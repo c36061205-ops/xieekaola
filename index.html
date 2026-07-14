@@ -195,6 +195,7 @@ function applySkin(id){
 let DB=load();
 function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrate(JSON.parse(raw));}catch(e){}}return migrate({});}
 function migrate(d){
+d.coins = d.coins || 0;
   d.me=d.me||{name:'我',avatar:''};d.me.realName=d.me.realName||'';
   d.settings=d.settings||{apiUrl:'',apiKey:'',chatModel:'',auxModel:''};
   delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
@@ -210,9 +211,27 @@ function migrate(d){
     if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
   if(!d.desktop.apps.find(a=>a.id==='hearts'))d.desktop.apps.push({id:'hearts',name:'心动值',emoji:'💗',icon:''});
     if(!d.desktop.apps.find(a=>a.id==='focus'))d.desktop.apps.push({id:'focus',name:'专注',emoji:'⏱️',icon:''});
+  // 新增三个应用入口
+  if(!d.desktop.apps.find(a=>a.id==='world'))d.desktop.apps.push({id:'world',name:'世界观',emoji:'🌍',icon:''});
+  if(!d.desktop.apps.find(a=>a.id==='floating'))d.desktop.apps.push({id:'floating',name:'浮光',emoji:'✨',icon:''});
+  if(!d.desktop.apps.find(a=>a.id==='shop'))d.desktop.apps.push({id:'shop',name:'购物',emoji:'🛍️',icon:''});
   d.contacts.forEach(c=>{
     if(c.inChatList===undefined)c.inChatList=!!(d.chats[c.id]&&d.chats[c.id].length);
     if(c.pHabit){c.pStyle=(c.pStyle||'')+(c.pStyle?'\n':'')+'口头禅/习惯：'+c.pHabit;delete c.pHabit;}
+	    // ---- 旧世界观自动迁移 ----
+    if (!c.worldId && c.worldview) {
+      var worldName = c.worldType || c.worldview.slice(0, 12) + '…';
+      var existed = (d.worlds || []).find(function(w) { return w.desc === c.worldview; });
+      if (existed) {
+        c.worldId = existed.id;
+      } else {
+        var newId = 'w_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        d.worlds = d.worlds || [];
+        d.worlds.push({ id: newId, name: worldName, icon: '🌍', desc: c.worldview });
+        c.worldId = newId;
+      }
+    }
+    // ---- 迁移结束 ----
     CFIELDS.forEach(k=>{if(c[k]===undefined)c[k]='';});
     c.status=c.status||{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'};
     c.chapters=c.chapters||[];c.mode=c.mode||'online';
@@ -222,7 +241,7 @@ function migrate(d){
   if(!d.contacts.find(c=>c.id==='c_aichan'))seedAiChan(d);
   return d;
 }
-function defaultApps(){return[{id:'wechat',name:'微信',emoji:'💬',icon:''},{id:'settings',name:'设置',emoji:'⚙️',icon:''},{id:'album',name:'相册',emoji:'🖼️',icon:''},{id:'music',name:'音乐',emoji:'🎵',icon:''},{id:'notes',name:'备忘录',emoji:'📝',icon:''},{id:'weather',name:'天气',emoji:'⛅',icon:''},{id:'preset',name:'预设',emoji:'🎭',icon:''}];}
+function defaultApps(){return[{id:'wechat',name:'微信',emoji:'💬',icon:''},{id:'settings',name:'设置',emoji:'⚙️',icon:''},{id:'album',name:'相册',emoji:'🖼️',icon:''},{id:'music',name:'音乐',emoji:'🎵',icon:''},{id:'notes',name:'备忘录',emoji:'📝',icon:''},{id:'weather',name:'天气',emoji:'⛅',icon:''},{id:'preset',name:'预设',emoji:'🎭',icon:''},{id:'hearts',name:'心动值',emoji:'💗',icon:''},{id:'focus',name:'专注',emoji:'⏱️',icon:''},{id:'world',name:'世界观',emoji:'🌍',icon:''},{id:'floating',name:'浮光',emoji:'✨',icon:''},{id:'shop',name:'购物',emoji:'🛍️',icon:''}];}
 function blankChar(id){const c={id,name:'新角色',nick:'',avatar:'',activity:'中',hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[]};CFIELDS.forEach(k=>c[k]='');return c;}
 function seedAiChan(d){const id='c_aichan';const c=blankChar(id);Object.assign(c,{name:'AI酱',nick:'AI酱',gender:'女',age:'看起来16',job:'手机里的AI助手',
   pKeywords:'温和、机灵、好奇心强、真诚、偶尔调皮',
@@ -263,11 +282,51 @@ function pickImage(cb,max,png){max=max||256;const inp=document.createElement('in
 function render(){const h=document.getElementById('home');if(h)h.remove();const b=document.getElementById('chatBottom');if(b)b.remove();closeModal();content.style.backgroundImage='';
   if(view.type==='home')return renderHome();content.style.display='block';
   if(view.type==='wechat')return renderWechat();if(view.type==='settings')return renderSettings();if(view.type==='charEdit')return renderCharEdit();if(view.type==='chat')return renderChat();if(view.type==='moments')return renderMoments();if(view.type==='hearts')return renderHearts();if(view.type==='heartDetail')return renderHeartDetail();if(view.type==='focus')return renderFocus();if(view.type==='hearts')return renderHearts();
+if(view.type==='worlds')return renderWorlds();
 if(view.type==='placeholder')return renderPlaceholder();}
 function showChrome(t,b){topbar.style.display=t?'flex':'none';tabbar.style.display=b?'flex':'none';}
 
 function renderHome(){showChrome(false,false);statusbar.classList.remove('dark');content.style.display='none';const d=document.createElement('div');d.id='home';if(DB.desktop.wallpaper)d.style.backgroundImage=`url('${DB.desktop.wallpaper}')`;d.innerHTML=`<div class="clockbig" id="homeClock"><div class="t">--:--</div><div class="d"></div></div><div id="appgrid">${DB.desktop.apps.map(a=>{const badge=a.id==='wechat'?`<span id="wxDeskBadge" style="display:none;position:absolute;top:-6px;right:-6px;min-width:28px;height:28px;padding:0 7px;background:#f43;color:#fff;border-radius:14px;font-size:16px;font-weight:600;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:9"></span>`:'';return `<div class="app ${a.id==='wechat'?'big':''}" onclick="openApp('${a.id}')"><div class="app-ic" style="position:relative;${a.icon?`background-image:url('${a.icon}');background-color:transparent;box-shadow:none`:''}">${a.icon?'':a.emoji}${badge}</div><div class="app-nm">${a.name}</div></div>`;}).join('')}</div>`;phone.appendChild(d);tick();refreshChatBadges();}
-function openApp(id){if(id==='wechat'){view={type:'wechat'};wechatPage='chats';render();}else if(id==='settings'){view={type:'settings'};render();}else if(id==='preset'){openModePreset();}else if(id==='hearts'){view={type:'hearts'};render();}else if(id==='focus'){view={type:'focus'};render();}else if(id==='hearts'){view={type:'hearts'};render();}else{const a=DB.desktop.apps.find(x=>x.id===id);view={type:'placeholder',title:a.name,msg:a.name+' 功能之后再做～'};render();}}
+function openApp(id) {
+  if (id === 'wechat') {
+    view = { type: 'wechat' };
+    wechatPage = 'chats';
+    render();
+  } else if (id === 'settings') {
+    view = { type: 'settings' };
+    render();
+  } else if (id === 'preset') {
+    openModePreset();
+  } else if (id === 'hearts') {
+    view = { type: 'hearts' };
+    render();
+  } 
+  else if (id === 'world') {
+  view = { type: 'worlds' };
+  render();
+}
+else if (id === 'focus') {
+    view = { type: 'focus' };
+    render();
+  } else if (id === 'world') {
+    view = { type: 'placeholder', title: '🌍 世界观', msg: '功能开发中，敬请期待～' };
+    render();
+  } else if (id === 'floating') {
+    view = { type: 'placeholder', title: '✨ 浮光', msg: '功能开发中，敬请期待～' };
+    render();
+  } else if (id === 'shop') {
+    view = { type: 'placeholder', title: '🛍️ 购物', msg: '功能开发中，敬请期待～' };
+    render();
+  } else {
+    var a = DB.desktop.apps.find(function(x) { return x.id === id; });
+    if (a) {
+      view = { type: 'placeholder', title: a.name, msg: a.name + ' 功能之后再做～' };
+    } else {
+      view = { type: 'placeholder', title: '未知', msg: '未找到该应用' };
+    }
+    render();
+  }
+}
 function goHome(){view={type:'home'};render();}
 function goWechat(p){view={type:'wechat'};wechatPage=p;render();}
 function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='心动值';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;
@@ -276,7 +335,195 @@ function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');t
   <div class="section-title">✨ 可解锁功能（消耗心动值）</div>${locked.map(l=>`<div class="row" onclick="alert('「${l[1]}」功能开发中，敬请期待～')" style="cursor:pointer"><div style="font-size:22px;width:40px">${l[0]}</div><div style="flex:1"><div style="font-size:15px;color:var(--text)">${l[1]}</div><div style="font-size:12px;color:var(--sub);margin-top:2px">${l[2]}</div></div><span style="color:var(--sub);font-size:13px">🔒 待开放</span></div>`).join('')}
   <div class="section-title">📒 心动记录</div>${(DB.heartLog&&DB.heartLog.length)?DB.heartLog.map(g=>`<div class="row"><div style="flex:1;font-size:14px;color:var(--text)">${esc(g.reason)}</div><div style="font-size:15px;font-weight:600;color:${g.n>0?'var(--theme)':'#e34'}">${g.n>0?'+':''}${g.n}</div></div>`).join(''):'<div class="empty">还没有记录～和角色聊天试试</div>'}<div style="height:20px"></div>`;}
 function renderPlaceholder(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent=view.title;tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;content.innerHTML=`<div class="empty">${view.msg}</div>`;}
+function showToast(text, duration) {
+  duration = duration || 2000;
+  var old = document.getElementById('appToast');
+  if (old) old.remove();
+  var toast = document.createElement('div');
+  toast.id = 'appToast';
+  toast.style.cssText = 'position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:8px 20px;border-radius:20px;font-size:14px;z-index:9999;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);pointer-events:none;transition:opacity 0.3s;';
+  toast.textContent = text;
+  document.body.appendChild(toast);
+  setTimeout(function() {
+    toast.style.opacity = '0';
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+  }, duration);
+}
+function insertSystemMessage(text) {
+  var arr = DB.chats[view.id];
+  if (!arr) return;
+  arr.push({
+    id: 'sys_' + Date.now(),
+    role: 'system',
+    type: 'system',
+    content: text,
+    time: Date.now()
+  });
+  save();
+  renderChat();
+}
+// ===== 世界观 App =====
 
+function renderWorlds() {
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = '🌍 世界观';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = goHome;
+  tbRight.textContent = '＋';
+  tbRight.onclick = function() { openWorldEditor(null); };
+
+  var worlds = DB.worlds || [];
+  if (!worlds.length) {
+    content.innerHTML = '<div class="empty">还没有世界观<br>点右上角 ＋ 创建第一个</div>';
+    return;
+  }
+
+  var html = '<div style="padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+  worlds.forEach(function(w) {
+    html += '<div onclick="openWorldDetail(\'' + w.id + '\')" style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--line);cursor:pointer;">' +
+      '<div style="font-size:32px;text-align:center;">' + (w.icon || '🌍') + '</div>' +
+      '<div style="font-size:15px;font-weight:600;text-align:center;margin-top:6px;color:var(--text)">' + esc(w.name) + '</div>' +
+      '<div style="font-size:12px;color:var(--sub);text-align:center;margin-top:2px;">' + esc(w.desc || '').slice(0, 20) + (w.desc && w.desc.length > 20 ? '…' : '') + '</div>' +
+      '</div>';
+  });
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+function openWorldEditor(worldId) {
+  var w = null;
+  if (worldId) {
+    w = (DB.worlds || []).find(function(x) { return x.id === worldId; });
+  }
+  var isEdit = !!w;
+  var nameVal = isEdit ? esc(w.name) : '';
+  var iconVal = isEdit ? esc(w.icon || '🌍') : '🌍';
+  var descVal = isEdit ? esc(w.desc || '') : '';
+  var keywordVal = '';
+  var placesVal = isEdit ? esc(w._places || '') : '';
+
+  var mo = document.createElement('div');
+  mo.className = 'modal';
+  mo.id = 'modal';
+  mo.innerHTML = '<div class="sheet-box">' +
+    '<h3>' + (isEdit ? '编辑世界观' : '新建世界观') + '</h3>' +
+    '<input id="we_name" value="' + nameVal + '" placeholder="世界观名称（必填）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:10px;background:var(--bg);color:var(--text);">' +
+    '<input id="we_icon" value="' + iconVal + '" placeholder="图标（一个emoji）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:10px;background:var(--bg);color:var(--text);">' +
+    '<input id="we_keyword" value="' + keywordVal + '" placeholder="关键词（如：赛博朋克、义体、霓虹）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:6px;background:var(--bg);color:var(--text);">' +
+    '<input id="we_places" value="' + placesVal + '" placeholder="关联地点（如：咖啡馆、书店、江边，用中文逗号分隔）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:6px;background:var(--bg);color:var(--text);">' +
+    '<button class="btn gray" style="margin:0 0 6px 0;padding:6px 0;font-size:13px;" onclick="aiPolishWorld()">✨ AI润色生成描述</button>' +
+    '<textarea id="we_desc" placeholder="世界观描述（可手动填写，也可用AI润色生成）" style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6;margin-top:6px;">' + descVal + '</textarea>' +
+    '<button class="btn" style="width:100%;margin:10px 0 4px;" onclick="saveWorld(\'' + (isEdit ? w.id : '') + '\')">保存</button>' +
+    (isEdit ? '<button class="btn gray" style="width:100%;margin:0;" onclick="deleteWorld(\'' + w.id + '\')">🗑️ 删除此世界观</button>' : '') +
+    '<button class="btn gray" style="width:100%;margin:4px 0 0;" onclick="closeModal()">取消</button>' +
+    '</div>';
+  mo.onclick = function(e) { if (e.target === mo) closeModal(); };
+  phone.appendChild(mo);
+
+  window._editingWorldId = isEdit ? w.id : null;
+}
+
+function openWorldDetail(worldId) {
+  var w = (DB.worlds || []).find(function(x) { return x.id === worldId; });
+  if (!w) { alert('世界观不存在'); return; }
+  var html = '<div style="padding:20px;">' +
+    '<div style="font-size:48px;text-align:center;">' + (w.icon || '🌍') + '</div>' +
+    '<div style="font-size:20px;font-weight:600;text-align:center;margin:10px 0 4px;color:var(--text)">' + esc(w.name) + '</div>' +
+    '<div style="font-size:14px;color:var(--sub);white-space:pre-wrap;line-height:1.6;margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;">' + esc(w.desc || '暂无描述') + '</div>' +
+    '<button class="btn" style="margin-top:16px;" onclick="openWorldEditor(\'' + w.id + '\')">✏️ 编辑</button>' +
+    '<button class="btn gray" style="margin-top:6px;" onclick="deleteWorld(\'' + w.id + '\')">🗑️ 删除</button>' +
+    '<button class="btn gray" style="margin-top:6px;" onclick="goWorlds()">‹ 返回列表</button>' +
+    '</div>';
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = w.name || '世界观';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = goWorlds;
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+  content.innerHTML = html;
+}
+
+function goWorlds() {
+  view = { type: 'worlds' };
+  render();
+}
+
+function saveWorld(editId) {
+  var name = document.getElementById('we_name').value.trim();
+  if (!name) { alert('请填写世界观名称'); return; }
+  var icon = document.getElementById('we_icon').value.trim() || '🌍';
+  var desc = document.getElementById('we_desc').value.trim();
+  var places = document.getElementById('we_places').value.trim();
+
+  if (editId) {
+    var w = (DB.worlds || []).find(function(x) { return x.id === editId; });
+    if (!w) { alert('世界观不存在'); return; }
+    w.name = name;
+    w.icon = icon;
+    w.desc = desc;
+    w._places = places;
+  } else {
+    DB.worlds = DB.worlds || [];
+    DB.worlds.push({
+      id: 'w_' + Date.now(),
+      name: name,
+      icon: icon,
+      desc: desc,
+      _places: places
+    });
+  }
+  save();
+  closeModal();
+  goWorlds();
+}
+
+function deleteWorld(worldId) {
+  if (!confirm('确定要删除这个世界观吗？')) return;
+  var related = (DB.contacts || []).filter(function(c) { return c.worldId === worldId; });
+  if (related.length) {
+    var names = related.map(function(c) { return c.nick || c.name; }).join('、');
+    if (!confirm('以下角色关联了此世界观：' + names + '。删除世界观后，这些角色的世界观会变为"未关联"。确定继续吗？')) return;
+    related.forEach(function(c) { c.worldId = ''; });
+  }
+  DB.worlds = (DB.worlds || []).filter(function(w) { return w.id !== worldId; });
+  save();
+  goWorlds();
+}
+
+async function aiPolishWorld() {
+  var keyword = document.getElementById('we_keyword').value.trim();
+  var places = document.getElementById('we_places').value.trim();
+  if (!keyword) { alert('请先输入关键词'); return; }
+  var model = DB.settings.auxModel || DB.settings.chatModel;
+  if (!model) { alert('请先在设置里选择模型'); return; }
+
+  var btn = document.querySelector('#modal .btn.gray');
+  if (btn) { btn.textContent = '⏳ 润色中…'; btn.disabled = true; }
+
+  try {
+    var prompt = '根据以下关键词，生成一个详细的世界观描述（150-200字）。要求：有氛围感、包含地理/社会/时间背景，有可延展的故事空间。另外，请根据关键词生成3-6个关键地点，每个地点用一句话描述它是什么地方、适合做什么。\n\n' +
+      '【硬性规则】生成地点时，必须在每个地点条目中明确标注归属：\n' +
+      '- 如果地点是“AI角色”经常去的地方，必须用角色名称标注，例如：「杨深常去的街角咖啡馆」\n' +
+      '- 如果地点是“用户”经常去的地方，必须用“用户”标注，例如：「用户常去的24小时便利店」\n' +
+      '- 如果地点是双方共同活动的地方，标注为「共同地点：江边长椅」\n' +
+      '绝对不允许出现“你常去的地方”“你的秘密基地”“你住的地方”这类模糊表述。\n\n' +
+      '输出格式：先写世界观正文，然后单独列出关键地点。\n\n' +
+      '关键词：' + keyword;
+    if (places) {
+      prompt += '\n\n用户提供的关联地点参考（可选择性使用）：' + places;
+    }
+    var result = await callAI([{ role: 'user', content: prompt }], model);
+    var descEl = document.getElementById('we_desc');
+    if (descEl) descEl.value = result.trim();
+  } catch (e) {
+    alert('润色失败：' + e.message);
+  } finally {
+    if (btn) { btn.textContent = '✨ AI润色生成描述'; btn.disabled = false; }
+  }
+}
+// ===== 世界观 App 函数结束 =====
 const wxT={chats:'微信',contacts:'通讯录',discover:'发现',me:'我'};
 function renderWechat(){showChrome(true,true);statusbar.classList.add('dark');tbTitle.textContent=wxT[wechatPage];tbLeft.textContent='‹';tbLeft.onclick=goHome;if(wechatPage==='contacts'){tbRight.textContent='＋';tbRight.onclick=addContact;}else{tbRight.textContent='';tbRight.onclick=null;}document.querySelectorAll('#tabbar .tab').forEach(t=>t.classList.toggle('active',t.dataset.page===wechatPage));if(wechatPage==='chats')renderChats();else if(wechatPage==='contacts')renderContacts();else if(wechatPage==='discover')renderDiscover();else renderWxMe();refreshMomentBadge();}
 function avatarHtml(c){const bg=c.avatar?`background-image:url('${c.avatar}')`:'';return `<div class="avatar" style="${bg}">${c.avatar?'':(c.name?c.name[0]:'?')}</div>`;}
@@ -463,7 +710,7 @@ function removeFromChats(id){
 }
 function delContactById(id){if(id==='c_aichan'){alert('AI酱是内置测试角色，删了也会自动回来哦～');return;}if(confirm('彻底删除该角色及聊天记录？')){DB.contacts=DB.contacts.filter(c=>c.id!==id);delete DB.chats[id];save();render();}}
 
-function renderSettings(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='设置';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;const s=DB.settings;content.innerHTML=`<div class="section-title">版本 ${APP_VER}｜AI 接口</div><div class="section"><div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div><div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="password" placeholder="sk-..."></div></div><button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button><div class="section"><div class="row"><label>主聊天模型</label><select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select></div><div class="row"><label>辅助模型</label><select id="auxModel"><option>${s.auxModel||'（润色/生成用）'}</option></select></div></div><button class="btn" onclick="saveApi()">保存接口设置</button><div class="section-title">✨ 主题皮肤（整体换肤）</div><div style="padding:10px 16px"><div onclick="applySkin('fusion');renderSettings()" style="cursor:pointer;border:2px solid #B34A6A;border-radius:12px;padding:10px 6px;text-align:center;background:#B34A6A22"><div style="width:100%;height:30px;border-radius:6px;background:#B34A6A;margin-bottom:6px"></div><div style="font-size:12px;color:var(--text)">🌙 洛丽塔×女巫之夜</div></div></div><div class="section-title">🖼️ 桌面壁纸</div><div class="field"><div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div></div><div class="section-title">😀 表情包仓库（AI靠"名字"识别使用）</div><div style="padding:10px 16px"><div class="stgrid">${DB.stickers.map((st,i)=>`<div class="st"><span class="x" onclick="delSticker(${i})">×</span><img src="${st.img}"><div class="nm">${esc(st.name)}</div></div>`).join('')}</div></div><button class="btn gray" onclick="addSticker()">＋ 添加表情</button><div class="section-title">App 图标（点图标换图片）</div>${DB.desktop.apps.map((a,i)=>`<div class="row"><div class="app-ic" style="width:40px;height:40px;font-size:22px;border-radius:10px;box-shadow:none;background-color:transparent;${a.icon?`background-image:url('${a.icon}')`:''}" onclick="pickAppIcon(${i})">${a.icon?'':a.emoji}</div><input style="margin-left:12px;text-align:left" value="${a.name}" onchange="DB.desktop.apps[${i}].name=this.value;save()">${a.icon?`<span style="color:#e34;cursor:pointer;font-size:13px" onclick="DB.desktop.apps[${i}].icon='';save();render()">还原</span>`:''}</div>`).join('')}<div class="hint">建议定期导出，清缓存会丢数据。</div><div style="height:20px"></div>`;}
+function renderSettings(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='设置';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;const s=DB.settings;content.innerHTML=`<div class="section-title">版本 ${APP_VER}｜AI 接口</div><div class="section"><div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div><div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div></div><button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button><div class="section"><div class="row"><label>主聊天模型</label><select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select></div><div class="row"><label>辅助模型</label><select id="auxModel"><option>${s.auxModel||'（润色/生成用）'}</option></select></div></div><button class="btn" onclick="saveApi()">保存接口设置</button><div class="section-title">✨ 主题皮肤（整体换肤）</div><div style="padding:10px 16px"><div onclick="applySkin('fusion');renderSettings()" style="cursor:pointer;border:2px solid #B34A6A;border-radius:12px;padding:10px 6px;text-align:center;background:#B34A6A22"><div style="width:100%;height:30px;border-radius:6px;background:#B34A6A;margin-bottom:6px"></div><div style="font-size:12px;color:var(--text)">🌙 洛丽塔×女巫之夜</div></div></div><div class="section-title">🖼️ 桌面壁纸</div><div class="field"><div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div></div><div class="section-title">😀 表情包仓库（AI靠"名字"识别使用）</div><div style="padding:10px 16px"><div class="stgrid">${DB.stickers.map((st,i)=>`<div class="st"><span class="x" onclick="delSticker(${i})">×</span><img src="${st.img}"><div class="nm">${esc(st.name)}</div></div>`).join('')}</div></div><button class="btn gray" onclick="addSticker()">＋ 添加表情</button><div class="section-title">App 图标（点图标换图片）</div>${DB.desktop.apps.map((a,i)=>`<div class="row"><div class="app-ic" style="width:40px;height:40px;font-size:22px;border-radius:10px;box-shadow:none;background-color:transparent;${a.icon?`background-image:url('${a.icon}')`:''}" onclick="pickAppIcon(${i})">${a.icon?'':a.emoji}</div><input style="margin-left:12px;text-align:left" value="${a.name}" onchange="DB.desktop.apps[${i}].name=this.value;save()">${a.icon?`<span style="color:#e34;cursor:pointer;font-size:13px" onclick="DB.desktop.apps[${i}].icon='';save();render()">还原</span>`:''}</div>`).join('')}<div class="hint">建议定期导出，清缓存会丢数据。</div><div style="height:20px"></div>`;}
 function setTheme(k){DB.settings.theme=k;applyTheme(k);save();render();}
 function pickWallpaper(){pickImage(d=>{DB.desktop.wallpaper=d;save();render();},900);}
 function pickAppIcon(i){pickImage(d=>{DB.desktop.apps[i].icon=d;save();render();},160,true);}
@@ -473,8 +720,8 @@ function delSticker(i){if(confirm('删除这个表情？')){DB.stickers.splice(i
 function editContact(id,from){_isEnteringCharEdit = true;editingId=id;edModule='role';editFrom=from||'contacts';view={type:'charEdit'};render();}
 function F(c,k,label,tip,ph,area){const val=esc(c[k]||'');const t=tip?`<span class="tip">${tip}</span>`:'';if(area)return `<div class="field"><label>${label}</label>${t}<textarea oninput="ag(this)" onchange="upd('${k}',this.value)" placeholder="${ph||''}">${val}</textarea></div>`;return `<div class="field"><label>${label}</label>${t}<input value="${val}" onchange="upd('${k}',this.value)" placeholder="${ph||''}"></div>`;}
 function renderCharEdit(){
-  var scrollTop = _isEnteringCharEdit ? 0 : content.scrollTop;  // 如果是进入页面，从顶部开始
-  _isEnteringCharEdit = false;  // 重置标志，下次就是页面内刷新了
+  var scrollTop = _isEnteringCharEdit ? 0 : content.scrollTop;
+  _isEnteringCharEdit = false;
   const c = getC(editingId);
   if (!c) { goWechat('contacts'); return; }
   showChrome(true, false);
@@ -527,14 +774,20 @@ function renderCharEdit(){
     html += F(c, 'myRelation', '我和TA的关系 / 怎么认识的', '⚡重点：让AI开局就懂你俩什么关系、如何相识', '', 1);
     html += '<div style="height:20px"></div>';
   } else if (edModule === 'world') {
-    html += F(c, 'worldType', '世界类型', '', '现代都市/西方奇幻/民国…');
-    html += F(c, 'worldview', '世界观详述', '地点、时代、氛围、关键设定', '', 1);
-    html += '<button class="btn" id="genWorldBtn" onclick="genWorld()">🌍 AI 生成/补全世界观</button>';
+    var worldOpts = '<option value="">未关联</option>';
+    (DB.worlds || []).forEach(function(w) {
+      var selected = (c.worldId === w.id) ? 'selected' : '';
+      worldOpts += '<option value="' + w.id + '" ' + selected + '>' + esc(w.name) + '</option>';
+    });
+    html += '<div class="field"><label>🌍 所属世界观</label><span class="tip">选择后，角色的世界观设定将自动关联</span><select onchange="upd(\'worldId\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)">' + worldOpts + '</select></div>';
+    html += '<div class="field" style="padding:6px 16px;background:var(--bg);border-radius:8px;margin:4px 16px;font-size:13px;color:var(--sub);border:1px dashed var(--line);"><span style="font-weight:600;color:var(--text)">📌 提示</span> 世界观在独立的「世界观」App中创建和编辑，角色只需关联即可。</div>';
     html += '<div class="grp">聊天背景（本角色专属）</div><div class="field"><div class="avapick" style="width:100%;height:120px;--ava:' + (c.chatBg ? 'url(\'' + c.chatBg + '\')' : 'none') + '" onclick="pickChatBg()">' + (c.chatBg ? '点击更换' : '点击上传聊天背景') + '</div>' + (c.chatBg ? '<div style="text-align:center;color:#e34;font-size:13px;margin-top:8px;cursor:pointer" onclick="upd(\'chatBg\',\'\');render()">清除背景</div>' : '') + '</div><div style="height:20px"></div>';
   } else {
     var st = c.status;
     var rng = function(k){
-      return '<div class="field"><label>' + k + '</label><div class="rangebox"><div class="stage" id="vb_' + k + '">' + (st[k] ?? 0) + ' · ' + favLabel(k, st[k] ?? 0) + '</div><input type="range" min="0" max="100" value="' + (st[k] ?? 0) + '" oninput="document.getElementById(\'vb_' + k + '\').textContent=this.value+\' · '+ favLabel(k, 0) + '\'.replace(/\\d+/,this.value)" onchange="updStatus(\'' + k + '\',+this.value)"></div></div>';
+      var label = k;
+      var currentVal = st[k] ?? 0;
+      return '<div class="field"><label>' + label + '</label><div class="rangebox"><div class="stage" id="vb_' + k + '">' + currentVal + ' · ' + favLabel(k, currentVal) + '</div><input type="range" min="0" max="100" value="' + currentVal + '" oninput="document.getElementById(\'vb_' + k + '\').textContent = this.value + \' · \' + favLabel(\'' + k + '\', parseInt(this.value))" onchange="updStatus(\'' + k + '\', +this.value)"></div></div>';
     };
     html += '<div class="hint">聊天时AI会根据剧情自动增减。</div>';
     html += rng('好感度') + rng('信任度') + rng('紧张感');
@@ -662,11 +915,18 @@ function momentCard(m,i){
   const imgs=(m.images||[]).map(src=>`<img src="${src}" style="width:33%;aspect-ratio:1;object-fit:cover;border-radius:4px;margin:2px">`).join('');
   const likes=(m.likes||[]).map(id=>id==='me'?DB.me.name:((getC(id)||{}).nick||(getC(id)||{}).name||'')).filter(Boolean);
   const iLiked=(m.likes||[]).includes('me');
-  const likeHtml=likes.length?`<div style="background:var(--bg);padding:6px 10px;border-radius:6px;font-size:13px;color:var(--theme)">❤️ ${likes.join('，')}</div>`:'';
+var likeHtml = likes.length ? '<div style="background:var(--bg);padding:6px 10px;border-radius:6px;font-size:13px;color:var(--text)">❤️ ' + likes.join('，') + '</div>' : '';
   const nameOf=id=>id==='me'?DB.me.name:((getC(id)||{}).nick||(getC(id)||{}).name||'未知');
-  const cmtHtml=(m.comments||[]).map(cm=>{const cc=nameOf(cm.by);const toStr=cm.to?`<span style="color:var(--sub)"> 回复 </span><b style="color:var(--theme)">${esc(nameOf(cm.to))}</b>`:'';return `<div style="font-size:13px;padding:3px 10px;background:var(--bg);cursor:pointer" onclick="replyComment(${i},'${cm.by}')"><b style="color:var(--theme)">${esc(cc)}</b>${toStr}<span style="color:var(--sub)">：</span>${esc(cm.text)}</div>`;}).join('');
+const cmtHtml = (m.comments || []).map(function(cm) {
+  var cc = nameOf(cm.by);
+  var toStr = cm.to ? '<span style="color:var(--sub)"> 回复 </span><b style="color:var(--theme)">' + esc(nameOf(cm.to)) + '</b>' : '';
+  return '<div style="font-size:13px;padding:3px 10px;background:var(--bg);cursor:pointer;color:var(--text);" onclick="replyComment(' + i + ',\'' + cm.by + '\')">' +
+    '<b style="color:var(--theme)">' + esc(cc) + '</b>' + toStr +
+    '<span style="color:var(--sub)">：</span><span style="color:var(--text)">' + esc(cm.text) + '</span>' +
+    '</div>';
+}).join('');
   const foot=(likeHtml||cmtHtml)?`<div style="margin-top:8px;border-radius:6px;overflow:hidden">${likeHtml}${cmtHtml}</div>`:'';
-  return `<div oncontextmenu="event.preventDefault();delMoment(${i})" onpointerdown="momentPress(${i})" onpointerup="momentRelease()" onpointerleave="momentRelease()" style="display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)"><div class="avatar" style="width:42px;height:42px;flex-shrink:0;${a.avatar?`background-image:url('${a.avatar}')`:''}">${a.avatar?'':(a.name[0]||'?')}</div><div style="flex:1;min-width:0"><div style="color:var(--theme);font-weight:600;font-size:15px">${esc(a.name)}</div><div style="font-size:15px;color:var(--text);margin:4px 0;white-space:pre-wrap;line-height:1.5">${a.isMe?esc(m.text):esc(m.text)}</div>${imgs?`<div style="display:flex;flex-wrap:wrap;margin:4px 0">${imgs}</div>`:''}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:12px;color:var(--sub)">${fmtTime(m.time)}</span><span style="font-size:14px"><span style="cursor:pointer;margin-right:14px" onclick="likeMoment(${i})">${iLiked?'❤️':'🤍'} 赞</span><span style="cursor:pointer" onclick="toggleCmtBox(${i})">💬 评论</span></span></div><div id="cmtbox_${i}" style="display:none;margin-top:8px"><input id="cmtinput_${i}" placeholder="评论…" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px;background:var(--bg);color:var(--text);outline:none"><button class="cbtn send" style="width:100%;margin-top:6px" onclick="doComment(${i})">发送</button></div>${foot}</div></div>`;
+  return `<div oncontextmenu="event.preventDefault();delMoment(${i})" onpointerdown="momentPress(${i})" onpointerup="momentRelease()" onpointerleave="momentRelease()" style="display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)"><div class="avatar" style="width:42px;height:42px;flex-shrink:0;${a.avatar?`background-image:url('${a.avatar}')`:''}">${a.avatar?'':(a.name[0]||'?')}</div><div style="flex:1;min-width:0"><div style="color:var(--theme);font-weight:600;font-size:15px">${esc(a.name)}</div><div style="font-size:15px;color:var(--text);margin:4px 0;white-space:pre-wrap;line-height:1.5">${a.isMe?esc(m.text):esc(m.text)}</div>${imgs?`<div style="display:flex;flex-wrap:wrap;margin:4px 0">${imgs}</div>`:''}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:12px;color:var(--sub)">${fmtTime(m.time)}</span><span style="font-size:14px"><span style="cursor:pointer;margin-right:14px;color:var(--text);" onclick="likeMoment(${i})">${iLiked?'❤️':'🤍'} 赞</span></span></div><div id="cmtbox_${i}" style="display:none;margin-top:8px"><input id="cmtinput_${i}" placeholder="评论…" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px;background:var(--bg);color:var(--text);outline:none"><button class="cbtn send" style="width:100%;margin-top:6px" onclick="doComment(${i})">发送</button></div>${foot}</div></div>`;
 }
 let _mpress=null;
 function momentPress(i){_mpress=setTimeout(()=>delMoment(i),600);}
@@ -892,7 +1152,12 @@ function buildSystem(c){
   s+=add('日常作息(据此安排角色行踪,别永远在原地等对方)',c.pDaily);
   s+=add('喜好厌恶',c.pLike)+add('语言习惯(领会语气逻辑,不要照搬举例台词)',c.pLang);
   if(c.negative)s+=`\n【绝对禁止】\n${c.negative}\n`;
-  s+=`\n【世界观】\n${c.worldType||''} ${c.worldview||''}\n`;
+  var world = (DB.worlds || []).find(function(w) { return w.id === c.worldId; });
+if (world) {
+  s += '\n【世界观】' + world.name + '：' + world.desc + '\n';
+} else {
+  s += '\n【世界观】未关联具体世界，请按默认现代都市处理。\n';
+}
   s+=`\n【对方(你正在对话的人)——务必分清身份】\n`+add('真实姓名(本名,线下面对面/亲密时用这个称呼)',real||net)+add('微信网名(仅系统备注,几乎不用于称呼;线下叙事禁止当本名;日常别刻意反复喊这个网名)',net)+add('性别',c.myGender)+add('年龄',c.myAge)+add('身份/职业',c.myJob)+add('外貌',c.myLook)+add('性格',c.myPersona)+add('你与对方的关系/如何相识',c.myRelation);
   s+=`\n【当前关系状态】\n好感度${st.好感度}(${favLabel('好感度',st.好感度)}) 信任度${st.信任度}(${favLabel('信任度',st.信任度)}) 紧张感${st.紧张感}(${favLabel('紧张感',st.紧张感)}) 当前关系:${st.当前关系}\n`;
   if(c.chapters&&c.chapters.length)s+=`\n【过往剧情记忆】\n`+c.chapters.map(ch=>ch.date+'：'+ch.content).join('\n')+`\n`;
@@ -912,10 +1177,28 @@ mine.forEach(m=>{const cmt=(m.comments||[]).some(x=>x.by===c.id);fc+='· 对方�
 function toApiMsg(m){if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};if(m.type==='image')return{role:m.role,content:[{type:'text',text:'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};if(m.type==='transfer')return{role:m.role,content:`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};if(m.type==='redpacket')return{role:m.role,content:`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};if(m.type==='voice')return{role:m.role,content:`（语音消息）${m.content}`};if(m.type==='sticker')return{role:m.role,content:`（发了个表情：${m.content}）`};return{role:m.role,content:m.content};}
 function colorLines(s,color){const col=color||'var(--theme)';return esc(s).replace(/(「[^」]*」|“[^”]*”|"[^"]*"|＂[^＂]*＂)/g,'<span style="color:'+col+';font-weight:500">$1</span>');}
 function tsHtml(t){return `<div class="ts"><span class="ts-pill">${fmtTime(t)}</span></div>`;}
-function bubble(c,m){const me=m.role==='user';const av=me?DB.me.avatar:c.avatar;const nm=me?((DB.me.name||'我')[0]):((c.name||'?')[0]);let body;
+function bubble(c,m){if (m.type === 'system') {
+  return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';
+}
+const me=m.role==='user';const av=me?DB.me.avatar:c.avatar;const nm=me?((DB.me.name||'我')[0]):((c.name||'?')[0]);let body;
   if(m.recalled){const who=me?'你':(c.nick||c.name);body=`<div class="mbody" style="background:transparent;box-shadow:none;color:var(--sub);font-size:13px;border:1px dashed var(--line)">${who} 撤回了一条消息 ${m.recalledContent?`<span style="color:var(--theme);cursor:pointer" onclick="peekRecall('${m.id}')">${m.reveal?'· '+esc(m.recalledContent):(me?'· 查看':'· 偷看(10💗)')}</span>`:''}</div>`;}
   else if(m.type==='image')body=`<div class="mbody" style="padding:3px;background:${me?'var(--theme)':'var(--card)'}"><img src="${m.content}" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>`;
-  else if(m.type==='transfer')body=`<div style="width:220px;background:#fff;border-radius:10px;overflow:hidden"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530"><div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center"><span style="color:#F99530;font-size:22px;font-weight:bold">¥</span></div><div style="flex:1"><div style="color:#fff;font-size:15px;font-weight:500">¥ ${esc(String(m.amount))}</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px">${esc(m.content)||'转账'}</div></div></div><div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px">微信转账</div></div>`;
+else if (m.type === 'transfer') {
+  var statusText = '';
+  if (m.status === 'accepted') statusText = '✅ 已接收';
+  else if (m.status === 'refunded') statusText = '⏳ 已退回';
+  else statusText = '待处理';
+  body = '<div class="transfer-card" data-mid="' + m.id + '" style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">' +
+    '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530;">' +
+      '<div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="color:#F99530;font-size:22px;font-weight:bold;">¥</span></div>' +
+      '<div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:500;">¥ ' + esc(String(m.amount)) + '</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px;">' + (m.content ? esc(m.content) : '转账') + '</div></div>' +
+    '</div>' +
+    '<div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px;display:flex;justify-content:space-between;">' +
+      '<span>微信转账</span>' +
+      '<span>' + statusText + '</span>' +
+    '</div>' +
+    '</div>';
+}
   else if(m.type==='redpacket')body=`<div style="width:220px;background:#fff;border-radius:10px;overflow:hidden"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#e05a49"><div style="width:36px;height:36px;background:#fbe0a6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px">🧧</div><div style="flex:1"><div style="color:#fff;font-size:14px">${esc(m.content)||'恭喜发财'}</div><div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:2px">¥${esc(String(m.amount))}</div></div></div><div style="background:#f2c879;color:#8a4b00;font-size:11px;padding:6px 12px">微信红包</div></div>`;
   else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const w=Math.round(110+Math.min(dur*5,120));body=`<div style="display:flex;flex-direction:column;${me?'align-items:flex-end':'align-items:flex-start'};max-width:72%"><div class="mbody" style="cursor:pointer;width:${w}px;display:flex;align-items:center;gap:6px" onclick="toggleVoice('${m.id}')">${me?`<span style="flex:1;text-align:right;opacity:.6">·····</span><span style="font-size:13px">${dur}″</span><span>🔊</span>`:`<span>🔊</span><span style="flex:1;opacity:.6">·····</span><span style="font-size:13px">${dur}″</span>`}</div><div id="vt_${m.id}" style="display:none;margin-top:5px;background:var(--card);border:1px solid var(--line);color:var(--text);padding:8px 11px;border-radius:8px;font-size:14px;white-space:pre-wrap;max-width:100%;line-height:1.5">${esc(m.content)}</div></div>`;}
   else if(m.type==='sticker'){const s=DB.stickers.find(x=>x.name===m.content);body=s?`<div style="padding:0"><img src="${s.img}" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>`:`<div class="mbody">[表情:${esc(m.content)}]</div>`;}
@@ -994,6 +1277,22 @@ bar.innerHTML=`<div id="inputRow"><span class="cbtn plus" onclick="togglePanel()
       }
     }, 200);
   }
+    if (!document._transferListener) {
+    document._transferListener = true;
+    document.addEventListener('click', function(e) {
+      var card = e.target.closest('.transfer-card');
+      if (!card) return;
+      var msgId = card.dataset.mid;
+      if (!msgId) return;
+      var arr = DB.chats[view.id];
+      if (!arr) return;
+      var msg = arr.find(function(m) { return m.id === msgId; });
+      if (!msg || msg.type !== 'transfer') return;
+      if (msg.status === 'accepted' || msg.status === 'refunded') return;
+      if (msg.from !== 'ai') return;
+      openTransferModal(msgId);
+    });
+  }
   window.addEventListener('resize', handleResize);
   // 存储清理函数，在下次 renderChat 时移除旧的监听
   if (window._resizeHandler) {
@@ -1017,14 +1316,15 @@ function actBtnClick(){const el=document.getElementById('chatInput');if(el.value
 function onChatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const el=document.getElementById('chatInput');if(el.value.trim())sendMsg();}}
 function togglePanel(){const p=document.getElementById('chatPanel');if(p)p.classList.toggle('on');scrollBottom();}
 function toggleMode(){const c=getC(view.id);c.mode=c.mode==='offline'?'online':'offline';save();const i=document.getElementById('modeIco'),t=document.getElementById('modeTxt');if(i)i.textContent=c.mode==='offline'?'📖':'💬';if(t)t.textContent=c.mode==='offline'?'线下中':'线上中';}
-function appendBubble(c,m){if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();}
+function appendBubble(c,m){if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
 function scrollBottom(){setTimeout(()=>{content.scrollTop=content.scrollHeight;},30);}
 function pushMy(m){m.id=newId();m.role='user';m.time=Date.now();DB.chats[view.id].push(m);save();appendBubble(getC(view.id),m);lastActivity=Date.now();}
 function sendMsg(){const el=document.getElementById('chatInput');const t=el.value.trim();if(!t)return;el.value='';el.style.height='auto';updateActBtn();pushMy({type:'text',content:t});}
 function sendImage(){togglePanel();pickImage(d=>pushMy({type:'image',content:d}),800);}
 function openInputSheet(title,fields,cb){closeModal();const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="sheet-box"><h3>${title}</h3>${fields.map((f,i)=>`<input id="sf_${i}" placeholder="${f.ph}" ${f.num?'inputmode="decimal"':''}>`).join('')}<button class="btn" style="width:100%;margin:4px 0 8px" onclick="submitSheet()">确定</button><button class="btn gray" style="width:100%;margin:0" onclick="closeModal()">取消</button></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);setTimeout(()=>{const el=document.getElementById('sf_0');if(el)el.focus();},50);window._sheetCb=cb;window._sheetN=fields.length;}
 function submitSheet(){const vals=[];for(let i=0;i<window._sheetN;i++)vals.push(document.getElementById('sf_'+i).value.trim());closeModal();window._sheetCb(vals);}
-function sendTransfer(){togglePanel();openInputSheet('转账',[{ph:'金额',num:true},{ph:'备注（可留空）'}],v=>{if(!v[0])return;pushMy({type:'transfer',amount:v[0],content:v[1]||''});});}
+function sendTransfer(){togglePanel();openInputSheet('转账',[{ph:'金额',num:true},{ph:'备注（可留空）'}],v=>{if(!v[0])return;var m = { type:'transfer', from:'user', amount: v[0], content: v[1] || '', status: 'pending' };
+pushMy(m);;});}
 function sendRedpacket(){alert('红包功能已下线，请使用转账～');}
 function sendVoice(){togglePanel();openInputSheet('发语音',[{ph:'输入语音内容'}],v=>{if(!v[0])return;pushMy({type:'voice',content:v[0]});});}
 function toggleVoice(id){const el=document.getElementById('vt_'+id);if(el){el.style.display=el.style.display==='none'?'block':'none';}}
@@ -1082,27 +1382,135 @@ function openMsgMenu(id, isMe){
   mo.onclick = function(e){ if (e.target === mo) closeModal(); };
   phone.appendChild(mo);
 }
-function delMsg(id){
-  var arr=DB.chats[view.id];if(!arr)return;
-  var idx=arr.findIndex(function(x){return x.id===id;});if(idx<0)return;
-  if(!confirm('删除这条消息？'))return;
-  arr.splice(idx,1);save();renderChat();
+function delMsg(id) {
+  var arr = DB.chats[view.id];
+  if (!arr) return;
+  var idx = arr.findIndex(function(x) { return x.id === id; });
+  if (idx < 0) return;
+  if (!confirm('删除这条消息及其后面的所有对话？')) return;
+  arr.splice(idx, arr.length - idx);
+  save();
+  renderChat();
 }
-function regenMsg(id){
-  var arr=DB.chats[view.id];if(!arr)return;
-  var idx=arr.findIndex(function(x){return x.id===id;});if(idx<0||arr[idx].role!=='assistant')return;
-  if(!confirm('让TA重新回复？会一并删掉这条及紧随其后的AI回复'))return;
-  var end=idx;
-  while(end+1<arr.length&&arr[end+1].role==='assistant')end++;
-  arr.splice(idx,end-idx+1);
-  save();renderChat();aiReply();
+function regenMsg(id) {
+  var arr = DB.chats[view.id];
+  if (!arr) return;
+  var idx = arr.findIndex(function(x) { return x.id === id; });
+  if (idx < 0 || arr[idx].role !== 'assistant') return;
+  if (!confirm('将删除这条消息及其后面的所有对话，AI会重新回复，确定吗？')) return;
+  // 从这条消息开始，删掉后面所有内容（包括用户消息和AI消息）
+  arr.splice(idx, arr.length - idx);
+  save();
+  renderChat();
+  aiReply();
 }
 function recallMsg(id){const arr=DB.chats[view.id];const m=arr&&arr.find(x=>x.id===id);if(!m||m.recalled)return;if(!confirm('撤回这条消息？'))return;m.recalledContent=(m.type==='text'||m.type==='voice')?m.content:'['+(m.type||'消息')+']';m.recalled=true;m.reveal=false;save();renderChat();}
 function peekRecall(id){const m=DB.chats[view.id].find(x=>x.id===id);if(!m)return;if(!m.reveal){const isAi=m.role==='assistant';if(isAi){if(!confirm('偷看 TA 撤回的内容？将消耗 10 💗心动值（看过后永久解锁）'))return;if(!spendHeart(getC(view.id),10,'偷看'+((getC(view.id)||{}).nick||(getC(view.id)||{}).name||'')+'的撤回'))return;}}m.reveal=true;save();renderChat();}
 function applyState(c,text){const m=text.match(/<state>([\s\S]*?)<\/state>/);if(m){m[1].split(/[,，]/).forEach(p=>{p=p.trim();let x;if(x=p.match(/好感\s*([+\-]?\d+)/))c.status.好感度=clamp(c.status.好感度+ +x[1]);else if(x=p.match(/信任\s*([+\-]?\d+)/))c.status.信任度=clamp(c.status.信任度+ +x[1]);else if(x=p.match(/紧张\s*([+\-]?\d+)/))c.status.紧张感=clamp(c.status.紧张感+ +x[1]);else if(x=p.match(/关系[:：]\s*(.+)/))c.status.当前关系=x[1].trim();});text=text.replace(m[0],'').trim();}return text;}
-function parseAiLine(line){line=line.trim();let m;if(m=line.match(/^\[转账[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/))return{type:'transfer',amount:m[1].trim(),content:(m[2]||'').trim()};if(m=line.match(/^\[红包[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/))return{type:'transfer',amount:m[1].trim(),content:(m[2]||'').trim()};if(m=line.match(/^\[语音[|｜]([\s\S]+)\]$/))return{type:'voice',content:m[1].trim()};if(m=line.match(/^\[表情[|｜](.+?)\]$/))return{type:'sticker',content:m[1].trim()};if(m=line.match(/^\[撤回[|｜]([\s\S]+)\]$/))return{type:'text',recalled:true,recalledContent:m[1].trim(),reveal:false};return{type:'text',content:line};}
+function parseAiLine(line){line=line.trim();let m;if(m=line.match(/^\[转账[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/))return{type:'transfer',from:'ai',amount:m[1].trim(),content:(m[2]||'').trim()};if(m=line.match(/^\[红包[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/))return{type:'transfer',amount:m[1].trim(),content:(m[2]||'').trim()};if(m=line.match(/^\[语音[|｜]([\s\S]+)\]$/))return{type:'voice',content:m[1].trim()};if(m=line.match(/^\[表情[|｜](.+?)\]$/))return{type:'sticker',content:m[1].trim()};if(m=line.match(/^\[撤回[|｜]([\s\S]+)\]$/))return{type:'text',recalled:true,recalledContent:m[1].trim(),reveal:false};if (m = line.match(/^\[接收\]/)) {
+  return { type: 'transfer_accept' };
+}
+if (m = line.match(/^\[退回\]/)) {
+  return { type: 'transfer_refund' };
+}return{type:'text',content:line};}
 let replying=false,lastActivity=Date.now();
-async function aiReply(nudge){if(replying)return;const c=getC(view.id);if(!DB.settings.chatModel){alert('请先在 设置 里拉取并选择模型');return;}replying=true;const b=document.getElementById('actBtn');if(b){b.textContent='…';b.disabled=true;}try{let allh=(DB.chats[c.id]||[]).map(toApiMsg);const lim=parseInt(DB.settings.ctxLimit);if(lim>0&&allh.length>lim)allh=allh.slice(-lim);const hist=allh;const messages=[{role:'system',content:buildSystem(c)},...hist];let modeReminder;if(c.mode==='online'){modeReminder='【立即生效·最高优先级】现在是微信线上打字聊天。无论上文出现过什么叙事风格，从这条起只输出口语短句，严禁任何括号（）()里的动作/神态/心理描写，严禁小说旁白，多句用换行分隔。';if(Date.now()>(c.meetCd||0)){modeReminder+='\n【线下邀约】若此刻剧情自然发展到你想和对方当面见面（如提出去找TA/约TA出来/已在赶去的路上），请在正常消息之后另起一行单独输出标记：[见面|地点]（地点简短如"楼下""老地方"，没有明确地点就写[见面|]）。这只是发出邀约信号，别在这条里描写见面过程，也别频繁使用，只在真的顺理成章时用。';}else{modeReminder+='\n【注意】对方刚婉拒了线下见面，这段时间内不要再提议见面、不要输出见面标记，自然继续线上聊天即可。';}}else{modeReminder='【立即生效·最高优先级·线下小说模式】现在是线下面对面场景，用第三人称小说笔法叙事：细致描写动作、神态、心理、环境细节，节奏张弛有度，避免流水账。所有人物台词必须用中文双引号“”括起（不要用「」方括号）；叙事描写里绝对不要用引号去强调或包裹词语，引号只保留给人物真正说出口的话。称呼对方请用其真实姓名或你俩关系里的称呼，严禁把对方的"微信网名"当作本名写进叙述。你只演你自己这一个角色，绝不替对方说话或替对方做决定。禁止任何微信功能格式（转账/表情等）。\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实间隔无关，哪怕对方隔很久才回也无缝承接，绝不提"过了一天""好久没见"。\n【线下收尾】当这段见面剧情自然走到尾声（该道别/该各自回家/事情办完了），不要无止境地黏着继续，请在叙事末尾另起一行单独输出标记：[回线上|]，表示这次见面告一段落、可以回到线上。只在剧情真的到收尾时才用，别硬结束。';}messages.push({role:'system',content:modeReminder});if(nudge)messages.push({role:'user',content:nudge});let out=await callAI(messages,DB.settings.chatModel);out=applyState(c,out);let lines=c.mode==='online'?out.split(/\n+/).map(s=>s.trim()).filter(Boolean):[out];if(!lines.length)lines=[out||'…'];let meetPlace=null,wantBack=false;for(let i=0;i<lines.length;i++){if(c.mode==='online'){const mm=lines[i].match(/^\[见面[|｜]?([\s\S]*?)\]$/);if(mm){meetPlace=mm[1].trim();continue;}}else{if(/\[回线上[|｜]?\s*\]/.test(lines[i])){wantBack=true;lines[i]=lines[i].replace(/\[回线上[|｜]?\s*\]/g,'').trim();if(!lines[i])continue;}}let parsed=c.mode==='online'?parseAiLine(lines[i]):{type:'text',content:lines[i]};const m=Object.assign({id:newId(),role:'assistant',time:Date.now()},parsed);DB.chats[c.id].push(m);save();appendBubble(c,m);if(i<lines.length-1)await sleep(500+Math.min((lines[i]||'').length*28,1600));}lastActivity=Date.now();addHeart(c,1,'和'+(c.nick||c.name)+'聊天');if(meetPlace!==null&&c.mode==='online')proposeMeet(c,meetPlace);if(wantBack&&c.mode==='offline')proposeBackOnline(c);}catch(e){alert('回复失败：'+e.message);}replying=false;const b2=document.getElementById('actBtn');if(b2)b2.disabled=false;updateActBtn();}
+async function aiReply(nudge){if(replying)return;const c=getC(view.id);if(!DB.settings.chatModel){alert('请先在 设置 里拉取并选择模型');return;}replying=true;tbTitle.textContent = (c.nick || c.name) + ' 正在输入…';const b=document.getElementById('actBtn');if(b){b.textContent='…';b.disabled=true;}try{let allh=(DB.chats[c.id]||[]).map(toApiMsg);const lim=parseInt(DB.settings.ctxLimit);if(lim>0&&allh.length>lim)allh=allh.slice(-lim);const hist=allh;var lastMsg = (DB.chats[c.id] || []).slice(-1)[0];
+var pendingTransfer = (lastMsg && lastMsg.role === 'user' && lastMsg.type === 'transfer' && lastMsg.status !== 'accepted' && lastMsg.status !== 'refunded');
+var transferAmount = pendingTransfer ? lastMsg.amount : 0;
+var transferNote = pendingTransfer ? (lastMsg.content || '') : '';
+const messages=[{role:'system',content:buildSystem(c)},...hist];let modeReminder;if(c.mode==='online'){modeReminder='【立即生效·最高优先级】现在是微信线上打字聊天。无论上文出现过什么叙事风格，从这条起只输出口语短句，严禁任何括号（）()里的动作/神态/心理描写，严禁小说旁白，多句用换行分隔。';if(Date.now()>(c.meetCd||0)){modeReminder+='\n【线下邀约】若此刻剧情自然发展到你想和对方当面见面（如提出去找TA/约TA出来/已在赶去的路上），请在正常消息之后另起一行单独输出标记：[见面|地点]（地点简短如"楼下""老地方"，没有明确地点就写[见面|]）。这只是发出邀约信号，别在这条里描写见面过程，也别频繁使用，只在真的顺理成章时用。';}else{modeReminder+='\n【注意】对方刚婉拒了线下见面，这段时间内不要再提议见面、不要输出见面标记，自然继续线上聊天即可。';}}else{modeReminder='【立即生效·最高优先级·线下小说模式】现在是线下面对面场景，用第三人称小说笔法叙事：细致描写动作、神态、心理、环境细节，节奏张弛有度，避免流水账。所有人物台词必须用中文双引号“”括起（不要用「」方括号）；叙事描写里绝对不要用引号去强调或包裹词语，引号只保留给人物真正说出口的话。称呼对方请用其真实姓名或你俩关系里的称呼，严禁把对方的"微信网名"当作本名写进叙述。你只演你自己这一个角色，绝不替对方说话或替对方做决定。禁止任何微信功能格式（转账/表情等）。\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实间隔无关，哪怕对方隔很久才回也无缝承接，绝不提"过了一天""好久没见"。\n【线下收尾】当这段见面剧情自然走到尾声（该道别/该各自回家/事情办完了），不要无止境地黏着继续，请在叙事末尾另起一行单独输出标记：[回线上|]，表示这次见面告一段落、可以回到线上。只在剧情真的到收尾时才用，别硬结束。';}messages.push({role:'system',content:modeReminder});if (pendingTransfer) {
+  messages.push({ role: 'system', content: '【强制指令】上一条消息是对方转给你的 ¥' + transferAmount + (transferNote ? '（备注：' + transferNote + '）' : '') + '。你必须在回复末尾单独一行输出 [接收] 或 [退回]，二选一，没有第三种选择。接收就感谢对方，退回就说明理由。这条标记必须单独占一行。' });
+}
+if(nudge)messages.push({role:'user',content:nudge});let out=await callAI(messages,DB.settings.chatModel);out=applyState(c,out);let lines=c.mode==='online'?out.split(/\n+/).map(s=>s.trim()).filter(Boolean):[out];if(!lines.length)lines=[out||'…'];let meetPlace=null,wantBack=false;for(let i=0;i<lines.length;i++){if(c.mode==='online'){const mm=lines[i].match(/^\[见面[|｜]?([\s\S]*?)\]$/);if(mm){meetPlace=mm[1].trim();continue;}}else{if(/\[回线上[|｜]?\s*\]/.test(lines[i])){wantBack=true;lines[i]=lines[i].replace(/\[回线上[|｜]?\s*\]/g,'').trim();if(!lines[i])continue;}}let parsed=c.mode==='online'?parseAiLine(lines[i]):{type:'text',content:lines[i]};if (parsed.type === 'transfer_accept') {
+  if (pendingTransfer && lastMsg) {
+    handleTransferAction(lastMsg.id, 'accept', true);
+  }
+  continue;
+}
+if (parsed.type === 'transfer_refund') {
+  if (pendingTransfer && lastMsg) {
+    handleTransferAction(lastMsg.id, 'refund', true);
+  }
+  continue;
+}
+const m=Object.assign({id:newId(),role:'assistant',time:Date.now()},parsed);DB.chats[c.id].push(m);save();appendBubble(c,m);if(i<lines.length-1)await sleep(500+Math.min((lines[i]||'').length*28,1600));}lastActivity=Date.now();addHeart(c,1,'和'+(c.nick||c.name)+'聊天');if(meetPlace!==null&&c.mode==='online')proposeMeet(c,meetPlace);if(wantBack&&c.mode==='offline')proposeBackOnline(c);}catch(e){alert('回复失败：'+e.message);}tbTitle.textContent = c.nick || c.name;replying=false;const b2=document.getElementById('actBtn');if(b2)b2.disabled=false;updateActBtn();}
+
+function openTransferModal(msgId) {
+  var arr = DB.chats[view.id];
+  if (!arr) return;
+  var msg = arr.find(function(m) { return m.id === msgId; });
+  if (!msg || msg.type !== 'transfer') return;
+  if (msg.status === 'accepted' || msg.status === 'refunded') return;
+
+  var overlay = document.createElement('div');
+  overlay.id = 'transferModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:999;display:flex;justify-content:center;align-items:center;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'width:280px;background:var(--card);border-radius:16px;padding:24px 20px 20px 20px;box-shadow:0 12px 48px rgba(0,0,0,0.5);';
+  box.innerHTML =
+    '<div style="text-align:center;font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px;">💰 转账</div>' +
+    '<div style="text-align:center;font-size:28px;font-weight:600;color:var(--text);margin:6px 0 2px 0;"><small style="font-size:18px;font-weight:400;color:var(--sub);">¥</small> ' + esc(String(msg.amount)) + '</div>' +
+    '<div style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:18px;">' + (msg.content ? esc(msg.content) : '转账') + '</div>' +
+    '<div style="display:flex;gap:10px;">' +
+      '<button id="modalAcceptBtn" style="flex:1;padding:12px 0;border:none;border-radius:10px;background:#F99530;color:#fff;font-size:16px;font-weight:500;cursor:pointer;">✅ 接收</button>' +
+      '<button id="modalRefundBtn" style="flex:1;padding:12px 0;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--sub);font-size:16px;font-weight:400;cursor:pointer;">退回</button>' +
+    '</div>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeTransferModal();
+  });
+
+  document.getElementById('modalAcceptBtn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    handleTransferAction(msgId, 'accept');
+  });
+
+  document.getElementById('modalRefundBtn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    handleTransferAction(msgId, 'refund');
+  });
+}
+
+function closeTransferModal() {
+  var el = document.getElementById('transferModal');
+  if (el) el.remove();
+}
+
+function handleTransferAction(msgId, action, silent) {
+  closeTransferModal();
+  var arr = DB.chats[view.id];
+  if (!arr) return;
+  var msg = arr.find(function(m) { return m.id === msgId; });
+  if (!msg || msg.type !== 'transfer') return;
+  if (msg.status === 'accepted' || msg.status === 'refunded') return;
+
+  var amount = parseFloat(msg.amount) || 0;
+  var isFromAI = (msg.from === 'ai');
+  var c = getC(view.id);
+  var name = (c ? c.nick || c.name : '对方');
+
+  if (action === 'accept') {
+    msg.status = 'accepted';
+    if (!isFromAI) {
+      // 用户→AI 转账：AI接收后，钱归AI（不涉及金币）
+    } else {
+      DB.coins = (DB.coins || 0) + amount;
+    }
+    var sysMsg = isFromAI ? '你已接收来自 ' + name + ' 的转账 ¥' + amount.toFixed(2) : name + ' 已接收你的转账 ¥' + amount.toFixed(2);
+    insertSystemMessage(sysMsg);
+  } else {
+    msg.status = 'refunded';
+    var sysMsg = isFromAI ? '你已退回 ' + name + ' 的转账 ¥' + amount.toFixed(2) : name + ' 已退回你的转账 ¥' + amount.toFixed(2);
+    insertSystemMessage(sysMsg);
+  }
+  save();
+  if (!silent) renderChat();
+}
+
 function proposeMeet(c,place){
   var where=place?('（'+place+'）'):'';
   var mo=document.createElement('div');mo.className='modal';mo.id='modal';
