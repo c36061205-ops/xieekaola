@@ -233,6 +233,17 @@ d.coins = d.coins || 0;
     }
     // ---- 迁移结束 ----
     CFIELDS.forEach(k=>{if(c[k]===undefined)c[k]='';});
+    // ===== 新增：生日和事例台词 =====
+    if (c.birthday === undefined) c.birthday = '';
+    if (c.sampleLines === undefined) c.sampleLines = '';
+    // ===== 新增：时间衰减相关字段 =====
+    if (c.lastActive === undefined) c.lastActive = Date.now();
+    if (c._lastDecayCheck === undefined) c._lastDecayCheck = 0;
+    // ===== 新增：拉黑字段迁移 =====
+    if (c.isBlockedByChar === undefined) c.isBlockedByChar = false;
+    if (c.blockedByCharAt === undefined) c.blockedByCharAt = 0;
+    if (c.blockedType === undefined) c.blockedType = '';
+    // =============================
     c.status=c.status||{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'};
     c.chapters=c.chapters||[];c.mode=c.mode||'online';
     if(c.activity===undefined)c.activity='中';if(c.allowAutoGreet===undefined)c.allowAutoGreet=true;
@@ -242,7 +253,7 @@ d.coins = d.coins || 0;
   return d;
 }
 function defaultApps(){return[{id:'wechat',name:'微信',emoji:'💬',icon:''},{id:'settings',name:'设置',emoji:'⚙️',icon:''},{id:'album',name:'相册',emoji:'🖼️',icon:''},{id:'music',name:'音乐',emoji:'🎵',icon:''},{id:'notes',name:'备忘录',emoji:'📝',icon:''},{id:'weather',name:'天气',emoji:'⛅',icon:''},{id:'preset',name:'预设',emoji:'🎭',icon:''},{id:'hearts',name:'心动值',emoji:'💗',icon:''},{id:'focus',name:'专注',emoji:'⏱️',icon:''},{id:'world',name:'世界观',emoji:'🌍',icon:''},{id:'floating',name:'浮光',emoji:'✨',icon:''},{id:'shop',name:'购物',emoji:'🛍️',icon:''}];}
-function blankChar(id){const c={id,name:'新角色',nick:'',avatar:'',activity:'中',hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[]};CFIELDS.forEach(k=>c[k]='');return c;}
+function blankChar(id){const c={id,name:'新角色',nick:'',avatar:'',activity:'中',hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:''};CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;}
 function seedAiChan(d){const id='c_aichan';const c=blankChar(id);Object.assign(c,{name:'AI酱',nick:'AI酱',gender:'女',age:'看起来16',job:'手机里的AI助手',
   pKeywords:'温和、机灵、好奇心强、真诚、偶尔调皮',
   pStyle:'自然口语、简洁清楚，偶尔用一个颜文字但不泛滥。认同时爱说"确实"，思考时"唔…"',
@@ -281,9 +292,18 @@ function pickImage(cb,max,png){max=max||256;const inp=document.createElement('in
 
 function render(){const h=document.getElementById('home');if(h)h.remove();const b=document.getElementById('chatBottom');if(b)b.remove();closeModal();content.style.backgroundImage='';
   if(view.type==='home')return renderHome();content.style.display='block';
-  if(view.type==='wechat')return renderWechat();if(view.type==='settings')return renderSettings();if(view.type==='charEdit')return renderCharEdit();if(view.type==='chat')return renderChat();if(view.type==='moments')return renderMoments();if(view.type==='hearts')return renderHearts();if(view.type==='heartDetail')return renderHeartDetail();if(view.type==='focus')return renderFocus();if(view.type==='hearts')return renderHearts();
-if(view.type==='worlds')return renderWorlds();
-if(view.type==='placeholder')return renderPlaceholder();}
+  if(view.type==='wechat')return renderWechat();
+  if(view.type==='settings')return renderSettings();
+  if(view.type==='charEdit')return renderCharEdit();
+  if(view.type==='chat')return renderChat();
+  if(view.type==='moments')return renderMoments();
+  if(view.type==='hearts')return renderHearts();
+  if(view.type==='heartDetail')return renderHeartDetail();
+  if(view.type==='voiceList')return renderVoiceList();
+  if(view.type==='focus')return renderFocus();
+  if(view.type==='worlds')return renderWorlds();
+  if(view.type==='placeholder')return renderPlaceholder();
+}
 function showChrome(t,b){topbar.style.display=t?'flex':'none';tabbar.style.display=b?'flex':'none';}
 
 function renderHome(){showChrome(false,false);statusbar.classList.remove('dark');content.style.display='none';const d=document.createElement('div');d.id='home';if(DB.desktop.wallpaper)d.style.backgroundImage=`url('${DB.desktop.wallpaper}')`;d.innerHTML=`<div class="clockbig" id="homeClock"><div class="t">--:--</div><div class="d"></div></div><div id="appgrid">${DB.desktop.apps.map(a=>{const badge=a.id==='wechat'?`<span id="wxDeskBadge" style="display:none;position:absolute;top:-6px;right:-6px;min-width:28px;height:28px;padding:0 7px;background:#f43;color:#fff;border-radius:14px;font-size:16px;font-weight:600;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:9"></span>`:'';return `<div class="app ${a.id==='wechat'?'big':''}" onclick="openApp('${a.id}')"><div class="app-ic" style="position:relative;${a.icon?`background-image:url('${a.icon}');background-color:transparent;box-shadow:none`:''}">${a.icon?'':a.emoji}${badge}</div><div class="app-nm">${a.name}</div></div>`;}).join('')}</div>`;phone.appendChild(d);tick();refreshChatBadges();}
@@ -334,6 +354,185 @@ function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');t
   content.innerHTML=`<div style="text-align:center;padding:30px 0 20px;background:linear-gradient(160deg,#ff9a9e,#fecfef)"><div style="font-size:14px;color:#fff;opacity:.9">我的心动值</div><div style="font-size:48px;font-weight:200;color:#fff;margin-top:6px">💗 ${DB.hearts||0}</div><div style="font-size:12px;color:#fff;opacity:.8;margin-top:6px">累计获得 ${DB.heartsTotal||0}</div></div>
   <div class="section-title">✨ 可解锁功能（消耗心动值）</div>${locked.map(l=>`<div class="row" onclick="alert('「${l[1]}」功能开发中，敬请期待～')" style="cursor:pointer"><div style="font-size:22px;width:40px">${l[0]}</div><div style="flex:1"><div style="font-size:15px;color:var(--text)">${l[1]}</div><div style="font-size:12px;color:var(--sub);margin-top:2px">${l[2]}</div></div><span style="color:var(--sub);font-size:13px">🔒 待开放</span></div>`).join('')}
   <div class="section-title">📒 心动记录</div>${(DB.heartLog&&DB.heartLog.length)?DB.heartLog.map(g=>`<div class="row"><div style="flex:1;font-size:14px;color:var(--text)">${esc(g.reason)}</div><div style="font-size:15px;font-weight:600;color:${g.n>0?'var(--theme)':'#e34'}">${g.n>0?'+':''}${g.n}</div></div>`).join(''):'<div class="empty">还没有记录～和角色聊天试试</div>'}<div style="height:20px"></div>`;}
+function listenHeart(c, passive) {
+  if (!c) return;
+  var cost = passive ? 8 : 10;
+  var name = c.nick || c.name;
+
+  if ((c.hearts || 0) < cost) {
+    alert('💔 心动值不足，当前 ' + (c.hearts || 0) + '，需要 ' + cost + '。\n多和 ' + name + ' 聊天可以增加心动值哦～');
+    return;
+  }
+
+  alert('⏳ 正在倾听 ' + name + ' 的内心…');
+
+  (async function() {
+    try {
+      var model = DB.settings.chatModel || DB.settings.auxModel;
+      if (!model) {
+        alert('⚠️ 请先在设置里选择模型');
+        return;
+      }
+
+      var msgs = (DB.chats[c.id] || []).slice(-15);
+      var convo = msgs.map(function(m) {
+        var who = m.role === 'user' ? (DB.me.name || '我') : (c.nick || c.name);
+        var content = m.content || '';
+        if (m.type === 'image') content = '[图片]';
+        if (m.type === 'sticker') content = '[表情]';
+        if (m.type === 'transfer') content = '[转账]';
+        if (m.type === 'voice') content = '[语音]';
+        return who + '：' + content;
+      }).join('\n');
+
+      var system = buildSystem(c);
+      var prompt = '【任务】根据上面的对话记录，生成一句 ' + (c.nick || c.name) + ' 此刻内心真实的想法（心声）。\n\n【硬性规则】\n1. 必须基于对话内容引发，不能凭空出现\n2. 字数严格控制在 20-30 字之间，最多一句话\n3. 不能是剧情总结（不能写成「你刚才说…」「今天你做了…」）\n4. 与表面人设形成反差（外表乖巧→内心带点小腹黑；外表高冷→内心其实在意）\n5. 不出现具体时间、地点、事件名称\n6. 用「他/她/这个人」代替对方名字\n\n【格式】只输出心声内容本身，不要引号、不要解释、不要任何标记。';
+
+      var messages = [
+        { role: 'system', content: system },
+        { role: 'system', content: '以下是最近的对话记录：\n' + convo },
+        { role: 'user', content: prompt }
+      ];
+
+      var out = await callAI(messages, model);
+      out = out.trim().replace(/^["「”]+|["」”]+$/g, '').replace(/<state>[\s\S]*?<\/state>/g, '').trim();
+
+      if (!out || out.length < 3) {
+        out = '… 这个人，我好像越来越看不懂了。';
+      }
+
+      c.hearts = (c.hearts || 0) - cost;
+      c.voiceLog = c.voiceLog || [];
+      c.voiceLog.unshift({ t: Date.now(), content: out });
+      c.heartLog = c.heartLog || [];
+      c.heartLog.unshift({ t: Date.now(), n: -cost, reason: '💭 聆听了一次心声' });
+      if (c.heartLog.length > 200) c.heartLog.pop();
+      save();
+
+      alert('💭 ' + name + ' 的心声：\n「' + out + '」\n\n— 消耗了 ' + cost + ' 心动值');
+
+      if (view.type === 'hearts' || view.type === 'heartDetail' || view.type === 'voiceList') {
+        render();
+      }
+
+    } catch (e) {
+      alert('⚠️ 出错了：' + (e.message || '心声生成失败，请重试'));
+    }
+  })();
+}
+
+// 显示被动心声小气泡
+function showHeartBubble(c, content) {
+  removeHeartBubble();
+  var bubble = document.createElement('div');
+  bubble.id = 'heartBubble';
+  bubble.style.cssText = 'margin:6px 12px 6px 12px;padding:10px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:opacity 0.3s;';
+  bubble.onclick = function() {
+    removeHeartBubble();
+    listenHeart(c, true);
+  };
+  bubble.innerHTML = '<span style="font-size:14px;color:var(--text);">💭 ' + (c.nick || c.name) + ' 现在心里有话想说… 点击查看（8💗）</span><span style="color:var(--sub);font-size:18px;padding:0 4px;">×</span>';
+  // 阻止冒泡，防止点击叉号触发父级点击
+  bubble.querySelector('span:last-child').onclick = function(e) {
+    e.stopPropagation();
+    removeHeartBubble();
+  };
+
+  var inputRow = document.getElementById('inputRow');
+  if (inputRow && inputRow.parentNode) {
+    inputRow.parentNode.insertBefore(bubble, inputRow);
+  } else {
+    var bottom = document.getElementById('chatBottom');
+    if (bottom) bottom.insertBefore(bubble, bottom.firstChild);
+  }
+
+  // 30秒后自动消失
+  bubble._timer = setTimeout(function() {
+    removeHeartBubble();
+  }, 30000);
+}
+
+function removeHeartBubble() {
+  var existing = document.getElementById('heartBubble');
+  if (existing) {
+    if (existing._timer) clearTimeout(existing._timer);
+    existing.remove();
+  }
+}
+function clickHeartBubble(cid) {
+  var c = getC(cid);
+  if (!c) return;
+  removeHeartBubble();
+
+  var cost = c._pendingHeart > 1 ? 8 : 10;
+  var name = c.nick || c.name;
+
+  if ((c.hearts || 0) < cost) {
+    alert('💔 心动值不足，当前 ' + (c.hearts || 0) + '，需要 ' + cost + '。\n多和 ' + name + ' 聊天可以增加哦～');
+    return;
+  }
+
+  if (c._pendingHeartContent) {
+    var content = c._pendingHeartContent;
+    c.hearts = (c.hearts || 0) - cost;
+    c.voiceLog = c.voiceLog || [];
+    c.voiceLog.unshift({ t: Date.now(), content: content });
+    c.heartLog = c.heartLog || [];
+    c.heartLog.unshift({ t: Date.now(), n: -cost, reason: '💭 聆听了一次心声' });
+    if (c.heartLog.length > 200) c.heartLog.pop();
+    c._pendingHeart = 0;
+    c._pendingHeartContent = null;
+    save();
+
+    alert('💭 ' + name + ' 的心声：\n「' + content + '」\n\n— 消耗了 ' + cost + ' 心动值');
+    if (view.type === 'chat' || view.type === 'heartDetail') {
+      render();
+    }
+    return;
+  }
+
+  alert('⏳ 正在倾听 ' + name + ' 的内心…');
+  generateHeartContent(c, function(content) {
+    if (!content) {
+      alert('💭 ' + name + ' 此刻似乎很安静，什么也没想。');
+      return;
+    }
+
+    c.hearts = (c.hearts || 0) - cost;
+    c.voiceLog = c.voiceLog || [];
+    c.voiceLog.unshift({ t: Date.now(), content: content });
+    c.heartLog = c.heartLog || [];
+    c.heartLog.unshift({ t: Date.now(), n: -cost, reason: '💭 聆听了一次心声' });
+    if (c.heartLog.length > 200) c.heartLog.pop();
+    c._pendingHeart = 0;
+    save();
+
+    alert('💭 ' + name + ' 的心声：\n「' + content + '」\n\n— 消耗了 ' + cost + ' 心动值');
+    if (view.type === 'chat' || view.type === 'heartDetail') {
+      render();
+    }
+  });
+}
+function showHeartBubbleDirect(c) {
+  removeHeartBubble();
+  var cost = c._pendingHeart > 1 ? 8 : 10;
+  var name = c.nick || c.name;
+
+  var bubble = document.createElement('div');
+  bubble.id = 'heartBubbleWrapper';
+  bubble.style.cssText = 'margin:4px 12px 4px 12px;padding:8px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;';
+  bubble.onclick = function() { clickHeartBubble(c.id); };
+  bubble.innerHTML = '<span style="font-size:13px;color:var(--text);">💭 ' + name + ' 现在心里有话想说… 点击查看（消耗 ' + cost + '💗）</span>' +
+    '<span style="color:var(--sub);font-size:16px;cursor:pointer;" onclick="event.stopPropagation();removeHeartBubble();">×</span>';
+
+  var inputRow = document.getElementById('inputRow');
+  if (inputRow && inputRow.parentNode) {
+    inputRow.parentNode.insertBefore(bubble, inputRow);
+  } else {
+    var bottom = document.getElementById('chatBottom');
+    if (bottom) bottom.insertBefore(bubble, bottom.firstChild);
+  }
+}
 function renderPlaceholder(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent=view.title;tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;content.innerHTML=`<div class="empty">${view.msg}</div>`;}
 function showToast(text, duration) {
   duration = duration || 2000;
@@ -575,32 +774,29 @@ function renderContacts(){
 function renderDiscover(){var un=DB.momentUnread||0;content.innerHTML='<div class="section" style="margin-top:12px"><div class="cell" onclick="openMoments()"><div class="avatar" style="background:#3a8ffe">🌅</div><div class="cell-body"><div class="cell-title">朋友圈</div></div><span id="momentBadge" style="display:'+(un>0?'inline-flex':'none')+';min-width:20px;height:20px;padding:0 6px;background:#f43;color:#fff;border-radius:10px;font-size:12px;align-items:center;justify-content:center">'+un+'</span></div></div>';refreshMomentBadge();}
 function renderWxMe(){const ag=DB.settings.autoGreet!==false;content.innerHTML=`<div class="field" style="border-top:1px solid var(--line)"><label>我的微信头像（点击选择）</label><div class="avapick" style="--ava:${DB.me.avatar?`url('${DB.me.avatar}')`:'none'}" onclick="pickMeAvatar()">${DB.me.avatar?'':'点击上传'}</div></div><div class="section"><div class="row"><label>我的网名</label><input value="${esc(DB.me.name)}" onchange="DB.me.name=this.value;save()"></div><div class="row"><label>真实姓名</label><input value="${esc(DB.me.realName)}" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名"></div></div><div class="hint">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>`;}
 function pickMeAvatar(){pickImage(d=>{DB.me.avatar=d;save();render();});}
-function attachSwipe(){
+function attachSwipe() {
   var cells = document.querySelectorAll('.swipe-cell');
-  cells.forEach(function(el){
+  cells.forEach(function(el) {
     if (el._swipeAttached) return;
     el._swipeAttached = true;
 
     var startX = 0, startY = 0, curX = 0, open = false, moved = false;
     var delWidth = 74;
 
-    // ---- touch 事件（手机端） ----
-    el.addEventListener('touchstart', function(e){
+    el.addEventListener('touchstart', function(e) {
       var t = e.touches[0];
       startX = t.clientX;
       startY = t.clientY;
       moved = false;
       el.style.transition = 'none';
-    }, {passive: true});
+    }, { passive: true });
 
-    el.addEventListener('touchmove', function(e){
+    el.addEventListener('touchmove', function(e) {
       var t = e.touches[0];
       var dx = t.clientX - startX;
       var dy = t.clientY - startY;
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-      // 如果竖向滑动距离大于横向，不处理
       if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 20) {
-        // 让浏览器正常滚动
         return;
       }
       e.preventDefault();
@@ -610,9 +806,9 @@ function attachSwipe(){
       if (target < -delWidth) target = -delWidth;
       curX = target;
       el.style.transform = 'translateX(' + target + 'px)';
-    }, {passive: false});
+    }, { passive: false });
 
-    el.addEventListener('touchend', function(e){
+    el.addEventListener('touchend', function(e) {
       el.style.transition = 'transform .2s';
       var shouldOpen = curX < -delWidth * 0.4;
       if (shouldOpen) {
@@ -624,17 +820,19 @@ function attachSwipe(){
         open = false;
         curX = 0;
       }
-    }, {passive: true});
+    }, { passive: true });
 
-    // ---- pointer 事件（桌面端降级） ----
-    var pStartX = 0, pCurX = 0, pOpen = false, pMoved = false;
-    el.addEventListener('pointerdown', function(e){
+    var pStartX = 0,
+      pCurX = 0,
+      pOpen = false,
+      pMoved = false;
+    el.addEventListener('pointerdown', function(e) {
       pStartX = e.clientX;
       pMoved = false;
       el.style.transition = 'none';
     });
 
-    el.addEventListener('pointermove', function(e){
+    el.addEventListener('pointermove', function(e) {
       if (pStartX === undefined) return;
       var dx = e.clientX - pStartX;
       if (Math.abs(dx) < 5) return;
@@ -646,7 +844,7 @@ function attachSwipe(){
       el.style.transform = 'translateX(' + target + 'px)';
     });
 
-    var pointerEnd = function(){
+    var pointerEnd = function() {
       if (!pMoved) return;
       el.style.transition = 'transform .2s';
       var shouldOpen = pCurX < -delWidth * 0.4;
@@ -664,17 +862,17 @@ function attachSwipe(){
     el.addEventListener('pointerup', pointerEnd);
     el.addEventListener('pointercancel', pointerEnd);
 
-    // ---- 点击关闭 ----
-    el.addEventListener('click', function(e){
+    el.addEventListener('click', function(e) {
       if (moved || pMoved) {
         e.stopPropagation();
         e.preventDefault();
-        // 如果处于打开状态，点击内容关闭
         if (open || pOpen) {
           el.style.transition = 'transform .2s';
           el.style.transform = 'translateX(0)';
-          open = false; pOpen = false;
-          curX = 0; pCurX = 0;
+          open = false;
+          pOpen = false;
+          curX = 0;
+          pCurX = 0;
         }
       }
     }, true);
@@ -708,7 +906,21 @@ function removeFromChats(id){
   save();
   render();
 }
-function delContactById(id){if(id==='c_aichan'){alert('AI酱是内置测试角色，删了也会自动回来哦～');return;}if(confirm('彻底删除该角色及聊天记录？')){DB.contacts=DB.contacts.filter(c=>c.id!==id);delete DB.chats[id];save();render();}}
+function delContactById(id){
+  if(id==='c_aichan'){alert('AI酱是内置测试角色，删了也会自动回来哦～');return;}
+  if(confirm('彻底删除该角色及聊天记录？')){
+    var c = getC(id);
+    if (c) {
+      // ===== 新增：极端降值（虽然删了但留个记录，方便后续可能恢复） =====
+      // 实际上删除角色不会保留数据，所以这里只做记录
+      console.log('💔 用户删除了角色：' + (c.nick || c.name) + '，好感度/信任度归零');
+    }
+    DB.contacts=DB.contacts.filter(c=>c.id!==id);
+    delete DB.chats[id];
+    save();
+    render();
+  }
+}
 
 function renderSettings(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='设置';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;const s=DB.settings;content.innerHTML=`<div class="section-title">版本 ${APP_VER}｜AI 接口</div><div class="section"><div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div><div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div></div><button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button><div class="section"><div class="row"><label>主聊天模型</label><select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select></div><div class="row"><label>辅助模型</label><select id="auxModel"><option>${s.auxModel||'（润色/生成用）'}</option></select></div></div><button class="btn" onclick="saveApi()">保存接口设置</button><div class="section-title">✨ 主题皮肤（整体换肤）</div><div style="padding:10px 16px"><div onclick="applySkin('fusion');renderSettings()" style="cursor:pointer;border:2px solid #B34A6A;border-radius:12px;padding:10px 6px;text-align:center;background:#B34A6A22"><div style="width:100%;height:30px;border-radius:6px;background:#B34A6A;margin-bottom:6px"></div><div style="font-size:12px;color:var(--text)">🌙 洛丽塔×女巫之夜</div></div></div><div class="section-title">🖼️ 桌面壁纸</div><div class="field"><div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div></div><div class="section-title">😀 表情包仓库（AI靠"名字"识别使用）</div><div style="padding:10px 16px"><div class="stgrid">${DB.stickers.map((st,i)=>`<div class="st"><span class="x" onclick="delSticker(${i})">×</span><img src="${st.img}"><div class="nm">${esc(st.name)}</div></div>`).join('')}</div></div><button class="btn gray" onclick="addSticker()">＋ 添加表情</button><div class="section-title">App 图标（点图标换图片）</div>${DB.desktop.apps.map((a,i)=>`<div class="row"><div class="app-ic" style="width:40px;height:40px;font-size:22px;border-radius:10px;box-shadow:none;background-color:transparent;${a.icon?`background-image:url('${a.icon}')`:''}" onclick="pickAppIcon(${i})">${a.icon?'':a.emoji}</div><input style="margin-left:12px;text-align:left" value="${a.name}" onchange="DB.desktop.apps[${i}].name=this.value;save()">${a.icon?`<span style="color:#e34;cursor:pointer;font-size:13px" onclick="DB.desktop.apps[${i}].icon='';save();render()">还原</span>`:''}</div>`).join('')}<div class="hint">建议定期导出，清缓存会丢数据。</div><div style="height:20px"></div>`;}
 function setTheme(k){DB.settings.theme=k;applyTheme(k);save();render();}
@@ -719,7 +931,13 @@ function delSticker(i){if(confirm('删除这个表情？')){DB.stickers.splice(i
 /* ===== 角色编辑（结构化） ===== */
 function editContact(id,from){_isEnteringCharEdit = true;editingId=id;edModule='role';editFrom=from||'contacts';view={type:'charEdit'};render();}
 function F(c,k,label,tip,ph,area){const val=esc(c[k]||'');const t=tip?`<span class="tip">${tip}</span>`:'';if(area)return `<div class="field"><label>${label}</label>${t}<textarea oninput="ag(this)" onchange="upd('${k}',this.value)" placeholder="${ph||''}">${val}</textarea></div>`;return `<div class="field"><label>${label}</label>${t}<input value="${val}" onchange="upd('${k}',this.value)" placeholder="${ph||''}"></div>`;}
-function renderCharEdit(){
+function renderCharEdit() {
+  // ===== 防御：确保 content 存在 =====
+  if (!content) {
+    content = document.getElementById('content');
+    if (!content) return;
+  }
+
   var scrollTop = _isEnteringCharEdit ? 0 : content.scrollTop;
   _isEnteringCharEdit = false;
   const c = getC(editingId);
@@ -732,80 +950,278 @@ function renderCharEdit(){
   tbRight.textContent = '';
   tbRight.onclick = null;
 
-  const T = function(k, t){ return '<div class="ed-tab ' + (edModule === k ? 'on' : '') + '" onclick="switchMod(\'' + k + '\')">' + t + '</div>'; };
+  const T = function(k, t) {
+    return '<div class="ed-tab ' + (edModule === k ? 'on' : '') + '" onclick="switchMod(\'' + k + '\')">' + t + '</div>';
+  };
   var html = '<div class="ed-tabs">' + T('role', '角色') + T('me', '我方') + T('world', '世界观') + T('status', '状态') + '</div>';
 
+  // ===== 优化后的折叠样式 =====
+  html += `
+  <style>
+    .fold-block {
+      border-bottom: 1px solid var(--line);
+      margin: 0 0 4px 0;
+      background: var(--card);
+      border-radius: 0;
+      transition: background 0.15s;
+    }
+    .fold-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--text);
+      background: var(--bg);
+      border-radius: 8px 8px 0 0;
+      transition: background 0.15s;
+    }
+    .fold-header:hover {
+      background: var(--line);
+    }
+    .fold-header .fold-icon {
+      font-size: 18px;
+      margin-right: 8px;
+    }
+    .fold-arrow {
+      font-size: 14px;
+      transition: transform 0.3s ease;
+      color: var(--sub);
+      opacity: 0.6;
+    }
+    .fold-arrow.open {
+      transform: rotate(90deg);
+      opacity: 1;
+    }
+    .fold-body {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      padding: 0 18px;
+      background: var(--card);
+      border-radius: 0 0 8px 8px;
+    }
+    .fold-body.open {
+      max-height: 9999px;
+      padding: 6px 18px 18px 18px;
+    }
+    /* 模块内字段间距优化 */
+    .fold-body .field {
+      padding: 6px 0;
+    }
+    .fold-body .field:last-child {
+      padding-bottom: 0;
+    }
+    .fold-body .field textarea {
+      min-height: 60px;
+    }
+    .fold-body .field input[type="text"] {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .fold-body .field input[type="text"]:focus {
+      border-color: var(--theme);
+      outline: none;
+    }
+    .fold-body .field textarea {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: inherit;
+      line-height: 1.5;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .fold-body .field textarea:focus {
+      border-color: var(--theme);
+      outline: none;
+    }
+    .fold-body .field label {
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--text);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .fold-body .field .tip {
+      font-size: 12px;
+      color: var(--sub);
+      display: block;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .fold-body .frow .field {
+      padding: 6px 0;
+    }
+    .fold-body .frow .field:first-child {
+      padding-right: 6px;
+    }
+    .fold-body .frow .field:last-child {
+      padding-left: 6px;
+    }
+  </style>
+  `;
+
+  var fold = function(id, label, icon, defaultOpen) {
+    var open = defaultOpen ? 'open' : '';
+    return '<div class="fold-block" data-fold="' + id + '">' +
+      '<div class="fold-header" onclick="toggleFold(this)">' +
+        '<span><span class="fold-icon">' + icon + '</span>' + label + '</span>' +
+        '<span class="fold-arrow ' + open + '">▶</span>' +
+      '</div>' +
+      '<div class="fold-body ' + open + '" id="foldbody_' + id + '">';
+  };
+  var foldEnd = '</div></div>';
+
+  // 辅助：生成带样式的 field（支持 textarea 或 input）
+  var Field = function(label, tip, value, onchange, placeholder, area) {
+    var tipHtml = tip ? '<span class="tip">' + tip + '</span>' : '';
+    var inputHtml = area
+      ? '<textarea oninput="ag(this)" onchange="' + onchange + '" placeholder="' + (placeholder || '') + '" style="min-height:80px;">' + esc(value || '') + '</textarea>'
+      : '<input type="text" value="' + esc(value || '') + '" onchange="' + onchange + '" placeholder="' + (placeholder || '') + '">';
+    return '<div class="field"><label>' + label + '</label>' + tipHtml + inputHtml + '</div>';
+  };
+
   if (edModule === 'role') {
+    // ----- 模块1：基础信息 -----
+    html += fold('basic', '基础信息', '📋', true);
     html += '<div class="field"><label>头像（点击选择）</label><div class="avapick" style="--ava:' + (c.avatar ? 'url(\'' + c.avatar + '\')' : 'none') + '" onclick="pickAvatar()">' + (c.avatar ? '' : '点击上传') + '</div></div>';
-    html += '<div class="grp">基本信息</div>';
-    html += F(c, 'name', '真名', '姓名，可含由来/别称');
-    html += F(c, 'nick', '微信昵称/网名', '聊天列表显示，留空用真名');
-    html += '<div class="field"><label>💬 个性签名 <span style="float:right;color:var(--theme);cursor:pointer;font-size:13px" onclick="genSignature()">✨ AI生成</span></label><input value="' + esc(c.signature || '') + '" placeholder="通讯录里显示的一句话，可手填或AI生成" onchange="upd(\'signature\',this.value)"></div>';
-    html += '<div class="frow" style="padding:0 16px">' + F(c, 'gender', '性别', '', '男/女…') + F(c, 'age', '年龄', '', '如 24') + '</div>';
-    html += F(c, 'job', '身份/职业', '角色的社会身份、职务');
-    html += F(c, 'family', '家庭/出身', '家庭背景，可留空');
-    html += F(c, 'body', '身体数据', '身高/体重/坐骑/信物等，可留空');
-    html += '<div class="grp">外貌与性格</div>';
-    html += F(c, 'pLook', '外貌特征', '五官、发型、身形，加一个记忆点', '', 1);
-    html += F(c, 'pKeywords', '<span class="prio">性格关键词（AI优先读取）</span>', '用词组罗列核心性格', '外冷内热、护短、别扭…', 1);
-    html += F(c, 'pStyle', '说话风格 / 口头禅', '句式特点、爱用词、口头禅', '', 1);
-    html += '<div class="field"><label>🎨 TA的台词颜色</label><span class="tip">线下剧情/朋友圈里，TA引号内台词显示的颜色</span><div style="display:flex;align-items:center;gap:12px;margin-top:6px"><input type="color" value="' + (c.lineColor || '#07c160') + '" onchange="upd(\'lineColor\',this.value)" style="width:48px;height:34px;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer;padding:2px">' + (c.lineColor ? '<span style="color:#e34;font-size:13px;cursor:pointer" onclick="upd(\'lineColor\',\'\');render()">恢复默认</span>' : '') + '<span style="color:' + (c.lineColor || 'var(--theme)') + ';font-weight:500">「示例台词」</span></div></div>';
-    html += '<div class="grp">深层设定（决定"活人感"）</div>';
-    html += F(c, 'pBack', '成长经历【性格来源】', '⚡心法：每段经历后用「→」推导出性格结论，别只罗列背景', '父母…／少年时…→所以他现在…', 1);
-    html += F(c, 'pDaily', '日常作息', '清晨/上午/午后/黄昏/入夜的行踪，防止角色永远在原地等你', '', 1);
-    html += F(c, 'pLike', '喜好与厌恶', '喜欢什么、讨厌什么、雷点', '', 1);
-    html += F(c, 'pLang', '语言习惯参考', '⚡给"语气逻辑"而非台词，如：越重的话说得越随意', '', 1);
-    html += F(c, 'negative', '❌ 负向约束（禁止AI做什么）', '⚡框住跑偏方向，如：❌不会用权力胁迫 ❌不得演成敌对', '', 1);
-    html += '<div class="grp">其他</div>';
-    html += F(c, 'opening', '开场白', '进入聊天时角色的第一句', '', 1);
-    html += F(c, 'pExtra', '补充设定', '服装体系、称呼、任何补充', '', 1);
-    html += '<div class="field"><label>🌐 社交活跃度</label><span class="tip">控制TA发朋友圈+主动找你说话的频率（联动）</span><select onchange="upd(\'activity\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)"><option ' + (c.activity === '关' ? 'selected' : '') + '>关</option><option ' + (c.activity === '低' ? 'selected' : '') + '>低</option><option ' + ((c.activity === '中' || !c.activity) ? 'selected' : '') + '>中</option><option ' + (c.activity === '高' ? 'selected' : '') + '>高</option></select></div>';
-    html += '<div class="field"><label>🤖 AI主动问候</label><span class="tip">开启后，这个角色会按活跃度主动找你聊天</span><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.allowAutoGreet !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (c.allowAutoGreet === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',false);renderCharEdit()">⛔ 关闭</button></div></div>';
-    html += '<div class="hint">关=不主动、不发圈；低=很少；高=频繁。</div>';
-    html += '<button class="btn" id="polishBtn" onclick="polishChar()">✨ AI 润色 / 补全人设（用辅助模型）</button><div class="hint">只补空白、轻润色已填内容，自动生成"经历→性格"推导。</div>';
-    html += c._draft ? '<button class="btn" onclick="saveDraft()">✅ 保存并开始聊天</button>' : '<button class="btn" onclick="leaveEdit()">✅ 完成 / 保存</button>';
-    html += '<div style="height:20px"></div>';
+    html += Field('真名', '', c.name, 'upd(\'name\',this.value)', '姓名，可含由来/别称', false);
+    html += Field('微信昵称/网名', '聊天列表显示，留空用真名', c.nick, 'upd(\'nick\',this.value)', '', false);
+    html += '<div class="field"><label>💬 个性签名 <span style="float:right;color:var(--theme);cursor:pointer;font-size:13px" onclick="genSignature()">✨ AI生成</span></label><input type="text" value="' + esc(c.signature || '') + '" onchange="upd(\'signature\',this.value)" placeholder="通讯录里显示的一句话"></div>';
+    html += '<div class="frow" style="display:flex;gap:8px;padding:0;">' +
+      '<div class="field" style="flex:1;"><label>性别</label><input type="text" value="' + esc(c.gender) + '" onchange="upd(\'gender\',this.value)" placeholder="男/女…"></div>' +
+      '<div class="field" style="flex:1;"><label>年龄</label><input type="text" value="' + esc(c.age) + '" onchange="upd(\'age\',this.value)" placeholder="如 24"></div>' +
+      '</div>';
+    html += Field('生日（自由填写）', '如 3月21日 / 霜月十五 / 2000-01-01', c.birthday, 'upd(\'birthday\',this.value)', '', false);
+    html += Field('身份/职业', '角色的社会身份、职务', c.job, 'upd(\'job\',this.value)', '', false);
+    html += Field('家庭出身', '家庭背景，可留空', c.family, 'upd(\'family\',this.value)', '', true);
+    html += Field('身体数据', '身高/体重/坐骑/信物等', c.body, 'upd(\'body\',this.value)', '', false);
+    html += foldEnd;
+
+    // ----- 模块2：外貌与性格 -----
+    html += fold('appearance', '外貌与性格', '🎭', false);
+    html += Field('外貌特征', '五官、发型、身形，加一个记忆点', c.pLook, 'upd(\'pLook\',this.value)', '', true);
+    html += Field('性格关键词', '用词组罗列核心性格，如：外冷内热、护短、别扭…', c.pKeywords, 'upd(\'pKeywords\',this.value)', '', true);
+    html += Field('成长经历', '⚡心法：每段经历后用「→」推导出性格结论', c.pBack, 'upd(\'pBack\',this.value)', '', true);
+    html += foldEnd;
+
+    // ----- 模块3：说话习惯（含事例台词） -----
+    html += fold('speech', '说话习惯（含事例）', '💬', false);
+    html += Field('说话风格 / 口头禅', '句式特点、爱用词、口头禅', c.pStyle, 'upd(\'pStyle\',this.value)', '', true);
+    html += Field('语言习惯', '⚡给"语气逻辑"而非台词，如：越重的话说得越随意', c.pLang, 'upd(\'pLang\',this.value)', '', true);
+    html += Field('📝 事例台词', 'AI会从这些例句里学习语气和用词习惯。3-6句，每行一句。', c.sampleLines, 'upd(\'sampleLines\',this.value)', '', true);
+    html += '<div class="field"><label>🎨 TA的台词颜色</label><div style="display:flex;align-items:center;gap:12px;margin-top:6px"><input type="color" value="' + (c.lineColor || '#07c160') + '" onchange="upd(\'lineColor\',this.value)" style="width:48px;height:34px;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer;padding:2px">' + (c.lineColor ? '<span style="color:#e34;font-size:13px;cursor:pointer" onclick="upd(\'lineColor\',\'\');render()">恢复默认</span>' : '') + '<span style="color:' + (c.lineColor || 'var(--theme)') + ';font-weight:500">「示例台词」</span></div></div>';
+    html += foldEnd;
+
+    // ----- 模块4：日常与喜好 -----
+    html += fold('daily', '日常与喜好', '🌙', false);
+    html += Field('日常作息', '清晨/上午/午后/黄昏/入夜的行踪', c.pDaily, 'upd(\'pDaily\',this.value)', '', true);
+    html += Field('喜好与厌恶', '喜欢什么、讨厌什么、雷点', c.pLike, 'upd(\'pLike\',this.value)', '', true);
+    html += foldEnd;
+
+    // ----- 模块5：规则与补充 -----
+    html += fold('rules', '规则与补充', '⚙️', false);
+    html += Field('❌ 负向约束', '框住跑偏方向，如：❌不会用权力胁迫', c.negative, 'upd(\'negative\',this.value)', '', true);
+    html += Field('📱 线上人设', 'TA在微信上的行为习惯：爱发表情包吗？常用哪些emoji？会不会已读不回或拉黑？', c.pOnlinePersona, 'upd(\'pOnlinePersona\',this.value)', '', true);
+    html += Field('开场白', '进入聊天时角色的第一句', c.opening, 'upd(\'opening\',this.value)', '', true);
+    html += Field('补充设定', '服装体系、称呼、任何补充', c.pExtra, 'upd(\'pExtra\',this.value)', '', true);
+    html += '<div class="field"><label>🌐 社交活跃度</label><select onchange="upd(\'activity\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)"><option ' + (c.activity === '关' ? 'selected' : '') + '>关</option><option ' + (c.activity === '低' ? 'selected' : '') + '>低</option><option ' + ((c.activity === '中' || !c.activity) ? 'selected' : '') + '>中</option><option ' + (c.activity === '高' ? 'selected' : '') + '>高</option></select></div>';
+    html += '<div class="field"><label>🤖 AI主动问候</label><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.allowAutoGreet !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (c.allowAutoGreet === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',false);renderCharEdit()">⛔ 关闭</button></div></div>';
+    html += foldEnd;
+
+    // ----- 底部按钮 -----
+    html += '<div style="padding:16px 18px 18px 18px;">';
+    html += '<button class="btn" id="polishBtn" onclick="polishChar()">✨ AI 润色 / 补全人设</button>';
+    html += '<div class="hint" style="padding:6px 0;font-size:12px;color:var(--sub);">已填字段只做轻微润色，空字段根据人设合理补全，不会凭空捏造。</div>';
+    if (c._draft) {
+      html += '<button class="btn" onclick="saveDraft()">✅ 保存并开始聊天</button>';
+    } else {
+      html += '<button class="btn" onclick="leaveEdit()">✅ 完成 / 保存</button>';
+    }
+	html += '<button class="btn gray" onclick="userBlockChar(\'' + c.id + '\')" style="margin-top:6px;">🔇 拉黑此角色</button>';
+    html += '</div>';
+
   } else if (edModule === 'me') {
-    html += '<div class="hint">「我」在这个角色面前的样子（姓名/网名在 微信→我 里统一设）。</div>';
-    html += '<div class="frow" style="padding:0 16px">' + F(c, 'myGender', '我的性别', '', '') + F(c, 'myAge', '我的年龄', '', '') + '</div>';
-    html += F(c, 'myJob', '我的身份/职业', '');
-    html += F(c, 'myLook', '我的外貌', '对方眼中我的样子', '', 1);
-    html += F(c, 'myPersona', '我的性格', '', '', 1);
-    html += F(c, 'myRelation', '我和TA的关系 / 怎么认识的', '⚡重点：让AI开局就懂你俩什么关系、如何相识', '', 1);
+    html += '<div class="hint" style="padding:12px 16px;">「我」在这个角色面前的样子（姓名/网名在 微信→我 里统一设）。</div>';
+    html += '<div class="frow" style="display:flex;gap:8px;padding:0 16px;">' +
+      '<div class="field" style="flex:1;"><label>我的性别</label><input type="text" value="' + esc(c.myGender) + '" onchange="upd(\'myGender\',this.value)"></div>' +
+      '<div class="field" style="flex:1;"><label>我的年龄</label><input type="text" value="' + esc(c.myAge) + '" onchange="upd(\'myAge\',this.value)"></div>' +
+      '</div>';
+    html += Field('我的身份/职业', '', c.myJob, 'upd(\'myJob\',this.value)', '', false);
+    html += Field('我的外貌', '对方眼中我的样子', c.myLook, 'upd(\'myLook\',this.value)', '', true);
+    html += Field('我的性格', '', c.myPersona, 'upd(\'myPersona\',this.value)', '', true);
+    html += Field('我和TA的关系 / 怎么认识的', '⚡重点：让AI开局就懂你俩什么关系、如何相识', c.myRelation, 'upd(\'myRelation\',this.value)', '', true);
     html += '<div style="height:20px"></div>';
+
   } else if (edModule === 'world') {
     var worldOpts = '<option value="">未关联</option>';
     (DB.worlds || []).forEach(function(w) {
       var selected = (c.worldId === w.id) ? 'selected' : '';
       worldOpts += '<option value="' + w.id + '" ' + selected + '>' + esc(w.name) + '</option>';
     });
-    html += '<div class="field"><label>🌍 所属世界观</label><span class="tip">选择后，角色的世界观设定将自动关联</span><select onchange="upd(\'worldId\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)">' + worldOpts + '</select></div>';
-    html += '<div class="field" style="padding:6px 16px;background:var(--bg);border-radius:8px;margin:4px 16px;font-size:13px;color:var(--sub);border:1px dashed var(--line);"><span style="font-weight:600;color:var(--text)">📌 提示</span> 世界观在独立的「世界观」App中创建和编辑，角色只需关联即可。</div>';
-    html += '<div class="grp">聊天背景（本角色专属）</div><div class="field"><div class="avapick" style="width:100%;height:120px;--ava:' + (c.chatBg ? 'url(\'' + c.chatBg + '\')' : 'none') + '" onclick="pickChatBg()">' + (c.chatBg ? '点击更换' : '点击上传聊天背景') + '</div>' + (c.chatBg ? '<div style="text-align:center;color:#e34;font-size:13px;margin-top:8px;cursor:pointer" onclick="upd(\'chatBg\',\'\');render()">清除背景</div>' : '') + '</div><div style="height:20px"></div>';
+    html += '<div style="padding:12px 16px;">';
+    html += '<div class="field"><label>🌍 所属世界观</label><select onchange="upd(\'worldId\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)">' + worldOpts + '</select></div>';
+    html += '<div class="field" style="padding:6px 16px;background:var(--bg);border-radius:8px;margin:4px 0;font-size:13px;color:var(--sub);border:1px dashed var(--line);"><span style="font-weight:600;color:var(--text)">📌 提示</span> 世界观在独立的「世界观」App中创建和编辑，角色只需关联即可。</div>';
+    html += '<div class="field"><label>聊天背景（本角色专属）</label><div class="avapick" style="width:100%;height:120px;--ava:' + (c.chatBg ? 'url(\'' + c.chatBg + '\')' : 'none') + '" onclick="pickChatBg()">' + (c.chatBg ? '点击更换' : '点击上传聊天背景') + '</div>' + (c.chatBg ? '<div style="text-align:center;color:#e34;font-size:13px;margin-top:8px;cursor:pointer" onclick="upd(\'chatBg\',\'\');render()">清除背景</div>' : '') + '</div>';
+    html += '</div>';
+
   } else {
     var st = c.status;
-    var rng = function(k){
+    var rng = function(k) {
       var label = k;
       var currentVal = st[k] ?? 0;
       return '<div class="field"><label>' + label + '</label><div class="rangebox"><div class="stage" id="vb_' + k + '">' + currentVal + ' · ' + favLabel(k, currentVal) + '</div><input type="range" min="0" max="100" value="' + currentVal + '" oninput="document.getElementById(\'vb_' + k + '\').textContent = this.value + \' · \' + favLabel(\'' + k + '\', parseInt(this.value))" onchange="updStatus(\'' + k + '\', +this.value)"></div></div>';
     };
+    html += '<div style="padding:12px 16px;">';
     html += '<div class="hint">聊天时AI会根据剧情自动增减。</div>';
     html += rng('好感度') + rng('信任度') + rng('紧张感');
-    html += '<div class="field"><label>当前关系</label><input value="' + esc(st.当前关系 || '') + '" onchange="updStatus(\'当前关系\',this.value)"></div>';
-    html += '<div class="section-title">🧠 长期记忆</div><div class="hint">点下方按钮，AI会把今天的聊天提炼成一条重要记忆，既能当日记翻看，也会自动影响之后的对话。</div>';
+    html += '<div class="field"><label>当前关系</label><input type="text" value="' + esc(st.当前关系 || '') + '" onchange="updStatus(\'当前关系\',this.value)"></div>';
+    html += '<div class="section-title" style="font-weight:600;padding:12px 0 4px;font-size:14px;color:var(--text);">🧠 长期记忆</div>';
+    html += '<div class="hint">点下方按钮，AI会把今天的聊天提炼成一条重要记忆，既能当日记翻看，也会自动影响之后的对话。</div>';
     if (c.chapters && c.chapters.length) {
-      c.chapters.forEach(function(ch, i){
-        html += '<div class="field"><label>' + ch.date + ' <span style="float:right;color:#e34;cursor:pointer" onclick="delChap(' + i + ')">删除</span></label><div style="white-space:pre-wrap;line-height:1.5">' + esc(ch.content) + '</div></div>';
+      c.chapters.forEach(function(ch, i) {
+        html += '<div class="field"><label>' + ch.date + ' <span style="float:right;color:#e34;cursor:pointer" onclick="delChap(' + i + ')">删除</span></label><div style="white-space:pre-wrap;line-height:1.5;padding:6px 0;color:var(--text);">' + esc(ch.content) + '</div></div>';
       });
     }
     html += '<button class="btn" id="genMemBtn" onclick="genMemory()">🧠 AI 生成今日记忆</button>';
-    html += '<button class="btn gray" style="margin-top:0" onclick="addChap()">＋ 手动添加</button>';
-    html += '<div style="height:20px"></div>';
+    html += '<button class="btn gray" style="margin-top:6px;" onclick="addChap()">＋ 手动添加</button>';
+    html += '</div>';
   }
 
   content.innerHTML = html;
   content.scrollTop = scrollTop;
   content.querySelectorAll('textarea').forEach(ag);
+}
+
+// 折叠切换函数（放在全局，和 renderCharEdit 平级）
+function toggleFold(header) {
+  var body = header.nextElementSibling;
+  var arrow = header.querySelector('.fold-arrow');
+  if (!body || !body.classList.contains('fold-body')) return;
+  var isOpen = body.classList.contains('open');
+  if (isOpen) {
+    body.classList.remove('open');
+    if (arrow) arrow.classList.remove('open');
+  } else {
+    body.classList.add('open');
+    if (arrow) arrow.classList.add('open');
+  }
 }
 async function genMemory(){
   const c=getC(editingId);if(!c)return;
@@ -860,19 +1276,25 @@ async function polishChar(){
   const c=getC(editingId);const btn=document.getElementById('polishBtn');
   const model=DB.settings.auxModel||DB.settings.chatModel;
   if(!model){alert('请先在 设置 里拉取并选择模型');return;}
-  const cur={真名:c.name,性别:c.gender,年龄:c.age,身份职业:c.job,家庭出身:c.family,身体数据:c.body,外貌:c.pLook,性格关键词:c.pKeywords,说话风格:c.pStyle,成长经历:c.pBack,日常作息:c.pDaily,喜好厌恶:c.pLike,语言习惯:c.pLang,负向约束:c.negative,开场白:c.opening,补充:c.pExtra};
+  // ===== 修改点1：cur 新增 生日、事例台词、线上人设 =====
+  const cur={真名:c.name,性别:c.gender,年龄:c.age,生日:c.birthday,身份职业:c.job,家庭出身:c.family,身体数据:c.body,外貌:c.pLook,性格关键词:c.pKeywords,说话风格:c.pStyle,成长经历:c.pBack,日常作息:c.pDaily,喜好厌恶:c.pLike,语言习惯:c.pLang,事例台词:c.sampleLines,负向约束:c.negative,线上人设:c.pOnlinePersona,开场白:c.opening,补充:c.pExtra};
 const pr = `你是资深角色卡作者。你的任务是根据用户提供的角色信息，生成一张完整、统一的角色卡。
 
 角色现有信息如下（JSON格式）：
 ${JSON.stringify(cur, null, 2)}
 
+【核心原则：不凭空捏造】
+- 已填字段：只做轻微润色（修正不通顺的句子、调整措辞），不改原意，不添加新设定。
+- 空字段：根据已有信息合理补全，但必须从角色已有的性格、经历、说话风格里推导，绝不凭空脑补一段新的经历或行为。
+
 请完成以下工作：
-1. 已填字段：保留原意，只做轻微润色补充，不要推翻重写。
-2. 空字段：根据已有信息合理补全。
-3. 成长经历：必须用“具体经历 → 所以这个角色现在变成了什么样的人”的因果写法。
-4. 语言习惯：只写这个角色说话的语气倾向和逻辑，不写具体台词。
-5. 负向约束：用“❌”列出这个角色绝对不会做的事。
-6. 开场白：这个角色在微信里发给用户的第一句话。要求口语化、像真人发微信（可带颜文字，多条用换行分隔）。禁止小说旁白或动作描写。
+1. 已填字段保留原意，只做轻微润色补充。
+2. 空字段根据已有信息合理补全，不凭空捏造。
+3. 成长经历：必须用"具体经历 → 所以这个角色现在变成了什么样的人"的因果写法。
+4. 说话风格 + 语言习惯 + 事例台词：三者要统一，事例台词用来示范角色真实的说话语气和用词习惯。
+5. 线上人设：根据角色性格合理推断TA在微信上的行为习惯（爱不爱发表情、常用什么emoji、会不会已读不回等），如果没有足够信息，就写"待补充"，不要乱编。
+6. 负向约束：用"❌"列出这个角色绝对不会做的事，只写能推断出来的，不硬凑。
+7. 开场白：这个角色在微信里发给用户的第一句话。要求口语化、像真人发微信（可带颜文字，多条用换行分隔）。禁止小说旁白或动作描写。
 
 输出要求：只输出一个JSON对象，键名与上述字段完全一致，值是字符串。不要任何解释、不要代码块标记。`;
   btn.textContent='润色中…（请稍候）';btn.disabled=true;
@@ -881,7 +1303,8 @@ ${JSON.stringify(cur, null, 2)}
     out=out.replace(/```json/gi,'').replace(/```/g,'').trim();
     const m=out.match(/\{[\s\S]*\}/);if(m)out=m[0];
     const r=JSON.parse(out);
-    const map={真名:'name',性别:'gender',年龄:'age',身份职业:'job',家庭出身:'family',身体数据:'body',外貌:'pLook',性格关键词:'pKeywords',说话风格:'pStyle',成长经历:'pBack',日常作息:'pDaily',喜好厌恶:'pLike',语言习惯:'pLang',负向约束:'negative',开场白:'opening',补充:'pExtra'};
+    // ===== 修改点2：map 新增 生日、事例台词、线上人设 =====
+    const map={真名:'name',性别:'gender',年龄:'age',生日:'birthday',身份职业:'job',家庭出身:'family',身体数据:'body',外貌:'pLook',性格关键词:'pKeywords',说话风格:'pStyle',成长经历:'pBack',日常作息:'pDaily',喜好厌恶:'pLike',语言习惯:'pLang',事例台词:'sampleLines',负向约束:'negative',线上人设:'pOnlinePersona',开场白:'opening',补充:'pExtra'};
     for(const k in map){if(r[k]!==undefined&&r[k]!==null)c[map[k]]=String(r[k]);}
     save();render();alert('润色完成～可再手动微调');
   }catch(e){alert('润色失败：'+e.message+'\n(可重试一次)');btn.textContent='✨ AI 润色 / 补全人设（用辅助模型）';btn.disabled=false;}
@@ -1084,6 +1507,11 @@ async function checkAutoGreet(){
   const slot=_daySlot();if(slot==='深夜')return;
   const today=new Date().toDateString();
   for(const c of DB.contacts){
+    // ===== 新增：检查时间衰减 =====
+    checkTimeDecay(c);
+	    // ===== 如果被角色拉黑，跳过主动问候 =====
+    if (c.isBlockedByChar) continue;
+    // =============================
     if(c._draft||!c.inChatList||c.activity==='关'||c.allowAutoGreet===false)continue;
     let should=false;
     if(c.activity==='高')should=true;
@@ -1095,11 +1523,11 @@ async function checkAutoGreet(){
     else{if(c.greetLog[slot])continue;}
     const msgs=DB.chats[c.id]||[];
     const lastT=msgs.length?(msgs[msgs.length-1].time||0):0;
-    if(Date.now()-lastT<10*60000)continue; // 10分钟内刚聊过就不打扰
+    if(Date.now()-lastT<10*60000)continue;
     if(c.activity==='低')c.greetLog.dayDone=true;else c.greetLog[slot]=true;
     save();
     await doAutoGreet(c,slot);
-    break; // 一次只发一个，避免并发轰炸
+    break;
   }
 }
 async function doAutoGreet(c,slot){
@@ -1126,54 +1554,301 @@ setInterval(function(){if(document.hidden)return;if(view.type==='charEdit')retur
 function addHeart(c,n,reason){if(!c)return;c.hearts=(c.hearts||0)+n;if(n>0)c.heartsTotal=(c.heartsTotal||0)+n;c.heartLog=c.heartLog||[];c.heartLog.unshift({t:Date.now(),n,reason});if(c.heartLog.length>200)c.heartLog.pop();checkMile(c);save();}
 function checkMile(c){c.heartMile=c.heartMile||{};[[50,30],[100,50],[150,100]].forEach(([need,bonus])=>{if((c.heartsTotal||0)>=need&&!c.heartMile[need]){c.heartMile[need]=1;c.hearts+=bonus;c.heartLog.unshift({t:Date.now(),n:bonus,reason:`💗累计达成${need}奖励`});setTimeout(()=>alert(`🎉 与${c.nick||c.name}的心动值累计突破 ${need}！奖励 ${bonus}`),400);}});}
 function spendHeart(c,n,reason){if(!c)return false;if((c.hearts||0)<n){alert('心动值不足～当前'+(c.hearts||0)+'，需要'+n+'。多和'+(c.nick||c.name)+'聊天可以获得哦');return false;}c.hearts-=n;c.heartLog=c.heartLog||[];c.heartLog.unshift({t:Date.now(),n:-n,reason});save();return true;}
-function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='心动值';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;
-  const cs=DB.contacts.filter(c=>!c._draft);
-  content.innerHTML=`<div style="text-align:center;padding:24px 0;background:linear-gradient(160deg,#ff9a9e,#fecfef);color:#fff"><div style="font-size:32px">💗</div><div style="font-size:13px;opacity:.9;margin-top:4px">你与每个人的专属心动值</div></div>${cs.length?cs.map(c=>`<div class="cell" onclick="openHeartDetail('${c.id}')">${avatarHtml(c)}<div class="cell-body"><div class="cell-title">${c.nick||c.name}</div><div class="cell-sub">累计 ${c.heartsTotal||0}</div></div><div style="color:var(--theme);font-weight:600;font-size:17px">💗 ${c.hearts||0}</div></div>`).join(''):'<div class="empty">还没有角色</div>'}<div style="height:20px"></div>`;}
-function openHeartDetail(id){view={type:'heartDetail',id};render();}
-function renderHeartDetail(){const c=getC(view.id);if(!c){view={type:'hearts'};return render();}showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent=c.nick||c.name;tbLeft.textContent='‹';tbLeft.onclick=()=>{view={type:'hearts'};render();};tbRight.textContent='';tbRight.onclick=null;
-  const locked=[['💭','TA的心声','窥探此刻TA想说又没说的话'],['📅','TA的行程','查看TA今天的安排'],['📡','监控','查看TA所在地的画面']];
-  content.innerHTML=`<div style="text-align:center;padding:26px 0 18px;background:linear-gradient(160deg,#ff9a9e,#fecfef)"><div style="font-size:13px;color:#fff;opacity:.9">与 ${esc(c.nick||c.name)} 的心动值</div><div style="font-size:46px;font-weight:200;color:#fff;margin-top:6px">💗 ${c.hearts||0}</div><div style="font-size:12px;color:#fff;opacity:.8;margin-top:6px">累计获得 ${c.heartsTotal||0}</div></div>
-  <div class="section-title">✨ 可解锁功能（消耗心动值）</div>${locked.map(l=>`<div class="row" onclick="alert('「${l[1]}」功能开发中，敬请期待～')" style="cursor:pointer"><div style="font-size:22px;width:40px">${l[0]}</div><div style="flex:1"><div style="font-size:15px;color:var(--text)">${l[1]}</div><div style="font-size:12px;color:var(--sub);margin-top:2px">${l[2]}</div></div><span style="color:var(--sub);font-size:13px">🔒 待开放</span></div>`).join('')}
-  <div class="section-title">📒 心动记录</div>${(c.heartLog&&c.heartLog.length)?c.heartLog.map(g=>`<div class="row"><div style="flex:1;font-size:14px;color:var(--text)">${esc(g.reason)}</div><div style="font-size:15px;font-weight:600;color:${g.n>0?'var(--theme)':'#e34'}">${g.n>0?'+':''}${g.n}</div></div>`).join(''):'<div class="empty">还没有记录～和TA聊天试试</div>'}<div style="height:20px"></div>`;}
+function renderHearts() {
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = '心动值';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = goHome;
+  tbRight.textContent = '';
+  tbRight.onclick = null;
 
+  var roleList = DB.contacts.filter(function(c) { return !c._draft; });
+
+  var html = '<div style="text-align:center;padding:24px 0 18px;background:linear-gradient(160deg,#ff9a9e,#fecfef)">' +
+    '<div style="font-size:32px;">💗</div>' +
+    '<div style="font-size:14px;color:#fff;opacity:.95;margin-top:4px">心动值</div>' +
+    '<div style="font-size:12px;color:#fff;opacity:.8;margin-top:4px">点击角色，查看心动值与心声</div>' +
+    '</div>';
+
+  if (roleList.length) {
+    html += '<div class="section-title">👥 角色列表</div>';
+    roleList.forEach(function(c) {
+      html += '<div class="cell" onclick="view={type:\'heartDetail\',id:\'' + c.id + '\'};render();" style="cursor:pointer;">' +
+        '<div class="avatar" style="' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.nick || c.name)[0]) + '</div>' +
+        '<div class="cell-body"><div class="cell-title">' + (c.nick || c.name) + '</div></div>' +
+        '<div style="color:var(--theme);font-weight:600;font-size:17px;">💗 ' + (c.hearts || 0) + '</div>' +
+        '</div>';
+    });
+  } else {
+    html += '<div class="empty">还没有角色，先去通讯录建一个吧～</div>';
+  }
+
+  html += '<div style="height:20px;"></div>';
+  content.innerHTML = html;
+}
+function openHeartDetail(id){view={type:'heartDetail',id};render();}
+// 把时间戳格式化成 2026年7月15日 02:24
+function fmtVoiceTime(t) {
+  var d = new Date(t);
+  return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' +
+    ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+}
+
+// 心声页：显示某个角色所有听过的心声
+function renderVoiceList() {
+  var c = getC(view.id);
+  if (!c) { view = { type: 'hearts' }; return render(); }
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  var name = c.nick || c.name;
+  tbTitle.textContent = name + ' 的心声';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); };
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+
+  var html = '<div style="text-align:center;padding:22px 0 16px;background:linear-gradient(160deg,#ff9a9e,#fecfef)">' +
+    '<div style="font-size:32px;">💭</div>' +
+    '<div style="font-size:14px;color:#fff;opacity:.95;margin-top:4px">' + esc(name) + ' 的心声</div>' +
+    '<div style="font-size:12px;color:#fff;opacity:.8;margin-top:4px">当前心动值 💗 ' + (c.hearts || 0) + '</div>' +
+    '</div>';
+
+  // 窥探按钮（主动听心声）
+  html += '<div class="row" onclick="listenHeart(getC(\'' + c.id + '\'), false)" style="cursor:pointer;">' +
+    '<div style="font-size:22px;width:40px;">🎧</div>' +
+    '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">窥探此刻的心声</div><div style="font-size:12px;color:var(--sub);">听 TA 此刻想说又没说的话（10💗）</div></div>' +
+    '<span style="color:var(--theme);font-size:13px;">🔓 点击</span></div>';
+
+  // 心声记录列表
+  html += '<div class="section-title">💭 心声记录</div>';
+  if (c.voiceLog && c.voiceLog.length) {
+    c.voiceLog.forEach(function(v) {
+      html += '<div style="margin:8px 12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;">' +
+        '<div style="font-size:14px;color:var(--text);line-height:1.6;">「' + esc(v.content) + '」</div>' +
+        '<div style="font-size:11px;color:var(--sub);margin-top:6px;">' + fmtVoiceTime(v.t) + '</div>' +
+        '</div>';
+    });
+  } else {
+    html += '<div class="empty">还没有听过 ' + esc(name) + ' 的心声，点上面窥探一下吧～</div>';
+  }
+
+  html += '<div style="height:20px;"></div>';
+  content.innerHTML = html;
+}
+
+function renderHeartDetail() {
+  var c = getC(view.id);
+  if (!c) { view = { type: 'hearts' }; return render(); }
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = c.nick || c.name;
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = function() { view = { type: 'hearts' }; render(); };
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+
+  var name = c.nick || c.name;
+
+  var html = '<div style="text-align:center;padding:26px 0 18px;background:linear-gradient(160deg,#ff9a9e,#fecfef)">' +
+    '<div style="font-size:13px;color:#fff;opacity:.9">与 ' + esc(name) + ' 的心动值</div>' +
+    '<div style="font-size:46px;font-weight:200;color:#fff;margin-top:6px">💗 ' + (c.hearts || 0) + '</div>' +
+    '<div style="font-size:12px;color:#fff;opacity:.8;margin-top:6px">累计获得 ' + (c.heartsTotal || 0) + '</div>' +
+    '</div>';
+
+  // 角色专属可解锁功能
+  html += '<div class="section-title">✨ 可解锁功能（消耗与 ' + esc(name) + ' 的心动值）</div>';
+
+  // 1. TA的心声（已实现）
+    html += '<div class="row" onclick="view={type:\'voiceList\',id:\'' + c.id + '\'};render();" style="cursor:pointer;">' +
+    '<div style="font-size:22px;width:40px;">💭</div>' +
+    '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">TA的心声</div><div style="font-size:12px;color:var(--sub);">窥探此刻TA想说又没说的话（10💗）</div></div>' +
+    '<span style="color:var(--theme);font-size:13px;">🔓 可用</span></div>';
+
+  html += '<div class="row" onclick="alert(\'📅 TA的行程 功能开发中，敬请期待～\')" style="cursor:pointer;">' +
+    '<div style="font-size:22px;width:40px;">📅</div>' +
+    '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">TA的行程</div><div style="font-size:12px;color:var(--sub);">查看TA今天的安排</div></div>' +
+    '<span style="color:var(--sub);font-size:13px;">🔒 待开放</span></div>';
+
+  html += '<div class="row" onclick="alert(\'📡 监控 功能开发中，敬请期待～\')" style="cursor:pointer;">' +
+    '<div style="font-size:22px;width:40px;">📡</div>' +
+    '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">监控</div><div style="font-size:12px;color:var(--sub);">查看TA所在地的画面</div></div>' +
+    '<span style="color:var(--sub);font-size:13px;">🔒 待开放</span></div>';
+
+  // 角色心动记录
+  html += '<div class="section-title">📒 与 ' + esc(name) + ' 的心动记录</div>';
+  if (c.heartLog && c.heartLog.length) {
+    c.heartLog.slice(0, 30).forEach(function(g) {
+      html += '<div class="row"><div style="flex:1;font-size:13px;color:var(--text);">' + esc(g.reason) + '</div><div style="font-size:14px;font-weight:600;color:' + (g.n > 0 ? 'var(--theme)' : '#e34') + '">' + (g.n > 0 ? '+' : '') + g.n + '</div></div>';
+    });
+    if (c.heartLog.length > 30) {
+      html += '<div class="hint" style="padding:6px 16px;">仅显示最近30条</div>';
+    }
+  } else {
+    html += '<div class="empty">还没有记录～和TA聊天试试</div>';
+  }
+
+  html += '<div style="height:20px;"></div>';
+  content.innerHTML = html;
+}
 /* ===== 聊天 ===== */
-function openChat(id){const c=getC(id);if(c){c.inChatList=true;c.unread=0;save();}view={type:'chat',id};render();}
+function openChat(id){
+  const c=getC(id);
+  if(c){
+    c.inChatList=true;
+    c.unread=0;
+    // ===== 新增：更新最后互动时间 + 检查时间衰减 =====
+    c.lastActive = Date.now();
+    checkTimeDecay(c);
+    // =============================================
+    save();
+  }
+  view={type:'chat',id};
+  render();
+}
 function stickerNames(){return DB.stickers.map(s=>s.name).join('、')||'（暂无表情）';}
 function buildSystem(c){
-  const st=c.status,net=DB.me.name,real=DB.me.realName;
-  const add=(t,v)=>v?`${t}：${v}\n`:'';
-  const now=new Date();const wd=['周日','周一','周二','周三','周四','周五','周六'][now.getDay()];const hh=now.getHours();const period=hh<6?'凌晨':hh<9?'清晨':hh<12?'上午':hh<14?'中午':hh<18?'下午':hh<23?'晚上':'深夜';
-  let s=`你正在进行沉浸式角色扮演，完全代入角色，绝不跳出、绝不承认自己是AI或程序。\n\n【你扮演的角色】\n`;
-  s+=add('真名',c.name)+add('网名',c.nick)+add('性别',c.gender)+add('年龄',c.age)+add('身份/职业',c.job)+add('家庭出身',c.family)+add('身体数据',c.body);
-  s+=add('外貌',c.pLook);
-  s+=add('性格关键词(最重要)',c.pKeywords)+add('说话风格/口头禅',c.pStyle);
-  s+=add('成长经历(内化,不主动解释,只体现在言行)',c.pBack);
-  s+=`\n【现实时间】现在是${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${wd} ${String(hh).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}（${period}）。请结合此刻时间与你的作息表现得像真实存在、能感知时间流逝的人（比如深夜会困、饭点会饿、工作日要上班）。\n`;
-  s+=add('日常作息(据此安排角色行踪,别永远在原地等对方)',c.pDaily);
-  s+=add('喜好厌恶',c.pLike)+add('语言习惯(领会语气逻辑,不要照搬举例台词)',c.pLang);
-  if(c.negative)s+=`\n【绝对禁止】\n${c.negative}\n`;
+  const st = c.status;
+  const net = DB.me.name;
+  const real = DB.me.realName;
+
+  const add = (t, v) => v ? `${t}：${v}\n` : '';
+  const now = new Date();
+  const wd = ['周日','周一','周二','周三','周四','周五','周六'][now.getDay()];
+  const hh = now.getHours();
+  const period = hh < 6 ? '凌晨' : hh < 9 ? '清晨' : hh < 12 ? '上午' : hh < 14 ? '中午' : hh < 18 ? '下午' : hh < 23 ? '晚上' : '深夜';
+
+  // ===== 第1层：你是谁（角色核心身份） =====
+  let s = '你正在进行沉浸式角色扮演，完全代入角色，绝不跳出、绝不承认自己是AI或程序。\n\n【你扮演的角色】\n';
+  s += add('真名', c.name);
+  s += add('网名', c.nick);
+  s += add('性别', c.gender);
+  s += add('年龄', c.age);
+  if (c.birthday) s += '生日：' + c.birthday + '\n';
+  s += add('身份/职业', c.job);
+  s += add('家庭出身', c.family);
+  s += add('身体数据', c.body);
+  s += add('外貌', c.pLook);
+  s += add('性格关键词(最重要)', c.pKeywords);
+  s += add('成长经历(内化,不主动解释,只体现在言行)', c.pBack);
+
+  // ===== 第2层：当前背景 =====
+  s += `\n【当前背景】\n`;
+  s += `现在是${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${wd} ${String(hh).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}（${period}）。请结合此刻时间与你的作息表现得像真实存在、能感知时间流逝的人。\n`;
+  s += add('日常作息(据此安排行踪)', c.pDaily);
+
   var world = (DB.worlds || []).find(function(w) { return w.id === c.worldId; });
-if (world) {
-  s += '\n【世界观】' + world.name + '：' + world.desc + '\n';
+  if (world) {
+    s += '\n【世界观】' + world.name + '：' + world.desc + '\n';
+  } else {
+    s += '\n【世界观】未关联具体世界，请按默认现代都市处理。\n';
+  }
+
+  s += `\n【当前关系状态】\n好感度${st.好感度}(${favLabel('好感度',st.好感度)}) 信任度${st.信任度}(${favLabel('信任度',st.信任度)}) 紧张感${st.紧张感}(${favLabel('紧张感',st.紧张感)}) 当前关系:${st.当前关系}\n`;
+
+  if (c.chapters && c.chapters.length) {
+    s += `\n【过往剧情记忆】\n` + c.chapters.map(ch => ch.date + '：' + ch.content).join('\n') + `\n`;
+  }
+
+  // 朋友圈背景（保留原逻辑）
+  try {
+    const mine = DB.moments.filter(m => m.author === 'me').slice(0, 3);
+    const theirs = DB.moments.filter(m => m.author === c.id).slice(0, 2);
+    let fc = '';
+    mine.forEach(m => { const cmt = (m.comments || []).some(x => x.by === c.id); fc += '· 对方在【' + fmtTime(m.time) + '】发的朋友圈：「' + (m.text || '(图片)') + '」' + (cmt ? '（你评论/互动过）' : '') + '\n'; });
+    theirs.forEach(m => { fc += '· 你自己发过的朋友圈：「' + (m.text || '(图片)') + '」\n'; });
+    if (fc) s += `\n【最近朋友圈动态（仅作背景了解）】\n${fc}【关于朋友圈的分寸】这些只是你恰好知道的近况，聊天时绝不要主动、频繁或生硬地提起；只有当话题极其自然地滑到相关内容、或对方主动说起时，才可像真人一样随口带一句。绝不要为了"显得知道"而刻意cue。\n`;
+  } catch(e) {}
+
+  s += `\n【对方(你正在对话的人)】\n`;
+  s += add('真实姓名(本名/亲密时用)', real || net);
+  s += add('微信网名(仅系统备注,日常别刻意喊)', net);
+  s += add('性别', c.myGender);
+  s += add('年龄', c.myAge);
+  s += add('身份/职业', c.myJob);
+  s += add('外貌', c.myLook);
+  s += add('性格', c.myPersona);
+  s += add('你与对方的关系/如何相识', c.myRelation);
+
+// ===== 第3层：线上人设 + 主动行为 =====
+s += '\n【📱 线上人设与主动行为】\n';
+if (c.pOnlinePersona) {
+  s += '你的线上行为习惯：' + c.pOnlinePersona + '\n';
 } else {
-  s += '\n【世界观】未关联具体世界，请按默认现代都市处理。\n';
+  s += '你没有指定特定线上人设，默认：心情轻松时可用适当emoji，不想回消息时可以适度"已读不回"，但不要主动拉黑或过分冷漠。\n';
 }
-  s+=`\n【对方(你正在对话的人)——务必分清身份】\n`+add('真实姓名(本名,线下面对面/亲密时用这个称呼)',real||net)+add('微信网名(仅系统备注,几乎不用于称呼;线下叙事禁止当本名;日常别刻意反复喊这个网名)',net)+add('性别',c.myGender)+add('年龄',c.myAge)+add('身份/职业',c.myJob)+add('外貌',c.myLook)+add('性格',c.myPersona)+add('你与对方的关系/如何相识',c.myRelation);
-  s+=`\n【当前关系状态】\n好感度${st.好感度}(${favLabel('好感度',st.好感度)}) 信任度${st.信任度}(${favLabel('信任度',st.信任度)}) 紧张感${st.紧张感}(${favLabel('紧张感',st.紧张感)}) 当前关系:${st.当前关系}\n`;
-  if(c.chapters&&c.chapters.length)s+=`\n【过往剧情记忆】\n`+c.chapters.map(ch=>ch.date+'：'+ch.content).join('\n')+`\n`;
-    try{
-    const mine=DB.moments.filter(m=>m.author==='me').slice(0,3);
-    const theirs=DB.moments.filter(m=>m.author===c.id).slice(0,2);
-    let fc='';
-mine.forEach(m=>{const cmt=(m.comments||[]).some(x=>x.by===c.id);fc+='· 对方在【'+fmtTime(m.time)+'】发的朋友圈：「'+(m.text||'(图片)')+'」'+(cmt?'（你评论/互动过）':'')+'\n';});    theirs.forEach(m=>{fc+='· 你自己发过的朋友圈：「'+(m.text||'(图片)')+'」\n';});
-    if(fc)s+=`\n【最近朋友圈动态（仅作背景了解）】\n${fc}【关于朋友圈的分寸】这些只是你恰好知道的近况，聊天时绝不要主动、频繁或生硬地提起；只有当话题极其自然地滑到相关内容、或对方主动说起时，才可像真人一样随口带一句。绝不要为了"显得知道"而刻意cue。\n`;
-  }catch(e){}
-  if(c.mode==='offline'){s+=`\n【当前模式：线下场景】\n${DB.settings.offlineStyle||DEFAULT_OFFLINE}\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实世界的间隔无关。哪怕对方隔了很久才回复，也请无缝承接上一段场景，绝不要提"过了一天""好久没见""你终于回来了""时间过得真快"之类的话，就当剧情从未中断、紧接着上一刻继续。\n`;}
-  else{s+=`\n【当前模式：线上微信】\n${DB.settings.onlineStyle||DEFAULT_ONLINE}\n【发消息条数】严格根据角色性格决定发几条：话痨/热情→可连发2-4条；高冷/沉默寡言/惜字如金→通常只发1条短句，别硬凑；随心情情境变化，不要每次都机械连发。\n`;s+=`\n【可发送的特殊消息】(需要时单独占一行，一行只放一个；不需要就正常说话)\n[转账|金额|备注]\n[语音|要说的话]\n[表情|表情名]  仅可用：${stickerNames()}\n[撤回|本来想说的话]  说错话/害羞/反悔时用\n【禁止】不要发红包，涉及给钱一律用[转账|金额|备注]。\n`;}
-  if(DB.settings.extraPrompt)s+=`\n【附加指令（最高优先级，须严格遵守）】\n${DB.settings.extraPrompt}\n`;
-  s+=`\n【必须遵守】回复最末尾另起一行输出关系变化，严格格式：<state>好感±N,信任±N,紧张±N,关系:文字</state>（无变化填0，关系不变可省略"关系:"部分）。这行会被隐藏。`;
+s += '\n主动行为指南：\n';
+s += '- [语音]：当你想说的话较长、情绪复杂、或者深夜/走路不方便打字时，主动发 [语音|内容]。别等对方提醒。\n';
+s += '- [撤回]：当你刚说出口的话太直白、太情绪化、或者你后悔说了，立刻用 [撤回|本来想说的话] 撤回。\n';
+s += '- [转账]：涉及金钱往来（还钱、帮买东西、开玩笑发钱）时，用 [转账|金额|备注]。\n';
+
+// ===== 新增：拉黑机制（情绪化版） =====
+s += '\n【拉黑机制（情绪化版）】\n';
+s += '你（角色）可能会因为以下原因拉黑对方（不是决裂，是闹情绪）：\n';
+s += '- 对方说了让你不高兴的话（吃醋、玩笑开过头、戳到痛处）\n';
+s += '- 对方冷落你太久，你想让他知道你在生气\n';
+s += '- 你觉得需要让他主动来哄你\n';
+s += '- 你单纯心情不好想作一下\n';
+s += '- 真的生气了（大矛盾）\n';
+s += '\n拉黑后，对方发消息会看到「对方已拒绝接收消息」。\n';
+s += '你可以在回复末尾输出 [拉黑玩家|小情绪] 或 [拉黑玩家|大矛盾] 来触发拉黑。\n';
+s += '小情绪：4-12小时后你会自己消气解除；大矛盾：需要对方付出更多才能解除。\n';
+s += '解除后可以像什么都没发生过一样继续聊天。\n';
+// =========================================
+
+  // ===== 第4层：说话风格 + 事例台词 =====
+  s += '\n【说话风格】\n';
+  s += add('说话风格/口头禅', c.pStyle);
+  s += add('语言习惯(语气逻辑)', c.pLang);
+  if (c.sampleLines) {
+    s += '事例台词（学习语气和用词习惯）：\n' + c.sampleLines + '\n';
+  }
+
+  // ===== 第5层：输出格式 =====
+  if (c.mode === 'offline') {
+    s += `\n【输出格式：线下模式】\n${DB.settings.offlineStyle || DEFAULT_OFFLINE}\n【时间处理】线下剧情按故事内的连续时间推进，无视现实间隔。\n【线下收尾】剧情自然走到尾声时，另起一行输出 [回线上|]。\n`;
+  } else {
+    s += `\n【输出格式：线上模式】\n${DB.settings.onlineStyle || DEFAULT_ONLINE}\n【发消息条数】严格根据角色性格决定发几条：话痨/热情→可连发2-4条；高冷/沉默寡言/惜字如金→通常只发1条短句，别硬凑；随心情情境变化，不要每次都机械连发。\n`;
+  }
+// ===== 新增：心声触发指令 =====
+s += '\n【心声触发指令】\n';
+s += '当你在对话中产生以下情绪时，在回复末尾单独输出 [心声]：\n';
+s += '- 特别想说出真实想法，但碍于性格/关系说不出口\n';
+s += '- 对方的话让你心动、吃醋、在意，但你表面没有表现出来\n';
+s += '- 你有强烈的内心活动，但你说出来的话很克制\n';
+s += '注意：心声应该与表面人设形成反差，字数在 20-30 字内。\n';
+s += '只有当真的有这种情绪时才输出，不要每句都输出。\n';
+// =============================================
+  // ===== 第6层：红线（负向约束） =====
+  if (c.negative) {
+    s += `\n【⛔ 红线（绝对禁止）】\n${c.negative}\n`;
+  }
+
+  // ===== 第7层：用户附加指令（最高优先级） =====
+  if (DB.settings.extraPrompt) {
+    s += `\n【🔓 用户附加指令（最高优先级）】\n${DB.settings.extraPrompt}\n`;
+  }
+
+// ===== 转账强制指令（始终生效） =====
+s += `\n【转账强制指令·最高优先级】\n`;
+s += `当对方（用户）发来转账时，你必须在回复末尾单独输出以下标记之一，二选一，不可忽略：\n`;
+s += `- [接收]：表示你接收了这笔钱，回复时正常说话表示感谢。\n`;
+s += `- [退回]：表示你退回这笔钱，回复时说明理由。\n`;
+s += `这条规则始终有效，即使你没提钱、即使你觉得不需要，也必须输出其中一个标记。\n`;
+
+s += `\n【必须遵守】回复最末尾另起一行输出关系变化，严格格式：<state>好感±N,信任±N,紧张±N,关系:文字</state>（无变化填0）。\n`;
+s += `【可选标记】如果你内心有强烈想说但没说出口的话，在 state 里加上 心声:1（有一点）或 心声:2（非常强烈），系统会检测到并在聊天界面显示提示。`;
+// ===== 特殊消息格式保护（位于所有指令之后，确保不被覆盖） =====
+s += `\n【特殊消息格式保留指令·不可覆盖】\n`;
+s += `即使你按照其他指令（包括用户附加指令）调整了说话风格，也必须保留以下能力：\n`;
+s += `- 当你想说的话较长、情绪复杂、或深夜/走路不方便时，使用 [语音|内容]\n`;
+s += `- 当你说错话或后悔时，使用 [撤回|本来想说的话]\n`;
+s += `- 涉及金钱往来时，使用 [转账|金额|备注]\n`;
+s += `这些格式不受其他指令影响，任何时候都可以使用。\n`;
+s += `\n【可选标记】如果你内心有强烈想说但没说出口的话，在 state 里加上 心声:1（有一点）或 心声:2（非常强烈），系统会检测到并在聊天界面显示提示。`;
   return s;
 }
+
 function toApiMsg(m){if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};if(m.type==='image')return{role:m.role,content:[{type:'text',text:'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};if(m.type==='transfer')return{role:m.role,content:`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};if(m.type==='redpacket')return{role:m.role,content:`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};if(m.type==='voice')return{role:m.role,content:`（语音消息）${m.content}`};if(m.type==='sticker')return{role:m.role,content:`（发了个表情：${m.content}）`};return{role:m.role,content:m.content};}
 function colorLines(s,color){const col=color||'var(--theme)';return esc(s).replace(/(「[^」]*」|“[^”]*”|"[^"]*"|＂[^＂]*＂)/g,'<span style="color:'+col+';font-weight:500">$1</span>');}
 function tsHtml(t){return `<div class="ts"><span class="ts-pill">${fmtTime(t)}</span></div>`;}
@@ -1206,13 +1881,54 @@ else if (m.type === 'transfer') {
   return `<div class="msg ${me?'me':''}" data-mid="${m.id||''}"><div class="cavatar" style="${av?`background-image:url('${av}')`:''}">${av?'':nm}</div>${body}</div>`;}
 function renderChat(){
   const old=document.getElementById('chatBottom');if(old)old.remove();const om=document.getElementById('modal');if(om)om.remove();
-  const c=getC(view.id);if(!c){goWechat('chats');return;}c.mode=c.mode||'online';
+  const c=getC(view.id);if(!c){goWechat('chats');return;}
+  // ===== 新增：更新最后互动时间 + 检查时间衰减 =====
+  c.lastActive = Date.now();
+  checkTimeDecay(c);
+  // =============================================
+  c.mode=c.mode||'online';
   showChrome(true,false);statusbar.classList.add('dark');
   tbLeft.textContent='‹';tbLeft.onclick=()=>goWechat('chats');tbTitle.textContent=c.nick||c.name;tbRight.textContent='⋯';tbRight.onclick=()=>editContact(c.id,'chat');
   content.style.backgroundImage=c.chatBg?`url('${c.chatBg}')`:'';
+    // ===== 如果被角色拉黑，在顶部插入一条系统消息 =====
+  if (c.isBlockedByChar) {
+    var blockedMsg = '🔇 你已被 ' + (c.nick || c.name) + ' 拉黑，无法发送消息。';
+    if (c.blockedType === '小情绪') {
+      blockedMsg += ' 小情绪，10💗 可立即解锁，或等待自动解除。';
+    } else if (c.blockedType === '大矛盾') {
+      blockedMsg += ' 大矛盾，50💗 可立即解锁，或等待 24 小时自动解除。';
+    }
+    // 在顶部插入系统消息
+    var topMsg = document.createElement('div');
+    topMsg.className = 'ts';
+    topMsg.innerHTML = '<span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + blockedMsg + '</span>';
+    content.prepend(topMsg);
+  }
+  // =============================================
+
   let msgs=DB.chats[c.id]||[];if(!msgs.length&&c.opening){c.opening.split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(line=>{msgs.push({id:newId(),role:'assistant',content:line,type:'text',time:Date.now()});});DB.chats[c.id]=msgs;save();}
   let ch=false;msgs.forEach(m=>{if(!m.id){m.id=newId();ch=true;}if(!m.type){m.type='text';ch=true;}});if(ch)save();
   let show=msgs,more=0;if(msgs.length>150){more=msgs.length-150;show=msgs.slice(-150);}let html=more?`<div class="ts">（仅显示最近150条，更早${more}条已折叠，记忆不受影响）</div>`:'';lastBubbleTime=0;show.forEach(m=>{const t=m.time||Date.now();if(!lastBubbleTime||t-lastBubbleTime>300000){html+=tsHtml(t);lastBubbleTime=t;}html+=bubble(c,m);});
+    // ===== 心声小气泡（检测待处理标记） =====
+  if (c._pendingHeart && !c._heartGenerated) {
+    c._heartGenerated = true;
+    var today = new Date().toDateString();
+    if (!c._heartDailyCount || c._heartDailyCount.date !== today) {
+      c._heartDailyCount = { date: today, count: 0 };
+    }
+    if (c._heartDailyCount.count < 3) {
+      c._heartDailyCount.count += 1;
+      var cost = c._pendingHeart > 1 ? 8 : 10;
+      html += '<div id="heartBubbleWrapper" style="margin:4px 12px 4px 12px;padding:8px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="clickHeartBubble(\'' + c.id + '\')">' +
+        '<span style="font-size:13px;color:var(--text);">💭 ' + (c.nick || c.name) + ' 现在心里有话想说… 点击查看（' + cost + '💗）</span>' +
+        '<span style="color:var(--sub);font-size:16px;cursor:pointer;" onclick="event.stopPropagation();removeHeartBubble();">×</span>' +
+        '</div>';
+    } else {
+      c._pendingHeart = 0;
+    }
+    save();
+  }
+  // ===========================================
   content.innerHTML=html;
   // 消息左滑支持（用户消息 + AI消息）
 document.querySelectorAll('#content .msg').forEach(function(el){
@@ -1237,7 +1953,7 @@ document.querySelectorAll('#content .msg').forEach(function(el){
     var dx = t.clientX - startX;
     var dy = t.clientY - startY;
     if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 15) {
-      return; // 竖向滑动不处理
+      return;
     }
     if (Math.abs(dx) < 10) return;
     e.preventDefault();
@@ -1251,7 +1967,6 @@ document.querySelectorAll('#content .msg').forEach(function(el){
     if (moved && slideEl.style.transform) {
       var current = parseFloat(slideEl.style.transform.replace('translateX(','')) || 0;
       if (current < -40) {
-        // 左滑超过40px，弹出操作菜单
         openMsgMenu(mid, isMe);
         slideEl.style.transform = 'translateX(0)';
       } else {
@@ -1266,7 +1981,6 @@ document.querySelectorAll('#content .msg').forEach(function(el){
   const bar=document.createElement('div');bar.id='chatBottom';
 bar.innerHTML=`<div id="inputRow"><span class="cbtn plus" onclick="togglePanel()">＋</span><textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea><button class="cbtn reply" id="actBtn" onclick="actBtnClick()">▶ 回复</button></div><div id="chatPanel"><div class="pnl" onclick="sendImage()">🖼️<span>相册</span></div><div class="pnl" onclick="sendTransfer()">💰<span>转账</span></div><div class="pnl" onclick="openStickerPicker()">😀<span>表情</span></div><div class="pnl" onclick="toggleMode()"><div id="modeIco">${c.mode==='offline'?'📖':'💬'}</div><span id="modeTxt">${c.mode==='offline'?'线下中':'线上中'}</span></div></div>`;
   phone.appendChild(bar);attachLongPress();scrollBottom();
-    // 监听键盘弹起/收起，重新调整滚动
   var resizeTimer;
   function handleResize() {
     clearTimeout(resizeTimer);
@@ -1277,7 +1991,7 @@ bar.innerHTML=`<div id="inputRow"><span class="cbtn plus" onclick="togglePanel()
       }
     }, 200);
   }
-    if (!document._transferListener) {
+  if (!document._transferListener) {
     document._transferListener = true;
     document.addEventListener('click', function(e) {
       var card = e.target.closest('.transfer-card');
@@ -1294,12 +2008,10 @@ bar.innerHTML=`<div id="inputRow"><span class="cbtn plus" onclick="togglePanel()
     });
   }
   window.addEventListener('resize', handleResize);
-  // 存储清理函数，在下次 renderChat 时移除旧的监听
   if (window._resizeHandler) {
     window.removeEventListener('resize', window._resizeHandler);
   }
   window._resizeHandler = handleResize;
-    // 输入框获得焦点时，滚动到可视区域
   var inputEl = document.getElementById('chatInput');
   if (inputEl) {
     inputEl.addEventListener('focus', function() {
@@ -1310,6 +2022,30 @@ bar.innerHTML=`<div id="inputRow"><span class="cbtn plus" onclick="togglePanel()
     });
   }
 }
+function checkTimeDecay(c) {
+  if (!c || !c.lastActive) return;
+  if (c._lastDecayCheck && Date.now() - c._lastDecayCheck < 7200000) return;
+
+  var hours = (Date.now() - c.lastActive) / (1000 * 60 * 60);
+  var decay = 0, trustDecay = 0, tensionRise = 0;
+
+  if (hours > 72) { decay = -8; trustDecay = -5; tensionRise = 5; }
+  else if (hours > 48) { decay = -5; trustDecay = -3; tensionRise = 3; }
+  else if (hours > 24) { decay = -3; trustDecay = -2; tensionRise = 2; }
+  else if (hours > 12) { decay = -1; trustDecay = -0.5; tensionRise = 1; }
+  else { return; }
+
+  c.status.好感度 = clamp(c.status.好感度 + decay);
+  c.status.信任度 = clamp(c.status.信任度 + trustDecay);
+  c.status.紧张感 = clamp(c.status.紧张感 + tensionRise);
+
+  c._lastDecayCheck = Date.now();
+  save();
+
+  if (view.type === 'chat' && view.id === c.id) {
+    insertSystemMessage('💤 你冷落了 ' + (c.nick || c.name) + ' ' + Math.round(hours) + ' 小时，TA 似乎有些疏远了。');
+  }
+}
 function onChatInput(t){ag(t);updateActBtn();}
 function updateActBtn(){const el=document.getElementById('chatInput'),b=document.getElementById('actBtn');if(!el||!b)return;if(el.value.trim()){b.textContent='发送';b.className='cbtn send';}else{b.textContent='▶ 回复';b.className='cbtn reply';}}
 function actBtnClick(){const el=document.getElementById('chatInput');if(el.value.trim())sendMsg();else aiReply();}
@@ -1318,7 +2054,41 @@ function togglePanel(){const p=document.getElementById('chatPanel');if(p)p.class
 function toggleMode(){const c=getC(view.id);c.mode=c.mode==='offline'?'online':'offline';save();const i=document.getElementById('modeIco'),t=document.getElementById('modeTxt');if(i)i.textContent=c.mode==='offline'?'📖':'💬';if(t)t.textContent=c.mode==='offline'?'线下中':'线上中';}
 function appendBubble(c,m){if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
 function scrollBottom(){setTimeout(()=>{content.scrollTop=content.scrollHeight;},30);}
-function pushMy(m){m.id=newId();m.role='user';m.time=Date.now();DB.chats[view.id].push(m);save();appendBubble(getC(view.id),m);lastActivity=Date.now();}
+function pushMy(m){
+  // ===== 检查是否被角色拉黑 =====
+  const c = getC(view.id);
+  if (c.isBlockedByUser) {
+  // 在顶部显示提示
+  var topMsg = document.createElement('div');
+  topMsg.className = 'ts';
+  topMsg.innerHTML = '<span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">🔇 你已拉黑 ' + (c.nick || c.name) + '，TA 不会主动找你。</span>';
+  content.prepend(topMsg);
+}
+  if (c && c.isBlockedByChar) {
+    var type = c.blockedType || '大矛盾';
+    var cost = type === '小情绪' ? 10 : 50;
+    var autoTime = type === '小情绪' ? '4-12 小时' : '24 小时';
+    var msg = '💔 ' + (c.nick || c.name) + ' 拉黑了你（' + type + '），' + cost + '💗 可立即解锁，或等待 ' + autoTime + ' 自动解除。';
+    if (confirm(msg)) {
+      // 用户选择解锁
+      if (spendHeart(c, cost, '解锁 ' + (c.nick || c.name) + ' 的拉黑')) {
+        c.isBlockedByChar = false;
+        c.blockedByCharAt = 0;
+        c.blockedType = '';
+        save();
+        renderChat();
+        // 解锁后重新发送消息
+        pushMy(m);
+        return;
+      }
+    }
+    // 不解锁，消息不发送
+    return;
+  }
+  // =================================
+
+  m.id=newId();m.role='user';m.time=Date.now();DB.chats[view.id].push(m);save();appendBubble(getC(view.id),m);lastActivity=Date.now();
+}
 function sendMsg(){const el=document.getElementById('chatInput');const t=el.value.trim();if(!t)return;el.value='';el.style.height='auto';updateActBtn();pushMy({type:'text',content:t});}
 function sendImage(){togglePanel();pickImage(d=>pushMy({type:'image',content:d}),800);}
 function openInputSheet(title,fields,cb){closeModal();const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="sheet-box"><h3>${title}</h3>${fields.map((f,i)=>`<input id="sf_${i}" placeholder="${f.ph}" ${f.num?'inputmode="decimal"':''}>`).join('')}<button class="btn" style="width:100%;margin:4px 0 8px" onclick="submitSheet()">确定</button><button class="btn gray" style="width:100%;margin:0" onclick="closeModal()">取消</button></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);setTimeout(()=>{const el=document.getElementById('sf_0');if(el)el.focus();},50);window._sheetCb=cb;window._sheetN=fields.length;}
@@ -1406,8 +2176,43 @@ function regenMsg(id) {
 }
 function recallMsg(id){const arr=DB.chats[view.id];const m=arr&&arr.find(x=>x.id===id);if(!m||m.recalled)return;if(!confirm('撤回这条消息？'))return;m.recalledContent=(m.type==='text'||m.type==='voice')?m.content:'['+(m.type||'消息')+']';m.recalled=true;m.reveal=false;save();renderChat();}
 function peekRecall(id){const m=DB.chats[view.id].find(x=>x.id===id);if(!m)return;if(!m.reveal){const isAi=m.role==='assistant';if(isAi){if(!confirm('偷看 TA 撤回的内容？将消耗 10 💗心动值（看过后永久解锁）'))return;if(!spendHeart(getC(view.id),10,'偷看'+((getC(view.id)||{}).nick||(getC(view.id)||{}).name||'')+'的撤回'))return;}}m.reveal=true;save();renderChat();}
-function applyState(c,text){const m=text.match(/<state>([\s\S]*?)<\/state>/);if(m){m[1].split(/[,，]/).forEach(p=>{p=p.trim();let x;if(x=p.match(/好感\s*([+\-]?\d+)/))c.status.好感度=clamp(c.status.好感度+ +x[1]);else if(x=p.match(/信任\s*([+\-]?\d+)/))c.status.信任度=clamp(c.status.信任度+ +x[1]);else if(x=p.match(/紧张\s*([+\-]?\d+)/))c.status.紧张感=clamp(c.status.紧张感+ +x[1]);else if(x=p.match(/关系[:：]\s*(.+)/))c.status.当前关系=x[1].trim();});text=text.replace(m[0],'').trim();}return text;}
-function parseAiLine(line){line=line.trim();let m;if(m=line.match(/^\[转账[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/))return{type:'transfer',from:'ai',amount:m[1].trim(),content:(m[2]||'').trim()};if(m=line.match(/^\[红包[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/))return{type:'transfer',amount:m[1].trim(),content:(m[2]||'').trim()};if(m=line.match(/^\[语音[|｜]([\s\S]+)\]$/))return{type:'voice',content:m[1].trim()};if(m=line.match(/^\[表情[|｜](.+?)\]$/))return{type:'sticker',content:m[1].trim()};if(m=line.match(/^\[撤回[|｜]([\s\S]+)\]$/))return{type:'text',recalled:true,recalledContent:m[1].trim(),reveal:false};if (m = line.match(/^\[接收\]/)) {
+function applyState(c, text) {
+  var m = text.match(/<state>([\s\S]*?)<\/state>/);
+  if (m) {
+    m[1].split(/[,，]/).forEach(function(p) {
+      p = p.trim();
+      var x;
+      if (x = p.match(/好感\s*([+\-]?\d+)/)) {
+        c.status.好感度 = clamp(c.status.好感度 + +x[1]);
+      } else if (x = p.match(/信任\s*([+\-]?\d+)/)) {
+        c.status.信任度 = clamp(c.status.信任度 + +x[1]);
+      } else if (x = p.match(/紧张\s*([+\-]?\d+)/)) {
+        c.status.紧张感 = clamp(c.status.紧张感 + +x[1]);
+      } else if (x = p.match(/关系[:：]\s*(.+)/)) {
+        c.status.当前关系 = x[1].trim();
+      }
+    });
+    text = text.replace(m[0], '').trim();
+  }
+
+  // ===== 解析心声标记 =====
+  var heartMatch = text.match(/心声[:：]\s*(\d+)/);
+  if (heartMatch) {
+    var level = parseInt(heartMatch[1]) || 1;
+    c._pendingHeart = level;
+    c._heartGenerated = false;
+  } else {
+    if (c._pendingHeart) {
+      c._pendingHeart = 0;
+    }
+  }
+  // =====================
+
+  return text;
+}
+function parseAiLine(line){line=line.trim();let m;if(m=line.match(/^\[转账[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/))return{type:'transfer',from:'ai',amount:m[1].trim(),content:(m[2]||'').trim()};if(m=line.match(/^\[红包[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/))return{type:'transfer',amount:m[1].trim(),content:(m[2]||'').trim()};if(m=line.match(/^\[语音[|｜]([\s\S]+)\]$/))return{type:'voice',content:m[1].trim()};if(m=line.match(/^\[表情[|｜](.+?)\]$/))return{type:'sticker',content:m[1].trim()};if(m=line.match(/^\[撤回[|｜]([\s\S]+)\]$/))return{type:'text',recalled:true,recalledContent:m[1].trim(),reveal:false};if (m = line.match(/^\[拉黑玩家[|｜](.+?)\]$/)) {
+  return { type: 'block_player', reason: m[1].trim() };
+}if (m = line.match(/^\[接收\]/)) {
   return { type: 'transfer_accept' };
 }
 if (m = line.match(/^\[退回\]/)) {
@@ -1421,59 +2226,71 @@ var transferNote = pendingTransfer ? (lastMsg.content || '') : '';
 const messages=[{role:'system',content:buildSystem(c)},...hist];let modeReminder;if(c.mode==='online'){modeReminder='【立即生效·最高优先级】现在是微信线上打字聊天。无论上文出现过什么叙事风格，从这条起只输出口语短句，严禁任何括号（）()里的动作/神态/心理描写，严禁小说旁白，多句用换行分隔。';if(Date.now()>(c.meetCd||0)){modeReminder+='\n【线下邀约】若此刻剧情自然发展到你想和对方当面见面（如提出去找TA/约TA出来/已在赶去的路上），请在正常消息之后另起一行单独输出标记：[见面|地点]（地点简短如"楼下""老地方"，没有明确地点就写[见面|]）。这只是发出邀约信号，别在这条里描写见面过程，也别频繁使用，只在真的顺理成章时用。';}else{modeReminder+='\n【注意】对方刚婉拒了线下见面，这段时间内不要再提议见面、不要输出见面标记，自然继续线上聊天即可。';}}else{modeReminder='【立即生效·最高优先级·线下小说模式】现在是线下面对面场景，用第三人称小说笔法叙事：细致描写动作、神态、心理、环境细节，节奏张弛有度，避免流水账。所有人物台词必须用中文双引号“”括起（不要用「」方括号）；叙事描写里绝对不要用引号去强调或包裹词语，引号只保留给人物真正说出口的话。称呼对方请用其真实姓名或你俩关系里的称呼，严禁把对方的"微信网名"当作本名写进叙述。你只演你自己这一个角色，绝不替对方说话或替对方做决定。禁止任何微信功能格式（转账/表情等）。\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实间隔无关，哪怕对方隔很久才回也无缝承接，绝不提"过了一天""好久没见"。\n【线下收尾】当这段见面剧情自然走到尾声（该道别/该各自回家/事情办完了），不要无止境地黏着继续，请在叙事末尾另起一行单独输出标记：[回线上|]，表示这次见面告一段落、可以回到线上。只在剧情真的到收尾时才用，别硬结束。';}messages.push({role:'system',content:modeReminder});if (pendingTransfer) {
   messages.push({ role: 'system', content: '【强制指令】上一条消息是对方转给你的 ¥' + transferAmount + (transferNote ? '（备注：' + transferNote + '）' : '') + '。你必须在回复末尾单独一行输出 [接收] 或 [退回]，二选一，没有第三种选择。接收就感谢对方，退回就说明理由。这条标记必须单独占一行。' });
 }
-if(nudge)messages.push({role:'user',content:nudge});let out=await callAI(messages,DB.settings.chatModel);out=applyState(c,out);let lines=c.mode==='online'?out.split(/\n+/).map(s=>s.trim()).filter(Boolean):[out];if(!lines.length)lines=[out||'…'];let meetPlace=null,wantBack=false;for(let i=0;i<lines.length;i++){if(c.mode==='online'){const mm=lines[i].match(/^\[见面[|｜]?([\s\S]*?)\]$/);if(mm){meetPlace=mm[1].trim();continue;}}else{if(/\[回线上[|｜]?\s*\]/.test(lines[i])){wantBack=true;lines[i]=lines[i].replace(/\[回线上[|｜]?\s*\]/g,'').trim();if(!lines[i])continue;}}let parsed=c.mode==='online'?parseAiLine(lines[i]):{type:'text',content:lines[i]};if (parsed.type === 'transfer_accept') {
-  if (pendingTransfer && lastMsg) {
-    handleTransferAction(lastMsg.id, 'accept', true);
-  }
+if(nudge)messages.push({role:'user',content:nudge});let out=await callAI(messages,DB.settings.chatModel);out=applyState(c,out);let lines=c.mode==='online'?out.split(/\n+/).map(s=>s.trim()).filter(Boolean):[out];if(!lines.length)lines=[out||'…'];let meetPlace=null,wantBack=false;
+
+var heartProcessed = false;
+
+for(let i=0;i<lines.length;i++){
+// ===== 检测 [心声] 行 =====
+var line = lines[i];
+// 情况1：[心声] 内容（同一行）
+var heartMatch = line.match(/^\[心声\][:：]?\s*(.+)/);
+if (heartMatch) {
+  c._pendingHeartContent = heartMatch[1].trim();
+  c._pendingHeart = 1;
+  c._heartGenerated = true;
+  save();
+  showHeartBubbleDirect(c);
+  lines[i] = '';
   continue;
 }
-if (parsed.type === 'transfer_refund') {
-  if (pendingTransfer && lastMsg) {
-    handleTransferAction(lastMsg.id, 'refund', true);
+// 情况2：[心声] 单独一行，下一行是内容
+if (line.trim() === '[心声]') {
+  var content = '';
+  if (i + 1 < lines.length) {
+    content = lines[i + 1].trim();
+    lines[i + 1] = '';
   }
+  c._pendingHeartContent = content || '……';
+  c._pendingHeart = 1;
+  c._heartGenerated = true;
+  save();
+  showHeartBubbleDirect(c);
+  lines[i] = '';
   continue;
 }
-const m=Object.assign({id:newId(),role:'assistant',time:Date.now()},parsed);DB.chats[c.id].push(m);save();appendBubble(c,m);if(i<lines.length-1)await sleep(500+Math.min((lines[i]||'').length*28,1600));}lastActivity=Date.now();addHeart(c,1,'和'+(c.nick||c.name)+'聊天');if(meetPlace!==null&&c.mode==='online')proposeMeet(c,meetPlace);if(wantBack&&c.mode==='offline')proposeBackOnline(c);}catch(e){alert('回复失败：'+e.message);}tbTitle.textContent = c.nick || c.name;replying=false;const b2=document.getElementById('actBtn');if(b2)b2.disabled=false;updateActBtn();}
-
-function openTransferModal(msgId) {
-  var arr = DB.chats[view.id];
-  if (!arr) return;
-  var msg = arr.find(function(m) { return m.id === msgId; });
-  if (!msg || msg.type !== 'transfer') return;
-  if (msg.status === 'accepted' || msg.status === 'refunded') return;
-
-  var overlay = document.createElement('div');
-  overlay.id = 'transferModal';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:999;display:flex;justify-content:center;align-items:center;';
-
-  var box = document.createElement('div');
-  box.style.cssText = 'width:280px;background:var(--card);border-radius:16px;padding:24px 20px 20px 20px;box-shadow:0 12px 48px rgba(0,0,0,0.5);';
-  box.innerHTML =
-    '<div style="text-align:center;font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px;">💰 转账</div>' +
-    '<div style="text-align:center;font-size:28px;font-weight:600;color:var(--text);margin:6px 0 2px 0;"><small style="font-size:18px;font-weight:400;color:var(--sub);">¥</small> ' + esc(String(msg.amount)) + '</div>' +
-    '<div style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:18px;">' + (msg.content ? esc(msg.content) : '转账') + '</div>' +
-    '<div style="display:flex;gap:10px;">' +
-      '<button id="modalAcceptBtn" style="flex:1;padding:12px 0;border:none;border-radius:10px;background:#F99530;color:#fff;font-size:16px;font-weight:500;cursor:pointer;">✅ 接收</button>' +
-      '<button id="modalRefundBtn" style="flex:1;padding:12px 0;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--sub);font-size:16px;font-weight:400;cursor:pointer;">退回</button>' +
-    '</div>';
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-
-  overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) closeTransferModal();
-  });
-
-  document.getElementById('modalAcceptBtn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    handleTransferAction(msgId, 'accept');
-  });
-
-  document.getElementById('modalRefundBtn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    handleTransferAction(msgId, 'refund');
-  });
+  if(c.mode==='online'){const mm=lines[i].match(/^\[见面[|｜]?([\s\S]*?)\]$/);if(mm){meetPlace=mm[1].trim();continue;}}else{if(/\[回线上[|｜]?\s*\]/.test(lines[i])){wantBack=true;lines[i]=lines[i].replace(/\[回线上[|｜]?\s*\]/g,'').trim();if(!lines[i])continue;}}
+    if (!lines[i] || !lines[i].trim()) continue;
+  let parsed=c.mode==='online'?parseAiLine(lines[i]):{type:'text',content:lines[i]};
+  if (parsed.type === 'transfer_accept') {
+    if (pendingTransfer && lastMsg) {
+      handleTransferAction(lastMsg.id, 'accept', true);
+    }
+    continue;
+  }
+  if (parsed.type === 'transfer_refund') {
+    if (pendingTransfer && lastMsg) {
+      handleTransferAction(lastMsg.id, 'refund', true);
+    }
+    continue;
+  }
+  if (parsed.type === 'block_player') {
+    c.isBlockedByChar = true;
+    c.blockedByCharAt = Date.now();
+    c.blockedType = parsed.reason === '大矛盾' ? '大矛盾' : '小情绪';
+    save();
+    var blockMsg = '🔇 ' + (c.nick || c.name) + ' 拉黑了你（' + c.blockedType + '），' + (c.blockedType === '小情绪' ? '10💗 可立即解锁，或等待自动解除。' : '50💗 可立即解锁，或等待 24 小时自动解除。');
+    insertSystemMessage(blockMsg);
+    renderChat();
+    continue;
+  }
+  const m=Object.assign({id:newId(),role:'assistant',time:Date.now()},parsed);
+  DB.chats[c.id].push(m);
+  save();
+  appendBubble(c,m);
+  if(i<lines.length-1)await sleep(500+Math.min((lines[i]||'').length*28,1600));
 }
+lastActivity=Date.now();addHeart(c,1,'和'+(c.nick||c.name)+'聊天');if(meetPlace!==null&&c.mode==='online')proposeMeet(c,meetPlace);if(wantBack&&c.mode==='offline')proposeBackOnline(c);}catch(e){alert('回复失败：'+e.message);}tbTitle.textContent = c.nick || c.name;replying=false;const b2=document.getElementById('actBtn');if(b2)b2.disabled=false;updateActBtn();}
 
 function closeTransferModal() {
   var el = document.getElementById('transferModal');
@@ -1506,11 +2323,32 @@ function handleTransferAction(msgId, action, silent) {
     msg.status = 'refunded';
     var sysMsg = isFromAI ? '你已退回 ' + name + ' 的转账 ¥' + amount.toFixed(2) : name + ' 已退回你的转账 ¥' + amount.toFixed(2);
     insertSystemMessage(sysMsg);
+    // ===== 新增：退回转账 → 降值 =====
+    if (c) {
+      c.status.好感度 = clamp(c.status.好感度 - 3);
+      c.status.信任度 = clamp(c.status.信任度 - 2);
+      c.status.紧张感 = clamp(c.status.紧张感 + 2);
+    }
+    // ================================
   }
   save();
   if (!silent) renderChat();
 }
-
+// ===== 用户拉黑角色 =====
+function userBlockChar(id) {
+  var c = getC(id);
+  if (!c) return;
+  if (c.isBlockedByUser) {
+    alert('你已拉黑 ' + (c.nick || c.name) + '，如需解除请到编辑页操作。');
+    return;
+  }
+  if (!confirm('确定要拉黑 ' + (c.nick || c.name) + ' 吗？\n拉黑后 TA 不会主动找你，聊天框会显示提示。')) return;
+  c.isBlockedByUser = true;
+  c.blockedByUserAt = Date.now();
+  save();
+  renderCharEdit();
+  alert('已拉黑 ' + (c.nick || c.name) + '。');
+}
 function proposeMeet(c,place){
   var where=place?('（'+place+'）'):'';
   var mo=document.createElement('div');mo.className='modal';mo.id='modal';
@@ -1519,9 +2357,19 @@ function proposeMeet(c,place){
   phone.appendChild(mo);
 }
 function declineMeet(cid){
-  var c=getC(cid);if(!c)return;
-  c.meetCd=Date.now()+1800000;
+  var c = getC(cid);
+  if (!c) return;
+  // ===== 新增：负面行为降值 =====
+  c.status.好感度 = clamp(c.status.好感度 - 4);
+  c.status.信任度 = clamp(c.status.信任度 - 3);
+  c.status.紧张感 = clamp(c.status.紧张感 + 3);
+  // =============================
+  c.meetCd = Date.now() + 1800000;
   save();
+  // ===== 新增：系统消息 =====
+  if (view.type === 'chat' && view.id === cid) {
+    insertSystemMessage(`💔 你拒绝了 ${c.nick || c.name} 的见面邀请，TA有些失落。`);
+  }
 }
 function enterOffline(cid,place){
   var c=getC(cid);if(!c)return;
