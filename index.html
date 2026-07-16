@@ -70,7 +70,7 @@
   opacity: 0.8;
 }
   .cell{display:flex;align-items:center;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);cursor:pointer;}
-  .avatar{width:36px;height:36px;border-radius:8px;background:var(--theme);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background-size:cover;background-position:center;}
+  .avatar{width:46px;height:46px;border-radius:8px;background:var(--theme);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background-size:cover;background-position:center;}
   .cell-body{flex:1;margin-left:12px;overflow:hidden;}.cell-title{font-size:16px;color:var(--text);}
   .cell-sub{font-size:13px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .empty{text-align:center;color:var(--sub);padding:60px 20px;font-size:14px;line-height:2;}
@@ -115,7 +115,7 @@
 .msg-act.recall,.msg-act.regen{background:var(--theme);}
 .msg-act.del{background:#e34;}
 .mbody,.msg-slide img{user-select:none;-webkit-user-select:none;}
-.mbody{max-width:75%;padding:8px 10px;border-radius:6px;background:var(--card);color:var(--text);font-size:15px;line-height:1.5;word-break:break-word;white-space:pre-wrap;box-shadow:0 1px 1px rgba(0,0,0,.05);}  .msg.me .mbody{background:var(--theme);color:#fff;}
+.mbody{max-width:85%;padding:9px 12px;border-radius:6px;background:var(--card);color:var(--text);font-size:15px;line-height:1.5;word-break:break-word;white-space:pre-wrap;box-shadow:0 1px 1px rgba(0,0,0,.05);}  .msg.me .mbody{background:var(--theme);color:#fff;}
   #chatBottom{flex-shrink:0;background:var(--nav);border-top:1px solid var(--line);}
 #inputRow{padding:8px 4px 16px 4px;display:flex;gap:6px;align-items:flex-end;}
   #chatInput{flex:1;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:15px;font-family:inherit;resize:none;max-height:100px;outline:none;background:var(--card);color:var(--text);}
@@ -131,7 +131,7 @@
   .sheet-box{background:var(--card);width:100%;border-radius:14px 14px 0 0;padding:18px 16px;}
   .sheet-box h3{font-size:16px;margin-bottom:14px;text-align:center;color:var(--text);}
   .sheet-box input{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px;font-size:15px;margin-bottom:10px;background:var(--bg);color:var(--text);outline:none;}
-  .popup{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;animation:popFade .2s ease;}
+.popup{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;animation:popFade .2s ease;}
 .popup-box{background:var(--card);width:78%;max-width:300px;border-radius:16px;padding:20px 18px 14px;text-align:center;animation:popUp .25s ease;box-shadow:0 8px 30px rgba(0,0,0,.3);}
 .popup-icon{font-size:34px;margin-bottom:8px;}
 .popup-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;}
@@ -144,7 +144,6 @@
 @keyframes popFade{from{opacity:0}to{opacity:1}}
 @keyframes popUp{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes popSpin{to{transform:rotate(360deg)}}
-
   .stgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
   .stgrid .st{position:relative;}
   .stgrid img{width:100%;aspect-ratio:1;object-fit:contain;cursor:pointer;background:var(--bg);border-radius:8px;}
@@ -207,24 +206,7 @@ function applySkin(id){
   save();
 }
 let DB=load();
-function load(){
-  const raw = localStorage.getItem(DB_KEY);
-  if (raw) {
-    try {
-      var d = migrate(JSON.parse(raw));
-      // 加载完成后检查每日自动总结（延迟3秒，让页面先渲染）
-      setTimeout(function() {
-        checkDailySummary();
-      }, 3000);
-      return d;
-    } catch(e) {}
-  }
-  var d = migrate({});
-  setTimeout(function() {
-    checkDailySummary();
-  }, 3000);
-  return d;
-}
+function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrate(JSON.parse(raw));}catch(e){}}return migrate({});}
 function migrate(d){
 d.coins = d.coins || 0;
   d.me=d.me||{name:'我',avatar:''};d.me.realName=d.me.realName||'';
@@ -246,8 +228,7 @@ d.coins = d.coins || 0;
   if(!d.desktop.apps.find(a=>a.id==='world'))d.desktop.apps.push({id:'world',name:'世界观',emoji:'🌍',icon:''});
   if(!d.desktop.apps.find(a=>a.id==='floating'))d.desktop.apps.push({id:'floating',name:'浮光',emoji:'✨',icon:''});
   if(!d.desktop.apps.find(a=>a.id==='shop'))d.desktop.apps.push({id:'shop',name:'购物',emoji:'🛍️',icon:''});
-  d.contacts.forEach(c=>{// 确保每个角色都有 chapters 字段
-c.chapters = c.chapters || [];
+  d.contacts.forEach(c=>{
     if(c.inChatList===undefined)c.inChatList=!!(d.chats[c.id]&&d.chats[c.id].length);
     if(c.pHabit){c.pStyle=(c.pStyle||'')+(c.pStyle?'\n':'')+'口头禅/习惯：'+c.pHabit;delete c.pHabit;}
 	    // ---- 旧世界观自动迁移 ----
@@ -278,23 +259,6 @@ c.chapters = c.chapters || [];
     // =============================
     c.status=c.status||{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'};
     c.chapters=c.chapters||[];c.mode=c.mode||'online';
-	// ===== 记忆数据迁移 =====
-if (c.chapters) {
-  c.chapters = c.chapters.map(function(ch) {
-    if (ch.summary === undefined) {
-      ch.summary = ch.content.slice(0, 30) + (ch.content.length > 30 ? '…' : '');
-    }
-    if (ch.isAuto === undefined) ch.isAuto = false;
-    if (ch.fromDate === undefined) ch.fromDate = '';
-    if (ch.id === undefined) ch.id = 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-    return ch;
-  });
-} else {
-  c.chapters = [];
-}
-// 新增：记忆卡片背景（暂时留空，以后用）
-c.memoryBg = c.memoryBg || '';
-// ===== 迁移结束 =====
     if(c.activity===undefined)c.activity='中';if(c.allowAutoGreet===undefined)c.allowAutoGreet=true;
     if(c.hearts===undefined)c.hearts=10;if(c.heartsTotal===undefined)c.heartsTotal=10;c.heartLog=c.heartLog||[];c.heartMile=c.heartMile||{};
   });
@@ -320,98 +284,6 @@ function seedAiChan(d){const id='c_aichan';const c=blankChar(id);Object.assign(c
 function checkMile(){[[50,30],[100,50],[150,100]].forEach(([need,bonus])=>{if(DB.heartsTotal>=need&&!DB.heartMile[need]){DB.heartMile[need]=1;DB.hearts+=bonus;DB.heartLog.unshift({t:Date.now(),n:bonus,reason:`💗累计达成${need}奖励`});setTimeout(()=>alert(`🎉 心动值累计突破 ${need}！奖励 ${bonus} 心动值`),400);}});}
 function spendHeart(n,reason){if((DB.hearts||0)<n){alert('心动值不足～当前'+(DB.hearts||0)+'，需要'+n+'。多和角色聊天可以获得哦');return false;}DB.hearts-=n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n:-n,reason});save();return true;}
 function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(DB));}catch(e){alert('保存失败(存储满?)：'+e.message);}}
-// ===== 每日自动总结 =====
-function checkDailySummary() {
-  var today = new Date().toDateString();
-  // 如果今天已经总结过了，跳过
-  if (DB._lastSummaryDate === today) return;
-  
-  var summarized = 0;
-  var contacts = DB.contacts.filter(function(c) { return !c._draft; });
-  
-  contacts.forEach(function(c) {
-    // 检查今天有没有聊天记录
-    var todayChats = (DB.chats[c.id] || []).filter(function(m) {
-      return new Date(m.time || 0).toDateString() === today;
-    });
-    if (todayChats.length < 2) return; // 消息太少，不总结
-    
-    // 检查今天是否已经有一条自动总结（防止重复）
-    var todayAuto = (c.chapters || []).filter(function(ch) {
-      return ch.date === today && ch.isAuto === true;
-    });
-    if (todayAuto.length > 0) return;
-    
-    // 执行总结
-    generateMemorySummary(c, true);
-    summarized++;
-  });
-  
-  DB._lastSummaryDate = today;
-  save();
-  if (summarized > 0) console.log('📝 自动总结了 ' + summarized + ' 个角色的记忆');
-}
-
-// 生成单个角色的记忆总结（isAuto=true 自动，false 手动）
-async function generateMemorySummary(c, isAuto) {
-  var model = DB.settings.auxModel || DB.settings.chatModel;
-  if (!model) return;
-  
-  var today = new Date();
-  var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-  
-  // 获取上一条记忆（用于续写）
-  var lastMem = (c.chapters || []).slice(-1)[0];
-  var lastContent = lastMem ? lastMem.content : '';
-  
-  // 获取今天的聊天记录
-  var todayChats = (DB.chats[c.id] || []).filter(function(m) {
-    return new Date(m.time || 0).toDateString() === today.toDateString();
-  });
-  var convo = todayChats.map(function(m) {
-    var who = m.role === 'user' ? (DB.me.name || '我') : (c.name || c.nick);
-    var content = m.content || '';
-    if (m.type === 'image') content = '[图片]';
-    if (m.type === 'sticker') content = '[表情]';
-    if (m.type === 'transfer') content = '[转账]';
-    if (m.type === 'voice') content = '[语音]';
-    return who + '：' + content;
-  }).join('\n');
-  
-  if (convo.length < 10) return; // 没什么实质内容，不总结
-  
-  var prompt = '请根据今天的聊天记录，生成一段「' + (c.name || c.nick) + '」的剧情记忆。\n\n';
-  if (lastContent) {
-    prompt += '【上一条记忆】\n' + lastContent + '\n\n';
-    prompt += '【要求】请续写上一条记忆之后的新发展，不要重复上一条已经写过的内容。\n';
-  } else {
-    prompt += '【要求】这是第一条记忆，请完整概括今天发生的事情。\n';
-  }
-  prompt += '\n【今天的聊天记录】\n' + convo;
-  prompt += '\n\n【输出格式】用第三人称，精炼写成一段话（3-6句），只输出内容本身，不要标题、不要日期、不要任何标记。';
-  
-  try {
-    var out = await callAI([{ role: 'user', content: prompt }], model);
-    out = out.trim();
-    if (!out || out.length < 5) return;
-    
-    // 生成一句话摘要（取前30字）
-    var summary = out.slice(0, 30) + (out.length > 30 ? '…' : '');
-    
-    c.chapters = c.chapters || [];
-    c.chapters.push({
-      id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-      date: dateStr,
-      content: out,
-      summary: summary,
-      isAuto: isAuto || false,
-      fromDate: lastMem ? lastMem.date : ''
-    });
-    save();
-  } catch(e) {
-    console.log('总结失败：' + e.message);
-  }
-}
 function getC(id){return DB.contacts.find(c=>c.id===id);}
 function clamp(v){return Math.max(0,Math.min(100,Math.round(v)));}
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -443,71 +315,51 @@ function render(){const h=document.getElementById('home');if(h)h.remove();const 
   if(view.type==='voiceList')return renderVoiceList();
   if(view.type==='focus')return renderFocus();
   if(view.type==='worlds')return renderWorlds();
-  if(view.type==='notes')return renderNotes();
-  if(view.type==='memoryDetail')return renderMemoryDetail();
   if(view.type==='placeholder')return renderPlaceholder();
 }
 function showChrome(t,b){topbar.style.display=t?'flex':'none';tabbar.style.display=b?'flex':'none';}
 
 function renderHome(){showChrome(false,false);statusbar.classList.remove('dark');content.style.display='none';const d=document.createElement('div');d.id='home';if(DB.desktop.wallpaper)d.style.backgroundImage=`url('${DB.desktop.wallpaper}')`;d.innerHTML=`<div class="clockbig" id="homeClock"><div class="t">--:--</div><div class="d"></div></div><div id="appgrid">${DB.desktop.apps.map(a=>{const badge=a.id==='wechat'?`<span id="wxDeskBadge" style="display:none;position:absolute;top:-6px;right:-6px;min-width:28px;height:28px;padding:0 7px;background:#f43;color:#fff;border-radius:14px;font-size:16px;font-weight:600;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:9"></span>`:'';return `<div class="app ${a.id==='wechat'?'big':''}" onclick="openApp('${a.id}')"><div class="app-ic" style="position:relative;${a.icon?`background-image:url('${a.icon}');background-color:transparent;box-shadow:none`:''}">${a.icon?'':a.emoji}${badge}</div><div class="app-nm">${a.name}</div></div>`;}).join('')}</div>`;phone.appendChild(d);tick();refreshChatBadges();}
 function openApp(id) {
-
   if (id === 'wechat') {
     view = { type: 'wechat' };
     wechatPage = 'chats';
     render();
-    return;
-  }
-  if (id === 'settings') {
+  } else if (id === 'settings') {
     view = { type: 'settings' };
     render();
-    return;
-  }
-  if (id === 'preset') {
+  } else if (id === 'preset') {
     openModePreset();
-    return;
-  }
-  if (id === 'hearts') {
+  } else if (id === 'hearts') {
     view = { type: 'hearts' };
     render();
-    return;
-  }
-  if (id === 'world') {
-    view = { type: 'worlds' };
-    render();
-    return;
-  }
-  if (id === 'focus') {
-    view = { type: 'focus' };
-    render();
-    return;
-  }
-  if (id === 'notes') {
-    view = { type: 'notes' };
-    render();
-    return;
-  }
-  if (id === 'floating') {
-    view = { type: 'placeholder', title: '✨ 浮光', msg: '功能开发中，敬请期待～' };
-    render();
-    return;
-  }
-  if (id === 'shop') {
-    view = { type: 'placeholder', title: '🛍️ 购物', msg: '功能开发中，敬请期待～' };
-    render();
-    return;
-  }
-
-  // 其他未识别的应用
-  var a = DB.desktop.apps.find(function(x) { return x.id === id; });
-  if (a) {
-    view = { type: 'placeholder', title: a.name, msg: a.name + ' 功能之后再做～' };
-  } else {
-    view = { type: 'placeholder', title: '未知', msg: '未找到该应用' };
-  }
+  } 
+  else if (id === 'world') {
+  view = { type: 'worlds' };
   render();
 }
-
+else if (id === 'focus') {
+    view = { type: 'focus' };
+    render();
+  } else if (id === 'world') {
+    view = { type: 'placeholder', title: '🌍 世界观', msg: '功能开发中，敬请期待～' };
+    render();
+  } else if (id === 'floating') {
+    view = { type: 'placeholder', title: '✨ 浮光', msg: '功能开发中，敬请期待～' };
+    render();
+  } else if (id === 'shop') {
+    view = { type: 'placeholder', title: '🛍️ 购物', msg: '功能开发中，敬请期待～' };
+    render();
+  } else {
+    var a = DB.desktop.apps.find(function(x) { return x.id === id; });
+    if (a) {
+      view = { type: 'placeholder', title: a.name, msg: a.name + ' 功能之后再做～' };
+    } else {
+      view = { type: 'placeholder', title: '未知', msg: '未找到该应用' };
+    }
+    render();
+  }
+}
 function goHome(){view={type:'home'};render();}
 function goWechat(p){view={type:'wechat'};wechatPage=p;render();}
 function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='心动值';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;
@@ -518,7 +370,7 @@ function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');t
 function listenHeart(c, passive) {
   if (!c) return;
   var cost = passive ? 8 : 10;
-  var name = c.name || c.nick;
+  var name = c.nick || c.name;
 
   if ((c.hearts || 0) < cost) {
     popTip('当前 ' + (c.hearts || 0) + '，需要 ' + cost + '。\n多和 ' + name + ' 聊天可以增加心动值哦～', {icon:'💔', title:'心动值不足'});
@@ -537,7 +389,7 @@ function listenHeart(c, passive) {
 
       var msgs = (DB.chats[c.id] || []).slice(-15);
       var convo = msgs.map(function(m) {
-        var who = m.role === 'user' ? (DB.me.name || '我') : (c.name || c.nick);
+        var who = m.role === 'user' ? (DB.me.name || '我') : (c.nick || c.name);
         var content = m.content || '';
         if (m.type === 'image') content = '[图片]';
         if (m.type === 'sticker') content = '[表情]';
@@ -547,7 +399,7 @@ function listenHeart(c, passive) {
       }).join('\n');
 
       var system = buildSystem(c);
-      var prompt = '【任务】根据上面的对话记录，生成一句 ' + (c.name || c.nick) + ' 此刻内心真实的想法（心声）。\n\n【硬性规则】\n1. 必须基于对话内容引发，不能凭空出现\n2. 字数严格控制在 20-30 字之间，最多一句话\n3. 不能是剧情总结（不能写成「你刚才说…」「今天你做了…」）\n4. 与表面人设形成反差（外表乖巧→内心带点小腹黑；外表高冷→内心其实在意）\n5. 不出现具体时间、地点、事件名称\n6. 用「他/她/这个人」代替对方名字\n\n【格式】只输出心声内容本身，不要引号、不要解释、不要任何标记。';
+      var prompt = '【任务】根据上面的对话记录，生成一句 ' + (c.nick || c.name) + ' 此刻内心真实的想法（心声）。\n\n【硬性规则】\n1. 必须基于对话内容引发，不能凭空出现\n2. 字数严格控制在 20-30 字之间，最多一句话\n3. 不能是剧情总结（不能写成「你刚才说…」「今天你做了…」）\n4. 与表面人设形成反差（外表乖巧→内心带点小腹黑；外表高冷→内心其实在意）\n5. 不出现具体时间、地点、事件名称\n6. 用「他/她/这个人」代替对方名字\n\n【格式】只输出心声内容本身，不要引号、不要解释、不要任何标记。';
 
       var messages = [
         { role: 'system', content: system },
@@ -592,7 +444,7 @@ function showHeartBubble(c, content) {
     removeHeartBubble();
     listenHeart(c, true);
   };
-  bubble.innerHTML = '<span style="font-size:14px;color:var(--text);">💭 ' + (c.name || c.nick) + ' 现在心里有话想说… 点击查看（8💗）</span><span style="color:var(--sub);font-size:18px;padding:0 4px;">×</span>';
+  bubble.innerHTML = '<span style="font-size:14px;color:var(--text);">💭 ' + (c.nick || c.name) + ' 现在心里有话想说… 点击查看（8💗）</span><span style="color:var(--sub);font-size:18px;padding:0 4px;">×</span>';
   // 阻止冒泡，防止点击叉号触发父级点击
   bubble.querySelector('span:last-child').onclick = function(e) {
     e.stopPropagation();
@@ -620,13 +472,27 @@ function removeHeartBubble() {
     existing.remove();
   }
 }
+function dismissHeartBubble(cid) {
+  var c = getC(cid);
+  if (!c) return;
+  removeHeartBubble();
+  c._pendingHeart = 0;
+  c._pendingHeartContent = null;
+  // 记录叉掉次数
+  c._heartDismissCount = (c._heartDismissCount || 0) + 1;
+  // 连续叉掉 3 次后，24 小时内不再触发
+  if (c._heartDismissCount >= 3) {
+    c._heartBlockUntil = Date.now() + 24 * 60 * 60 * 1000;
+  }
+  save();
+}
 function clickHeartBubble(cid) {
   var c = getC(cid);
   if (!c) return;
   removeHeartBubble();
 
   var cost = c._pendingHeart > 1 ? 8 : 10;
-  var name = c.name || c.nick;
+  var name = c.nick || c.name;
 
   if ((c.hearts || 0) < cost) {
     popTip('当前 ' + (c.hearts || 0) + '，需要 ' + cost + '。\n多和 ' + name + ' 聊天可以增加哦～', {icon:'💔', title:'心动值不足'});
@@ -674,24 +540,11 @@ function clickHeartBubble(cid) {
     }
   });
 }
-function dismissHeartBubble(cid) {
-  var c = getC(cid);
-  if (!c) return;
-  removeHeartBubble();
-  c._pendingHeart = 0;
-  c._pendingHeartContent = null;
-  // 记录叉掉次数
-  c._heartDismissCount = (c._heartDismissCount || 0) + 1;
-  // 连续叉掉 3 次后，24 小时内不再触发
-  if (c._heartDismissCount >= 3) {
-    c._heartBlockUntil = Date.now() + 24 * 60 * 60 * 1000;
-  }
-  save();
-}
+
 function showHeartBubbleDirect(c) {
   removeHeartBubble();
   var cost = c._pendingHeart > 1 ? 8 : 10;
-  var name = c.name || c.nick;
+  var name = c.nick || c.name;
 
   var bubble = document.createElement('div');
   bubble.id = 'heartBubbleWrapper';
@@ -857,7 +710,7 @@ function deleteWorld(worldId) {
   popConfirm('确定要删除这个世界观吗？', function(){
     var related = (DB.contacts || []).filter(function(c) { return c.worldId === worldId; });
     if (related.length) {
-      var names = related.map(function(c) { return c.name || c.nick; }).join('、');
+      var names = related.map(function(c) { return c.nick || c.name; }).join('、');
       popConfirm('以下角色关联了此世界观：' + names + '。删除后，这些角色的世界观会变为"未关联"。确定继续吗？', function(){
         related.forEach(function(c) { c.worldId = ''; });
         DB.worlds = (DB.worlds || []).filter(function(w) { return w.id !== worldId; });
@@ -926,7 +779,7 @@ function renderChats(){
     var last = lastText(m[m.length - 1]) || '开始聊天吧';
     var un = c.unread || 0;
     var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
-    return '<div class="swipe-wrap"><div class="swipe-del" style="right:-74px;" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
+    return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
       avatarHtml(c) +
       '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between">' + esc(c.name || c.nick) + badge + '</div><div class="cell-sub">' + esc(last).slice(0, 30) + '</div></div></div></div>';
   }).join('');
@@ -948,7 +801,7 @@ function renderContacts(){
   }
   var items = cs.map(function(c){
     var sign = c.signature || c.pKeywords || '这个人很神秘，什么都没留下';
-    return '<div class="swipe-wrap"><div class="swipe-del" style="right:-74px;" onclick="delContactById(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
+    return '<div class="swipe-wrap"><div class="swipe-del" onclick="delContactById(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
       avatarHtml(c) +
       '<div class="cell-body"><div class="cell-title">' +
       esc(c.name || c.nick) +
@@ -962,171 +815,107 @@ function renderDiscover(){var un=DB.momentUnread||0;content.innerHTML='<div clas
 function renderWxMe(){const ag=DB.settings.autoGreet!==false;content.innerHTML=`<div class="field" style="border-top:1px solid var(--line)"><label>我的微信头像（点击选择）</label><div class="avapick" style="--ava:${DB.me.avatar?`url('${DB.me.avatar}')`:'none'}" onclick="pickMeAvatar()">${DB.me.avatar?'':'点击上传'}</div></div><div class="section"><div class="row"><label>我的网名</label><input value="${esc(DB.me.name)}" onchange="DB.me.name=this.value;save()"></div><div class="row"><label>真实姓名</label><input value="${esc(DB.me.realName)}" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名"></div></div><div class="hint">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>`;}
 function pickMeAvatar(){pickImage(d=>{DB.me.avatar=d;save();render();});}
 function attachSwipe() {
-  var wrappers = document.querySelectorAll('.swipe-wrap');
-  wrappers.forEach(function(wrap) {
-    if (wrap._swipeDone) return;
-    wrap._swipeDone = true;
+  var cells = document.querySelectorAll('.swipe-cell');
+  cells.forEach(function(el) {
+    if (el._swipeAttached) return;
+    el._swipeAttached = true;
 
-    var cell = wrap.querySelector('.swipe-cell');
-    var del = wrap.querySelector('.swipe-del');
-    if (!cell || !del) return;
-
-    // 默认隐藏红色删除按钮
-    del.style.right = '-74px';
-
+    var startX = 0, startY = 0, curX = 0, open = false, moved = false;
     var delWidth = 74;
-    var startX = 0;
-    var startY = 0;
-    var offsetX = 0;
-    var isOpen = false;
 
-    function closeOthers() {
-      document.querySelectorAll('.swipe-wrap').forEach(function(w) {
-        if (w !== wrap) {
-          var c = w.querySelector('.swipe-cell');
-          var d = w.querySelector('.swipe-del');
-          if (c) {
-            c.style.transition = 'transform 0.25s ease';
-            c.style.transform = 'translateX(0)';
-            w._isOpen = false;
-          }
-          if (d) {
-            d.style.right = '-74px';
-          }
-        }
-      });
-    }
-
-    function closeThis() {
-      cell.style.transition = 'transform 0.25s ease';
-      cell.style.transform = 'translateX(0)';
-      del.style.right = '-74px';
-      isOpen = false;
-      wrap._isOpen = false;
-    }
-
-    document.addEventListener('click', function(e) {
-      if (!wrap.contains(e.target)) {
-        if (isOpen) closeThis();
-      }
-    });
-
-    cell.addEventListener('touchstart', function(e) {
+    el.addEventListener('touchstart', function(e) {
       var t = e.touches[0];
       startX = t.clientX;
       startY = t.clientY;
-      cell.style.transition = 'none';
+      moved = false;
+      el.style.transition = 'none';
     }, { passive: true });
 
-    cell.addEventListener('touchmove', function(e) {
+    el.addEventListener('touchmove', function(e) {
       var t = e.touches[0];
       var dx = t.clientX - startX;
       var dy = t.clientY - startY;
-
-      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 20) {
         return;
       }
-
       e.preventDefault();
-
-      var base = isOpen ? -delWidth : 0;
-      var target = base + dx;
+      moved = true;
+      var target = open ? dx - delWidth : dx;
       if (target > 0) target = 0;
       if (target < -delWidth) target = -delWidth;
-      offsetX = target;
-      cell.style.transform = 'translateX(' + target + 'px)';
-
-      // 滑动过程中同步显示删除按钮
-      var progress = Math.abs(target) / delWidth;
-      if (progress > 0.1) {
-        del.style.right = (10 - progress * 84) + 'px';
-      } else {
-        del.style.right = '-74px';
-      }
+      curX = target;
+      el.style.transform = 'translateX(' + target + 'px)';
     }, { passive: false });
 
-    cell.addEventListener('touchend', function(e) {
-      cell.style.transition = 'transform 0.25s ease';
-
-      if (typeof offsetX !== 'number' || isNaN(offsetX)) {
-        offsetX = 0;
-      }
-
-      if (offsetX < -delWidth * 0.35) {
-        closeOthers();
-        cell.style.transform = 'translateX(-' + delWidth + 'px)';
-        del.style.right = '0';
-        isOpen = true;
-        wrap._isOpen = true;
+    el.addEventListener('touchend', function(e) {
+      el.style.transition = 'transform .2s';
+      var shouldOpen = curX < -delWidth * 0.4;
+      if (shouldOpen) {
+        el.style.transform = 'translateX(-' + delWidth + 'px)';
+        open = true;
+        curX = -delWidth;
       } else {
-        closeThis();
+        el.style.transform = 'translateX(0)';
+        open = false;
+        curX = 0;
       }
     }, { passive: true });
 
-    cell.addEventListener('click', function(e) {
-      if (isOpen) {
-        closeThis();
-        e.stopPropagation();
-        e.preventDefault();
-      }
-    }, true);
-
-    // 鼠标支持
-    var mouseStartX = 0;
-    var mouseMoved = false;
-
-    cell.addEventListener('mousedown', function(e) {
-      mouseStartX = e.clientX;
-      mouseMoved = false;
-      cell.style.transition = 'none';
+    var pStartX = 0,
+      pCurX = 0,
+      pOpen = false,
+      pMoved = false;
+    el.addEventListener('pointerdown', function(e) {
+      pStartX = e.clientX;
+      pMoved = false;
+      el.style.transition = 'none';
     });
 
-    cell.addEventListener('mousemove', function(e) {
-      if (mouseStartX === undefined) return;
-      var dx = e.clientX - mouseStartX;
+    el.addEventListener('pointermove', function(e) {
+      if (pStartX === undefined) return;
+      var dx = e.clientX - pStartX;
       if (Math.abs(dx) < 5) return;
-      mouseMoved = true;
-      var base = isOpen ? -delWidth : 0;
-      var target = base + dx;
+      pMoved = true;
+      var target = pOpen ? dx - delWidth : dx;
       if (target > 0) target = 0;
       if (target < -delWidth) target = -delWidth;
-      offsetX = target;
-      cell.style.transform = 'translateX(' + target + 'px)';
-      var progress = Math.abs(target) / delWidth;
-      if (progress > 0.1) {
-        del.style.right = (10 - progress * 84) + 'px';
-      } else {
-        del.style.right = '-74px';
-      }
+      pCurX = target;
+      el.style.transform = 'translateX(' + target + 'px)';
     });
 
-    var mouseEnd = function(e) {
-      if (!mouseMoved) { mouseStartX = undefined; return; }
-      cell.style.transition = 'transform 0.25s ease';
-
-      if (typeof offsetX !== 'number' || isNaN(offsetX)) {
-        offsetX = 0;
-      }
-
-      if (offsetX < -delWidth * 0.35) {
-        closeOthers();
-        cell.style.transform = 'translateX(-' + delWidth + 'px)';
-        del.style.right = '0';
-        isOpen = true;
-        wrap._isOpen = true;
+    var pointerEnd = function() {
+      if (!pMoved) return;
+      el.style.transition = 'transform .2s';
+      var shouldOpen = pCurX < -delWidth * 0.4;
+      if (shouldOpen) {
+        el.style.transform = 'translateX(-' + delWidth + 'px)';
+        pOpen = true;
+        pCurX = -delWidth;
       } else {
-        closeThis();
+        el.style.transform = 'translateX(0)';
+        pOpen = false;
+        pCurX = 0;
       }
-      mouseStartX = undefined;
-      mouseMoved = false;
+      pStartX = undefined;
     };
+    el.addEventListener('pointerup', pointerEnd);
+    el.addEventListener('pointercancel', pointerEnd);
 
-    cell.addEventListener('mouseup', mouseEnd);
-    cell.addEventListener('mouseleave', function(e) {
-      if (mouseMoved) {
-        mouseEnd(e);
+    el.addEventListener('click', function(e) {
+      if (moved || pMoved) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (open || pOpen) {
+          el.style.transition = 'transform .2s';
+          el.style.transform = 'translateX(0)';
+          open = false;
+          pOpen = false;
+          curX = 0;
+          pCurX = 0;
+        }
       }
-    });
+    }, true);
   });
 }
 function removeFromChats(id){
@@ -1163,7 +952,7 @@ function delContactById(id){
   popConfirm('彻底删除该角色及聊天记录？', function(){
     var c = getC(id);
     if (c) {
-      console.log('💔 用户删除了角色：' + (c.name || c.nick) + '，好感度/信任度归零');
+      console.log('💔 用户删除了角色：' + (c.nick || c.name) + '，好感度/信任度归零');
     }
     DB.contacts=DB.contacts.filter(c=>c.id!==id);
     delete DB.chats[id];
@@ -1196,7 +985,7 @@ function renderCharEdit() {
   statusbar.classList.add('dark');
   tbLeft.textContent = '‹';
   tbLeft.onclick = leaveEdit;
-  tbTitle.textContent = c.name || c.nick || '编辑';
+  tbTitle.textContent = c.nick || c.name || '编辑';
   tbRight.textContent = '';
   tbRight.onclick = null;
 
@@ -1407,8 +1196,7 @@ function renderCharEdit() {
 	html += '<button class="btn gray" onclick="userBlockChar(\'' + c.id + '\')" style="margin-top:6px;">🔇 拉黑此角色</button>';
     html += '</div>';
 
-  } 
-else if (edModule === 'me') {
+  } else if (edModule === 'me') {
   // 使用和角色模块相同的折叠样式，默认展开
   var fold = function(id, label, icon, defaultOpen) {
     var open = defaultOpen ? 'open' : '';
@@ -1439,7 +1227,7 @@ else if (edModule === 'me') {
 
   html += '<div style="height:20px;"></div>';
 }
-  else if (edModule === 'world') {
+ else if (edModule === 'world') {
     var worldOpts = '<option value="">未关联</option>';
     (DB.worlds || []).forEach(function(w) {
       var selected = (c.worldId === w.id) ? 'selected' : '';
@@ -1462,19 +1250,16 @@ else if (edModule === 'me') {
     html += '<div class="hint">聊天时AI会根据剧情自动增减。</div>';
     html += rng('好感度') + rng('信任度') + rng('紧张感');
     html += '<div class="field"><label>当前关系</label><input type="text" value="' + esc(st.当前关系 || '') + '" onchange="updStatus(\'当前关系\',this.value)"></div>';
-// ===== 状态模块：记忆入口 =====
-html += '<div style="padding:12px 16px;">';
-html += '<div class="field" style="border:1px dashed var(--line);border-radius:12px;padding:16px;cursor:pointer;background:var(--bg);" data-cid="' + c.id + '" onclick="openMemoryDetail(this.dataset.cid)">' +
-  '<div style="display:flex;align-items:center;gap:12px;">' +
-    '<span style="font-size:28px;">📝</span>' +
-    '<div style="flex:1;">' +
-      '<div style="font-size:15px;color:var(--text);font-weight:500;">记忆存档</div>' +
-      '<div style="font-size:13px;color:var(--sub);">' + (c.chapters || []).length + ' 条记忆 · 点击查看/管理</div>' +
-    '</div>' +
-    '<span style="color:var(--theme);font-size:18px;">→</span>' +
-  '</div>' +
-'</div>';
-html += '</div>';
+    html += '<div class="section-title" style="font-weight:600;padding:12px 0 4px;font-size:14px;color:var(--text);">🧠 长期记忆</div>';
+    html += '<div class="hint">点下方按钮，AI会把今天的聊天提炼成一条重要记忆，既能当日记翻看，也会自动影响之后的对话。</div>';
+    if (c.chapters && c.chapters.length) {
+      c.chapters.forEach(function(ch, i) {
+        html += '<div class="field"><label>' + ch.date + ' <span style="float:right;color:#e34;cursor:pointer" onclick="delChap(' + i + ')">删除</span></label><div style="white-space:pre-wrap;line-height:1.5;padding:6px 0;color:var(--text);">' + esc(ch.content) + '</div></div>';
+      });
+    }
+    html += '<button class="btn" id="genMemBtn" onclick="genMemory()">🧠 AI 生成今日记忆</button>';
+    html += '<button class="btn gray" style="margin-top:6px;" onclick="addChap()">＋ 手动添加</button>';
+    html += '</div>';
   }
 
   content.innerHTML = html;
@@ -1574,7 +1359,6 @@ ${JSON.stringify(cur, null, 2)}
 - 只输出一个 JSON 对象，键名与上述字段完全一致（真名→name，性别→gender，年龄→age，身份职业→job，家庭出身→family，身体数据→body，外貌→pLook，性格关键词→pKeywords，说话风格→pStyle，成长经历→pBack，日常作息→pDaily，喜好厌恶→pLike，语言习惯→pLang，事例台词→sampleLines，负向约束→negative，线上人设→pOnlinePersona，开场白→opening，补充→pExtra）。
 - 每个字段的值是字符串，可以使用 Markdown 格式（如 **加粗**、- 列表）。
 - 不要任何解释、不要代码块标记。只输出 JSON。`;
-
   btn.textContent='润色中…（请稍候）';btn.disabled=true;
   try{
     let out=await callAI([{role:'user',content:pr}],model);
@@ -1853,8 +1637,8 @@ function renderHearts() {
     html += '<div class="section-title">👥 角色列表</div>';
     roleList.forEach(function(c) {
       html += '<div class="cell" onclick="view={type:\'heartDetail\',id:\'' + c.id + '\'};render();" style="cursor:pointer;">' +
-        '<div class="avatar" style="' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.name || c.nick)[0]) + '</div>' +
-        '<div class="cell-body"><div class="cell-title">' + (c.name || c.nick) + '</div></div>' +
+        '<div class="avatar" style="' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.nick || c.name)[0]) + '</div>' +
+        '<div class="cell-body"><div class="cell-title">' + (c.nick || c.name) + '</div></div>' +
         '<div style="color:var(--theme);font-weight:600;font-size:17px;">💗 ' + (c.hearts || 0) + '</div>' +
         '</div>';
     });
@@ -1879,7 +1663,7 @@ function renderVoiceList() {
   if (!c) { view = { type: 'hearts' }; return render(); }
   showChrome(true, false);
   statusbar.classList.add('dark');
-  var name = c.name || c.nick;
+  var name = c.nick || c.name;
   tbTitle.textContent = name + ' 的心声';
   tbLeft.textContent = '‹';
   tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); };
@@ -1901,42 +1685,32 @@ function renderVoiceList() {
   // 心声记录列表
   html += '<div class="section-title">💭 心声记录</div>';
   if (c.voiceLog && c.voiceLog.length) {
-c.voiceLog.forEach(function(v, index) {
-  html += '<div class="voice-card" data-cid="' + c.id + '" data-index="' + index + '" style="margin:8px 12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;cursor:pointer;" oncontextmenu="event.preventDefault();deleteVoiceRecord(\'' + c.id + '\',' + index + ')" onclick="event.stopPropagation();">' +
-    '<div style="font-size:14px;color:var(--text);line-height:1.6;">「' + esc(v.content) + '」</div>' +
-    '<div style="font-size:11px;color:var(--sub);margin-top:6px;">' + fmtVoiceTime(v.t) + '</div>' +
-  '</div>';
-});
+    c.voiceLog.forEach(function(v) {
+      html += '<div style="margin:8px 12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;">' +
+        '<div style="font-size:14px;color:var(--text);line-height:1.6;">「' + esc(v.content) + '」</div>' +
+        '<div style="font-size:11px;color:var(--sub);margin-top:6px;">' + fmtVoiceTime(v.t) + '</div>' +
+        '</div>';
+    });
   } else {
     html += '<div class="empty">还没有听过 ' + esc(name) + ' 的心声，点上面窥探一下吧～</div>';
   }
 
   html += '<div style="height:20px;"></div>';
   content.innerHTML = html;
-  attachSwipe();
 }
-function deleteVoiceRecord(cid, index) {
-  var c = getC(cid);
-  if (!c || !c.voiceLog) return;
-  if (index < 0 || index >= c.voiceLog.length) return;
-  popConfirm('确定删除这条心声记录吗？', function(){
-    c.voiceLog.splice(index, 1);
-    save();
-    renderVoiceList();
-  }, { icon: '💭', title: '删除心声记录' });
-}
+
 function renderHeartDetail() {
   var c = getC(view.id);
   if (!c) { view = { type: 'hearts' }; return render(); }
   showChrome(true, false);
   statusbar.classList.add('dark');
-  tbTitle.textContent = c.name || c.nick;
+  tbTitle.textContent = c.nick || c.name;
   tbLeft.textContent = '‹';
   tbLeft.onclick = function() { view = { type: 'hearts' }; render(); };
   tbRight.textContent = '';
   tbRight.onclick = null;
 
-  var name = c.name || c.nick;
+  var name = c.nick || c.name;
 
   var html = '<div style="text-align:center;padding:26px 0 18px;background:linear-gradient(160deg,#ff9a9e,#fecfef)">' +
     '<div style="font-size:13px;color:#fff;opacity:.9">与 ' + esc(name) + ' 的心动值</div>' +
@@ -1948,12 +1722,12 @@ function renderHeartDetail() {
   html += '<div class="section-title">✨ 可解锁功能（消耗与 ' + esc(name) + ' 的心动值）</div>';
 
   // 1. TA的心声（已实现）
-  html += '<div class="row" onclick="view={type:\'voiceList\',id:\'' + c.id + '\'};render();" style="cursor:pointer;">' +
+    html += '<div class="row" onclick="view={type:\'voiceList\',id:\'' + c.id + '\'};render();" style="cursor:pointer;">' +
     '<div style="font-size:22px;width:40px;">💭</div>' +
     '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">TA的心声</div><div style="font-size:12px;color:var(--sub);">窥探此刻TA想说又没说的话（10💗）</div></div>' +
     '<span style="color:var(--theme);font-size:13px;">🔓 可用</span></div>';
 
-  html += '<div class="row" onclick="popTip(\'功能开发中，敬请期待～\',{icon:\'📅\',title:\'TA的行程\'})">' +
+  html += '<div class="row" onclick="alert(\'📅 TA的行程 功能开发中，敬请期待～\')" style="cursor:pointer;">' +
     '<div style="font-size:22px;width:40px;">📅</div>' +
     '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">TA的行程</div><div style="font-size:12px;color:var(--sub);">查看TA今天的安排</div></div>' +
     '<span style="color:var(--sub);font-size:13px;">🔒 待开放</span></div>';
@@ -1966,13 +1740,9 @@ function renderHeartDetail() {
   // 角色心动记录
   html += '<div class="section-title">📒 与 ' + esc(name) + ' 的心动记录</div>';
   if (c.heartLog && c.heartLog.length) {
-    // heartLog 是倒序存储的（最新的在 [0]），遍历时 index 就是真实索引
-c.heartLog.slice(0, 30).forEach(function(g, index) {
-  html += '<div class="row" style="background:var(--card);">' +
-    '<div style="flex:1;font-size:13px;color:var(--text);">' + esc(g.reason) + '</div>' +
-    '<div style="font-size:14px;font-weight:600;color:' + (g.n > 0 ? 'var(--theme)' : '#e34') + ';flex-shrink:0;margin-left:8px;">' + (g.n > 0 ? '+' : '') + g.n + '</div>' +
-  '</div>';
-});
+    c.heartLog.slice(0, 30).forEach(function(g) {
+      html += '<div class="row"><div style="flex:1;font-size:13px;color:var(--text);">' + esc(g.reason) + '</div><div style="font-size:14px;font-weight:600;color:' + (g.n > 0 ? 'var(--theme)' : '#e34') + '">' + (g.n > 0 ? '+' : '') + g.n + '</div></div>';
+    });
     if (c.heartLog.length > 30) {
       html += '<div class="hint" style="padding:6px 16px;">仅显示最近30条</div>';
     }
@@ -1982,33 +1752,6 @@ c.heartLog.slice(0, 30).forEach(function(g, index) {
 
   html += '<div style="height:20px;"></div>';
   content.innerHTML = html;
-  
-  // 绑定左滑手势
-  attachSwipe();
-}
-function deleteHeartRecord(cid, index) {
-  var c = getC(cid);
-  if (!c || !c.heartLog) return;
-  if (index < 0 || index >= c.heartLog.length) return;
-  var record = c.heartLog[index];
-  // 只允许删除心声记录
-  if (!record.reason || record.reason.indexOf('💭 聆听了') !== 0) {
-    showPopup({ icon: '⚠️', title: '提示', message: '只能删除心声记录' });
-    return;
-  }
-  showPopup({
-    icon: '💭',
-    title: '删除心声记录',
-    message: '确定要删除这条心声记录吗？\n"' + record.reason + '"',
-    buttons: [
-      { text: '取消', type: 'ghost' },
-      { text: '删除', type: 'danger', onClick: function() {
-        c.heartLog.splice(index, 1);
-        save();
-        renderHeartDetail();
-      }}
-    ]
-  });
 }
 /* ===== 聊天 ===== */
 function openChat(id){
@@ -2024,313 +1767,6 @@ function openChat(id){
   }
   view={type:'chat',id};
   render();
-}
-// ===== 备忘录主界面 =====
-function renderNotes() {
-  showChrome(true, false);
-  statusbar.classList.add('dark');
-  tbTitle.textContent = '📝 备忘录';
-  tbLeft.textContent = '‹';
-  tbLeft.onclick = goHome;
-  tbRight.textContent = '';
-  tbRight.onclick = null;
-  
-  var contacts = DB.contacts.filter(function(c) { return !c._draft; });
-  if (!contacts.length) {
-    content.innerHTML = '<div class="empty">还没有角色<br>先去通讯录建一个吧～</div>';
-    return;
-  }
-  
-  var html = '<div style="padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
-  contacts.forEach(function(c) {
-    var mems = c.chapters || [];
-    var count = mems.length;
-    var lastDate = mems.length ? mems[mems.length - 1].date : '暂无';
-    var bgColor = c.memoryBg ? '' : 'background:var(--card);';
-    var bgImage = c.memoryBg ? 'background-image:url(\'' + c.memoryBg + '\');background-size:cover;background-position:center;' : '';
-    
-html += '<div data-cid="' + c.id + '" onclick="openMemoryDetail(this.dataset.cid)" style="background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--line);cursor:pointer;min-height:90px;display:flex;flex-direction:column;justify-content:space-between;">' +
-      '<div style="display:flex;align-items:center;gap:10px;' + (c.memoryBg ? 'text-shadow:0 1px 4px rgba(0,0,0,0.7);' : '') + '">' +
-        '<div class="avatar" style="width:40px;height:40px;flex-shrink:0;' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.name ? c.name[0] : '?')) + '</div>' +
-        '<div style="font-weight:600;font-size:16px;' + (c.memoryBg ? 'color:#fff;' : 'color:var(--text);') + '">' + esc(c.name || c.nick) + '</div>' +
-      '</div>' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">' +
-        '<span style="font-size:13px;' + (c.memoryBg ? 'color:rgba(255,255,255,0.8);' : 'color:var(--sub);') + '">' + count + ' 条记忆 · 最近 ' + lastDate + '</span>' +
-        '<span style="font-size:13px;color:var(--theme);' + (c.memoryBg ? 'color:#fff;opacity:0.9;' : '') + '">查看 →</span>' +
-      '</div>' +
-    '</div>';
-  });
-  html += '</div>';
-  html += '<div class="hint" style="padding:12px 16px;">每天自动总结今天聊过的内容，也可以手动添加或修改。</div>';
-  content.innerHTML = html;
-}
-function openMemoryDetail(cid) {
-  view = { type: 'memoryDetail', id: cid };
-  render();
-}
-// ===== 某个角色的记忆详情页 =====
-function renderMemoryDetail() {
-  var c = getC(view.id);
-  if (!c) { view = { type: 'notes' }; render(); return; }
-  
-  showChrome(true, false);
-  statusbar.classList.add('dark');
-  tbTitle.textContent = (c.name || c.nick) + ' 的记忆';
-  tbLeft.textContent = '‹';
-  tbLeft.onclick = function() { view = { type: 'notes' }; render(); };
-  tbRight.textContent = '＋';
-  tbRight.onclick = function() { addManualMemory(c.id); };
-  
-  var mems = c.chapters || [];
-  var html = '<div style="padding:8px 0;">';
-  
-  if (!mems.length) {
-    html += '<div class="empty">还没有记忆<br>点击右上角 ＋ 手动添加，或聊完天等自动总结</div>';
-  } else {
-    var sorted = mems.slice().reverse();
-    sorted.forEach(function(mem, idx) {
-      var realIdx = mems.length - 1 - idx;
-      var tag = mem.isAuto ? '🤖 自动' : '✍️ 手动';
-      var date = mem.date || '未知日期';
-      var summary = mem.summary || mem.content.slice(0, 30) + (mem.content.length > 30 ? '…' : '');
-      var content = mem.content || '';
-      
-      html += '<div style="margin:8px 12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
-          '<span style="font-size:12px;color:var(--sub);">' + date + ' · ' + tag + '</span>' +
-          '<span style="display:flex;gap:6px;">' +
-            '<span style="color:#e34;font-size:14px;cursor:pointer;" onclick="deleteMemory(\'' + c.id + '\',' + realIdx + ')">🗑️</span>' +
-          '</span>' +
-        '</div>' +
-        '<div style="font-size:14px;color:var(--text);cursor:pointer;" onclick="toggleMemoryEdit(\'' + c.id + '\',' + realIdx + ')">' +
-          '<div id="mem_display_' + c.id + '_' + realIdx + '">' + esc(summary) + ' <span style="color:var(--sub);font-size:12px;">点击展开/编辑</span></div>' +
-          '<div id="mem_edit_' + c.id + '_' + realIdx + '" style="display:none;margin-top:6px;">' +
-            '<textarea id="mem_text_' + c.id + '_' + realIdx + '" style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6;">' + esc(content) + '</textarea>' +
-            '<div style="display:flex;gap:6px;margin-top:6px;">' +
-              // ---- 保存按钮（使用数据属性，不用 onclick） ----
-              '<button class="btn btn-mem-save" data-cid="' + c.id + '" data-idx="' + realIdx + '" style="flex:1;margin:0;padding:6px 0;font-size:13px;">💾 保存</button>' +
-              // ---- 取消按钮（使用数据属性） ----
-              '<button class="btn gray btn-mem-cancel" data-cid="' + c.id + '" data-idx="' + realIdx + '" style="flex:1;margin:0;padding:6px 0;font-size:13px;">取消</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    });
-  }
-  
-  // ---- 底部三个按钮（AI续写、手动添加） ----
-  html += '<div style="padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;">' +
-    // AI续写（也改用数据属性）
-    '<button class="btn btn-mem-continue" data-cid="' + c.id + '" style="flex:1;min-width:120px;margin:0;">🧠 AI续写今日</button>' +
-    // 手动添加：保留原来的 onclick，因为它能正常调用 addManualMemory
-    '<button class="btn gray" style="flex:1;min-width:120px;margin:0;" onclick="addManualMemory(\'' + c.id + '\')">＋ 手动添加</button>' +
-    '</div>';
-  
-  html += '</div>';
-  content.innerHTML = html;
-  
-  // ---- 事件监听（统一处理保存、取消、AI续写） ----
-  // 先移除旧的监听，防止重复绑定
-  content.removeEventListener('click', handleMemClick);
-  function handleMemClick(e) {
-    var target = e.target.closest('.btn-mem-save');
-    if (target) {
-      var cid = target.dataset.cid;
-      var idx = parseInt(target.dataset.idx, 10);
-      saveMemoryEdit(cid, idx);
-      e.preventDefault();
-      return;
-    }
-    target = e.target.closest('.btn-mem-cancel');
-    if (target) {
-      var cid = target.dataset.cid;
-      var idx = parseInt(target.dataset.idx, 10);
-      cancelMemoryEdit(cid, idx);
-      e.preventDefault();
-      return;
-    }
-    target = e.target.closest('.btn-mem-continue');
-    if (target) {
-      var cid = target.dataset.cid;
-      aiContinueMemory(cid);
-      e.preventDefault();
-      return;
-    }
-  }
-  content.addEventListener('click', handleMemClick);
-}
-// ===== 保存编辑后的记忆 =====
-function saveMemoryEdit(cid, idx) {
-  var c = getC(cid);
-  if (!c) { alert('角色不存在'); return; }
-  var mem = c.chapters[idx];
-  if (!mem) { alert('记忆不存在'); return; }
-
-  var ta = document.getElementById('mem_text_' + cid + '_' + idx);
-  if (!ta) { alert('找不到编辑框'); return; }
-
-  var newContent = ta.value.trim();
-  if (!newContent) { alert('内容不能为空'); return; }
-
-  mem.content = newContent;
-  mem.summary = newContent.slice(0, 30) + (newContent.length > 30 ? '…' : '');
-  save();
-  renderMemoryDetail();
-}
-
-// ===== 取消编辑 =====
-function cancelMemoryEdit(cid, idx) {
-  var display = document.getElementById('mem_display_' + cid + '_' + idx);
-  var edit = document.getElementById('mem_edit_' + cid + '_' + idx);
-  if (display) display.style.display = 'block';
-  if (edit) edit.style.display = 'none';
-}
-// ===== 点击展开/收起编辑框 =====
-function toggleMemoryEdit(cid, idx) {
-  var display = document.getElementById('mem_display_' + cid + '_' + idx);
-  var edit = document.getElementById('mem_edit_' + cid + '_' + idx);
-  if (!display || !edit) return;
-
-  if (edit.style.display === 'block') {
-    edit.style.display = 'none';
-    display.style.display = 'block';
-  } else {
-    edit.style.display = 'block';
-    display.style.display = 'none';
-    var ta = document.getElementById('mem_text_' + cid + '_' + idx);
-    if (ta) ta.focus();
-  }
-}
-// ===== 手动添加记忆 =====
-function addManualMemory(cid) {
-  var c = getC(cid);
-  if (!c) return;
-  
-  var mo = document.createElement('div');
-  mo.className = 'modal';
-  mo.id = 'modal';
-  mo.innerHTML = '<div class="sheet-box">' +
-    '<h3>✍️ 添加记忆</h3>' +
-    '<div style="font-size:12px;color:var(--sub);margin-bottom:4px;">日期（默认今天）</div>' +
-    '<input id="mem_date" type="date" value="' + new Date().toISOString().slice(0,10) + '" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);margin-bottom:10px;">' +
-    '<div style="font-size:12px;color:var(--sub);margin-bottom:4px;">内容</div>' +
-    '<textarea id="mem_content" style="width:100%;min-height:100px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6;"></textarea>' +
-    '<button class="btn" style="width:100%;margin:10px 0 4px;" onclick="saveManualMemory(\'' + cid + '\')">保存</button>' +
-    '<button class="btn gray" style="width:100%;margin:0;" onclick="closeModal()">取消</button>' +
-    '</div>';
-  mo.onclick = function(e) { if (e.target === mo) closeModal(); };
-  phone.appendChild(mo);
-  setTimeout(function() {
-    var el = document.getElementById('mem_content');
-    if (el) el.focus();
-  }, 100);
-}
-
-function saveManualMemory(cid) {
-  var c = getC(cid);
-  if (!c) return;
-  var date = document.getElementById('mem_date').value.trim();
-  var content = document.getElementById('mem_content').value.trim();
-  if (!content) { alert('请填写内容'); return; }
-  
-  c.chapters = c.chapters || [];
-  c.chapters.push({
-    id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-    date: date || new Date().toISOString().slice(0,10),
-    content: content,
-    summary: content.slice(0, 30) + (content.length > 30 ? '…' : ''),
-    isAuto: false,
-    fromDate: ''
-  });
-  save();
-  closeModal();
-  renderMemoryDetail();
-}
-
-// ===== AI续写今日记忆 =====
-async function aiContinueMemory(cid) {
-  var c = getC(cid);
-  if (!c) return;
-  
-  var model = DB.settings.auxModel || DB.settings.chatModel;
-  if (!model) { alert('请先在设置里选择模型'); return; }
-  
-  popLoading('正在续写记忆…');
-  
-  try {
-    await generateMemorySummary(c, false);
-    popClose();
-    renderMemoryDetail();
-    alert('✅ 已续写今日记忆！');
-  } catch(e) {
-    popClose();
-    alert('续写失败：' + e.message);
-  }
-}
-// 切换记忆编辑模式
-function toggleMemoryEdit(cid, idx) {
-  var c = getC(cid);
-  if (!c) return;
-  var mem = c.chapters[idx];
-  if (!mem) return;
-  
-  var display = document.getElementById('mem_display_' + cid + '_' + idx);
-  var edit = document.getElementById('mem_edit_' + cid + '_' + idx);
-  if (!display || !edit) return;
-  
-  // 如果编辑框已经显示，就隐藏（第二次点击当做取消）
-  if (edit.style.display === 'block') {
-    edit.style.display = 'none';
-    display.style.display = 'block';
-    return;
-  }
-  
-  // 否则显示编辑框
-  edit.style.display = 'block';
-  display.style.display = 'none';
-  var ta = document.getElementById('mem_text_' + cid + '_' + idx);
-  if (ta) {
-    ta.focus();
-    ta.setSelectionRange(ta.value.length, ta.value.length);
-  }
-}
-
-// 保存编辑
-function saveMemoryEdit(cid, idx) {
-  var c = getC(cid);
-  if (!c) return;
-  var mem = c.chapters[idx];
-  if (!mem) return;
-  
-  var ta = document.getElementById('mem_text_' + cid + '_' + idx);
-  if (!ta) return;
-  
-  var newContent = ta.value.trim();
-  if (!newContent) { alert('内容不能为空'); return; }
-  
-  mem.content = newContent;
-  mem.summary = newContent.slice(0, 30) + (newContent.length > 30 ? '…' : '');
-  save();
-  renderMemoryDetail();
-}
-
-// 取消编辑
-function cancelMemoryEdit(cid, idx) {
-  var display = document.getElementById('mem_display_' + cid + '_' + idx);
-  var edit = document.getElementById('mem_edit_' + cid + '_' + idx);
-  if (display) display.style.display = 'block';
-  if (edit) edit.style.display = 'none';
-}
-
-// 删除记忆
-function deleteMemory(cid, idx) {
-  popConfirm('确定删除这条记忆吗？', function() {
-    var c = getC(cid);
-    if (!c) return;
-    c.chapters.splice(idx, 1);
-    save();
-    renderMemoryDetail();
-  }, { icon: '🗑️', title: '删除记忆' });
 }
 function stickerNames(){return DB.stickers.map(s=>s.name).join('、')||'（暂无表情）';}
 function buildSystem(c){
@@ -2372,27 +1808,10 @@ function buildSystem(c){
 
   s += `\n【当前关系状态】\n好感度${st.好感度}(${favLabel('好感度',st.好感度)}) 信任度${st.信任度}(${favLabel('信任度',st.信任度)}) 紧张感${st.紧张感}(${favLabel('紧张感',st.紧张感)}) 当前关系:${st.当前关系}\n`;
 
-// ===== 近7天的记忆 =====
-if (c.chapters && c.chapters.length) {
-  var now2 = new Date();
-  var sevenDaysAgo = new Date(now2.getTime() - 7 * 24 * 60 * 60 * 1000);
-  var recent = c.chapters.filter(function(ch) {
-    try {
-      var d = new Date(ch.date);
-      return d >= sevenDaysAgo;
-    } catch(e) { return false; }
-  });
-  // 按日期排序（老的在前，新的在后）
-  recent.sort(function(a, b) { return a.date < b.date ? -1 : 1; });
-  
-  if (recent.length) {
-    s += '\n【最近一周的记忆（用于了解剧情走向，不要重复叙述）】\n';
-    recent.forEach(function(ch) {
-      s += ch.date + '：' + ch.content + '\n';
-    });
-    s += '\n';
+  if (c.chapters && c.chapters.length) {
+    s += `\n【过往剧情记忆】\n` + c.chapters.map(ch => ch.date + '：' + ch.content).join('\n') + `\n`;
   }
-}
+
   // 朋友圈背景（保留原逻辑）
   try {
     const mine = DB.moments.filter(m => m.author === 'me').slice(0, 3);
@@ -2496,7 +1915,6 @@ s += '- 如果用户连续叉掉你的心声气泡，说明对方现在不想看
 s += '- 只有真正有情绪波动时才触发，不要为了触发而触发\n';
 s += '注意：心声应该与表面人设形成反差，字数在 20-30 字内。\n';
 // =============================================
-
   // ===== 第6层：红线（负向约束） =====
   if (c.negative) {
     s += `\n【⛔ 红线（绝对禁止）】\n${c.negative}\n`;
@@ -2570,7 +1988,7 @@ function renderChat(){
   content.style.backgroundImage=c.chatBg?`url('${c.chatBg}')`:'';
     // ===== 如果被角色拉黑，在顶部插入一条系统消息 =====
   if (c.isBlockedByChar) {
-    var blockedMsg = '🔇 你已被 ' + (c.name || c.nick) + ' 拉黑，无法发送消息。';
+    var blockedMsg = '🔇 你已被 ' + (c.nick || c.name) + ' 拉黑，无法发送消息。';
     if (c.blockedType === '小情绪') {
       blockedMsg += ' 小情绪，10💗 可立即解锁，或等待自动解除。';
     } else if (c.blockedType === '大矛盾') {
@@ -2598,7 +2016,7 @@ function renderChat(){
       c._heartDailyCount.count += 1;
       var cost = c._pendingHeart > 1 ? 8 : 10;
       html += '<div id="heartBubbleWrapper" style="margin:4px 12px 4px 12px;padding:8px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="clickHeartBubble(\'' + c.id + '\')">' +
-        '<span style="font-size:13px;color:var(--text);">💭 ' + (c.name || c.nick) + ' 现在心里有话想说… 点击查看（' + cost + '💗）</span>' +
+        '<span style="font-size:13px;color:var(--text);">💭 ' + (c.nick || c.name) + ' 现在心里有话想说… 点击查看（' + cost + '💗）</span>' +
         '<span style="color:var(--sub);font-size:16px;cursor:pointer;" onclick="event.stopPropagation();removeHeartBubble();">×</span>' +
         '</div>';
     } else {
@@ -2640,29 +2058,21 @@ document.querySelectorAll('#content .msg').forEach(function(el){
     slideEl.style.transform = 'translateX(' + target + 'px)';
   }, {passive: false});
 
-el.addEventListener('touchend', function(e) {
-  el.style.transition = 'transform .2s';
-  // 从实际 transform 中读取当前位移
-  var currentTransform = el.style.transform;
-  var currentX = 0;
-  var match = currentTransform.match(/translateX\(([^)]+)\)/);
-  if (match) {
-    currentX = parseFloat(match[1]);
-  }
-  var shouldOpen = currentX < -delWidth * 0.4;
-  if (shouldOpen) {
-    el.style.transform = 'translateX(-' + delWidth + 'px)';
-    open = true;
-    curX = -delWidth;
-  } else {
-    el.style.transform = 'translateX(0)';
-    open = false;
-    curX = 0;
-  }
-  startX = 0;
-  startY = 0;
-  moved = false;
-}, { passive: true });
+  el.addEventListener('touchend', function(e){
+    slideEl.style.transition = 'transform .2s';
+    if (moved && slideEl.style.transform) {
+      var current = parseFloat(slideEl.style.transform.replace('translateX(','')) || 0;
+      if (current < -40) {
+        openMsgMenu(mid, isMe);
+        slideEl.style.transform = 'translateX(0)';
+      } else {
+        slideEl.style.transform = 'translateX(0)';
+      }
+    } else {
+      slideEl.style.transform = 'translateX(0)';
+    }
+    startX = undefined;
+  }, {passive: true});
 });
   const bar=document.createElement('div');bar.id='chatBottom';
 bar.innerHTML=`<div id="inputRow"><span class="cbtn plus" onclick="togglePanel()">＋</span><textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea><button class="cbtn reply" id="actBtn" onclick="actBtnClick()">▶ 回复</button></div><div id="chatPanel"><div class="pnl" onclick="sendImage()">🖼️<span>相册</span></div><div class="pnl" onclick="sendTransfer()">💰<span>转账</span></div><div class="pnl" onclick="openStickerPicker()">😀<span>表情</span></div><div class="pnl" onclick="toggleMode()"><div id="modeIco">${c.mode==='offline'?'📖':'💬'}</div><span id="modeTxt">${c.mode==='offline'?'线下中':'线上中'}</span></div></div>`;
@@ -2729,7 +2139,7 @@ function checkTimeDecay(c) {
   save();
 
   if (view.type === 'chat' && view.id === c.id) {
-    insertSystemMessage('💤 你冷落了 ' + (c.name || c.nick) + ' ' + Math.round(hours) + ' 小时，TA 似乎有些疏远了。');
+    insertSystemMessage('💤 你冷落了 ' + (c.nick || c.name) + ' ' + Math.round(hours) + ' 小时，TA 似乎有些疏远了。');
   }
 }
 function onChatInput(t){ag(t);updateActBtn();}
@@ -2747,17 +2157,17 @@ function pushMy(m){
   // 在顶部显示提示
   var topMsg = document.createElement('div');
   topMsg.className = 'ts';
-  topMsg.innerHTML = '<span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">🔇 你已拉黑 ' + (c.name || c.nick) + '，TA 不会主动找你。</span>';
+  topMsg.innerHTML = '<span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">🔇 你已拉黑 ' + (c.nick || c.name) + '，TA 不会主动找你。</span>';
   content.prepend(topMsg);
 }
   if (c && c.isBlockedByChar) {
     var type = c.blockedType || '大矛盾';
     var cost = type === '小情绪' ? 10 : 50;
     var autoTime = type === '小情绪' ? '4-12 小时' : '24 小时';
-    var msg = '💔 ' + (c.name || c.nick) + ' 拉黑了你（' + type + '），' + cost + '💗 可立即解锁，或等待 ' + autoTime + ' 自动解除。';
+    var msg = '💔 ' + (c.nick || c.name) + ' 拉黑了你（' + type + '），' + cost + '💗 可立即解锁，或等待 ' + autoTime + ' 自动解除。';
     if (confirm(msg)) {
       // 用户选择解锁
-      if (spendHeart(c, cost, '解锁 ' + (c.name || c.nick) + ' 的拉黑')) {
+      if (spendHeart(c, cost, '解锁 ' + (c.nick || c.name) + ' 的拉黑')) {
         c.isBlockedByChar = false;
         c.blockedByCharAt = 0;
         c.blockedType = '';
@@ -2998,7 +2408,7 @@ if (m = line.match(/^\[退回\]/)) {
   return { type: 'transfer_refund' };
 }return{type:'text',content:line};}
 let replying=false,lastActivity=Date.now();
-async function aiReply(nudge){if(replying)return;const c=getC(view.id);if(!DB.settings.chatModel){alert('请先在 设置 里拉取并选择模型');return;}replying=true;tbTitle.textContent = (c.name || c.nick) + ' 正在输入…';const b=document.getElementById('actBtn');if(b){b.textContent='…';b.disabled=true;}try{let allh=(DB.chats[c.id]||[]).map(toApiMsg);const lim=parseInt(DB.settings.ctxLimit);if(lim>0&&allh.length>lim)allh=allh.slice(-lim);const hist=allh;var lastMsg = (DB.chats[c.id] || []).slice(-1)[0];
+async function aiReply(nudge){if(replying)return;const c=getC(view.id);if(!DB.settings.chatModel){alert('请先在 设置 里拉取并选择模型');return;}replying=true;tbTitle.textContent = (c.nick || c.name) + ' 正在输入…';const b=document.getElementById('actBtn');if(b){b.textContent='…';b.disabled=true;}try{let allh=(DB.chats[c.id]||[]).map(toApiMsg);const lim=parseInt(DB.settings.ctxLimit);if(lim>0&&allh.length>lim)allh=allh.slice(-lim);const hist=allh;var lastMsg = (DB.chats[c.id] || []).slice(-1)[0];
 var pendingTransfer = (lastMsg && lastMsg.role === 'user' && lastMsg.type === 'transfer' && lastMsg.status !== 'accepted' && lastMsg.status !== 'refunded');
 var transferAmount = pendingTransfer ? lastMsg.amount : 0;
 var transferNote = pendingTransfer ? (lastMsg.content || '') : '';
@@ -3063,7 +2473,7 @@ if (line.trim() === '[心声]') {
     c.blockedByCharAt = Date.now();
     c.blockedType = parsed.reason === '大矛盾' ? '大矛盾' : '小情绪';
     save();
-    var blockMsg = '🔇 ' + (c.name || c.nick) + ' 拉黑了你（' + c.blockedType + '），' + (c.blockedType === '小情绪' ? '10💗 可立即解锁，或等待自动解除。' : '50💗 可立即解锁，或等待 24 小时自动解除。');
+    var blockMsg = '🔇 ' + (c.nick || c.name) + ' 拉黑了你（' + c.blockedType + '），' + (c.blockedType === '小情绪' ? '10💗 可立即解锁，或等待自动解除。' : '50💗 可立即解锁，或等待 24 小时自动解除。');
     insertSystemMessage(blockMsg);
     renderChat();
     continue;
@@ -3074,7 +2484,7 @@ if (line.trim() === '[心声]') {
   appendBubble(c,m);
   if(i<lines.length-1)await sleep(500+Math.min((lines[i]||'').length*28,1600));
 }
-lastActivity=Date.now();addHeart(c,1,'和'+(c.nick||c.name)+'聊天');if(meetPlace!==null&&c.mode==='online')proposeMeet(c,meetPlace);if(wantBack&&c.mode==='offline')proposeBackOnline(c);}catch(e){alert('回复失败：'+e.message);}tbTitle.textContent = c.name || c.nick;replying=false;const b2=document.getElementById('actBtn');if(b2)b2.disabled=false;updateActBtn();}
+lastActivity=Date.now();addHeart(c,1,'和'+(c.nick||c.name)+'聊天');if(meetPlace!==null&&c.mode==='online')proposeMeet(c,meetPlace);if(wantBack&&c.mode==='offline')proposeBackOnline(c);}catch(e){alert('回复失败：'+e.message);}tbTitle.textContent = c.nick || c.name;replying=false;const b2=document.getElementById('actBtn');if(b2)b2.disabled=false;updateActBtn();}
 
 function closeTransferModal() {
   var el = document.getElementById('transferModal');
@@ -3092,7 +2502,7 @@ function handleTransferAction(msgId, action, silent) {
   var amount = parseFloat(msg.amount) || 0;
   var isFromAI = (msg.from === 'ai');
   var c = getC(view.id);
-  var name = (c ? c.name || c.nick : '对方');
+  var name = (c ? c.nick || c.name : '对方');
 
   if (action === 'accept') {
     msg.status = 'accepted';
@@ -3153,7 +2563,7 @@ function declineMeet(cid){
   save();
   // ===== 新增：系统消息 =====
   if (view.type === 'chat' && view.id === cid) {
-    insertSystemMessage(`💔 你拒绝了 ${c.name || c.nick} 的见面邀请，TA有些失落。`);
+    insertSystemMessage(`💔 你拒绝了 ${c.nick || c.name} 的见面邀请，TA有些失落。`);
   }
 }
 function enterOffline(cid,place){
@@ -3297,7 +2707,7 @@ function exportCharacter(id){
   var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = (c.name || c.nick) + '_备份_' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = (c.nick || c.name) + '_备份_' + new Date().toISOString().slice(0,10) + '.json';
   a.click();
 }
 function importCharacter(){
