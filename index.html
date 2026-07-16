@@ -926,7 +926,7 @@ function renderChats(){
     var last = lastText(m[m.length - 1]) || '开始聊天吧';
     var un = c.unread || 0;
     var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
-    return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
+    return '<div class="swipe-wrap"><div class="swipe-del" style="right:-74px;" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
       avatarHtml(c) +
       '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between">' + esc(c.name || c.nick) + badge + '</div><div class="cell-sub">' + esc(last).slice(0, 30) + '</div></div></div></div>';
   }).join('');
@@ -948,7 +948,7 @@ function renderContacts(){
   }
   var items = cs.map(function(c){
     var sign = c.signature || c.pKeywords || '这个人很神秘，什么都没留下';
-    return '<div class="swipe-wrap"><div class="swipe-del" onclick="delContactById(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
+    return '<div class="swipe-wrap"><div class="swipe-del" style="right:-74px;" onclick="delContactById(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
       avatarHtml(c) +
       '<div class="cell-body"><div class="cell-title">' +
       esc(c.name || c.nick) +
@@ -971,35 +971,43 @@ function attachSwipe() {
     var del = wrap.querySelector('.swipe-del');
     if (!cell || !del) return;
 
+    // 默认隐藏红色删除按钮
+    del.style.right = '-74px';
+
     var delWidth = 74;
     var startX = 0;
     var startY = 0;
     var offsetX = 0;
     var isOpen = false;
 
-    // 关闭其他打开的行
     function closeOthers() {
       document.querySelectorAll('.swipe-wrap').forEach(function(w) {
         if (w !== wrap) {
           var c = w.querySelector('.swipe-cell');
+          var d = w.querySelector('.swipe-del');
           if (c) {
             c.style.transition = 'transform 0.25s ease';
             c.style.transform = 'translateX(0)';
             w._isOpen = false;
           }
+          if (d) {
+            d.style.right = '-74px';
+          }
         }
       });
     }
 
-    // 点击其他地方关闭
+    function closeThis() {
+      cell.style.transition = 'transform 0.25s ease';
+      cell.style.transform = 'translateX(0)';
+      del.style.right = '-74px';
+      isOpen = false;
+      wrap._isOpen = false;
+    }
+
     document.addEventListener('click', function(e) {
       if (!wrap.contains(e.target)) {
-        if (isOpen) {
-          cell.style.transition = 'transform 0.25s ease';
-          cell.style.transform = 'translateX(0)';
-          isOpen = false;
-          wrap._isOpen = false;
-        }
+        if (isOpen) closeThis();
       }
     });
 
@@ -1015,7 +1023,6 @@ function attachSwipe() {
       var dx = t.clientX - startX;
       var dy = t.clientY - startY;
 
-      // 如果垂直滑动大于水平，不处理（让页面滚动）
       if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
         return;
       }
@@ -1028,36 +1035,43 @@ function attachSwipe() {
       if (target < -delWidth) target = -delWidth;
       offsetX = target;
       cell.style.transform = 'translateX(' + target + 'px)';
+
+      // 滑动过程中同步显示删除按钮
+      var progress = Math.abs(target) / delWidth;
+      if (progress > 0.1) {
+        del.style.right = (10 - progress * 84) + 'px';
+      } else {
+        del.style.right = '-74px';
+      }
     }, { passive: false });
 
     cell.addEventListener('touchend', function(e) {
       cell.style.transition = 'transform 0.25s ease';
 
-      if (offsetX < -delWidth * 0.4) {
+      if (typeof offsetX !== 'number' || isNaN(offsetX)) {
+        offsetX = 0;
+      }
+
+      if (offsetX < -delWidth * 0.35) {
         closeOthers();
         cell.style.transform = 'translateX(-' + delWidth + 'px)';
+        del.style.right = '0';
         isOpen = true;
         wrap._isOpen = true;
       } else {
-        cell.style.transform = 'translateX(0)';
-        isOpen = false;
-        wrap._isOpen = false;
+        closeThis();
       }
     }, { passive: true });
 
-    // 点击 cell 关闭（如果已打开）
     cell.addEventListener('click', function(e) {
       if (isOpen) {
-        cell.style.transition = 'transform 0.25s ease';
-        cell.style.transform = 'translateX(0)';
-        isOpen = false;
-        wrap._isOpen = false;
+        closeThis();
         e.stopPropagation();
         e.preventDefault();
       }
     }, true);
 
-    // 桌面鼠标支持
+    // 鼠标支持
     var mouseStartX = 0;
     var mouseMoved = false;
 
@@ -1078,20 +1092,30 @@ function attachSwipe() {
       if (target < -delWidth) target = -delWidth;
       offsetX = target;
       cell.style.transform = 'translateX(' + target + 'px)';
+      var progress = Math.abs(target) / delWidth;
+      if (progress > 0.1) {
+        del.style.right = (10 - progress * 84) + 'px';
+      } else {
+        del.style.right = '-74px';
+      }
     });
 
     var mouseEnd = function(e) {
       if (!mouseMoved) { mouseStartX = undefined; return; }
       cell.style.transition = 'transform 0.25s ease';
-      if (offsetX < -delWidth * 0.4) {
+
+      if (typeof offsetX !== 'number' || isNaN(offsetX)) {
+        offsetX = 0;
+      }
+
+      if (offsetX < -delWidth * 0.35) {
         closeOthers();
         cell.style.transform = 'translateX(-' + delWidth + 'px)';
+        del.style.right = '0';
         isOpen = true;
         wrap._isOpen = true;
       } else {
-        cell.style.transform = 'translateX(0)';
-        isOpen = false;
-        wrap._isOpen = false;
+        closeThis();
       }
       mouseStartX = undefined;
       mouseMoved = false;
@@ -1878,12 +1902,9 @@ function renderVoiceList() {
   html += '<div class="section-title">💭 心声记录</div>';
   if (c.voiceLog && c.voiceLog.length) {
 c.voiceLog.forEach(function(v, index) {
-  html += '<div class="swipe-wrap" style="position:relative;overflow:hidden;margin:8px 12px;border-radius:10px;">' +
-    '<div class="swipe-del" style="position:absolute;right:0;top:0;bottom:0;width:74px;background:#e34;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;border-radius:0 10px 10px 0;" onclick="deleteVoiceRecord(\'' + c.id + '\',' + index + ')">删除</div>' +
-    '<div class="swipe-cell" style="padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;position:relative;transition:transform 0.2s;touch-action:pan-y;">' +
-      '<div style="font-size:14px;color:var(--text);line-height:1.6;">「' + esc(v.content) + '」</div>' +
-      '<div style="font-size:11px;color:var(--sub);margin-top:6px;">' + fmtVoiceTime(v.t) + '</div>' +
-    '</div>' +
+  html += '<div class="voice-card" data-cid="' + c.id + '" data-index="' + index + '" style="margin:8px 12px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:10px;cursor:pointer;" oncontextmenu="event.preventDefault();deleteVoiceRecord(\'' + c.id + '\',' + index + ')" onclick="event.stopPropagation();">' +
+    '<div style="font-size:14px;color:var(--text);line-height:1.6;">「' + esc(v.content) + '」</div>' +
+    '<div style="font-size:11px;color:var(--sub);margin-top:6px;">' + fmtVoiceTime(v.t) + '</div>' +
   '</div>';
 });
   } else {
