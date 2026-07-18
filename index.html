@@ -34,22 +34,33 @@
 #tabbar{height:68px;background:var(--nav);display:flex;border-top:1px solid var(--line);flex-shrink:0;padding:4px 4px 8px 4px;}
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;color:var(--sub);gap:3px;cursor:pointer;}
   .tab.active{color:var(--theme);}.tab .ic{font-size:22px;}
-  #home{position:absolute;inset:0;background-size:cover;background-position:center;background-image:radial-gradient(ellipse at 50% 20%, #3D2F4A, #1F1A2A 70%);padding:10px 16px 20px;overflow-y:auto;z-index:5;}
+  #home{position:absolute;inset:0;background-size:cover;background-position:center;background-image:radial-gradient(ellipse at 50% 20%, #3D2F4A, #1F1A2A 70%);padding:10px 16px 20px;overflow:hidden;z-index:5;}
 #appgrid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px 10px;           /* 行距 20，列距 10，更紧凑规整 */
-    grid-auto-rows: 88px;
+    gap: 14px 6px;           /* 原来是 20px 10px，缩小行距和列距 */
+    grid-auto-rows: 84px;    /* 原来是 88px，稍微收一点 */
     align-content: start;
-    margin-top: 8px;
+    margin-top: 4px;         /* 原来是 8px，往上收一点 */
 }
   .app{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;justify-content:flex-start;}
-  .app-ic{width:60px;height:60px;border-radius:15px;background:#fff center/cover;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 3px 8px rgba(0,0,0,.15);}
+.app-ic {
+    width: 64px;             /* 原来是 60px */
+    height: 64px;            /* 原来是 60px */
+    border-radius: 16px;     /* 原来是 15px，稍微圆一点 */
+    background: #fff center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 3px 8px rgba(0,0,0,.15);
+}
 .app-nm {
     font-size: 11px;
-    color: rgba(255,255,255,0.85);
+    color: var(--text);
     letter-spacing: 1px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    text-shadow: var(--app-text-shadow, 0 1px 4px rgba(0,0,0,0.5));
+    transition: color 0.3s, text-shadow 0.3s;
 }
   .app.big{grid-column:span 2;grid-row:span 2;justify-content:center;}
   .app.big .app-ic{width:130px;height:130px;border-radius:28px;font-size:72px;}
@@ -273,20 +284,17 @@
 .clock-starry .date {
     font-size: 12px;
     color: var(--sub);
-    opacity: 0.7;
+    opacity: var(--clock-sub-opacity, 0.7);  /* 这里改了 */
     white-space: nowrap;
 }
-
-/* —— 右侧：问候语 —— */
 .clock-starry .greet {
     font-size: 12px;
     color: var(--theme);
-    opacity: 0.45;
+    opacity: var(--clock-theme-opacity, 0.45); /* 这里改了 */
     letter-spacing: 2px;
     white-space: nowrap;
     font-weight: 300;
 }
-
 /* ----- 2×2 大组件（毛玻璃 → 透明）----- */
 .clock-starry.widget-2x2 {
     grid-column: span 2;
@@ -373,6 +381,25 @@
 .clock-starry .footer,
 .clock-starry.widget-2x2 .footer {
     display: none;
+}
+.page-container {
+  overflow: hidden;
+  width: 100%;
+  flex: 1;
+}
+.page-slider {
+  display: flex;
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+.page-slider .page {
+  min-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 6px;
+  grid-auto-rows: 84px;
+  align-content: start;
+  padding: 0 4px;
 }
 </style>
 </head>
@@ -476,22 +503,37 @@ const CFIELDS=['gender','age','job','family','body','pLook','pKeywords','pBehavi
 const SKINS = [
   {
     id: 'fusion',
-    name: '🌙 洛丽塔×女巫之夜',
-    color: '#B34A6A',          // 色块预览用
+    name: '🌙 女巫之夜',
+    color: '#B34A6A',
     '--theme': '#B34A6A',
     '--bg': '#1F1A2A',
     '--nav': '#2E2540',
     '--card': '#2E2540',
     '--text': '#E8DDE6',
     '--sub': '#A084A0',
-    '--line': '#3D2F4A'
-  }
+    '--line': '#3D2F4A',
+    // ✅ 内置壁纸（纯色/渐变色字符串，或图片URL）
+    wallpaper: 'radial-gradient(ellipse at 50% 20%, #3D2F4A, #1F1A2A 70%)'
+  },
+  {
+    id: 'aqua_girl',
+    name: '🌸 亚系少女',
+color: '#DDB6C9',
+  '--theme': '#DDB6C9',
+  '--bg': '#F9F4F7',
+  '--nav': '#FFFFFF',
+  '--card': '#FFFFFF',
+  '--text': '#2D2328',        // 改为深紫灰（原先 #493F45）
+  '--sub': '#5C4A52',         // 改为中灰粉（原先 #BCADB4）
+  '--line': '#EBE1E6',
+  wallpaper: 'radial-gradient(ellipse at 50% 20%, #F7EAF0 0%, #F4EEF1 60%, #EBE1E6 100%)'
+}
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
 
 const ICON_SETS = {
-  // 🧙 女巫之夜（当前这套）
+  // 🌙 女巫之夜
   fusion: {
     // 桌面应用
     wechat:   'https://s1.imagehub.cc/images/2026/07/18/a9faef329860549c150b76e1dbefe024.png',
@@ -514,57 +556,77 @@ const ICON_SETS = {
     discoverMoments: 'https://s1.imagehub.cc/images/2026/07/18/1e0c998bfe1009fe7a21302cfd2e3bc6.png',
   },
 
-  // 🌟 新主题（你后面做了之后，把图片直链填进来就行）
-  new_theme: {
-    // 桌面应用
-    wechat:   '', // 示例：'https://你的图床/xxx.png'
-    notes:    '',
-    focus:    '',
-    settings: '',
-    album:    '',
-    hearts:   '',
-    music:    '',
-    preset:   '',
-    floating: '',
-    shop:     '',
-    world:    '',
-    // 底栏
-    tabChats:    '',
-    tabContacts: '',
-    tabDiscover: '',
-    tabMe:       '',
-    // 发现页
-    discoverMoments: '',
-  }
+  // 🌸 亚系少女（浅色）
+aqua_girl: {
+  // 桌面应用
+  wechat:   'https://s1.imagehub.cc/images/2026/07/18/3d52ff962ca94ab2fa932a350be5d87e.png',
+  notes:    'https://s1.imagehub.cc/images/2026/07/18/8d0293cfe24582f3854e48188e76b04b.png',
+  focus:    'https://s1.imagehub.cc/images/2026/07/18/df8bd09b0f73bee23e3201474840c485.png',
+  settings: 'https://s1.imagehub.cc/images/2026/07/18/38939f087763d1c20c24b923cf7a1f0d.png',
+  album:    'https://s1.imagehub.cc/images/2026/07/18/ca9099844eb07492b316f3577f2731c8.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/07/18/cbc75e09f213c4967bfda4ab3c751d24.png',
+  music:    'https://s1.imagehub.cc/images/2026/07/18/578f70bd87cfa01ab0dc51408a3a9f60.png',
+  preset:   'https://s1.imagehub.cc/images/2026/07/18/9674b917fbee1c5bde956944f4c91328.png',
+  floating: 'https://s1.imagehub.cc/images/2026/07/18/aab17e5ac56dab93071c5e27cc6624eb.png',
+  shop:     'https://s1.imagehub.cc/images/2026/07/18/cd6a061ad9156dfb8d6395cc07db5f7c.png',
+  world:    'https://s1.imagehub.cc/images/2026/07/18/e3d1fc4788c6b2ce4d2405f94f11078a.png',
+  // 底栏
+  tabChats:    'https://s1.imagehub.cc/images/2026/07/18/8093c43d71b0dd670c2c3ce65b9fb946.png',
+  tabContacts: 'https://s1.imagehub.cc/images/2026/07/18/3f30df0b0b39432887373fbbdeb6ec9f.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/07/18/01a65fb2d7627fe4ced535e936150292.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/07/18/d53eb71abec7a8c2040a4c6d44dbbe02.png',
+  // 发现页
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/07/18/cc47b8a25593b462072f593ce294fc8b.png',
+},
+
 };
 // =====================================
-function applySkin(id){
+function applySkin(id) {
+  // 1. 查找主题配置
   var skin = SKINS.find(function(s) { return s.id === id; }) || SKINS[0];
   var root = document.documentElement;
-  root.style.setProperty('--theme', skin['--theme']);
-  root.style.setProperty('--bg', skin['--bg']);
-  root.style.setProperty('--nav', skin['--nav']);
-  root.style.setProperty('--card', skin['--card']);
-  root.style.setProperty('--text', skin['--text']);
-  root.style.setProperty('--sub', skin['--sub']);
-  root.style.setProperty('--line', skin['--line']);
 
-  // 切换主题 ID
-  currentThemeId = id || 'fusion';
-  DB.settings.skin = currentThemeId;
+  // 2. 批量应用 CSS 变量
+  var cssVars = ['--theme', '--bg', '--nav', '--card', '--text', '--sub', '--line'];
+  cssVars.forEach(function(key) {
+    root.style.setProperty(key, skin[key]);
+  });
+
+  // 3. 更新全局状态
+  currentThemeId = skin.id;
+  DB.settings.skin = skin.id;
+
+  // 4. 壁纸逻辑：用户未自定义壁纸时，切换为主题默认壁纸
+  if (!DB.desktop._userWallpaper) {
+    DB.desktop.wallpaper = skin.wallpaper || '';
+  }
+
   save();
-
-  // 更新所有图标（底栏 + 当前页面）
   updateAllIcons();
 
-  // 如果当前在首页或发现页，重新渲染
-if (view.type === 'home' && typeof renderHome === 'function') {
-    renderHome();
-}
-  else if (view.type === 'wechat' && wechatPage === 'discover') renderDiscover();
-  else if (view.type === 'wechat' && wechatPage === 'chats') renderChats();
-  else if (view.type === 'wechat' && wechatPage === 'contacts') renderContacts();
-  else if (view.type === 'wechat' && wechatPage === 'me') renderWxMe();
+  // ===== 新增：浅色主题适配（通过 CSS 变量，不再用内联样式） =====
+  var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea');
+if (isLight) {
+  root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
+  root.style.setProperty('--clock-sub-opacity', '1');
+  root.style.setProperty('--clock-theme-opacity', '1');
+  } else {
+    root.style.setProperty('--app-text-shadow', '0 1px 4px rgba(0,0,0,0.5)');
+    root.style.setProperty('--clock-sub-opacity', '0.7');
+    root.style.setProperty('--clock-theme-opacity', '0.45');
+  }
+  // ===========================================================
+
+  // 5. 刷新当前页面
+  if (view.type === 'home') {
+    if (typeof renderHome === 'function') renderHome();
+  } else if (view.type === 'wechat') {
+    if (wechatPage === 'discover' && typeof renderDiscover === 'function') renderDiscover();
+    else if (wechatPage === 'chats' && typeof renderChats === 'function') renderChats();
+    else if (wechatPage === 'contacts' && typeof renderContacts === 'function') renderContacts();
+    else if (wechatPage === 'me' && typeof renderWxMe === 'function') renderWxMe();
+  }
+  // 注：原来的 setTimeout 已删除，天气卡片背景由 renderHome 动态生成
 }
 function updateAllIcons() {
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
@@ -766,7 +828,17 @@ function renderHome() {
   
   const d = document.createElement('div');
   d.id = 'home';
-  if (DB.desktop.wallpaper) d.style.backgroundImage = `url('${DB.desktop.wallpaper}')`;
+  // 桌面壁纸：支持图片 URL 或 CSS 渐变字符串
+  var bg = DB.desktop.wallpaper;
+  if (bg) {
+    if (bg.startsWith('http') || bg.startsWith('data:')) {
+      d.style.backgroundImage = 'url(' + bg + ')';
+      d.style.backgroundSize = 'cover';
+      d.style.backgroundPosition = 'center';
+    } else {
+      d.style.background = bg;
+    }
+  }
   
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
   
@@ -782,7 +854,7 @@ function renderHome() {
   });
   
   // ---- 构建时钟 HTML ----
-var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
+  var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
     <div class="corners">
       <span>✦</span>
       <span>✦</span>
@@ -796,41 +868,53 @@ var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
     </div>
     <div class="greet">今夜星辰</div>
     <div class="footer">✦ ✦ ✦</div>
-  </div>`;  
-  // ---- 构建天气 HTML（独立卡片，不再放在 grid 里） ----
+  </div>`;
+  
+  // ---- 构建天气 HTML（独立卡片） ----
   var weatherHtml = '';
   if (weatherApp) {
-    weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:20px;background:rgba(255,255,255,0.06);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.08);padding:14px 16px 10px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.3s;position:relative;overflow:hidden;min-height:130px;">
-      <!-- 装饰粒子 -->
-      <div style="position:absolute;top:8%;left:6%;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.35);box-shadow:0 0 12px rgba(255,255,255,0.2);animation:floatParticle 7s ease-in-out infinite;"></div>
-      <div style="position:absolute;bottom:30%;right:10%;width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.30);box-shadow:0 0 10px rgba(255,255,255,0.15);animation:floatParticle 9s ease-in-out infinite 2s;"></div>
-      <div style="position:absolute;top:50%;left:75%;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.30);box-shadow:0 0 8px rgba(255,255,255,0.15);animation:floatParticle 8s ease-in-out infinite 3.5s;"></div>
-      <div style="position:absolute;top:25%;right:20%;width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.25);animation:floatParticle 6s ease-in-out infinite 1s;"></div>
-      <div style="position:absolute;bottom:10%;left:15%;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.20);animation:floatParticle 10s ease-in-out infinite 4s;"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
-        <span id="widgetIcon" style="font-size:28px;line-height:1;">🌤</span>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span id="widgetTemp" style="font-size:28px;font-weight:300;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:4px;">
-            <span id="widgetState" style="font-size:16px;font-weight:400;opacity:0.8;">晴</span>
-            <span id="widgetTempNum">--</span><span style="font-size:18px;opacity:0.5;">℃</span>
-          </span>
-          <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.08);color:var(--theme);font-size:14px;cursor:pointer;transition:all 0.2s;" onclick="event.stopPropagation();refreshWeather()">↻</span>
-          <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.05);color:var(--sub);font-size:14px;cursor:pointer;transition:all 0.2s;opacity:0.4;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
-        </div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:2px 0;position:relative;z-index:1;overflow:hidden;">
-        <div id="widgetDesc" style="font-size:15px;font-weight:500;color:var(--text);line-height:1.5;opacity:0.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
-        <div id="widgetDetail" style="font-size:12px;color:var(--sub);opacity:0.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
-      </div>
-      <div style="position:relative;z-index:1;flex-shrink:0;padding-bottom:2px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span id="widgetWorldName" style="font-size:12px;color:var(--sub);opacity:0.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;">未关联</span>
-          <span id="widgetUpdateTime" style="font-size:11px;color:var(--sub);opacity:0.4;white-space:nowrap;flex-shrink:0;">刚刚</span>
-        </div>
-        <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:4px;"></div>
-      </div>
-    </div>`;
-  }  
+    // ===== 新增：根据当前主题动态设置天气卡背景 =====
+    var skinId = DB.settings.skin || 'fusion';
+    var isLight = (skinId === 'aqua_girl' || skinId === 'pink_tea' || skinId === 'milktea');
+    var wBg = isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.06)';
+    var wBorder = isLight ? '1px solid rgba(255,255,255,0.8)' : '1px solid rgba(255,255,255,0.08)';
+    var wBlur = isLight ? 'blur(20px)' : 'blur(16px)';
+	var wParticle = isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.35)';
+var wParticleGlow = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)';
+    // =============================================
+
+weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:20px;background:${wBg};backdrop-filter:${wBlur};-webkit-backdrop-filter:${wBlur};border:${wBorder};padding:14px 16px 10px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.3s;position:relative;overflow:hidden;min-height:130px;">
+  <!-- 装饰粒子（颜色已改为动态变量） -->
+  <div style="position:absolute;top:8%;left:6%;width:6px;height:6px;border-radius:50%;background:${wParticle};box-shadow:0 0 12px ${wParticleGlow};animation:floatParticle 7s ease-in-out infinite;"></div>
+  <div style="position:absolute;bottom:30%;right:10%;width:5px;height:5px;border-radius:50%;background:${wParticle};box-shadow:0 0 10px ${wParticleGlow};animation:floatParticle 9s ease-in-out infinite 2s;"></div>
+  <div style="position:absolute;top:50%;left:75%;width:4px;height:4px;border-radius:50%;background:${wParticle};box-shadow:0 0 8px ${wParticleGlow};animation:floatParticle 8s ease-in-out infinite 3.5s;"></div>
+  <div style="position:absolute;top:25%;right:20%;width:3px;height:3px;border-radius:50%;background:${wParticle};box-shadow:0 0 6px ${wParticleGlow};animation:floatParticle 6s ease-in-out infinite 1s;"></div>
+  <div style="position:absolute;bottom:10%;left:15%;width:4px;height:4px;border-radius:50%;background:${wParticle};box-shadow:0 0 8px ${wParticleGlow};animation:floatParticle 10s ease-in-out infinite 4s;"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
+    <span id="widgetIcon" style="font-size:28px;line-height:1;">🌤</span>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span id="widgetTemp" style="font-size:28px;font-weight:300;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:4px;">
+        <span id="widgetState" style="font-size:16px;font-weight:400;opacity:0.8;">晴</span>
+        <span id="widgetTempNum">--</span><span style="font-size:18px;opacity:0.5;">℃</span>
+      </span>
+      <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.08);color:var(--theme);font-size:14px;cursor:pointer;transition:all 0.2s;" onclick="event.stopPropagation();refreshWeather()">↻</span>
+      <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.05);color:var(--sub);font-size:14px;cursor:pointer;transition:all 0.2s;opacity:0.4;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
+    </div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:2px 0;position:relative;z-index:1;overflow:hidden;">
+    <div id="widgetDesc" style="font-size:15px;font-weight:500;color:var(--text);line-height:1.5;opacity:0.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
+    <div id="widgetDetail" style="font-size:12px;color:var(--sub);opacity:0.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
+  </div>
+  <div style="position:relative;z-index:1;flex-shrink:0;padding-bottom:2px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span id="widgetWorldName" style="font-size:12px;color:var(--sub);opacity:0.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;">未关联</span>
+      <span id="widgetUpdateTime" style="font-size:11px;color:var(--sub);opacity:0.4;white-space:nowrap;flex-shrink:0;">刚刚</span>
+    </div>
+    <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:4px;"></div>
+  </div>
+</div>`;
+  }
+  
   // ---- 构建应用网格（只放普通 App） ----
   var appsHtml = otherApps.map(function(a) {
     var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-6px;right:-6px;min-width:28px;height:28px;padding:0 7px;background:#f43;color:#fff;border-radius:14px;font-size:16px;font-weight:600;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:9;"></span>' : '';
@@ -2044,9 +2128,96 @@ function delContactById(id){
   }, {icon:'🗑️', title:'删除角色'});
 }
 
-function renderSettings(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='设置';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;const s=DB.settings;content.innerHTML=`<div class="section-title">版本 ${APP_VER}｜AI 接口</div><div class="section"><div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div><div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div></div><button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button><div class="section"><div class="row"><label>主聊天模型</label><select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select></div><div class="row"><label>辅助模型</label><select id="auxModel"><option>${s.auxModel||'（润色/生成用）'}</option></select></div></div><button class="btn" onclick="saveApi()">保存接口设置</button><div class="section-title">✨ 主题皮肤（整体换肤）</div><div style="padding:10px 16px"><div onclick="applySkin('fusion');renderSettings()" style="cursor:pointer;border:2px solid #B34A6A;border-radius:12px;padding:10px 6px;text-align:center;background:#B34A6A22"><div style="width:100%;height:30px;border-radius:6px;background:#B34A6A;margin-bottom:6px"></div><div style="font-size:12px;color:var(--text)">🌙 洛丽塔×女巫之夜</div></div></div><div class="section-title">🖼️ 桌面壁纸</div><div class="field"><div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div></div><div class="section-title">😀 表情包仓库（AI靠"名字"识别使用）</div><div style="padding:10px 16px"><div class="stgrid">${DB.stickers.map((st,i)=>`<div class="st"><span class="x" onclick="delSticker(${i})">×</span><img src="${st.img}"><div class="nm">${esc(st.name)}</div></div>`).join('')}</div></div><button class="btn gray" onclick="addSticker()">＋ 添加表情</button><div class="section-title">App 图标（点图标换图片）</div>${DB.desktop.apps.map((a,i)=>`<div class="row"><div class="app-ic" style="width:40px;height:40px;font-size:22px;border-radius:10px;box-shadow:none;background-color:transparent;${a.icon?`background-image:url('${a.icon}')`:''}" onclick="pickAppIcon(${i})">${a.icon?'':a.emoji}</div><input style="margin-left:12px;text-align:left" value="${a.name}" onchange="DB.desktop.apps[${i}].name=this.value;save()">${a.icon?`<span style="color:#e34;cursor:pointer;font-size:13px" onclick="DB.desktop.apps[${i}].icon='';save();render()">还原</span>`:''}</div>`).join('')}<div class="hint">建议定期导出，清缓存会丢数据。</div><div style="height:20px"></div>`;}
+function renderSettings(){
+  showChrome(true,false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent='设置';
+  tbLeft.textContent='‹';
+  tbLeft.onclick=goHome;
+  tbRight.textContent='';
+  tbRight.onclick=null;
+  const s=DB.settings;
+  content.innerHTML=`
+    <div class="section-title">版本 ${APP_VER}｜AI 接口</div>
+    <div class="section">
+      <div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div>
+      <div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div>
+    </div>
+    <button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button>
+    <div class="section">
+      <div class="row"><label>主聊天模型</label><select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select></div>
+      <div class="row"><label>辅助模型</label><select id="auxModel"><option>${s.auxModel||'（润色/生成用）'}</option></select></div>
+    </div>
+    <button class="btn" onclick="saveApi()">保存接口设置</button>
+
+    <!-- ===== 主题皮肤（动态渲染） ===== -->
+    <div class="section-title">✨ 主题皮肤（整体换肤）</div>
+    <div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      ${SKINS.map(skin => `
+        <div onclick="applySkin('${skin.id}');renderSettings()" 
+             style="cursor:pointer;border:2px solid ${skin['--theme']};border-radius:12px;padding:10px 6px;text-align:center;background:${skin['--theme']}22;">
+          <div style="width:100%;height:30px;border-radius:6px;background:${skin['--theme']};margin-bottom:6px"></div>
+          <div style="font-size:12px;color:var(--text);">${skin.name}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="section-title">🖼️ 桌面壁纸</div>
+    <div class="field">
+      <div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div>
+      ${DB.desktop.wallpaper ? `
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:13px;" onclick="resetWallpaper()">🔄 恢复主题默认</button>
+        <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:13px;color:#e34;" onclick="clearWallpaper()">🗑️ 移除壁纸</button>
+      </div>
+      ` : ''}
+    </div>
+
+    <div class="section-title">😀 表情包仓库（AI靠"名字"识别使用）</div>
+    <div style="padding:10px 16px">
+      <div class="stgrid">${DB.stickers.map((st,i)=>`<div class="st"><span class="x" onclick="delSticker(${i})">×</span><img src="${st.img}"><div class="nm">${esc(st.name)}</div></div>`).join('')}</div>
+    </div>
+    <button class="btn gray" onclick="addSticker()">＋ 添加表情</button>
+
+    <div class="section-title">App 图标（点图标换图片）</div>
+    ${DB.desktop.apps.map((a,i)=>`
+      <div class="row">
+        <div class="app-ic" style="width:40px;height:40px;font-size:22px;border-radius:10px;box-shadow:none;background-color:transparent;${a.icon?`background-image:url('${a.icon}')`:''}" onclick="pickAppIcon(${i})">${a.icon?'':a.emoji}</div>
+        <input style="margin-left:12px;text-align:left" value="${a.name}" onchange="DB.desktop.apps[${i}].name=this.value;save()">
+        ${a.icon?`<span style="color:#e34;cursor:pointer;font-size:13px" onclick="DB.desktop.apps[${i}].icon='';save();render()">还原</span>`:''}
+      </div>
+    `).join('')}
+    <div class="hint">建议定期导出，清缓存会丢数据。</div>
+    <div style="height:20px"></div>
+  `;
+}
 function setTheme(k){DB.settings.theme=k;applyTheme(k);save();render();}
-function pickWallpaper(){pickImage(d=>{DB.desktop.wallpaper=d;save();render();},900);}
+function pickWallpaper() {
+  pickImage(function(d) {
+    DB.desktop.wallpaper = d;
+    DB.desktop._userWallpaper = true;
+    save();
+    render();
+  }, 900);
+}
+function resetWallpaper() {
+  DB.desktop._userWallpaper = false;
+  var skin = SKINS.find(function(s) { return s.id === DB.settings.skin; }) || SKINS[0];
+  DB.desktop.wallpaper = skin.wallpaper || '';
+  save();
+  render();
+  popTip('已恢复主题默认壁纸', { icon: '🔄', title: '完成' });
+}
+
+function clearWallpaper() {
+  popConfirm('确定要移除壁纸吗？', function() {
+    DB.desktop.wallpaper = '';
+    DB.desktop._userWallpaper = false;
+    save();
+    render();
+    popTip('壁纸已移除', { icon: '🗑️', title: '完成' });
+  }, { icon: '🗑️', title: '移除壁纸' });
+}
 function pickAppIcon(i){pickImage(d=>{DB.desktop.apps[i].icon=d;save();render();},160,true);}
 function addSticker(){pickImage(d=>{const name=prompt('给这个表情起个名字（AI会用这名字发它，如：开心、哭哭、摊手）：');if(!name)return;DB.stickers.push({id:'s'+Date.now(),name:name.trim(),img:d});save();render();},240,true);}
 function delSticker(i){popConfirm('删除这个表情？',function(){DB.stickers.splice(i,1);save();render();},{icon:'🗑️',title:'删除表情'});}
