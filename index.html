@@ -213,7 +213,7 @@
   margin-top: 8px;
 }
   .cell{display:flex;align-items:center;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);cursor:pointer;}
-  .avatar{width:46px;height:46px;border-radius:8px;background:var(--theme);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background-size:cover;background-position:center;}
+  .avatar{width:36px;height:36px;border-radius:6px;background:var(--theme);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background-size:cover;background-position:center;}
   .cell-body{flex:1;margin-left:12px;overflow:hidden;}.cell-title{font-size:16px;color:var(--text);}
   .cell-sub{font-size:13px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .empty{text-align:center;color:var(--sub);padding:60px 20px;font-size:14px;line-height:2;}
@@ -248,11 +248,13 @@
   .swatch.on{border-color:#333;}
 .ts{text-align:center;margin:16px 0 10px;}
 .ts-pill{display:inline-block;padding:3px 11px;font-size:11px;color:var(--theme);background:color-mix(in srgb,var(--theme) 14%,transparent);border-radius:11px;line-height:1.5;letter-spacing:.5px;font-weight:500;}
-  .msg{display:flex;padding:4px 10px;gap:6px;align-items:flex-start;}
+  .msg{display:flex;padding:5px 10px;gap:8px;align-items:flex-start;}
   .msg.me{flex-direction:row-reverse;}
   .cavatar{width:36px;height:36px;border-radius:6px;flex-shrink:0;background:var(--theme) center/cover;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
-  .msg-slide{display:flex;align-items:flex-start;transition:transform .2s;position:relative;}
-.msg.me .msg-slide{flex-direction:row-reverse;}
+.msg-slide{display:flex;flex-direction:column;align-items:flex-start;gap:0;transition:transform .2s;position:relative;}
+.msg.me .msg-slide{align-items:flex-end;}
+
+.msg.me .msg-slide{align-items:flex-end;}
 .msg-acts{display:flex;align-items:center;gap:6px;padding:0 6px;flex-shrink:0;}
 .msg-act{color:#fff;font-size:13px;padding:0 14px;height:34px;line-height:34px;border-radius:5px;cursor:pointer;white-space:nowrap;}
 .msg-act.recall,.msg-act.regen{background:var(--theme);}
@@ -743,11 +745,15 @@ function migrate(d){
 d.coins = d.coins || 0;
   d.me=d.me||{name:'我',avatar:''};d.me.realName=d.me.realName||'';
   d.settings=d.settings||{apiUrl:'',apiKey:'',chatModel:'',auxModel:''};
+  // ===== 群聊新增：上下文条数 =====
+  if(d.settings.groupCtxLimit===undefined)d.settings.groupCtxLimit='';
   delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
     if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
   d.settings.onlineStyle=d.settings.onlineStyle||DEFAULT_ONLINE;
   d.settings.offlineStyle=d.settings.offlineStyle||DEFAULT_OFFLINE;
   d.contacts=d.contacts||[];d.chats=d.chats||{};d.moments=d.moments||[];d.stickers=d.stickers||[];
+  // ===== 群聊新增：群聊数组 =====
+  d.groups=d.groups||[];
   d.desktop=d.desktop||{wallpaper:'',apps:null};
   if(!d.desktop.apps||!d.desktop.apps.length)d.desktop.apps=defaultApps();
   d.desktop.apps=d.desktop.apps.filter(a=>a.id!=='moments');
@@ -763,6 +769,9 @@ d.coins = d.coins || 0;
   d.contacts.forEach(c=>{
   if (!c.memories) c.memories = [];
   if (!c.schedules) c.schedules = [];
+  // ===== 群聊新增：社会关系 + 每日私聊触发计数 =====
+  if (!c.relations) c.relations = [];
+  if (!c._groupPrivateTrigger) c._groupPrivateTrigger = { date:'', count:0 };
     if(c.inChatList===undefined)c.inChatList=!!(d.chats[c.id]&&d.chats[c.id].length);
     if(c.pHabit){c.pStyle=(c.pStyle||'')+(c.pStyle?'\n':'')+'口头禅/习惯：'+c.pHabit;delete c.pHabit;}
 	c.pBehavior = c.pBehavior || '';
@@ -809,6 +818,62 @@ if (d.desktop && d.desktop.apps) {
 }
   return d;
 }
+// ==================== 社会关系·AI润色 ====================
+async function polishRelation(idx){
+  var c = getC(editingId);
+  if(!c.relations || !c.relations[idx]) return;
+  var r = c.relations[idx];
+  var model = DB.settings.auxModel || DB.settings.chatModel;
+  if(!model){ alert('请先在 设置 里拉取并选择模型'); return; }
+
+  // 弄清"对方是谁"
+  var targetName = '', targetPersona = '';
+  if(r.targetId==='npc'){
+    targetName = r.targetName || '某人';
+  } else {
+    var t = getC(r.targetId);
+    if(t){
+      targetName = t.name || t.nick;
+      targetPersona = (t.pKeywords||'') + ' ' + (t.job||'');
+    } else { targetName = '某人'; }
+  }
+
+  var selfName = c.name || c.nick || '这个角色';
+  var selfPersona = (c.pKeywords||'');
+
+  var btn = document.getElementById('polishRel'+idx);
+  if(btn){ btn.textContent='⏳ 润色中…'; btn.disabled=true; }
+
+  var pr = '把下面这句人物关系润色得自然、有画面感，但要简洁。\n\n'
+    + '角色：'+selfName+'（性格：'+selfPersona+'）\n'
+    + '对象：'+targetName+'\n'
+    + '关系：'+(r.relationType||'中性')+'\n'
+    + '草稿：'+(r.description||'（用户未填，请仅根据上面的"关系标签"和两人性格，写一条最基础、克制的关系描述，不要脑补任何具体剧情）')+'\n\n'
+    + '硬性要求：\n'
+	+ '0. 用客观的第三人称陈述关系事实，绝对不要模仿角色的语气、口癖、颜文字、语气词（如"唔…""呢""(^-^)"）。这是设定说明，不是角色发言。\n'
+    + '1. 只写1~2句话，最多50字，禁止长篇大论。\n'
+    + '2. 用真名，称角色为「'+selfName+'」、对象为「'+targetName+'」，不要用你/我/TA。\n'
+    + '3. 只在草稿基础上顺化丰满，严禁编造草稿里没有的具体事件或情节。\n'
+    + '4. 只输出这一两句话本身，不要解释、不要引号、不要JSON。';
+
+  try {
+    var out = await callAI([{role:'user', content:pr}], model);
+    out = (out||'').replace(/```/g,'').replace(/^["「『]|["」』]$/g,'').trim();
+    if(out){
+      c.relations[idx].description = out;
+      save();
+      render();
+      // render会重绘，按钮状态自动恢复，无需手动复位
+    } else {
+      alert('润色返回空，请重试');
+      if(btn){ btn.textContent='✨ AI润色这条关系'; btn.disabled=false; }
+    }
+  } catch(e){
+    alert('润色失败：'+e.message);
+    if(btn){ btn.textContent='✨ AI润色这条关系'; btn.disabled=false; }
+  }
+}
+
 function defaultApps(){return[{id:'wechat',name:'微信',emoji:'💬',icon:''},{id:'notes', name:'备忘录', emoji:'📝', icon:''},{id:'settings',name:'设置',emoji:'⚙️',icon:''},{id:'album',name:'相册',emoji:'🖼️',icon:''},{id:'music',name:'音乐',emoji:'🎵',icon:''},{id:'weather',name:'天气',emoji:'⛅',icon:''},{id:'preset',name:'预设',emoji:'🎭',icon:''},{id:'hearts',name:'心迹',emoji:'💗',icon:''},{id:'focus',name:'专注',emoji:'⏱️',icon:''},{id:'world',name:'世界观',emoji:'🌍',icon:''},{id:'floating',name:'浮光',emoji:'✨',icon:''},{id:'shop',name:'购物',emoji:'🛍️',icon:''}];}
 function blankChar(id){const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:''};CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;}
 function seedAiChan(d){const id='c_aichan';const c=blankChar(id);Object.assign(c,{name:'AI酱',nick:'AI酱',gender:'女',age:'看起来16',job:'手机里的AI助手',
@@ -1040,6 +1105,9 @@ function render(){triggerDailyMemoryCheck();triggerDailyMemoryCheck();const h=do
   if(view.type==='settings')return renderSettings();
   if(view.type==='charEdit')return renderCharEdit();
   if(view.type==='chat')return renderChat();
+  if(view.type==='groupList')return renderGroupList();
+  if(view.type==='groupChat')return renderGroupChat();
+  if(view.type==='groupSet')return renderGroupSet();
   if(view.type==='moments')return renderMoments();
   if(view.type==='hearts')return renderHearts();
   if(view.type==='heartDetail')return renderHeartDetail();
@@ -1463,11 +1531,13 @@ function autoCheckWeatherUpdate() {
   }
 
   // 依次更新每个世界观（串行，不是并行）
+  var tried = {};
+
   function updateNext() {
-    // 找第一个需要更新的世界观
     var target = null;
     for (var k = 0; k < worlds.length; k++) {
       var wk = worlds[k];
+      if (tried[wk.id]) continue;
       if (!wk.weather || (Date.now() - (wk.weather.updatedAt || 0) > _weatherUpdateInterval)) {
         target = wk;
         break;
@@ -1475,19 +1545,18 @@ function autoCheckWeatherUpdate() {
     }
 
     if (!target) {
-      // 全部更新完毕，解锁
       _weatherUpdating = false;
       renderWeatherWidget();
       return;
     }
 
+    tried[target.id] = true;
+
     aiGenerateWeather(target.id, function(success) {
-      // 不管成功还是失败，继续下一个
-      updateNext();
+      setTimeout(updateNext, 0);
     });
   }
 
-  // 开始更新队列
   updateNext();
 }
 function refreshWeather() {
@@ -1535,18 +1604,17 @@ async function aiGenerateWeather(worldId, callback) {
   var month = now.getMonth() + 1;
   var season = month >= 3 && month <= 5 ? '春天' : month >= 6 && month <= 8 ? '夏天' : month >= 9 && month <= 11 ? '秋天' : '冬天';
   
-  var prompt = '你是一个氛围感极强的小说环境描写师。请根据以下世界观，生成一条「天气氛围句」。\n\n' +
-    '【世界观】\n' + (world.desc || '现代都市') + '\n\n' +
-    '【当前时间】' + season + '，' + period + '\n\n' +
+  var prompt = '根据世界观生成一条简洁的天气描述。\n\n' +
+    '【世界观】' + (world.desc || '现代都市') + '\n' +
+    '【时间】' + season + '，' + period + '\n\n' +
     '【要求】\n' +
-    '1. 不要写「晴天」「下雨」「多云」这类干巴巴的词，要写出「这个世界独有的天气现象」\n' +
-    '2. 如果世界观里有魔法、异能、妖气、灵气、赛博等设定，天气要体现这些元素\n' +
-    '3. 字数严格控制在 18-30 字之间，像一句小说里的环境描写\n' +
-    '4. 只输出一个 JSON 对象，格式：{"icon":"天气emoji","state":"中文天气状态(晴/雨/雪/多云/阴等)","temp":数字,"desc":"氛围句","detail":"补充细节"}。不要任何解释，不要代码块标记。\n\n' +
-    '可用 icon：☀️ 晴 / ⛅ 多云 / ☁️ 阴 / 🌧 雨 / ⛈ 雷暴 / ❄️ 雪 / 🌫 雾 / 🌪 风 / 🌙 夜\n' +
-    'temp 范围：-5 ~ 45 之间合理数字\n' +
-    'desc 就是那条氛围句\n' +
-    'detail 可以写湿度、风、或世界观特有的细节（如「妖气浓度 73%」）';
+    '1. desc是一句朴素、清楚的天气描写，就写天气本身（如"晴空万里，微风和煦""细雨绵绵，空气微凉"）。\n' +
+    '2. 禁止出现任何人物（他/她/你）、禁止出现屏幕/手机等现代设备意象、禁止把天气写成带情节的小场景。只描写天空、温度、风、光这类自然现象。\n' +
+    '3. 只有当世界观明确含魔法/灵气/妖气/赛博等设定时，才可轻微融入；普通现代/都市世界就写正常真实的天气，不要硬凑奇幻词。\n' +
+    '4. desc 控制在12-22字，简洁自然。\n' +
+    '5. 只输出JSON：{"icon":"天气emoji","state":"晴/雨/雪/多云/阴等","temp":数字,"desc":"天气描写","detail":"补充如湿度/风力"}。不要解释、不要代码块。\n\n' +
+    '可用icon：☀️晴 ⛅多云 ☁️阴 🌧雨 ⛈雷暴 ❄️雪 🌫雾 🌪风 🌙夜\n' +
+    'temp：-5~45之间合理数字';
   
   try {
     var out = await callAI([{ role: 'user', content: prompt }], model);
@@ -1604,6 +1672,14 @@ async function aiGenerateWeather(worldId, callback) {
     if (callback) callback(true);
   } catch (e) {
     console.error('AI 生成天气失败:', e);
+    // 失败也盖个时间戳，避免下一轮立刻疯狂重试（隔一个周期后才会再试）
+    if (!world.weather) {
+      world.weather = { icon:'🌤', state:'晴', temp:22, desc:'（天气生成失败，稍后重试）', detail:'', updatedAt: Date.now() };
+      save();
+    } else {
+      world.weather.updatedAt = Date.now();
+      save();
+    }
     if (callback) callback(false);
   }
 }
@@ -2206,30 +2282,65 @@ function renderWechat(){showChrome(true,true);statusbar.classList.add('dark');tb
 function avatarHtml(c){const bg=c.avatar?`background-image:url('${c.avatar}')`:'';return `<div class="avatar" style="${bg}">${c.avatar?'':(c.name?c.name[0]:'?')}</div>`;}
 function lastText(m){if(!m)return'';if(m.recalled)return'[有一条消息被撤回]';if(m.type==='image')return'[图片]';if(m.type==='transfer')return'[转账]';if(m.type==='redpacket')return'[红包]';if(m.type==='voice')return'[语音]';if(m.type==='sticker')return'[表情]';return m.content;}
 function renderChats(){
-  var cs = DB.contacts.filter(function(c){ return !c._draft && c.inChatList; }).sort(function(a,b){ return lastMsgTime(b.id) - lastMsgTime(a.id); });
-  if (!cs.length) {
+  // 私聊条目
+  var privateItems = DB.contacts.filter(function(c){ return !c._draft && c.inChatList; })
+    .map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
+
+  // 群聊条目（未隐藏的）
+  var groupItems = (DB.groups||[]).filter(function(g){ return !g.hideInChats; })
+    .map(function(g){ return { kind:'group', id:g.id, time:(g.lastMsg&&g.lastMsg.time)?g.lastMsg.time:(g.createdAt||0), g:g }; });
+
+  // 合并 + 按时间降序
+  var all = privateItems.concat(groupItems).sort(function(a,b){ return b.time - a.time; });
+
+  if (!all.length) {
     content.innerHTML = '<div class="empty">还没有对话～<br>去「通讯录」点一个角色开始聊天</div>';
     refreshChatBadges();
     return;
   }
-  var items = cs.map(function(c){
-    var m = DB.chats[c.id] || [];
-    var last = lastText(m[m.length - 1]) || '开始聊天吧';
-    var un = c.unread || 0;
-    var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
-    return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
-      avatarHtml(c) +
-      '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between">' + esc(c.nick || c.name) + badge + '</div><div class="cell-sub">' + esc(last).slice(0, 30) + '</div></div></div></div>';
+
+  var items = all.map(function(item){
+    if (item.kind === 'private') {
+      var c = item.c;
+      var m = DB.chats[c.id] || [];
+      var last = lastText(m[m.length - 1]) || '开始聊天吧';
+      var un = c.unread || 0;
+      var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
+      return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
+        avatarHtml(c) +
+        '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between">' + esc(c.nick || c.name) + badge + '</div><div class="cell-sub">' + esc(last).slice(0, 30) + '</div></div></div></div>';
+    } else {
+      var g = item.g;
+      var preview = '群聊已创建';
+      if (g.lastMsg && g.lastMsg.text) {
+        var sender = '';
+        if (g.lastMsg.senderId === 'user') sender = (DB.me.name||'我') + '：';
+        else if (g.lastMsg.senderId) { var sc = getC(g.lastMsg.senderId); sender = (sc?(sc.nick||sc.name):'') + '：'; }
+        preview = sender + g.lastMsg.text;
+      }
+      var un = g.unread || 0;
+      var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
+      return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeGroupFromChats(\'' + g.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + g.id + '" onclick="openGroupChat(\'' + g.id + '\')">' +
+        '<div class="avatar" style="background:var(--theme);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;">👥</div>' +
+        '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between"><span>' + esc(g.name) + ' <span style="color:var(--sub);font-size:13px;">(' + (g.members.length+1) + ')</span></span>' + badge + '</div><div class="cell-sub">' + esc(preview).slice(0, 30) + '</div></div></div></div>';
+    }
   }).join('');
   content.innerHTML = '<div style="flex:1;min-height:100%;padding-bottom:8px;">' + items + '</div>';
   attachSwipe();
   refreshChatBadges();
 }
+
 function lastMsgTime(cid){const arr=DB.chats[cid];if(!arr||!arr.length)return 0;return arr[arr.length-1].time||0;}
 function renderContacts(){
   var importHtml = '<div class="section" style="margin-top:0;background:var(--card);border-bottom:1px solid var(--line);padding:6px 16px;display:flex;justify-content:space-between;align-items:center;">' +
     '<span style="color:var(--sub);font-size:13px;">👥 通讯录</span>' +
     '<button class="btn gray" style="display:inline-block;width:auto;margin:0;padding:4px 14px;font-size:13px;" onclick="importCharacter()">📥 导入角色</button>' +
+    '</div>' +
+    // ===== 群聊入口 =====
+    '<div class="cell" style="border-bottom:1px solid var(--line);" onclick="view={type:\'groupList\'};render();">' +
+      '<div class="avatar" style="background:var(--theme);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;">👥</div>' +
+      '<div class="cell-body"><div class="cell-title">群聊</div>' +
+      '<div class="cell-sub" style="color:var(--sub);">' + (DB.groups.length ? DB.groups.length + ' 个群聊' : '还没有群聊') + '</div></div>' +
     '</div>';
 
   var cs = DB.contacts.filter(function(c){ return !c._draft; });
@@ -2252,38 +2363,39 @@ function renderContacts(){
 function renderDiscover() {
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
 
-  // ---- 获取最新发朋友圈的角色 ----
-  var latestMoment = null;
-  var latestAuthor = null;
-  // 从 DB.moments 中找最新的一条非自己发的
-  for (var i = DB.moments.length - 1; i >= 0; i--) {
-    var m = DB.moments[i];
-    if (m.author !== 'me') {
-      latestMoment = m;
-      latestAuthor = getC(m.author);
-      break;
+  var rightHtml = '';
+  var hasUnread = (DB.momentUnread || 0) > 0 || (DB.momentReplyUnread || 0) > 0;
+
+  // 只有存在未读时，才显示头像和红点
+  if (hasUnread) {
+    // 找最新一条非自己发的朋友圈的作者
+    var latestMoment = null;
+    var latestAuthor = null;
+    for (var i = DB.moments.length - 1; i >= 0; i--) {
+      var m = DB.moments[i];
+      if (m.author !== 'me') {
+        latestMoment = m;
+        latestAuthor = getC(m.author);
+        break;
+      }
+    }
+
+    // 头像
+    if (latestAuthor) {
+      var avatarStyle = latestAuthor.avatar
+        ? 'background-image:url(\'' + latestAuthor.avatar + '\');background-size:cover;background-position:center;'
+        : '';
+      var avatarText = latestAuthor.avatar ? '' : (latestAuthor.nick || latestAuthor.name || '?')[0];
+      rightHtml += '<span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:#ccc;text-align:center;line-height:28px;font-size:12px;color:#fff;flex-shrink:0;margin-right:4px;' + avatarStyle + '">' + avatarText + '</span>';
+    }
+
+    // 数字圈（AI回复你的评论）
+    var replyUnread = DB.momentReplyUnread || 0;
+    if (replyUnread > 0) {
+      rightHtml += '<span style="min-width:20px;height:20px;padding:0 6px;background:#f43;color:#fff;border-radius:10px;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">' + (replyUnread > 99 ? '99+' : replyUnread) + '</span>';
     }
   }
 
-  // ---- 构建右侧显示内容 ----
-  var rightHtml = '';
-
-  // 1. 小头像（最新发朋友圈的角色）
-  if (latestAuthor) {
-    var avatarStyle = latestAuthor.avatar
-      ? 'background-image:url(\'' + latestAuthor.avatar + '\');background-size:cover;background-position:center;'
-      : '';
-    var avatarText = latestAuthor.avatar ? '' : (latestAuthor.nick || latestAuthor.name || '?')[0];
-    rightHtml += '<span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:#ccc;text-align:center;line-height:28px;font-size:12px;color:#fff;flex-shrink:0;margin-right:4px;' + avatarStyle + '">' + avatarText + '</span>';
-  }
-
-  // 2. 数字圈（AI回复了你的评论）
-  var replyUnread = DB.momentReplyUnread || 0;
-  if (replyUnread > 0) {
-    rightHtml += '<span style="min-width:20px;height:20px;padding:0 6px;background:#f43;color:#fff;border-radius:10px;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">' + (replyUnread > 99 ? '99+' : replyUnread) + '</span>';
-  }
-
-  // ---- 渲染 ----
   content.innerHTML = '<div class="section" style="margin-top:12px">' +
     '<div class="cell" onclick="openMoments()">' +
       '<div class="avatar" style="background:transparent; background-image: url(' + icons.discoverMoments + '); background-size: cover; background-position: center;"></div>' +
@@ -2293,6 +2405,839 @@ function renderDiscover() {
 
   refreshMomentBadge();
 }
+// 群聊列表页（临时简版，第③步会完善建群）
+function renderGroupList(){
+  showChrome(true,false);
+  statusbar.classList.add('dark');
+  tbLeft.textContent='‹'; tbLeft.onclick=function(){ goWechat('contacts'); };
+  tbTitle.textContent='群聊';
+  tbRight.textContent='＋'; tbRight.onclick=function(){ openCreateGroup(); };
+  content.style.backgroundImage=''; content.style.display='block';
+  var groups=DB.groups||[];
+  if(!groups.length){ content.innerHTML='<div class="empty">还没有群聊<br>点右上角 ＋ 创建一个</div>'; return; }
+  var items=groups.map(function(g){
+    return '<div class="cell" onclick="openGroupChat(\''+g.id+'\')">'+
+      '<div class="avatar" style="background:var(--theme);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;">👥</div>'+
+      '<div class="cell-body"><div class="cell-title">'+esc(g.name)+' <span style="color:var(--sub);font-size:13px;">('+(g.members.length+1)+')</span></div></div>'+
+    '</div>';
+  }).join('');
+  content.innerHTML='<div style="flex:1;min-height:100%;padding-bottom:8px;">'+items+'</div>';
+}
+
+// 从聊天列表移除群（群仍在，不删记录）—— 这是「删除对话」，不是退群
+function removeGroupFromChats(gid){
+  popConfirm('从聊天列表移除该群？（群仍保留在 通讯录→群聊 里，聊天记录不删）', function(){
+    var g=(DB.groups||[]).find(function(x){return x.id===gid;});
+    if(g) g.hideInChats=true;
+    save(); render();
+  }, {icon:'👥', title:'移除群聊'});
+}
+
+// ↓↓↓ 临时占位，第③④步会替换成真的，先防止报错 ↓↓↓
+// ==================== 创建群聊 ====================
+function openCreateGroup(){
+  var chars = DB.contacts.filter(function(c){ return !c._draft; });
+  if (chars.length < 2){ alert('至少需要 2 个角色才能建群，先去通讯录多建几个角色吧～'); return; }
+
+  var checkboxes = chars.map(function(c){
+    var name = esc(c.nick || c.name);
+    var avStyle = c.avatar ? "background-image:url('"+c.avatar+"')" : 'background:var(--theme);color:#fff;display:flex;align-items:center;justify-content:center;';
+    return '<label style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line);cursor:pointer;">'+
+      '<input type="checkbox" class="grp-check" value="'+c.id+'" style="width:18px;height:18px;flex-shrink:0;">'+
+      '<div class="avatar" style="width:34px;height:34px;'+avStyle+'">'+(c.avatar?'':name[0])+'</div>'+
+      '<span style="color:var(--text);font-size:15px;">'+name+'</span>'+
+    '</label>';
+  }).join('');
+
+  var mo = document.createElement('div');
+  mo.className = 'modal'; mo.id = 'modal';
+  mo.innerHTML =
+    '<div class="modal-box">'+
+      '<div style="font-weight:600;margin-bottom:10px;">👥 创建群聊</div>'+
+      '<div style="font-size:12px;color:var(--sub);margin-bottom:4px;">群名称（留空自动生成）</div>'+
+      '<input id="grp_name" placeholder="给群起个名字…" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);margin-bottom:12px;box-sizing:border-box;">'+
+      '<div style="font-size:12px;color:var(--sub);margin-bottom:4px;">选择成员（至少 2 人）</div>'+
+      '<div style="max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:4px 10px;margin-bottom:12px;">'+checkboxes+'</div>'+
+      '<button class="btn" style="width:100%;margin:0 0 8px;" onclick="doCreateGroup()">创建</button>'+
+      '<button class="btn gray" style="width:100%;margin:0;" onclick="closeModal()">取消</button>'+
+    '</div>';
+  mo.onclick = function(e){ if(e.target===mo) closeModal(); };
+  phone.appendChild(mo);
+}
+
+function doCreateGroup(){
+  var checked = document.querySelectorAll('.grp-check:checked');
+  var members = [];
+  checked.forEach(function(el){ members.push(el.value); });
+  if (members.length < 2){ alert('至少选择 2 个成员～'); return; }
+
+  var name = document.getElementById('grp_name').value.trim();
+  if (!name){
+    var names = members.slice(0,3).map(function(id){ var c=getC(id); return c?(c.nick||c.name):'?'; });
+    name = names.join('、') + '的群聊';
+  }
+
+  var gid = 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  DB.groups.push({
+    id: gid, name: name, members: members, owner: members[0],
+    createdAt: Date.now(), unread: 0, lastMsg: null
+  });
+  if (!DB.chats[gid]) DB.chats[gid] = [];
+  save();
+  closeModal();
+
+  view = { type:'groupChat', id:gid };
+  render();
+}
+
+// ==================== 打开群聊 ====================
+function openGroupChat(gid){
+  var g = (DB.groups||[]).find(function(x){ return x.id===gid; });
+  if(!g){ goWechat('chats'); return; }
+  g.unread = 0; save();
+  view = { type:'groupChat', id:gid };
+  render();
+}
+
+// ==================== 群聊气泡（带昵称 + 撤回显示）====================
+function groupBubble(m){
+  if (m.recalled){
+    var whoR = (m.role==='user') ? (DB.me.name||'我') : (function(){ var cc=getC(m.charId); return cc?(cc.nick||cc.name):'对方'; })();
+    return '<div class="ts">'+esc(whoR)+' 撤回了一条消息</div>';
+  }
+
+  var me = (m.role === 'user');
+  var c = (!me && m.charId) ? getC(m.charId) : null;
+
+  var av = me ? DB.me.avatar : (c ? c.avatar : '');
+  var initial = me ? ((DB.me.name||'我')[0]) : (c ? ((c.name||'?')[0]) : '?');
+  var senderName = me ? '' : (c ? (c.nick||c.name) : '未知');
+
+  var body;
+  if (m.type === 'image') {
+    body = '<div class="mbody" style="display:inline-block;padding:3px;background:'+(me?'var(--theme)':'var(--card)')+'"><img src="'+m.content+'" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>';
+  } else if (m.type === 'sticker') {
+    var s = DB.stickers.find(function(x){ return x.name===m.content; });
+    body = s ? '<div style="display:inline-block;padding:0"><img src="'+s.img+'" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>' : '<div class="mbody" style="display:inline-block;">[表情:'+esc(m.content)+']</div>';
+  } else if (m.type === 'voice') {
+    var dur = Math.max(1, Math.min(60, Math.round((m.content||'').length / 2.2)));
+    var expandedClass = m.voiceExpanded ? 'expanded' : '';
+    body = '<div class="mbody voice-bubble '+expandedClass+'" style="cursor:pointer;display:inline-flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;text-align:left;'+(me?'background:var(--theme);color:#fff;':'')+'" onclick="toggleVoice(\''+m.id+'\')">'+
+      '<div class="voice-top">'+
+        '<span class="play-icon">▶</span>'+
+        '<div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>'+
+        '<span class="duration">'+dur+'″</span>'+
+      '</div>'+
+      '<div class="voice-text">'+esc(m.content)+'</div>'+
+    '</div>';
+  } else {
+    body = '<div class="mbody" style="display:inline-block;max-width:100%;text-align:left;word-break:break-word;white-space:pre-wrap;">'+esc(m.content)+'</div>';
+  }
+
+  var nameTag = (!me && senderName)
+    ? '<div style="font-size:11px;color:var(--sub);line-height:1.2;margin:0 0 1px 2px;">'+esc(senderName)+'</div>'
+    : '';
+
+  var avExtra = nameTag ? 'margin-top:15px;' : '';
+  return '<div class="msg '+(me?'me':'')+'" data-mid="'+(m.id||'')+'">'+
+    '<div class="avatar" style="'+(av?"background-image:url('"+av+"');":'')+avExtra+'">'+(av?'':initial)+'</div>'+
+    '<div class="msg-slide" style="max-width:70%;min-width:0;'+(me?'text-align:right;':'text-align:left;')+'">'+
+      nameTag + body +
+    '</div>'+
+  '</div>';
+}
+
+// ==================== 群聊界面 ====================
+function renderGroupChat(keepScroll){
+  var savedScroll = keepScroll ? content.scrollTop : 0;
+
+  var oldBottom = document.getElementById('chatBottom'); if(oldBottom) oldBottom.remove();
+  var oldModal = document.getElementById('modal'); if(oldModal) oldModal.remove();
+
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(!g){ goWechat('chats'); return; }
+
+  // 顶部栏
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = function(){ goWechat('chats'); };   // ← 退出回聊天列表
+  tbTitle.textContent = g.name + '(' + (g.members.length+1) + ')';
+  tbRight.textContent = '⋯';
+  tbRight.onclick = function(){ openGroupSet(g.id); };
+  content.style.backgroundImage = '';
+
+  // 消息列表
+  var msgs = DB.chats[g.id] || [];
+  var show = msgs, more = 0;
+  if (msgs.length > 150){ more = msgs.length-150; show = msgs.slice(-150); }
+  var html = more ? '<div class="ts">（仅显示最近150条）</div>' : '';
+  lastBubbleTime = 0;
+  show.forEach(function(m){
+    var t = m.time || Date.now();
+    if(!lastBubbleTime || t-lastBubbleTime>300000){ html += tsHtml(t); lastBubbleTime = t; }
+    html += groupBubble(m);
+  });
+  content.innerHTML = html;
+  
+    // ===== 群聊·绑定消息左滑 =====
+  document.querySelectorAll('#content .msg').forEach(function(el){
+    if(el._swipeMsg) return;
+    el._swipeMsg = true;
+    var mid = el.dataset.mid;
+    var isMe = el.classList.contains('me');
+    var startX=0, startY=0, moved=false;
+    var slideEl = el;
+    el.addEventListener('touchstart', function(e){ var t=e.touches[0]; startX=t.clientX; startY=t.clientY; moved=false; slideEl.style.transition='none'; }, {passive:true});
+    el.addEventListener('touchmove', function(e){
+      if(startX===undefined) return;
+      var t=e.touches[0]; var dx=t.clientX-startX; var dy=t.clientY-startY;
+      if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>15) return;
+      if(Math.abs(dx)<10) return;
+      e.preventDefault(); moved=true;
+      var target=Math.max(-80,Math.min(0,dx));
+      slideEl.style.transform='translateX('+target+'px)';
+    }, {passive:false});
+    el.addEventListener('touchend', function(){
+      slideEl.style.transition='transform .2s';
+      if(moved && slideEl.style.transform){
+        var cur=parseFloat(slideEl.style.transform.replace('translateX(',''))||0;
+        if(cur<-40){ openGroupMsgMenu(mid,isMe); slideEl.style.transform='translateX(0)'; }
+        else slideEl.style.transform='translateX(0)';
+      } else slideEl.style.transform='translateX(0)';
+      startX=undefined;
+    }, {passive:true});
+  });
+
+
+  // 底部输入栏（＋只留相册；无线上线下切换）
+  var bar = document.createElement('div');
+  bar.id = 'chatBottom';
+  bar.innerHTML =
+    '<div id="inputRow">'+
+      '<span class="cbtn plus" onclick="togglePanel()">＋</span>'+
+      '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onGroupInput(this)" onkeydown="onGroupKey(event)"></textarea>'+
+      '<span class="cbtn" onclick="openGroupStickerPicker()" style="font-size:30px;width:36px;padding:0;text-align:center;color:var(--text);flex-shrink:0;line-height:38px;cursor:pointer;">☺</span>'+
+      '<button class="cbtn reply" id="actBtn" onclick="groupActBtnClick()">▶ 回复</button>'+
+    '</div>'+
+    '<div id="chatPanel">'+
+      '<div class="pnl" onclick="groupSendImage()">🖼️<span>相册</span></div>'+
+    '</div>';
+  phone.appendChild(bar);
+  updateGroupActBtn();
+
+  if (keepScroll && savedScroll !== undefined) content.scrollTop = savedScroll;
+  else scrollBottom();
+}
+// ==================== 群聊·消息菜单 ====================
+function openGroupMsgMenu(id, isMe){
+  var arr = DB.chats[view.id];
+  if(!arr) return;
+  var m = arr.find(function(x){ return x.id===id; });
+  if(!m || m.recalled) return;
+
+  var btns = '';
+  if(isMe){
+    var recallable = (Date.now() - (m.time||0)) < 300000;
+    if(recallable) btns += '<button class="btn" onclick="closeModal();groupRecallMsg(\''+id+'\')">↩️ 撤回（5分钟内）</button>';
+    else btns += '<div style="text-align:center;color:var(--sub);font-size:13px;padding:6px 0;border-bottom:1px solid var(--line);">已超过5分钟，无法撤回</div>';
+    btns += '<button class="btn gray" onclick="closeModal();groupDelMsg(\''+id+'\')">🗑️ 单条删除</button>';
+  } else {
+    btns += '<button class="btn" onclick="closeModal();groupRegenMsg(\''+id+'\')">🔄 让TA重新回复</button>';
+    btns += '<button class="btn" onclick="closeModal();groupRecallMsg(\''+id+'\')">↩️ 撤回这条</button>';
+    btns += '<button class="btn gray" onclick="closeModal();groupDelMsg(\''+id+'\')">🗑️ 单条删除</button>';
+  }
+
+  var mo = document.createElement('div');
+  mo.className='modal'; mo.id='modal';
+  mo.innerHTML = '<div class="sheet-box">'+btns+'<button class="btn gray" style="margin-top:0" onclick="closeModal()">取消</button></div>';
+  mo.onclick = function(e){ if(e.target===mo) closeModal(); };
+  phone.appendChild(mo);
+}
+
+// 撤回
+function groupRecallMsg(id){
+  var arr = DB.chats[view.id]; if(!arr) return;
+  var m = arr.find(function(x){ return x.id===id; });
+  if(!m || m.recalled) return;
+  popConfirm('撤回这条消息？', function(){
+    m.recalledContent = (m.type==='text'||m.type==='voice') ? m.content : '['+(m.type||'消息')+']';
+    m.recalled = true;
+    m.reveal = false;
+    save();
+    renderGroupChat(true);
+  }, {icon:'↩️', title:'撤回消息'});
+}
+
+// 删除单条
+function groupDelMsg(id){
+  var arr = DB.chats[view.id]; if(!arr) return;
+  var idx = arr.findIndex(function(x){ return x.id===id; });
+  if(idx<0) return;
+  arr.splice(idx,1);
+  // 更新群预览为最后一条
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(g){
+    var last = arr[arr.length-1];
+    if(last){
+      var pv = last.type==='text'?last.content:(last.type==='image'?'[图片]':(last.type==='sticker'?'[表情]':''));
+      g.lastMsg = { text:pv, time:last.time, senderId:(last.role==='user'?'user':last.charId) };
+    } else g.lastMsg = null;
+  }
+  save();
+  renderGroupChat(true);
+}
+
+// 重新回复（占位，第⑦步AI调度接上）
+function groupRegenMsg(id){ alert('「重新回复」需要AI调度，第⑦步做～'); }
+
+// ==================== 群聊·发消息（通用）====================
+function groupPush(m){
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(!g) return;
+  m.id = newId();
+  m.time = Date.now();
+  if(!DB.chats[g.id]) DB.chats[g.id] = [];
+  DB.chats[g.id].push(m);
+
+  var preview = '';
+  if(m.type==='text') preview = m.content;
+  else if(m.type==='image') preview = '[图片]';
+  else if(m.type==='sticker') preview = '[表情]';
+  g.lastMsg = { text:preview, time:m.time, senderId:(m.role==='user'?'user':m.charId) };
+
+  save();
+  renderGroupChat(false);   // ← 改成 false：重绘后滚到底部
+}
+
+// 输入框自适应高度
+function onGroupInput(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  updateGroupActBtn();   // ← 打字时让按钮变身
+
+  // 检测@
+  var val = el.value;
+  var pos = el.selectionStart;
+  var charBefore = val.slice(pos-1, pos);
+  if (charBefore === '@'){ openGroupAtPicker(); }
+}
+// @成员选择浮层
+function openGroupAtPicker(){
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(!g) return;
+  var members = g.members.map(function(id){ return getC(id); }).filter(Boolean);
+  if(!members.length) return;
+
+  var rows = members.map(function(c){
+    var name = esc(c.nick||c.name);
+    var avStyle = c.avatar ? "background-image:url('"+c.avatar+"')" : 'background:var(--theme);color:#fff;display:flex;align-items:center;justify-content:center;';
+    return '<div onclick="groupInsertAt(\''+c.id+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line);cursor:pointer;">'+
+      '<div class="avatar" style="width:32px;height:32px;'+avStyle+'">'+(c.avatar?'':name[0])+'</div>'+
+      '<span style="color:var(--text);font-size:15px;">'+name+'</span></div>';
+  }).join('');
+
+  var mo = document.createElement('div');
+  mo.className='modal'; mo.id='modal';
+  mo.innerHTML = '<div class="modal-box"><div style="font-weight:600;margin-bottom:10px;color:var(--text);">@ 谁</div>'+
+    '<div style="max-height:280px;overflow-y:auto;">'+rows+'</div>'+
+    '<button class="btn gray" style="width:100%;margin:10px 0 0 0;box-sizing:border-box;" onclick="closeModal()">取消</button></div>';
+  mo.onclick = function(e){ if(e.target===mo) closeModal(); };
+  phone.appendChild(mo);
+}
+
+// 点选后：把已输入的 @ 替换成 "@昵称 "
+function groupInsertAt(cid){
+  closeModal();
+  var c = getC(cid); if(!c) return;
+  var el = document.getElementById('chatInput'); if(!el) return;
+  var name = c.nick||c.name;
+  var val = el.value;
+  var pos = el.selectionStart;
+  // 把光标前那个 @ 去掉，插入 "@昵称 "
+  var before = val.slice(0, pos-1);   // 去掉刚输入的 @
+  var after = val.slice(pos);
+  el.value = before + '@' + name + ' ' + after;
+  el.focus();
+  var newPos = (before + '@' + name + ' ').length;
+  el.setSelectionRange(newPos, newPos);
+  el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px';
+}
+
+function onGroupKey(e){
+  // 回车发送；Shift+回车 换行（和大多数聊天一致，电脑手机都适用）
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    groupActBtnClick();
+  }
+}
+
+// 点【▶回复】：先把你的消息发出去（AI调度第⑦步接上）
+function groupActBtnClick(){
+  var el = document.getElementById('chatInput');
+  var text = el ? el.value.trim() : '';
+  if (text) {
+    // 有字 → 只发送，不触发AI
+    groupSendText();
+  } else {
+    // 空 → 触发AI回复
+    triggerGroupAI();
+  }
+}
+
+// 只发送用户文字（不触发AI）
+function groupSendText(){
+  var el = document.getElementById('chatInput');
+  var t = el ? el.value.trim() : '';
+  if(!t) return;
+  el.value = '';
+  el.style.height = 'auto';
+  groupPush({ role:'user', type:'text', content:t });
+  var ni = document.getElementById('chatInput');
+  if (ni){ ni.focus(); updateGroupActBtn(); }
+}
+function updateGroupActBtn(){
+  var el = document.getElementById('chatInput'), b = document.getElementById('actBtn');
+  if(!el || !b) return;
+  if(el.value.trim()){ b.textContent='发送'; b.className='cbtn send'; }
+  else { b.textContent='▶ 回复'; b.className='cbtn reply'; }
+}
+
+// ==================== 群聊·拼角色prompt（复用人设灵魂，砍私聊专属）====================
+function buildGroupSystem(c, g){
+  var add = function(t,v){ return v ? (t+'：'+v+'\n') : ''; };
+  var meName = DB.me.name || '我';
+  var s = '';
+  s += '你正在参与一个微信群聊，完全代入你的角色，绝不跳出、绝不承认自己是AI或程序。\n\n';
+  s += '【你扮演的角色】\n';
+  s += add('真名', c.name);
+  s += add('网名(群里显示的名字)', c.nick);
+  s += add('性别', c.gender);
+  s += add('年龄', c.age);
+  s += add('身份/职业', c.job);
+  s += add('外貌', c.pLook);
+  s += add('性格关键词(最重要)', c.pKeywords);
+  s += add('行为模式(必须遵循)', c.pBehavior);
+  s += add('成长经历(内化,不主动解释,只体现在言行)', c.pBack);
+  s += add('说话风格/口头禅', c.pStyle);
+  s += add('语言习惯', c.pLang);
+  if (c.sampleLines) s += '事例台词(学习语气用词)：\n' + c.sampleLines + '\n';
+
+  var world = (DB.worlds||[]).find(function(w){ return w.id===c.worldId; });
+  if (world) s += '\n【世界观】' + world.name + '：' + world.desc + '\n';
+
+  s += '\n【当前群聊】群名：' + g.name + '\n【群成员】\n';
+  s += '· ' + meName + '（这是操控这个APP的真实用户本人；当你想在群里点名TA时，必须写「@' + meName + '」，严禁写成「@我」「@你」或其他名字）\n';
+  g.members.forEach(function(mid){
+    var mc = getC(mid);
+    if(mc) s += '· ' + (mc.nick||mc.name) + (mid===c.id?'（就是你自己）':'') + '\n';
+  });
+
+  var rels = c.relations || [];
+  if (rels.length){
+    s += '\n【你对群里其他人的关系与态度（据此自然互动）】\n';
+    rels.forEach(function(r){
+      var name;
+      if (r.targetId==='user') name = meName;
+      else { var tc = getC(r.targetId); name = tc ? (tc.nick||tc.name) : (r.targetName||r.targetId); }
+      s += '· 对「' + name + '」：' + (r.relationType||'') + (r.description?('——'+r.description):'') + (r.attitude?('（态度：'+r.attitude+'）'):'') + '\n';
+    });
+    s += '关系亲近的多接话/主动回应，敌对的可抬杠或冷淡回避，符合你的真实感受。\n';
+  }
+
+  if (c.status) s += '\n【你和"' + meName + '"的当前关系】' + c.status.当前关系 + '（好感度' + c.status.好感度 + '）\n';
+  if (c.negative) s += '\n【⛔ 绝对禁止】' + c.negative + '\n';
+  if (DB.settings.extraPrompt) s += '\n【用户附加指令】' + DB.settings.extraPrompt + '\n';
+  if (DB.settings.onlineStyle) {
+    s += '\n【输出格式与风格·必须遵守】\n' + DB.settings.onlineStyle + '\n';
+  }
+
+  s += '\n【群聊发言规则·必须遵守】\n';
+  s += '1. 这是多人微信群，像真人发微信一样：口语化短句。\n';
+  s += '2. 严禁任何括号()（）里的动作/神态/心理描写，严禁小说旁白，只输出你说出口的话。\n';
+  s += '3. 多句话用换行分隔，每行是一条独立气泡；发几条要符合你性格：话痨可2-3条，高冷1条、甚至不说。\n';
+  s += '4. 你能看到群里每个人说的话（每句前面标了说话人名字），自然接话，可以@某人，也可以只回应某一个人。\n';
+  s += '5. 不要复述别人的话，不要在开头写自己的名字。\n';
+  s += '6. 如果按你的性格，此刻不想说话/没必要开口，就只输出四个字：[不说]\n';
+  s += '7. 【私聊触发·极度克制】只有当你此刻对"' + meName + '"产生了很强烈、当着群里大家不方便说出口的情绪（吃醋/心动/委屈/想单独找TA说），才在你发言的最后、单独一行输出：[私聊触发]。正常聊天绝对不要输出它。\n';
+  s += '8. 禁止输出 [转账]/[撤回]/[拉黑]/[表情]/[心声] 等标记。\n';
+  s += '\n【语音消息】\n';
+  s += '9. 满足任意条件时可发语音：①深夜23:00-06:00 ②想说的话超20字 ③情绪明显波动（很开心/难过/激动）④不方便打字（走路/开车/手上有东西）。\n';
+  s += '10. 发语音格式必须是单独一行：[语音|说话内容]，例如 [语音|我今天真的好累啊不想说话了]。\n';
+  s += '11. 禁止惯性连发语音：每条独立判断，不满足条件就发纯文字。\n';
+  s += '12. 禁止用文字描述代替语音：绝不写"（语音）..."或"我发条语音说..."，要发就直接输出 [语音|内容]。\n';
+  return s;
+}
+
+// ==================== 群聊·历史转文本（谁说了什么）====================
+function buildGroupHistory(g){
+  var msgs = DB.chats[g.id] || [];
+  var lim = parseInt(DB.settings.groupCtxLimit) || 20;
+  if (lim>0 && msgs.length>lim) msgs = msgs.slice(-lim);
+  var meName = DB.me.name || '我';
+  var lines = msgs.map(function(m){
+    if (m.recalled) return null;
+    var who = (m.role==='user') ? meName : (function(){ var mc=getC(m.charId); return mc?(mc.nick||mc.name):'某人'; })();
+    var content = (m.type==='image') ? '[图片]' : (m.type==='sticker') ? '[表情]' : m.content;
+    return who + '：' + content;
+  }).filter(Boolean);
+  return lines.join('\n');
+}
+
+// ==================== 群聊AI·追加一条气泡 ====================
+function pushGroupAIMsg(charId, content, type){
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(!g) return;
+  var mtype = type || 'text';
+  var m = { id:newId(), role:'assistant', charId:charId, type:mtype, content:content, time:Date.now() };
+  if(!DB.chats[g.id]) DB.chats[g.id]=[];
+  DB.chats[g.id].push(m);
+  var pv = mtype==='voice' ? '[语音]' : content;
+  g.lastMsg = { text:pv, time:m.time, senderId:charId };
+  save();
+  renderGroupChat(false);
+}
+
+// ==================== 群聊·让选中的角色依次发言 ====================
+async function groupAISpeak(chosen){
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(!g){ return; }
+
+  groupReplying = true;
+  var btn = document.getElementById('actBtn');
+  if(btn){ btn.textContent='…'; btn.disabled=true; }
+
+  try{
+    for(var k=0; k<chosen.length; k++){
+      var c = chosen[k].c;
+      var nm = c.nick || c.name;
+
+      var messages = [
+        { role:'system', content: buildGroupSystem(c, g) },
+        { role:'user', content: '【群聊记录】\n' + buildGroupHistory(g) + '\n\n现在轮到你（' + nm + '）在群里发言。只输出你要说的话本身，不要写名字前缀。' }
+      ];
+
+      var out = '';
+      try { out = await callAI(messages, DB.settings.chatModel); }
+      catch(e){ continue; }
+      out = (out||'').trim();
+      if(!out) continue;
+      if(/^\[不说\]/.test(out)) continue;
+
+      var wantPrivate = /\[私聊触发\]/.test(out);
+      out = out.replace(/\[私聊触发\]/g,'').trim();
+      // 注意：这里不再删除 [语音|]，留给下面逐行解析；其他标记照旧删掉
+      out = out.replace(/\[(转账|撤回|拉黑玩家|表情|心声)[^\]]*\]/g,'').trim();
+      if(!out) continue;
+
+      var esc2 = nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      var namePrefix = new RegExp('^'+esc2+'\\s*[:：]\\s*');
+      var lines = out.split(/\n+/).map(function(x){ return x.trim().replace(namePrefix,''); }).filter(Boolean);
+
+      for(var i=0; i<lines.length; i++){
+        var line = lines[i];
+        var vm = line.match(/^\[语音\s*[|｜]\s*([\s\S]*?)\]$/);
+        if(vm){
+          // 是语音消息
+          var vtext = vm[1].trim();
+          if(vtext) pushGroupAIMsg(c.id, vtext, 'voice');
+        } else {
+          // 普通文本，清掉可能残留的语音标记碎片
+          line = line.replace(/\[语音\s*[|｜]?/g,'').replace(/\]/g,'').trim();
+          if(!line) continue;
+          pushGroupAIMsg(c.id, line, 'text');
+        }
+        if(i<lines.length-1) await sleep(400 + Math.min(line.length*28, 1400));
+      }
+      if (wantPrivate) triggerGroupPrivate(c);
+      if(k<chosen.length-1) await sleep(500 + Math.random()*500);
+    }
+  } catch(e){
+    alert('群聊回复失败：' + e.message);
+  } finally {
+    groupReplying = false;
+    var b2 = document.getElementById('actBtn');
+    if(b2){ b2.textContent='▶ 回复'; b2.disabled=false; }
+  }
+}
+
+// ==================== 群聊AI·触发调度 ====================
+var groupReplying = false;
+
+function triggerGroupAI(){
+  if (groupReplying) return;
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(!g) return;
+  if(!DB.settings.chatModel){ alert('请先在 设置 里选择模型'); return; }
+
+  // 找出被@的成员
+  var msgs = DB.chats[g.id] || [];
+  var lastUserMsg = null;
+  for(var i=msgs.length-1;i>=0;i--){ if(msgs[i].role==='user'){ lastUserMsg=msgs[i]; break; } }
+  var atText = (lastUserMsg && lastUserMsg.type==='text') ? lastUserMsg.content : '';
+
+  // 计算每个成员权重
+  var pool = g.members.map(function(cid){
+    var c = getC(cid);
+    if(!c) return null;
+
+    // 活动度
+    var actMap = { '关':0, '低':0.2, '中':0.6, '高':1.0 };
+    var wAct = (actMap[c.activity]!==undefined) ? actMap[c.activity] : 0.6;
+
+    // 粘人度 0~100 → 0.2~1.0
+    var cling = (c.clinginess===undefined?50:c.clinginess);
+    var wCling = 0.2 + (cling/100)*0.8;
+
+    // 好感度 0~100 → 0.2~1.0
+    var fav = (c.status && c.status.好感度!==undefined) ? c.status.好感度 : 50;
+    var wFav = 0.2 + (fav/100)*0.8;
+
+    // 对"用户"的关系系数
+    var relCoef = 1.0;
+    var curRel = (c.status && c.status.当前关系) ? c.status.当前关系 : '';
+    if(/恋|爱人|喜欢|暧昧/.test(curRel)) relCoef = 1.3;
+    else if(/敌|讨厌|仇/.test(curRel)) relCoef = 0.5;
+
+    var weight = wAct * wCling * wFav * relCoef;
+
+    // 被@ +0.5
+    var atMe = atText && atText.indexOf('@'+(c.nick||c.name)) >= 0;
+    if(atMe) weight += 0.5;
+
+    return { cid:cid, c:c, weight:weight, atMe:!!atMe };
+  }).filter(Boolean);
+
+  // 筛选 + 选人
+  var candidates = pool.filter(function(p){ return p.weight > 0.1; });
+  if(!candidates.length){
+    // 保底：选权重最高的1人
+    pool.sort(function(a,b){ return b.weight-a.weight; });
+    candidates = pool.slice(0,1);
+  }
+
+  // 被@的必选；其余按权重比例随机，总共1~3人
+  var chosen = [];
+  candidates.forEach(function(p){ if(p.atMe) chosen.push(p); });
+
+  var rest = candidates.filter(function(p){ return !p.atMe; });
+  // 按权重加随机扰动排序
+  rest.sort(function(a,b){ return (b.weight*Math.random()) - (a.weight*Math.random()); });
+
+  var maxSpeakers = 3;
+  for(var j=0; j<rest.length && chosen.length<maxSpeakers; j++){
+    // 权重越高越可能入选
+    var p = rest[j];
+    var prob = Math.min(0.9, p.weight);
+    if(chosen.length===0 || Math.random() < prob) chosen.push(p);
+  }
+  if(!chosen.length && candidates.length) chosen.push(candidates[0]);
+
+  // 限制最多3人
+  chosen = chosen.slice(0,3);
+
+  groupAISpeak(chosen);
+
+}
+
+function groupSendImage(){ togglePanel(); pickImage(function(d){ groupPush({ role:'user', type:'image', content:d }); }, 800); }
+
+function openGroupStickerPicker(){
+  var list = DB.stickers || [];
+  if(!list.length){ alert('还没有表情，先去私聊的表情面板里添加吧～'); return; }
+  var grid = list.map(function(s){
+    return '<div onclick="groupPickSticker(\''+esc(s.name)+'\')" style="cursor:pointer;padding:4px;"><img src="'+s.img+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;"></div>';
+  }).join('');
+  var mo = document.createElement('div');
+  mo.className='modal'; mo.id='modal';
+  mo.innerHTML = '<div class="modal-box"><div style="font-weight:600;margin-bottom:10px;color:var(--text);">选择表情</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:300px;overflow-y:auto;">'+grid+'</div>'+
+    '<button class="btn gray" style="width:100%;margin:10px 0 0 0;box-sizing:border-box;" onclick="closeModal()">取消</button></div>';
+  mo.onclick = function(e){ if(e.target===mo) closeModal(); };
+  phone.appendChild(mo);
+}
+// ==================== 群聊→私聊联动：群里没说的话，私聊破功 ====================
+async function triggerGroupPrivate(c){
+  // 每日上限：每个角色每天最多因群聊触发2次私聊
+  var today = new Date().toDateString();
+  if (!c._grpPrivDaily || c._grpPrivDaily.date !== today) {
+    c._grpPrivDaily = { date: today, count: 0 };
+  }
+  if (c._grpPrivDaily.count >= 2) return;
+  c._grpPrivDaily.count += 1;
+  save();
+
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  var groupName = g ? g.name : '群聊';
+  var meName = DB.me.name || '我';
+
+  try {
+    // 用私聊的完整人设（buildSystem），保证是"真正的TA"
+    var sys = buildSystem(c);
+    var recentGroup = g ? buildGroupHistory(g) : '';
+
+    var prompt = '【场景】你刚才在群「' + groupName + '」里和大家聊天，但你此刻对"' + meName +
+      '"产生了一种当着群里所有人不方便说出口的情绪（比如吃醋、心动、在意、委屈、想单独跟TA说的话）。\n' +
+      '于是你现在**私下单独**给"' + meName + '"发微信，说那句在群里没说出口的话。\n\n' +
+      '【刚才的群聊记录】\n' + recentGroup + '\n\n' +
+      '【要求】\n' +
+      '1. 直接输出你私聊发给TA的消息，口语化、简短、符合你的性格。\n' +
+      '2. 内容要呼应刚才群里的情境，体现"当着大家不好说、私下才敢说"的反差。\n' +
+      '3. 可以多句，用换行分隔。不要写任何括号动作描写，不要写名字前缀。\n' +
+      '4. 不要输出任何方括号标记。';
+
+    var messages = [
+      { role:'system', content: sys },
+      { role:'user', content: prompt }
+    ];
+
+    var out = await callAI(messages, DB.settings.chatModel);
+    out = (out||'').replace(/<state>[\s\S]*?<\/state>/gi,'').replace(/\[[^\]]*\]/g,'').trim();
+    if(!out) return;
+
+    var lines = out.split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
+
+    // 存进【私聊】记录
+    if(!DB.chats[c.id]) DB.chats[c.id] = [];
+    lines.forEach(function(line){
+      DB.chats[c.id].push({ id:newId(), role:'assistant', type:'text', content:line, time:Date.now() });
+    });
+
+    // 私聊未读+1（红点提示），并把该角色顶到聊天列表
+    c.unread = (c.unread||0) + lines.length;
+    c.inChatList = true;
+    save();
+    if (typeof refreshChatBadges === 'function') refreshChatBadges();
+
+  } catch(e){
+    // 静默失败，不打扰群聊
+    console.warn('私聊联动失败：', e.message);
+  }
+}
+// ==================== 群设置页 ====================
+function renderGroupSet(){
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(!g){ goWechat('chats'); return; }
+
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = function(){ view={type:'groupChat', id:g.id}; render(); };
+  tbTitle.textContent = '群聊设置';
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+
+  var meName = DB.me.name || '我';
+  var html = '<div style="padding:12px;background:var(--bg);min-height:100%;">';
+
+  // 成员宫格
+  html += '<div style="background:var(--card);border-radius:10px;padding:14px;margin-bottom:12px;">';
+  html += '<div style="font-size:13px;color:var(--sub);margin-bottom:10px;">群成员（'+(g.members.length+1)+'）</div>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:12px;">';
+
+  // 我（不可移除）
+  var meAva = DB.me.avatar ? 'url(\''+DB.me.avatar+'\')' : 'none';
+  html += '<div style="width:56px;text-align:center;">'
+        + '<div style="width:48px;height:48px;border-radius:8px;background:#07c160 center/cover no-repeat;background-image:'+meAva+';margin:0 auto;"></div>'
+        + '<div style="font-size:11px;color:var(--sub);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(meName)+'</div></div>';
+
+  // 各成员（可移除）
+  g.members.forEach(function(mid){
+    var c = getC(mid);
+    if(!c) return;
+    var ava = c.avatar ? 'url(\''+c.avatar+'\')' : 'none';
+    html += '<div style="width:56px;text-align:center;position:relative;" onclick="removeGroupMember(\''+mid+'\')">'
+          + '<div style="width:48px;height:48px;border-radius:8px;background:#ccc center/cover no-repeat;background-image:'+ava+';margin:0 auto;"></div>'
+          + '<div style="font-size:11px;color:var(--sub);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(c.nick||c.name)+'</div></div>';
+  });
+
+  // ＋ 邀请
+  html += '<div style="width:56px;text-align:center;" onclick="openGroupInvite(\''+g.id+'\')">'
+        + '<div style="width:48px;height:48px;border-radius:8px;border:1px dashed var(--line);color:var(--sub);font-size:28px;line-height:44px;margin:0 auto;">＋</div>'
+        + '<div style="font-size:11px;color:var(--sub);margin-top:4px;">邀请</div></div>';
+
+  html += '</div></div>';
+  html += '<div class="hint" style="font-size:12px;color:var(--sub);padding:0 4px 10px;">点成员头像可将其移出群聊。</div>';
+
+  // 群名
+  html += '<div style="background:var(--card);border-radius:10px;margin-bottom:12px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px;" onclick="renameGroup(\''+g.id+'\')">'
+        + '<span>群聊名称</span>'
+        + '<span style="color:var(--sub);">'+esc(g.name)+' ›</span></div>';
+  html += '</div>';
+
+  // 退群
+  html += '<div style="background:var(--card);border-radius:10px;text-align:center;padding:14px;color:#e34;font-weight:600;" onclick="quitGroup(\''+g.id+'\')">退出群聊</div>';
+
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+// 移除成员
+function removeGroupMember(mid){
+  var g = (DB.groups||[]).find(function(x){ return x.id===view.id; });
+  if(!g) return;
+  var c = getC(mid);
+  if(!confirm('将「'+(c?(c.nick||c.name):'该成员')+'」移出群聊？')) return;
+  g.members = g.members.filter(function(x){ return x!==mid; });
+  save();
+  renderGroupSet();
+}
+
+// 改群名
+function renameGroup(gid){
+  var g = (DB.groups||[]).find(function(x){ return x.id===gid; });
+  if(!g) return;
+  var name = prompt('修改群聊名称：', g.name);
+  if(name===null) return;
+  name = name.trim();
+  if(!name) return;
+  g.name = name;
+  save();
+  renderGroupSet();
+}
+
+// 退群
+function quitGroup(gid){
+  if(!confirm('确定退出并删除该群聊？聊天记录将一并清除。')) return;
+  DB.groups = (DB.groups||[]).filter(function(x){ return x.id!==gid; });
+  if(DB.chats) delete DB.chats[gid];
+  save();
+  goWechat('chats');
+}
+
+// 邀请成员（复用建群的勾选）
+function openGroupInvite(gid){
+  var g = (DB.groups||[]).find(function(x){ return x.id===gid; });
+  if(!g) return;
+  var avail = DB.contacts.filter(function(c){
+    return !c._draft && g.members.indexOf(c.id)<0;
+  });
+  if(!avail.length){ alert('没有可邀请的角色了'); return; }
+
+  var names = avail.map(function(c,i){ return (i+1)+'. '+(c.nick||c.name); }).join('\n');
+  var pick = prompt('输入要邀请的角色编号（多个用逗号隔开）：\n'+names);
+  if(pick===null) return;
+  var idxs = pick.split(/[,，\s]+/).map(function(s){ return parseInt(s.trim())-1; }).filter(function(n){ return n>=0 && n<avail.length; });
+  if(!idxs.length) return;
+  idxs.forEach(function(n){
+    var cid = avail[n].id;
+    if(g.members.indexOf(cid)<0) g.members.push(cid);
+  });
+  save();
+  renderGroupSet();
+}
+
+function groupPickSticker(name){
+  closeModal();
+  groupPush({ role:'user', type:'sticker', content:name });
+}
+
+function openGroupSet(gid){
+  view = { type:'groupSet', id:gid };
+  render();
+}
+
 function renderWxMe(){const ag=DB.settings.autoGreet!==false;content.innerHTML=`<div class="field" style="border-top:1px solid var(--line)"><label>我的微信头像（点击选择）</label><div class="avapick" style="--ava:${DB.me.avatar?`url('${DB.me.avatar}')`:'none'}" onclick="pickMeAvatar()">${DB.me.avatar?'':'点击上传'}</div></div><div class="section"><div class="row"><label>我的网名</label><input value="${esc(DB.me.name)}" onchange="DB.me.name=this.value;save()"></div><div class="row"><label>真实姓名</label><input value="${esc(DB.me.realName)}" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名"></div></div><div class="hint">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>`;}
 function pickMeAvatar(){pickImage(d=>{DB.me.avatar=d;save();render();});}
 function attachSwipe() {
@@ -2797,6 +3742,7 @@ html += foldEnd;
   html += '<div class="hint" style="padding:12px 16px;color:var(--sub);font-size:13px;">「我」在这个角色面前的样子。姓名/网名在 微信→我 里统一设。</div>';
 
   html += fold('me_basic', '我方基本信息', '👤', true);
+    // ===== 社会关系模块（群聊用）=====
   html += '<div class="frow" style="display:flex;gap:8px;padding:0;">' +
     '<div class="field" style="flex:1;"><label>我的性别</label><input type="text" value="' + esc(c.myGender || '') + '" onchange="upd(\'myGender\',this.value)" placeholder="男/女"></div>' +
     '<div class="field" style="flex:1;"><label>我的年龄</label><input type="text" value="' + esc(c.myAge || '') + '" onchange="upd(\'myAge\',this.value)" placeholder="如 24"></div>' +
@@ -2822,6 +3768,9 @@ html += foldEnd;
     html += '<div class="field"><label>🌍 所属世界观</label><select onchange="upd(\'worldId\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)">' + worldOpts + '</select></div>';
     html += '<div class="field" style="padding:6px 16px;background:var(--bg);border-radius:8px;margin:4px 0;font-size:13px;color:var(--sub);border:1px dashed var(--line);"><span style="font-weight:600;color:var(--text)">📌 提示</span> 世界观在独立的「世界观」App中创建和编辑，角色只需关联即可。</div>';
     html += '<div class="field"><label>聊天背景（本角色专属）</label><div class="avapick" style="width:100%;height:120px;--ava:' + (c.chatBg ? 'url(\'' + c.chatBg + '\')' : 'none') + '" onclick="pickChatBg()">' + (c.chatBg ? '点击更换' : '点击上传聊天背景') + '</div>' + (c.chatBg ? '<div style="text-align:center;color:#e34;font-size:13px;margin-top:8px;cursor:pointer" onclick="upd(\'chatBg\',\'\');render()">清除背景</div>' : '') + '</div>';
+    // ===== 社会关系模块（群聊互动用）=====
+    html += '<div style="padding:14px 16px 4px;font-weight:600;font-size:15px;color:var(--text);"><span style="margin-right:6px;">👥</span>社会关系（TA与其他角色/NPC）</div>';
+    html += relationEditHtml(c);
     html += '</div>';
 
   } else {
@@ -2852,6 +3801,67 @@ html += foldEnd;
   content.innerHTML = html;
   content.scrollTop = scrollTop;
   content.querySelectorAll('textarea').forEach(ag);
+}
+// ==================== 社会关系·渲染 ====================
+function relationEditHtml(c){
+  c.relations = c.relations || [];
+  var others = DB.contacts.filter(function(x){ return x.id!==c.id && !x._draft; });
+  var relTypes = ['恋人','喜欢','暧昧','朋友','家人','同事','敌对','讨厌','陌生','中性'];
+  var html = '<div class="hint" style="padding:4px 16px 8px;color:var(--sub);font-size:13px;">TA对你、以及对群里其他人的关系与态度，影响群聊里TA跟谁多互动、态度如何。</div>';
+
+  c.relations.forEach(function(r, idx){
+    var opts = '';
+    others.forEach(function(o){
+      opts += '<option value="'+o.id+'"'+(r.targetId===o.id?' selected':'')+'>'+esc(o.nick||o.name)+'</option>';
+    });
+    opts += '<option value="npc"'+(r.targetId==='npc'?' selected':'')+'>🆕 其他人（NPC·下方填名字）</option>';
+
+    var typeOpts = relTypes.map(function(t){
+      return '<option value="'+t+'"'+(r.relationType===t?' selected':'')+'>'+t+'</option>';
+    }).join('');
+
+    html += '<div style="margin:8px 12px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);">';
+    html += '<div class="field"><label>对谁</label><select onchange="updRelation('+idx+',\'targetId\',this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);">'+opts+'</select></div>';
+    if(r.targetId==='npc'){
+      html += '<div class="field"><label>对方名字（NPC）</label><input type="text" value="'+esc(r.targetName||'')+'" onchange="updRelation('+idx+',\'targetName\',this.value)" placeholder="如 前男友、林总、闺蜜小美"></div>';
+    }
+    html += '<div class="field"><label>关系标签</label><select onchange="updRelation('+idx+',\'relationType\',this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);">'+typeOpts+'</select></div>';
+    html += '<div class="field"><label>关系描述 <span onclick="polishRelation('+idx+')" style="float:right;color:var(--theme);font-size:12px;cursor:pointer;font-weight:normal;" id="polishRel'+idx+'">✨润色</span></label><textarea oninput="ag(this)" onchange="updRelation('+idx+',\'description\',this.value)" placeholder="一句话说清关系，如：患难与共的兄弟，嘴硬心软。最好先填写关键词再让ai润色">'+esc(r.description||'')+'</textarea></div>';
+    html += '<button class="btn gray" style="width:100%;margin:4px 0 0 0 !important;display:block;box-sizing:border-box;" onclick="delRelation('+idx+')">🗑️ 删除这条</button>';
+
+    html += '</div>';
+  });
+
+  html += '<div style="padding:8px 12px 16px;box-sizing:border-box;"><button class="btn" style="width:100%;margin:0 !important;display:block;box-sizing:border-box;" onclick="addRelation()">＋ 添加一条关系</button></div>';
+
+  return html;
+}
+
+// 增
+function addRelation(){
+  var c = getC(editingId);
+  c.relations = c.relations || [];
+  var others = DB.contacts.filter(function(x){ return x.id!==c.id && !x._draft; });
+  var defId = others.length ? others[0].id : 'npc';
+  c.relations.push({ targetId:defId, targetName:'', relationType:'中性', description:'' });
+  save();
+  render();
+}
+// 删
+function delRelation(idx){
+  var c = getC(editingId);
+  if(!c.relations) return;
+  c.relations.splice(idx,1);
+  save();
+  render();
+}
+// 改（文本框失焦保存，不重绘；切换对象时重绘以显隐NPC名字框）
+function updRelation(idx, key, val){
+  var c = getC(editingId);
+  if(!c.relations || !c.relations[idx]) return;
+  c.relations[idx][key] = val;
+  save();
+  if(key==='targetId') render();
 }
 
 // 折叠切换函数（放在全局，和 renderCharEdit 平级）
@@ -3397,7 +4407,13 @@ function cleanMomentText(t){
 }
 /* ===== 朋友圈：未读红点 & 后台守护 ===== */
 function markMomentUnread(n){DB.momentUnread=(DB.momentUnread||0)+(n||1);save();refreshMomentBadge();}
-function clearMomentUnread(){if(DB.momentUnread){DB.momentUnread=0;save();}refreshMomentBadge();}
+function clearMomentUnread(){
+  var changed = false;
+  if(DB.momentUnread){ DB.momentUnread = 0; changed = true; }
+  if(DB.momentReplyUnread){ DB.momentReplyUnread = 0; changed = true; }
+  if(changed) save();
+  refreshMomentBadge();
+}
 function refreshMomentBadge(){
   var un=DB.momentUnread||0;
   var tab=document.querySelector('#tabbar .tab[data-page="discover"]');
@@ -4654,7 +5670,7 @@ function renderChat(keepScroll) {
     var mid = el.dataset.mid;
     var isMe = el.classList.contains('me');
     var startX = 0, startY = 0, moved = false;
-    var slideEl = el.querySelector('.msg-slide') || el;
+    var slideEl = el;
 
     el.addEventListener('touchstart', function(e) {
       var t = e.touches[0];
@@ -4971,14 +5987,27 @@ function toggleVoice(id){
   if (!arr) return;
   var m = arr.find(function(x){ return x.id === id; });
   if (!m) return;
-  // 切换展开状态
   m.voiceExpanded = !m.voiceExpanded;
   save();
-  // 重新渲染，保持滚动位置
-  renderChat(true);
+  // 判断当前是群聊还是私聊，调对应的渲染函数
+  var isGroup = (DB.groups||[]).some(function(x){ return x.id===view.id; });
+  if (isGroup) renderGroupChat(true);
+  else renderChat(true);
 }
-function openStickerPicker(){var panel = document.getElementById('chatPanel');
-  if (panel) panel.classList.remove('on');if(!DB.stickers.length){popTip('去 设置→表情包仓库 添加吧～',{icon:'😶',title:'还没有表情'});return;}const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="modal-box"><div class="stgrid">${DB.stickers.map((s,i)=>`<div class="st"><img src="${s.img}" onclick="sendSticker(${i})"><div class="nm">${esc(s.name)}</div></div>`).join('')}</div></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);}
+function openStickerPicker(){
+  var panel = document.getElementById('chatPanel');
+  if (panel) panel.classList.remove('on');
+  if(!DB.stickers.length){
+    popTip('去 设置→表情包仓库 添加吧～',{icon:'😶',title:'还没有表情'});
+    return;
+  }
+  var mo=document.createElement('div');
+  mo.className='modal';
+  mo.id='modal';
+  mo.innerHTML='<div class="modal-box"><div class="stgrid">'+DB.stickers.map(function(s,i){return '<div class="st"><img src="'+s.img+'" onclick="sendSticker('+i+')"><div class="nm">'+esc(s.name)+'</div></div>';}).join('')+'</div><button class="btn gray" style="width:100%;margin:10px 0 0 0;box-sizing:border-box;" onclick="closeModal()">取消</button></div>';
+  mo.onclick=function(e){if(e.target===mo)closeModal();};
+  phone.appendChild(mo);
+}
 function sendSticker(i){closeModal();pushMy({type:'sticker',content:DB.stickers[i].name});}
 function closeModal(){const m=document.getElementById('modal');if(m)m.remove();}
 // ===== 统一弹窗系统 =====
