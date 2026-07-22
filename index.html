@@ -625,6 +625,26 @@ color: '#DDB6C9',
   '--sub': '#5C4A52',         // 改为中灰粉（原先 #BCADB4）
   '--line': '#EBE1E6',
   wallpaper: 'radial-gradient(ellipse at 50% 20%, #F7EAF0 0%, #F4EEF1 60%, #EBE1E6 100%)'
+},
+{
+  id: 'orchard',
+  name: '🐻 林间小集',
+  color: '#C85B53',
+  '--theme': '#C85B53',
+  '--bg': '#F3E9D8',
+  '--nav': '#F5EDE0',
+  '--card': '#EAD7C0',           // ← 比背景深了一个色号，气泡更立体
+  '--text': '#5D3A2A',
+  '--sub': '#5A8291',
+  '--line': '#D6C2A8',           // ← 加深边框，增强分割感
+  '--island-bg': 'rgba(243, 233, 216, 0.75)',
+  '--island-shadow': '0 4px 30px rgba(200, 91, 83, 0.12), inset 0 1px 0 rgba(255,255,255,0.9)',
+  '--island-border': '1px solid rgba(200, 91, 83, 0.2)',
+  '--island-glow': 'radial-gradient(circle at 50% 30%, rgba(232, 184, 102, 0.25), transparent 70%)',
+  '--island-glow-opacity': '1',
+  '--island-particles': 'radial-gradient(circle at 20% 40%, rgba(232, 184, 102, 0.5) 2px, transparent 2px), radial-gradient(circle at 80% 60%, rgba(200, 91, 83, 0.3) 2px, transparent 2px), radial-gradient(circle at 50% 80%, rgba(136, 160, 102, 0.4) 2px, transparent 2px)',
+  '--island-particles-opacity': '0.8',
+  wallpaper: 'radial-gradient(ellipse at 30% 10%, #E8C9A0 0%, transparent 40%), radial-gradient(ellipse at 70% 90%, #A8B88A 0%, transparent 50%), linear-gradient(145deg, #F3E9D8 0%, #E8DCC8 100%)'
 }
 ];
 // ========== 主题图标集 ==========
@@ -654,7 +674,7 @@ const ICON_SETS = {
     discoverMoments: 'https://s1.imagehub.cc/images/2026/07/18/1e0c998bfe1009fe7a21302cfd2e3bc6.png',
   },
 
-  // 🌸 亚系少女（浅色）
+  // 🌸 亚系少女
 aqua_girl: {
   // 桌面应用
   wechat:   'https://s1.imagehub.cc/images/2026/07/18/3d52ff962ca94ab2fa932a350be5d87e.png',
@@ -675,6 +695,25 @@ aqua_girl: {
   tabMe:       'https://s1.imagehub.cc/images/2026/07/18/d53eb71abec7a8c2040a4c6d44dbbe02.png',
   // 发现页
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/19/13c0e268240ff1bebeb6b70b91c53058.png',
+},
+// 🐻 林间小集
+orchard: {
+  wechat:   'https://s1.imagehub.cc/images/2026/07/22/33f48b88b1d86a6e3fd90334a433a73d.png',
+  notes:    'https://s1.imagehub.cc/images/2026/07/22/59fd728dd038ff40d0af553d9cfba104.png',
+  focus:    'https://s1.imagehub.cc/images/2026/07/22/4700a8733173102aceb87bd040acaefb.png',
+  settings: 'https://s1.imagehub.cc/images/2026/07/22/0baaf3fee37cd4872fab4e3fb13b147b.png',
+  album:    'https://s1.imagehub.cc/images/2026/07/22/d2838e610300924452c382096f31d6ff.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/07/22/693e2fb6ee9bc78edcc63a830d99fdb4.png',
+  music:    'https://s1.imagehub.cc/images/2026/07/22/5318b136798e2b59e7d5dda93a4c0441.png',
+  preset:   'https://s1.imagehub.cc/images/2026/07/22/558e1b907bb3f18c048869eced0d0959.png',
+  floating: 'https://s1.imagehub.cc/images/2026/07/22/60ba2efaa4b5127c0a94f95fa926d2e3.png',
+  shop:     'https://s1.imagehub.cc/images/2026/07/22/99f05bf18e962f0ab7d1c5f8fd4e4243.png',
+  world:    'https://s1.imagehub.cc/images/2026/07/22/782d6430893b3bdddca63fd37b5e2ea2.png',
+  tabChats:    'https://s1.imagehub.cc/images/2026/07/22/e856f25f017c7aa747f4e6340a014860.png',
+  tabContacts: 'https://s1.imagehub.cc/images/2026/07/22/8ab1b08d350d2215c7506fb78af48946.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/07/22/344cf07ec9cfa26587d5563c6572f0e1.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/07/22/881c5b2e97cc7febac866c7af070943b.png',
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/07/22/90508b72d72612459f2ab7aae746bb23.png',
 },
 
 };
@@ -703,8 +742,7 @@ function applySkin(id) {
   updateAllIcons();
 
   // ===== 新增：浅色主题适配（通过 CSS 变量，不再用内联样式） =====
-  var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea');
-if (isLight) {
+var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard');if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
   root.style.setProperty('--clock-sub-opacity', '1');
   root.style.setProperty('--clock-theme-opacity', '1');
@@ -1250,6 +1288,24 @@ function renderHome() {
     }
   });
   
+  // ===== 【新增】在渲染天气之前，根据上次聊天的世界观设置当前索引 =====
+  if (DB.desktop._activeWorld) {
+    var worlds = DB.worlds || [];
+    var idx = worlds.findIndex(function(w) { return w.id === DB.desktop._activeWorld; });
+    if (idx !== -1) {
+      _weatherCurrentIndex = idx;
+    } else {
+      // 如果储存的世界观已被删除，重置
+      DB.desktop._activeWorld = null;
+      save();
+      _weatherCurrentIndex = 0;
+    }
+  } else {
+    // 没有记录，默认第一个
+    _weatherCurrentIndex = 0;
+  }
+  // ================================================================
+  
   // ---- 构建时钟 HTML ----
   var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
     <div class="corners">
@@ -1270,46 +1326,48 @@ function renderHome() {
   // ---- 构建天气 HTML（独立卡片） ----
   var weatherHtml = '';
   if (weatherApp) {
-    // ===== 新增：根据当前主题动态设置天气卡背景 =====
+    // ===== 根据当前主题动态设置天气卡背景 =====
     var skinId = DB.settings.skin || 'fusion';
     var isLight = (skinId === 'aqua_girl' || skinId === 'pink_tea' || skinId === 'milktea');
-    var wBg = isLight ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.06)';
-    var wBorder = isLight ? '1px solid rgba(255,255,255,0.8)' : '1px solid rgba(255,255,255,0.08)';
-    var wBlur = isLight ? 'blur(20px)' : 'blur(16px)';
-	var wParticle = isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.35)';
-var wParticleGlow = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)';
+    var isOrchard = (skinId === 'orchard');
+
+    var wBg = isLight ? 'rgba(255,255,255,0.7)' : (isOrchard ? 'rgba(243, 233, 216, 0.85)' : 'rgba(255,255,255,0.06)');
+    var wBorder = isLight ? '1px solid rgba(255,255,255,0.8)' : (isOrchard ? '1px solid rgba(200, 91, 83, 0.25)' : '1px solid rgba(255,255,255,0.08)');
+    var wBlur = isLight ? 'blur(20px)' : (isOrchard ? 'blur(12px)' : 'blur(16px)');
+    var wParticle = isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.35)';
+    var wParticleGlow = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)';
     // =============================================
 
-weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:20px;background:${wBg};backdrop-filter:${wBlur};-webkit-backdrop-filter:${wBlur};border:${wBorder};padding:14px 16px 10px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.3s;position:relative;overflow:hidden;min-height:130px;">
-  <!-- 装饰粒子（颜色已改为动态变量） -->
-  <div style="position:absolute;top:8%;left:6%;width:6px;height:6px;border-radius:50%;background:${wParticle};box-shadow:0 0 12px ${wParticleGlow};animation:floatParticle 7s ease-in-out infinite;"></div>
-  <div style="position:absolute;bottom:30%;right:10%;width:5px;height:5px;border-radius:50%;background:${wParticle};box-shadow:0 0 10px ${wParticleGlow};animation:floatParticle 9s ease-in-out infinite 2s;"></div>
-  <div style="position:absolute;top:50%;left:75%;width:4px;height:4px;border-radius:50%;background:${wParticle};box-shadow:0 0 8px ${wParticleGlow};animation:floatParticle 8s ease-in-out infinite 3.5s;"></div>
-  <div style="position:absolute;top:25%;right:20%;width:3px;height:3px;border-radius:50%;background:${wParticle};box-shadow:0 0 6px ${wParticleGlow};animation:floatParticle 6s ease-in-out infinite 1s;"></div>
-  <div style="position:absolute;bottom:10%;left:15%;width:4px;height:4px;border-radius:50%;background:${wParticle};box-shadow:0 0 8px ${wParticleGlow};animation:floatParticle 10s ease-in-out infinite 4s;"></div>
-  <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
-    <span id="widgetIcon" style="font-size:28px;line-height:1;">🌤</span>
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span id="widgetTemp" style="font-size:28px;font-weight:300;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:4px;">
-        <span id="widgetState" style="font-size:16px;font-weight:400;opacity:0.8;">晴</span>
-        <span id="widgetTempNum">--</span><span style="font-size:18px;opacity:0.5;">℃</span>
-      </span>
-      <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.08);color:var(--theme);font-size:14px;cursor:pointer;transition:all 0.2s;" onclick="event.stopPropagation();refreshWeather()">↻</span>
-      <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.05);color:var(--sub);font-size:14px;cursor:pointer;transition:all 0.2s;opacity:0.4;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
-    </div>
-  </div>
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:2px 0;position:relative;z-index:1;overflow:hidden;">
-    <div id="widgetDesc" style="font-size:15px;font-weight:500;color:var(--text);line-height:1.5;opacity:0.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
-    <div id="widgetDetail" style="font-size:12px;color:var(--sub);opacity:0.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
-  </div>
-  <div style="position:relative;z-index:1;flex-shrink:0;padding-bottom:2px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <span id="widgetWorldName" style="font-size:12px;color:var(--sub);opacity:0.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;">未关联</span>
-      <span id="widgetUpdateTime" style="font-size:11px;color:var(--sub);opacity:0.4;white-space:nowrap;flex-shrink:0;">刚刚</span>
-    </div>
-    <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:4px;"></div>
-  </div>
-</div>`;
+    weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:20px;background:${wBg};backdrop-filter:${wBlur};-webkit-backdrop-filter:${wBlur};border:${wBorder};padding:14px 16px 10px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.3s;position:relative;overflow:hidden;min-height:130px;">
+      <!-- 装饰粒子 -->
+      <div style="position:absolute;top:8%;left:6%;width:6px;height:6px;border-radius:50%;background:${wParticle};box-shadow:0 0 12px ${wParticleGlow};animation:floatParticle 7s ease-in-out infinite;"></div>
+      <div style="position:absolute;bottom:30%;right:10%;width:5px;height:5px;border-radius:50%;background:${wParticle};box-shadow:0 0 10px ${wParticleGlow};animation:floatParticle 9s ease-in-out infinite 2s;"></div>
+      <div style="position:absolute;top:50%;left:75%;width:4px;height:4px;border-radius:50%;background:${wParticle};box-shadow:0 0 8px ${wParticleGlow};animation:floatParticle 8s ease-in-out infinite 3.5s;"></div>
+      <div style="position:absolute;top:25%;right:20%;width:3px;height:3px;border-radius:50%;background:${wParticle};box-shadow:0 0 6px ${wParticleGlow};animation:floatParticle 6s ease-in-out infinite 1s;"></div>
+      <div style="position:absolute;bottom:10%;left:15%;width:4px;height:4px;border-radius:50%;background:${wParticle};box-shadow:0 0 8px ${wParticleGlow};animation:floatParticle 10s ease-in-out infinite 4s;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
+        <span id="widgetIcon" style="font-size:28px;line-height:1;">🌤</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span id="widgetTemp" style="font-size:28px;font-weight:300;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:4px;">
+            <span id="widgetState" style="font-size:16px;font-weight:400;opacity:0.8;">晴</span>
+            <span id="widgetTempNum">--</span><span style="font-size:18px;opacity:0.5;">℃</span>
+          </span>
+          <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.08);color:var(--theme);font-size:14px;cursor:pointer;transition:all 0.2s;" onclick="event.stopPropagation();refreshWeather()">↻</span>
+          <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.05);color:var(--sub);font-size:14px;cursor:pointer;transition:all 0.2s;opacity:0.4;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:2px 0;position:relative;z-index:1;overflow:hidden;">
+        <div id="widgetDesc" style="font-size:15px;font-weight:500;color:var(--text);line-height:1.5;opacity:0.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
+        <div id="widgetDetail" style="font-size:12px;color:var(--sub);opacity:0.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
+      </div>
+      <div style="position:relative;z-index:1;flex-shrink:0;padding-bottom:2px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span id="widgetWorldName" style="font-size:12px;color:var(--sub);opacity:0.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;">未关联</span>
+          <span id="widgetUpdateTime" style="font-size:11px;color:var(--sub);opacity:0.4;white-space:nowrap;flex-shrink:0;">刚刚</span>
+        </div>
+        <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:4px;"></div>
+      </div>
+    </div>`;
   }
   
   // ---- 构建应用网格（只放普通 App） ----
@@ -1384,6 +1442,7 @@ function renderWeatherWidget() {
   
   _weatherWorlds = worlds;
   
+  // 边界修正
   if (_weatherCurrentIndex >= worlds.length) _weatherCurrentIndex = 0;
   if (_weatherCurrentIndex < 0) _weatherCurrentIndex = 0;
   
@@ -1400,11 +1459,11 @@ function renderWeatherWidget() {
   // 图标
   if (iconEl) iconEl.textContent = w.weather.icon || '🌤';
   
-  // 状态文字：优先使用 AI 返回的 state，否则用 Emoji 映射兜底
+  // 状态文字
   var state = w.weather.state || mapIconToState(w.weather.icon) || '晴';
   if (stateEl) stateEl.textContent = state;
   
-  // 温度（带 ℃）
+  // 温度
   if (tempEl) {
     if (w.weather.temp !== undefined && w.weather.temp !== null && w.weather.temp !== '--') {
       tempEl.textContent = w.weather.temp;
@@ -1448,21 +1507,20 @@ function renderWeatherWidget() {
     timeEl.textContent = '更新 ' + timeText;
   }
   
-  // 小圆点
+  // ★ 小圆点（已修复颜色，但无额外逻辑）
   if (dotsEl) {
     dotsEl.innerHTML = worlds.map(function(_, i) {
-      return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' + (i === _weatherCurrentIndex ? 'var(--theme)' : 'rgba(255,255,255,0.2)') + ';transition:all 0.3s;"></span>';
+      var isActive = (i === _weatherCurrentIndex);
+      var bgColor = isActive ? 'var(--theme)' : 'var(--sub)';
+      var opacity = isActive ? '1' : '0.35';
+      var shadow = isActive ? '0 0 6px var(--theme)' : 'none';
+      return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' + bgColor + ';opacity:' + opacity + ';box-shadow:' + shadow + ';transition:all 0.3s;"></span>';
     }).join('');
   }
   
-  if (w.id !== '_placeholder') {
-    DB.desktop._activeWorld = w.id;
-    save();
-  }
-  
+  // 不再在这里保存 _activeWorld，也不重新绑定事件
   autoCheckWeatherUpdate();
 }
-// ============================================================
 // 天气小组件：滑动绑定
 // ============================================================
 function bindWeatherWidgetEvents() {
@@ -1737,35 +1795,42 @@ async function aiGenerateWeather(worldId, callback) {
     };
     save();
     
-    // ===== 向关联该世界观的角色发送天气消息 =====
-    var activeWorldId = DB.desktop._activeWorld;
-    if (activeWorldId === worldId) {
-      var relatedChars = DB.contacts.filter(function(c) { return c.worldId === worldId; });
-      relatedChars.forEach(function(c) {
-        if (!DB.chats[c.id]) DB.chats[c.id] = [];
-        var msgs = DB.chats[c.id];
-        var sysMsg = '🌤 天气变了：' + data.desc;
-        var lastWeatherMsg = null;
-        for (var i = msgs.length - 1; i >= 0; i--) {
-          if (msgs[i].role === 'system' && msgs[i].content && msgs[i].content.startsWith('🌤 天气变了')) {
-            lastWeatherMsg = msgs[i];
-            break;
-          }
-        }
-        var isDuplicate = lastWeatherMsg && lastWeatherMsg.content === sysMsg;
-        if (!isDuplicate) {
-          msgs.push({
-            id: 'sys_' + Date.now(),
-            role: 'system',
-            type: 'system',
-            content: sysMsg,
-            time: Date.now()
-          });
-        }
-      });
-      save();
+// ===== 向所有关联该世界观的角色发送天气消息（不再限制为当前活跃世界观） =====
+var relatedChars = DB.contacts.filter(function(c) { return c.worldId === worldId; });
+relatedChars.forEach(function(c) {
+  if (!DB.chats[c.id]) DB.chats[c.id] = [];
+  var msgs = DB.chats[c.id];
+  var sysMsg = '🌤 天气变了：' + data.desc;
+  
+  // 去重：检查最后一条天气消息是否完全相同
+  var lastWeatherMsg = null;
+  for (var i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role === 'system' && msgs[i].content && msgs[i].content.startsWith('🌤 天气变了')) {
+      lastWeatherMsg = msgs[i];
+      break;
     }
+  }
+  var isDuplicate = lastWeatherMsg && lastWeatherMsg.content === sysMsg;
+  
+  if (!isDuplicate) {
+    msgs.push({
+      id: 'sys_' + Date.now(),
+      role: 'system',
+      type: 'system',
+      content: sysMsg,
+      time: Date.now()
+    });
+    // 立即保存，保证数据持久化
+    save();
     
+    // 如果当前正在该角色的聊天界面，立即刷新显示（保持滚动位置）
+    if (view && view.type === 'chat' && view.id === c.id) {
+      renderChat(true);
+    }
+  }
+});
+// 为了保险，再统一保存一次（但已在循环内保存过，这里可留可删，留着无妨）
+save();    
     if (callback) callback(true);
   } catch (e) {
     console.error('AI 生成天气失败:', e);
@@ -4509,14 +4574,26 @@ async function aiPostMoment(cid, silent) {
       sys = '你扮演「' + (c.nick || c.name) + '」。';
     }
 
-      var p = sys + '\n\n【任务】以第一人称发一条微信朋友圈，就像真人随手发的。\n' +
-    '【硬性要求】\n' +
-    '1. 必须是连贯的一整段，绝对不许分行换行。\n' +
-    '2. 内容要具体、有信息量：写你正在做的事、遇到的人、吃的东西、工作、吐槽、某个具体想法等。不许写空泛的抒情。\n' +
-    '3. 严禁写天气/阳光/风/光合作用/暖洋洋这类文艺抒情，严禁"今天的xx软乎乎/暖洋洋"这种矫情句式。这是最重要的一条。\n' +
-    '4. 口语、随手、接地气，可以带点情绪或吐槽，像发给朋友看的碎碎念。\n' +
-    '5. 长度一两句、几十字即可。\n' +
-    '6. 只输出正文本身，不要引号、解释、旁白，禁止<state>标签和任何方括号标记。';
+    var p = sys + '\n\n【任务】以第一人称发一条微信朋友圈，就像真人随手发的。\n' +
+        '【硬性要求】\n' +
+        '1. **字数硬限制**：最多不超过 3 句话，总字数控制在 20~50 字之间。超过 50 字的内容将被视为违规。\n' +
+        '2. **句式多样性**：每次发圈都必须换一种表达风格，不要重复之前用过的主谓宾结构或常用词（如“确实想……”、“看得我……”）。\n' +
+        '3. 必须是连贯的一整段，绝对不许分行换行。\n' +
+        '4. 内容要具体、有信息量：写你正在做的事、遇到的人、吃的东西、工作、吐槽、某个具体想法等。不许写空泛的抒情。\n' +
+        '5. 严禁写天气/阳光/风/光合作用/暖洋洋这类文艺抒情，严禁“今天的xx软乎乎/暖洋洋”这种矫情句式。这是最重要的一条。\n' +
+        '6. 口语、随手、接地气，可以带点情绪或吐槽，像发给朋友看的碎碎念。\n' +
+        '7. 只输出正文本身，不要引号、解释、旁白，禁止<state>标签和任何方括号标记。\n' +
+        '【风格变化参考】\n' +
+        '你可以选择以下任意一种风格，但每次必须不同：\n' +
+        '- 吐槽式：吐槽某件小事，带点无奈或幽默\n' +
+        '- 分享式：分享刚经历的趣事或见闻\n' +
+        '- 记录式：简单记下此刻在做什么，带点感叹\n' +
+        '- 碎碎念式：自言自语式的短句，像随口说的\n' +
+        '【示例】（20~50字，3句以内）\n' +
+        '✅ “刚买咖啡，店员把糖当成盐给我，喝了一口差点去世。”\n' +
+        '✅ “地铁上旁边大哥在打游戏，声音外放，我忍了十分钟还是戴上了耳机。”\n' +
+        '✅ “今天的工作终于收尾了，接下来只想躺着。”\n' +
+        '❌ “刚才在街上那个章鱼烧摊子老板真的绝了，给妖怪加酱汁的时候手抖得跟帕金森似的……”（超字数、句式重复）';
 
     var txt = await callAI([{ role: 'user', content: p }], model);
     txt = cleanMomentText(txt);
@@ -4537,10 +4614,8 @@ async function aiPostMoment(cid, silent) {
       _settled: true
     });
 
-    // ---- 新增：标记未读 ----
     DB.momentUnread = (DB.momentUnread || 0) + 1;
     refreshMomentBadge();
-
     save();
 
     if (view.type === 'moments') renderMoments();
@@ -5624,6 +5699,19 @@ function openChat(id){
     c.lastActive = Date.now();
     checkTimeDecay(c);
     // =============================================
+    
+    // ===== 【新增】打开聊天时，自动把该角色的世界观设为天气活跃项 =====
+    if (c.worldId) {
+      DB.desktop._activeWorld = c.worldId;
+      // 同步更新天气索引
+      var worlds = DB.worlds || [];
+      var idx = worlds.findIndex(function(w) { return w.id === c.worldId; });
+      if (idx !== -1) _weatherCurrentIndex = idx;
+      // 保存这个偏好
+      save();
+    }
+    // =========================================================
+    
     save();
   }
   view={type:'chat',id};
@@ -5756,7 +5844,7 @@ if (todaySchedule && todaySchedule.items && todaySchedule.items.length) {
   s += '     如果不满足条件，就老实发纯文本，别故意创造条件去发语音。\n\n';
   s += '  ✅ 正确示例：[语音|我今天有点累，不想说话了]\n';
   s += '  ❌ 错误示例：（语音消息）我今天有点累。\n\n';
-
+s += '  【语音内容要求】语音消息必须语义连贯、逻辑清晰，使用标点符号（句号、逗号、问号等），长度适中（通常 1~3 句话）。请像真人正常说话一样组织内容。\n\n';
   // ----- 表情包 -----
   s += '- [表情包] 触发条件：\n';
   s += '  ① 首先根据你的人设判断是否适合发表情包：\n';
@@ -5805,20 +5893,21 @@ if (todaySchedule && todaySchedule.items && todaySchedule.items.length) {
   s += '  ✅ 正确示例：[拉黑玩家|大矛盾]；\n';
   s += '  ❌ 错误示例：（我生气了，不想理你了）。\n\n';
 
-  // ===== 第4层：说话风格 + 事例台词 =====
-  s += '\n【说话风格】\n';
-  s += add('说话风格/口头禅', c.pStyle);
-  s += add('语言习惯(语气逻辑)', c.pLang);
-  if (c.sampleLines) {
-    s += '事例台词（学习语气和用词习惯）：\n' + c.sampleLines + '\n';
-  }
-
+      // ===== 第4层：说话风格 + 线上人设 + 事例台词 =====
+      s += '\n【说话风格与线上习惯】\n';
+      s += add('说话风格/口头禅', c.pStyle);
+      s += add('语言习惯(语气逻辑)', c.pLang);
+      s += add('线上人设（微信聊天时的具体习惯，如是否爱发表情包、回消息快慢、语气风格等，务必遵循）', c.pOnlinePersona);
+      if (c.sampleLines) {
+        s += '事例台词（学习语气和用词习惯）：\n' + c.sampleLines + '\n';
+      }
   // ===== 第5层：输出格式（线上/线下） =====
   if (c.mode === 'offline') {
     s += `\n【输出格式：线下模式】\n${DB.settings.offlineStyle || DEFAULT_OFFLINE}\n【时间处理】线下剧情按故事内的连续时间推进，无视现实间隔。\n【线下收尾】剧情自然走到尾声时，另起一行输出 [回线上|]。\n`;
   } else {
     s += `\n【输出格式：线上模式】\n${DB.settings.onlineStyle || DEFAULT_ONLINE}\n【发消息条数】严格根据角色性格决定发几条：话痨/热情→可连发2-4条；高冷/沉默寡言/惜字如金→通常只发1条短句，别硬凑；随心情情境变化，不要每次都机械连发。\n`;
   }
+    s += `【语音消息标点例外】当你决定发语音（[语音|内容]）时，内容必须使用正常的标点符号（句号、逗号、问号等），确保语义连贯、逻辑清晰，像真人正常说话。其他普通文本消息仍遵守无标点规则。\n`;
 
   // ===== 心声触发指令 =====
   s += '\n【心声触发指令】\n';
