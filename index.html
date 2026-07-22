@@ -2402,40 +2402,51 @@ function deleteWorld(worldId) {
 }
 
 async function aiPolishWorld() {
+  // 互斥锁检查
+  if (window._polishLock_world) {
+    console.warn('已有世界观润色任务进行中，本次忽略');
+    return;
+  }
+  window._polishLock_world = true;
+
   var keyword = document.getElementById('we_keyword').value.trim();
   var places = document.getElementById('we_places').value.trim();
-  if (!keyword) { alert('请先输入关键词'); return; }
+  if (!keyword) {
+    alert('请先输入关键词');
+    window._polishLock_world = false;
+    return;
+  }
   var model = DB.settings.auxModel || DB.settings.chatModel;
-  if (!model) { alert('请先在设置里选择模型'); return; }
+  if (!model) {
+    alert('请先在设置里选择模型');
+    window._polishLock_world = false;
+    return;
+  }
 
   var btn = document.querySelector('#modal .btn.gray');
-  if (btn) { btn.textContent = '⏳ 润色中…'; btn.disabled = true; }
+  if (btn) {
+    btn.textContent = '⏳ 润色中…';
+    btn.disabled = true;
+  }
 
   try {
-var prompt = '根据以下关键词，生成一个世界观描述。\n\n' +
-  '【要求】\n' +
-  '- 世界观是给 AI 用的上下文提示词，必须能直接指导对话。不要纯氛围描写，不要华丽词藻。\n' +
-  '- 必须包含以下信息：时代背景、社会结构、核心规则、主要势力、当前局势。\n' +
-  '- 结构清晰，用 Markdown 格式输出（## 标题、- 列表）。\n\n' +
-  '另外，请根据关键词生成 3-6 个关键地点，每个地点用一句话描述它是什么地方、适合做什么。\n\n' +
-  '【硬性规则】生成地点时，必须在每个地点条目中明确标注归属：\n' +
-  '- 如果地点是"AI角色"经常去的地方，必须用角色名称标注，例如：「杨深常去的街角咖啡馆」\n' +
-  '- 如果地点是"用户"经常去的地方，必须用"用户"标注，例如：「用户常去的24小时便利店」\n' +
-  '- 如果地点是双方共同活动的地方，标注为「共同地点：江边长椅」\n' +
-  '绝对不允许出现"你常去的地方""你的秘密基地""你住的地方"这类模糊表述。\n\n' +
-  '输出格式：先写世界观正文（Markdown 格式），然后单独列出关键地点。\n\n' +
-  '关键词：' + keyword;
+    var prompt = '根据以下关键词，生成一个世界观描述。\n\n【要求】\n- 世界观是给 AI 用的上下文提示词，必须能直接指导对话。不要纯氛围描写，不要华丽词藻。\n- 必须包含以下信息：时代背景、社会结构、核心规则、主要势力、当前局势。\n- 结构清晰，用 Markdown 格式输出（## 标题、- 列表）。\n\n另外，请根据关键词生成 3-6 个关键地点，每个地点用一句话描述它是什么地方、适合做什么。\n\n【硬性规则】生成地点时，必须在每个地点条目中明确标注归属：\n- 如果地点是"AI角色"经常去的地方，必须用角色名称标注，例如：「杨深常去的街角咖啡馆」\n- 如果地点是"用户"经常去的地方，必须用"用户"标注，例如：「用户常去的24小时便利店」\n- 如果地点是双方共同活动的地方，标注为「共同地点：江边长椅」\n绝对不允许出现"你常去的地方""你的秘密基地""你住的地方"这类模糊表述。\n\n输出格式：先写世界观正文（Markdown 格式），然后单独列出关键地点。\n\n关键词：' + keyword;
 
-if (places) {
-  prompt += '\n\n用户提供的关联地点参考（可选择性使用）：' + places;
-}
+    if (places) {
+      prompt += '\n\n用户提供的关联地点参考（可选择性使用）：' + places;
+    }
+
     var result = await callAI([{ role: 'user', content: prompt }], model);
     var descEl = document.getElementById('we_desc');
     if (descEl) descEl.value = result.trim();
   } catch (e) {
     alert('润色失败：' + e.message);
   } finally {
-    if (btn) { btn.textContent = '✨ AI润色生成描述'; btn.disabled = false; }
+    if (btn) {
+      btn.textContent = '✨ AI润色生成描述';
+      btn.disabled = false;
+    }
+    window._polishLock_world = false;
   }
 }
 // ===== 世界观 App 函数结束 =====
@@ -4123,15 +4134,32 @@ function delChap(i){if(confirm('删除？')){getC(editingId).chapters.splice(i,1
 
 /* ===== AI 润色 ===== */
 async function polishChar() {
+  // 互斥锁
+  if (window._polishLock_char) {
+    console.warn('已有润色任务进行中，本次忽略');
+    return;
+  }
+  window._polishLock_char = true;
+
   const c = getC(editingId);
   const btn = document.getElementById('polishBtn');
+  if (btn) {
+    btn.textContent = '⏳ 润色中…';
+    btn.disabled = true;
+  }
+
   const model = DB.settings.auxModel || DB.settings.chatModel;
   if (!model) {
     alert('请先在 设置 里拉取并选择模型');
+    window._polishLock_char = false;
+    if (btn) {
+      btn.textContent = '✨ AI 润色 / 补全人设';
+      btn.disabled = false;
+    }
     return;
   }
 
-  // 构建当前角色数据（将 undefined 转成空字符串）
+  // 读取当前所有字段（保留原始内容）
   const cur = {
     真名: c.name || '',
     性别: c.gender || '',
@@ -4142,6 +4170,7 @@ async function polishChar() {
     身体数据: c.body || '',
     外貌: c.pLook || '',
     性格关键词: c.pKeywords || '',
+    行为模式: c.pBehavior || '',
     说话风格: c.pStyle || '',
     成长经历: c.pBack || '',
     日常作息: c.pDaily || '',
@@ -4154,40 +4183,42 @@ async function polishChar() {
     补充: c.pExtra || ''
   };
 
-  // 所有中文键名列表（用于 prompt 和 映射）
   const chineseKeys = [
     '真名', '性别', '年龄', '生日', '身份职业', '家庭出身', '身体数据',
-    '外貌', '性格关键词', '说话风格', '成长经历', '日常作息', '喜好厌恶',
+    '外貌', '性格关键词', '行为模式', '说话风格', '成长经历', '日常作息', '喜好厌恶',
     '语言习惯', '事例台词', '负向约束', '线上人设', '开场白', '补充'
   ];
 
-  const pr = `你是一位擅长塑造“真人感”角色的资深设定师。用户已经提供了一些基础框架，现在需要你把这些信息润色成生动、自然、有血有肉的文字，而不是填空式的标签堆砌。
+  // ===== 新 Prompt：保留所有细节，只做整理和补全 =====
+  const pr = `你是一位角色设定润色助手。用户已经填写了一些角色设定草稿，请你在【完全保留用户原有文字和细节】的基础上，完成以下工作：
+
+1. 如果某字段用户已填写，请仅做以下微调：
+   - 修正明显的错别字或语法错误（不要改风格）。
+   - 将零散的词语整理成自然的短句（但不要删减原有信息）。
+   - 如果该字段内容明显不完整（例如只有几个关键词），可根据整体人设适当补充 1~2 句合理的细节。
+
+2. 如果某字段为空，请根据整体人设合理补全（补全内容需符合人设逻辑，不要脑补无关剧情）。
+
+3. 【特别重要】针对“成长经历”（pBack）字段：
+   - 如果用户已填写了带箭头的格式（例如“事件 → 影响”），请保留原有箭头逻辑，并适当补充使因果链更清晰。
+   - 如果用户未填写，则用“事件 → 影响”的格式补全。
+   - 【禁止】将用户的箭头格式改成散文叙述。
+
+4. 【特别重要】针对“行为模式”（pBehavior）字段：
+   - 如果用户已填写，请完整保留用户写的内容，只对其中的逻辑顺序做轻微调整（如合并同类项），但绝对不要删减用户的描述。
+   - 如果用户未填写，则按照“外在印象 → 行为习惯 → 情绪表达”的逻辑补全，但补全内容要简洁。
+
+5. 【总体原则】用户的每一条已填写内容都是宝贵的，你有责任保留它们，只做锦上添花，不要自作主张删减或压缩。
 
 【输入的角色信息】
 ${JSON.stringify(cur, null, 2)}
 
-【核心要求】
-1. **已填字段**：优化措辞和逻辑，让它读起来像小说人物档案或真实的社交简介，自然流畅，不要生硬的短句罗列。
-2. **空白字段**：根据已有性格和经历，进行合理且有灵气的补全（例如：如果性格内敛，可以补充“习惯用点头代替回应，但悄悄记住对方喜好”这类细节）。
-3. **风格忌讳（非常重要）**：绝对禁止使用“性格开朗”、“善良”、“喜欢看书”这类干瘪词汇。必须用**具体的行为细节和习惯**来展现人物（比如：“遇到冷场会主动递零食打破僵局”、“书房里堆满了看到一半就睡着的推理小说”）。
-4. **成长经历**：必须写清楚“遭遇了什么 → 所以变成了什么样的人”，因果链要清晰，避免流水账。
-5. **说话与台词**：事例台词必须真实自然，像活人说话，禁止书面语、播音腔。线上人设要写出具体的微信使用习惯（例如：“只发表情包不打字”、“看到消息隔半小时才回”、“爱用波浪号～”）。
-6. **开场白**：必须是对方一打开聊天框就能看到的、极具个人特色的第一句话。极度口语化，带有人设辨识度（可以带一个轻微的口癖或习惯用语）。
-
-【视角约束】
-- 所有描述使用第三人称（他/她），不要用“我”指代角色。
-- 角色与用户的关系中，用“用户”代替“我”。
-- 开场白可以用第一人称。
-
-【输出格式 - 严格遵守】
+【输出格式】
 - 只输出一个 JSON 对象。
 - 键名必须使用中文，与下面列表完全一致，一个都不能少：
   ${chineseKeys.join('、')}
-- 必须包含以上所有键，即使值为空字符串也必须包含，绝对不允许省略任何键。
+- 必须包含以上所有键，即使值为空字符串也必须包含。
 - 不要任何解释、不要代码块标记。只输出 JSON。`;
-
-  btn.textContent = '⏳ 润色中…（请稍候）';
-  btn.disabled = true;
 
   try {
     let out = await callAI([{ role: 'user', content: pr }], model);
@@ -4196,7 +4227,6 @@ ${JSON.stringify(cur, null, 2)}
     if (m) out = m[0];
     const r = JSON.parse(out);
 
-    // ---- 映射表：中文键 → 实际字段名 ----
     const map = {
       真名: 'name',
       性别: 'gender',
@@ -4207,6 +4237,7 @@ ${JSON.stringify(cur, null, 2)}
       身体数据: 'body',
       外貌: 'pLook',
       性格关键词: 'pKeywords',
+      行为模式: 'pBehavior',
       说话风格: 'pStyle',
       成长经历: 'pBack',
       日常作息: 'pDaily',
@@ -4219,7 +4250,7 @@ ${JSON.stringify(cur, null, 2)}
       补充: 'pExtra'
     };
 
-    // ---- 尝试中文键 ----
+    // 尝试中文键
     let usedChinese = true;
     for (const cnKey of chineseKeys) {
       if (r[cnKey] !== undefined && r[cnKey] !== null) {
@@ -4230,7 +4261,7 @@ ${JSON.stringify(cur, null, 2)}
       }
     }
 
-    // ---- 如果中文键没命中任何字段，尝试英文键（容错） ----
+    // 容错：尝试英文键
     if (!usedChinese) {
       const engMap = {
         name: 'name',
@@ -4242,6 +4273,7 @@ ${JSON.stringify(cur, null, 2)}
         body: 'body',
         pLook: 'pLook',
         pKeywords: 'pKeywords',
+        pBehavior: 'pBehavior',
         pStyle: 'pStyle',
         pBack: 'pBack',
         pDaily: 'pDaily',
@@ -4262,11 +4294,8 @@ ${JSON.stringify(cur, null, 2)}
         }
       }
       if (!anyMatched) {
-        // 极端情况：AI 返回了奇怪的键名，直接弹出原始内容帮助调试
         console.warn('AI 返回的 JSON 键名无法识别:', Object.keys(r));
         alert('AI 返回的格式与预期不符，请检查 API 响应或重试。\n返回内容：' + out.slice(0, 200));
-        btn.textContent = '✨ AI 润色 / 补全人设';
-        btn.disabled = false;
         return;
       }
     }
@@ -4277,8 +4306,11 @@ ${JSON.stringify(cur, null, 2)}
   } catch (e) {
     alert('润色失败：' + e.message + '\n(可重试一次)');
   } finally {
-    btn.textContent = '✨ AI 润色 / 补全人设（用辅助模型）';
-    btn.disabled = false;
+    if (btn) {
+      btn.textContent = '✨ AI 润色 / 补全人设';
+      btn.disabled = false;
+    }
+    window._polishLock_char = false;
   }
 }
 /* ===== 朋友圈 ===== */
