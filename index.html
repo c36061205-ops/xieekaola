@@ -286,6 +286,7 @@
 .popup-btn.main{background:var(--theme);color:#fff;}
 .popup-btn.sub{background:var(--bg);color:var(--sub);border:1px solid var(--line);}
 .popup-spin{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--theme);border-radius:50%;margin:6px auto 12px;animation:popSpin .8s linear infinite;}
+@keyframes watchBlink { 0%,100%{opacity:1} 50%{opacity:.25} }
 @keyframes popFade{from{opacity:0}to{opacity:1}}
 @keyframes popUp{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes popSpin{to{transform:rotate(360deg)}}
@@ -894,6 +895,63 @@ function addHeart(n,reason){DB.hearts=(DB.hearts||0)+n;if(n>0)DB.heartsTotal=(DB
 function checkMile(){[[50,30],[100,50],[150,100]].forEach(([need,bonus])=>{if(DB.heartsTotal>=need&&!DB.heartMile[need]){DB.heartMile[need]=1;DB.hearts+=bonus;DB.heartLog.unshift({t:Date.now(),n:bonus,reason:`💗累计达成${need}奖励`});setTimeout(()=>popTip(`🎉 心动值累计突破 ${need}！奖励 ${bonus} 心动值`),400);}});}
 function spendHeart(n,reason){if((DB.hearts||0)<n){alert('心动值不足～当前'+(DB.hearts||0)+'，需要'+n+'。多和角色聊天可以获得哦');return false;}DB.hearts-=n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n:-n,reason});save();return true;}
 function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(DB));}catch(e){alert('保存失败(存储满?)：'+e.message);}}
+// ===== 轻量收集：只捞今天、且与该角色直接相关的群聊/朋友圈片段 =====
+function collectExtraContextForChar(c) {
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var isToday = function(t){ return new Date(t||0).toISOString().slice(0,10) === todayStr; };
+  var nameOf = function(id){
+    if (id === 'me') return (DB.me && DB.me.name) || '我';
+    if (id === c.id) return c.name || c.nick;
+    return '群友';
+  };
+  var mentioned = function(txt){
+    if (!txt) return false;
+    return (c.name && txt.indexOf(c.name) >= 0) || (c.nick && txt.indexOf(c.nick) >= 0);
+  };
+  var lines = [];
+
+  // 1) 群聊：只看该角色所在的群
+  (DB.groups || []).forEach(function(g){
+    if (!g.members || g.members.indexOf(c.id) < 0) return;
+    var msgs = (DB.chats[g.id] || []).filter(function(m){ return isToday(m.time); });
+    msgs.slice(-60).forEach(function(m){
+      var txt = lastText(m) || '';
+      if (!txt) return;
+      if (m.role === 'assistant' && m.charId === c.id) {
+        lines.push('[群聊·'+(g.name||'群')+'] '+ (c.name||c.nick) +'：'+ txt);   // TA自己说的
+      } else if (m.role === 'user' && mentioned(txt)) {
+        lines.push('[群聊·'+(g.name||'群')+'] '+ nameOf('me') +'：'+ txt);        // 我在群里提到TA
+      }
+    });
+  });
+
+  // 2) 朋友圈：TA发的 / TA点赞的 / TA评论的 / 内容提到TA的
+  (DB.moments || []).filter(function(p){ return isToday(p.time); }).slice(-40).forEach(function(p){
+    var isAuthor       = p.author === c.id;
+    var likedByChar    = (p.likes || []).indexOf(c.id) >= 0;
+    var commentedByChar= (p.comments || []).some(function(cm){ return cm.by === c.id; });
+    var textMentions   = mentioned(p.text);
+    if (!(isAuthor || likedByChar || commentedByChar || textMentions)) return;
+
+    if (isAuthor) {
+      lines.push('[朋友圈] '+(c.name||c.nick)+' 发布："'+ (p.text||'') +'"');
+    } else if (p.text) {
+      lines.push('[朋友圈] '+ nameOf(p.author) +' 发布："'+ p.text +'"');
+    }
+    if (likedByChar && !isAuthor) {
+      lines.push('  └ '+(c.name||c.nick)+' 点了赞');
+    }
+    (p.comments || []).forEach(function(cm){
+      if (cm.by === c.id) lines.push('  └ '+(c.name||c.nick)+' 评论："'+ (cm.text||'') +'"');
+    });
+  });
+
+  // 3) 防爆闸：最多20条、总字数≤1200
+  var picked = lines.slice(-20).join('\n');
+  if (picked.length > 1200) picked = picked.slice(-1200);
+  return picked; // 空字符串 = 今天群聊/朋友圈跟TA没关系
+}
+
 // ===== 每日自动记忆生成（仅调用辅助模型） =====
 async function generateMemoryForChar(c) {
   var model = DB.settings.auxModel || DB.settings.chatModel;
@@ -910,35 +968,72 @@ async function generateMemoryForChar(c) {
 
   try {
     var convo = todays.map(function(m) {
-      var who = (m.role === 'assistant') ? (c.nick || c.name) : (DB.me.name || '我');
+      var who = (m.role === 'assistant') ? (c.name || c.nick) : (DB.me.name || '我');
       return who + '：' + (lastText(m) || '');
     }).join('\n');
 
-    var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.nick || c.name) + '」和「' + (DB.me.name || '我') + '」今天的聊天记录，提炼出 1~3 条值得长期记住的记忆。\n\n' +
-      '【重要】每条记忆都必须附带优先级（priority）：\n' +
+    // 【新增1】收集今天群聊/朋友圈里与TA相关的片段
+    var extraContext = collectExtraContextForChar(c);
+    var extraBlock = '';
+    if (extraContext) {
+      extraBlock = '\n\n【今日群聊/朋友圈参考（仅筛选出与「' + (c.name || c.nick) + '」直接相关的片段，作背景补充）】\n' +
+        extraContext +
+        '\n（注意：以上是群聊和朋友圈的公开内容，属于背景信息，不要把它们当成TA与用户之间的私聊事件或私下约定；只有当它们明显影响到TA与用户的关系时，才酌情参考。）';
+    }
+
+    var favNow = (c.status && c.status.好感度 != null) ? c.status.好感度 : 50;
+    var relNow = (c.status && c.status.当前关系) ? c.status.当前关系 : '初次见面';
+    var known = '';
+    if (c.job) known += '身份/职业：' + c.job + '\n';
+    if (c.pLook) known += '外貌特征：' + c.pLook + '\n';
+    if (c.pKeywords) known += '性格：' + c.pKeywords + '\n';
+    if (c.pBack) known += '背景经历：' + c.pBack + '\n';
+    var world = (DB.worlds||[]).find(function(w){ return w.id===c.worldId; });
+    if (world) known += '世界观设定：' + world.name + '——' + world.desc + '\n';
+    if (!known) known = '（无特别设定）';
+
+    var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.name || c.nick) + '」和「' + (DB.me.name || '我') + '」今天的聊天记录，完成两个任务。\n\n' +
+      '【任务一：提炼记忆】提炼出 1~3 条值得长期记住的记忆，每条附带优先级（priority）：\n' +
       '- core（核心）：涉及关系本质、身份定义、无法改变的事实（例如：确立了关系、坦白身世、重要承诺）\n' +
       '- important（重要）：重要共同经历、情感转折、影响关系的关键对话\n' +
-      '- temp（临时）：日常琐事、短期状态、可随时间淡化的小事\n\n' +
-      '【视角要求】请用第三人称描述，将对方称为「用户」，不要用「我」来指代用户。例如：用户和XX一起去了海边。\n\n' +
-      '请以 JSON 数组格式输出，每条包含：content（字符串）、priority（字符串），不要有任何其他文字。\n\n' +
-      '聊天记录：\n' + convo;
+      '- temp（临时）：日常琐事、短期状态、可随时间淡化的小事\n' +
+      '【重要·区分已知设定与新事件】下面是这个角色的既定设定（属于已知背景，不是今天发生的事）：\n' + known + '\n' +
+      '提炼记忆时，绝对不要把上述既定设定当成新记忆记录——凡是属于角色本身固有属性（种族、外貌、身份、身世、性格等设定里已写明的内容），都不是新记忆，一律不记。只记录今天聊天中【新发生的事、新的情感变化、新的约定或承诺、关系的新进展、双方之间的互动细节】。\n' +
+      '视角要求：用第三人称描述，将对方称为「用户」，不要用「我」指代用户。例如：用户和XX一起去了海边。\n\n' +
+      '【任务二：判定当前关系】\n' +
+      '结合今天的聊天内容、以及下面的参考信息，给出一个最贴合此刻剧情的「关系称谓」：\n' +
+      '- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
+      '- 目前的关系称谓：' + relNow + '\n' +
+      '要求：\n' +
+      '① 关系称谓要有故事感、贴合剧情，而不是干巴巴的档位词。例如：热恋期的恋人 / 闹别扭的恋人 / 刚确立的暧昧 / 无话不谈的挚友 / 渐行渐远的旧识 / 已分手的前任 / 形同陌路 等。\n' +
+      '② 若今天发生了明确的重大剧情转折（表白、在一起、分手、绝交、和好），关系称谓要据此突变（如分手就写"前任"而非降级为"朋友"）。\n' +
+      '③ 若只是日常聊天、没有重大转折，就在原有关系称谓基础上微调或保持，不要仅凭好感度小幅波动就升降关系。\n' +
+      '④ 好感度只作参考：高好感支撑亲密称谓，好感很低或刚吵架可体现疏离，但最终以剧情为准。\n' +
+      '⑤ 关系称谓控制在 10 字以内。\n\n' +
+      '【输出格式】只输出一个 JSON 对象，不要任何其他文字：\n' +
+      '{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓"}\n\n' +
+      '聊天记录：\n' + convo + extraBlock;   // 【新增2】把背景补充拼在最后
 
     var out = await callAI([{ role: 'user', content: prompt }], model);
     out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
-    var match = out.match(/\[[\s\S]*\]/);
+    var match = out.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('AI 返回格式不正确');
-    var items = JSON.parse(match[0]);
-    if (!Array.isArray(items) || items.length === 0) return false;
+    var data = JSON.parse(match[0]);
+
+    var items = Array.isArray(data.memories) ? data.memories : [];
+
+    if (data.relation && typeof data.relation === 'string' && data.relation.trim()) {
+      if (!c.status) c.status = {};
+      c.status.当前关系 = data.relation.trim();
+    }
 
     var anyAdded = false;
     items.forEach(function(item) {
       if (!item.content || !item.priority) return;
-      // ========== 去重：只检查内容是否重复（不限日期） ==========
       var exists = (c.memories || []).some(function(m) {
         return m.content === item.content;
       });
       if (exists) return;
-      // =======================================================
       if (!c.memories) c.memories = [];
       c.memories.push({
         id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
@@ -952,8 +1047,9 @@ async function generateMemoryForChar(c) {
       c.chapters.push({ date: todayStr, content: '[记忆] ' + item.content });
       anyAdded = true;
     });
-    if (anyAdded) save();
-    return anyAdded;
+
+    if (anyAdded || (data.relation && data.relation.trim())) save();
+    return anyAdded || !!(data.relation && data.relation.trim());
   } catch (e) {
     console.error('生成记忆失败（' + (c.nick || c.name) + '）：', e);
     return false;
@@ -1113,6 +1209,7 @@ function render(){triggerDailyMemoryCheck();triggerDailyMemoryCheck();const h=do
   if(view.type==='heartDetail')return renderHeartDetail();
   if(view.type==='voiceList')return renderVoiceList();
   if(view.type==='schedule')return renderSchedule(); 
+  else if (view.type === 'watchLog') renderWatchLog();
   if(view.type==='focus')return renderFocus();
   if(view.type==='worlds')return renderWorlds();
   if (view.type === 'memo') return renderMemoMain();
@@ -1217,7 +1314,7 @@ weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;
   
   // ---- 构建应用网格（只放普通 App） ----
   var appsHtml = otherApps.map(function(a) {
-    var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-6px;right:-6px;min-width:28px;height:28px;padding:0 7px;background:#f43;color:#fff;border-radius:14px;font-size:16px;font-weight:600;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:9;"></span>' : '';
+        var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>' : '';
     var iconUrl = a.icon || icons[a.id] || null;
     var style = 'position:relative;';
     if (iconUrl) {
@@ -2320,9 +2417,9 @@ function renderChats(){
       }
       var un = g.unread || 0;
       var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
-      return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeGroupFromChats(\'' + g.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + g.id + '" onclick="openGroupChat(\'' + g.id + '\')">' +
-        '<div class="avatar" style="background:var(--theme);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;">👥</div>' +
-        '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between"><span>' + esc(g.name) + ' <span style="color:var(--sub);font-size:13px;">(' + (g.members.length+1) + ')</span></span>' + badge + '</div><div class="cell-sub">' + esc(preview).slice(0, 30) + '</div></div></div></div>';
+return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeGroupFromChats(\'' + g.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + g.id + '" onclick="openGroupChat(\'' + g.id + '\')">' +
+  '<div class="avatar" style="background:transparent;padding:0;overflow:hidden;">' + groupIcon() + '</div>' +
+  '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between"><span>' + esc(g.name) + ' <span style="color:var(--sub);font-size:13px;">(' + (g.members.length+1) + ')</span></span>' + badge + '</div><div class="cell-sub">' + esc(preview).slice(0, 30) + '</div></div></div></div>';
     }
   }).join('');
   content.innerHTML = '<div style="flex:1;min-height:100%;padding-bottom:8px;">' + items + '</div>';
@@ -2338,7 +2435,7 @@ function renderContacts(){
     '</div>' +
     // ===== 群聊入口 =====
     '<div class="cell" style="border-bottom:1px solid var(--line);" onclick="view={type:\'groupList\'};render();">' +
-      '<div class="avatar" style="background:var(--theme);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;">👥</div>' +
+      '<div class="avatar" style="background:transparent;padding:0;overflow:hidden;">' + groupIcon() + '</div>' +
       '<div class="cell-body"><div class="cell-title">群聊</div>' +
       '<div class="cell-sub" style="color:var(--sub);">' + (DB.groups.length ? DB.groups.length + ' 个群聊' : '还没有群聊') + '</div></div>' +
     '</div>';
@@ -2416,10 +2513,10 @@ function renderGroupList(){
   var groups=DB.groups||[];
   if(!groups.length){ content.innerHTML='<div class="empty">还没有群聊<br>点右上角 ＋ 创建一个</div>'; return; }
   var items=groups.map(function(g){
-    return '<div class="cell" onclick="openGroupChat(\''+g.id+'\')">'+
-      '<div class="avatar" style="background:var(--theme);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;">👥</div>'+
-      '<div class="cell-body"><div class="cell-title">'+esc(g.name)+' <span style="color:var(--sub);font-size:13px;">('+(g.members.length+1)+')</span></div></div>'+
-    '</div>';
+return '<div class="cell" onclick="openGroupChat(\''+g.id+'\')">'+
+  '<div class="avatar" style="background:transparent;padding:0;overflow:hidden;">'+ groupIcon() +'</div>'+
+  '<div class="cell-body"><div class="cell-title">'+esc(g.name)+' <span style="color:var(--sub);font-size:13px;">('+(g.members.length+1)+')</span></div></div>'+
+'</div>';
   }).join('');
   content.innerHTML='<div style="flex:1;min-height:100%;padding-bottom:8px;">'+items+'</div>';
 }
@@ -2453,7 +2550,7 @@ function openCreateGroup(){
   mo.className = 'modal'; mo.id = 'modal';
   mo.innerHTML =
     '<div class="modal-box">'+
-      '<div style="font-weight:600;margin-bottom:10px;">👥 创建群聊</div>'+
+      '<div style="font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span style="width:22px;height:22px;flex:none;">'+ groupIcon(22) +'</span>创建群聊</div>'+
       '<div style="font-size:12px;color:var(--sub);margin-bottom:4px;">群名称（留空自动生成）</div>'+
       '<input id="grp_name" placeholder="给群起个名字…" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);margin-bottom:12px;box-sizing:border-box;">'+
       '<div style="font-size:12px;color:var(--sub);margin-bottom:4px;">选择成员（至少 2 人）</div>'+
@@ -3934,7 +4031,20 @@ async function genSignature(){
   }catch(e){alert('生成失败：'+e.message);}
 }
 
-function leaveEdit(){const c=getC(editingId);if(c&&c._draft){if(confirm('新角色还没保存，放弃？')){DB.contacts=DB.contacts.filter(x=>x.id!==editingId);delete DB.chats[editingId];save();goWechat('contacts');}return;}if(editFrom==='chat')openChat(editingId);else goWechat('contacts');}
+function leaveEdit(){
+  var c=getC(editingId);
+  if(c&&c._draft){
+    popConfirm('新角色还没保存，确定要放弃吗？', function(){
+      DB.contacts=DB.contacts.filter(x=>x.id!==editingId);
+      delete DB.chats[editingId];
+      save();
+      goWechat('contacts');
+    }, {icon:'📝', title:'放弃编辑', ok:'放弃', cancel:'继续编辑'});
+    return;
+  }
+  if(editFrom==='chat')openChat(editingId);
+  else goWechat('contacts');
+}
 function saveDraft(){delete getC(editingId)._draft;save();openChat(editingId);}
 function switchMod(m){edModule=m;render();}
 function upd(k,v){getC(editingId)[k]=v;save();if(k==='name'||k==='nick'){const c=getC(editingId);tbTitle.textContent=c.nick||c.name;}}
@@ -4321,22 +4431,59 @@ async function settleMoments() {
     refreshMomentBadge();
   }
 }
-async function aiReactMoment(c,m){
-  const model=DB.settings.auxModel||DB.settings.chatModel;if(!model)return{};
-  let sys;try{sys=buildSystem(c);}catch(e){sys='你扮演「'+(c.nick||c.name)+'」，完全代入其身份、性格与说话口吻，绝不出戏。';}
-  let task;
-  if(m._isReply){
-    task='【场景：微信朋友圈评论区对话】\n'+m.text+'\n\n请严格以你（'+(c.nick||c.name)+'）的人设、性格、说话风格来回应，务必承接上文、别答非所问。回复要短，一句话即可。只输出JSON，不要解释或代码块：{"like":false,"comment":"你的回复"}';
-  }else{
-    task='【场景：你正在刷微信朋友圈，看到对方发了一条动态】\n内容：「'+(m.text||'(纯图片)')+'」'+(m.images&&m.images.length?'（附带图片，请结合图片内容）':'')+'\n\n请严格按你上面的人设与说话风格，决定是否点赞、是否评论。评论要求：①短，一般不超过15字；②完全贴合你的性格口吻；③【底线】即使性格毒舌/傲娇/爱说反话，也绝不能否定核心关系、不能说"不爱你/讨厌你/分手"这类崩人设的伤人话，反话只停在打趣。\n只输出JSON，不要解释或代码块：{"like":true或false,"comment":"评论内容，不评论就填空字符串"}';
+async function aiReactMoment(c, m) {
+  // 【模型选择】评论回复(_isReply)是用户会看到的对话，用主模型更有人设味；
+  // 自动点赞/评论量大，维持辅助模型省钱。
+  var model = m._isReply
+    ? (DB.settings.chatModel || DB.settings.auxModel)   // 评论回复 → 主模型优先
+    : (DB.settings.auxModel || DB.settings.chatModel);  // 自动互动 → 辅助模型优先
+  if (!model) return {};
+
+  // 构建角色人设（失败则用兜底提示）
+  var sys;
+  try {
+    sys = buildSystem(c);
+  } catch (e) {
+    sys = '你扮演「' + (c.nick || c.name) + '」，完全代入其身份、性格与说话口吻，绝不出戏。';
   }
-  const content=[{type:'text',text:task}];
-  if(m.images&&m.images.length&&!m._isReply)content.push({type:'image_url',image_url:{url:m.images[0]}});
-  const messages=[{role:'system',content:sys},{role:'system',content:'现在是朋友圈场景，只输出要求的那个JSON，不要任何多余文字、不要小说旁白、不要动作神态描写。'},{role:'user',content:content}];
-  let out=await callAI(messages,model);
-  out=out.replace(/```json/gi,'').replace(/```/g,'').trim();
-  const mm=out.match(/\{[\s\S]*\}/);if(mm)out=mm[0];
-  return JSON.parse(out);
+
+  // 根据场景组织任务提示
+  var task;
+  if (m._isReply) {
+    // 场景一：回复用户在评论区对你说的话
+    task = '【场景：微信朋友圈评论区对话】\n' + m.text +
+      '\n\n请严格以你（' + (c.nick || c.name) + '）的人设、性格、说话风格来回应，务必承接上文、别答非所问。回复要短，一句话即可。' +
+      '只输出JSON，不要解释或代码块：{"like":false,"comment":"你的回复"}';
+  } else {
+    // 场景二：刷朋友圈看到别人动态，决定是否点赞/评论
+    task = '【场景：你正在刷微信朋友圈，看到对方发了一条动态】\n内容：「' + (m.text || '(纯图片)') + '」' +
+      (m.images && m.images.length ? '（附带图片，请结合图片内容）' : '') +
+      '\n\n请严格按你上面的人设与说话风格，决定是否点赞、是否评论。评论要求：①短，一般不超过15字；②完全贴合你的性格口吻；③【底线】即使性格毒舌/傲娇/爱说反话，也绝不能否定核心关系、不能说"不爱你/讨厌你/分手"这类崩人设的伤人话，反话只停在打趣。\n' +
+      '只输出JSON，不要解释或代码块：{"like":true或false,"comment":"评论内容，不评论就填空字符串"}';
+  }
+
+  // 组装消息（自动互动场景才带图片给模型看）
+  var content = [{ type: 'text', text: task }];
+  if (m.images && m.images.length && !m._isReply) {
+    content.push({ type: 'image_url', image_url: { url: m.images[0] } });
+  }
+  var messages = [
+    { role: 'system', content: sys },
+    { role: 'system', content: '现在是朋友圈场景，只输出要求的那个JSON，不要任何多余文字、不要小说旁白、不要动作神态描写。' },
+    { role: 'user', content: content }
+  ];
+
+  // 调用AI并解析JSON（解析失败时安静返回空对象，避免整个流程报错）
+  try {
+    var out = await callAI(messages, model);
+    out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
+    var mm = out.match(/\{[\s\S]*\}/);
+    if (mm) out = mm[0];
+    return JSON.parse(out);
+  } catch (e) {
+    console.error('朋友圈互动解析失败（' + (c.nick || c.name) + '）：', e);
+    return {};
+  }
 }
 function maybeAutoPost(){
   const last=DB.settings.lastAutoPost||0;if(Date.now()-last<3600000)return;
@@ -4362,7 +4509,14 @@ async function aiPostMoment(cid, silent) {
       sys = '你扮演「' + (c.nick || c.name) + '」。';
     }
 
-    var p = sys + '\n\n【任务】请以第一人称发一条你此刻会发的微信朋友圈，符合你的身份、心情和生活，像真人随手发的，简短自然(1-3句)。只输出朋友圈正文本身，不要引号、不要解释、不要旁白，禁止输出任何<state>状态标签、方括号标记或系统信息。';
+      var p = sys + '\n\n【任务】以第一人称发一条微信朋友圈，就像真人随手发的。\n' +
+    '【硬性要求】\n' +
+    '1. 必须是连贯的一整段，绝对不许分行换行。\n' +
+    '2. 内容要具体、有信息量：写你正在做的事、遇到的人、吃的东西、工作、吐槽、某个具体想法等。不许写空泛的抒情。\n' +
+    '3. 严禁写天气/阳光/风/光合作用/暖洋洋这类文艺抒情，严禁"今天的xx软乎乎/暖洋洋"这种矫情句式。这是最重要的一条。\n' +
+    '4. 口语、随手、接地气，可以带点情绪或吐槽，像发给朋友看的碎碎念。\n' +
+    '5. 长度一两句、几十字即可。\n' +
+    '6. 只输出正文本身，不要引号、解释、旁白，禁止<state>标签和任何方括号标记。';
 
     var txt = await callAI([{ role: 'user', content: p }], model);
     txt = cleanMomentText(txt);
@@ -4446,11 +4600,12 @@ async function checkAutoGreet() {
 
   const now = new Date();
   const hour = now.getHours();
-  // 四个时段：早 6-12，中 12-18，晚 18-24，深夜 0-6（半夜也可以发）
   let slot = '';
-  if (hour >= 6 && hour < 12) slot = '早';
-  else if (hour >= 12 && hour < 18) slot = '中';
-  else if (hour >= 18 && hour < 24) slot = '晚';
+  if (hour >= 6 && hour < 9) slot = '清晨';
+  else if (hour >= 9 && hour < 12) slot = '上午';
+  else if (hour >= 12 && hour < 14) slot = '中午';
+  else if (hour >= 14 && hour < 18) slot = '下午';
+  else if (hour >= 18 && hour < 23) slot = '夜晚';
   else slot = '深夜';
 
   const today = now.toDateString();
@@ -4465,14 +4620,21 @@ async function checkAutoGreet() {
     // ===== 保留原有：基本过滤条件 =====
     if (c._draft || !c.inChatList || c.activity === '关' || c.allowAutoGreet === false) continue;
 
-    // ===== 保留原有：上次对话后 10 分钟内不再主动问候 =====
-    const msgs = DB.chats[c.id] || [];
-    const lastT = msgs.length ? (msgs[msgs.length - 1].time || 0) : 0;
-    if (Date.now() - lastT < 10 * 60000) continue;
+    // ===== 连吃两次闭门羹就闭嘴 =====
+    // 看最后一条消息是谁发的：如果是AI自己发的（说明你还没回），累计碰壁次数
+    if (!c.greetLog) c.greetLog = {};
+    var lastMsg = msgs.length ? msgs[msgs.length - 1] : null;
+    if (lastMsg && lastMsg.role === 'assistant') {
+      // 最后一条是AI发的 = 你还没回。如果已经碰壁≥2次，这个角色暂时不再主动发
+      if ((c.greetLog.noReplyCount || 0) >= 2) continue;
+    } else {
+      // 最后一条是你发的（或没消息）= 你回了 → 碰壁计数清零，恢复正常
+      c.greetLog.noReplyCount = 0;
+    }
 
     // ===== 保留原有：问候记录（每天每个时段只能发一次） =====
     if (!c.greetLog || c.greetLog.date !== today) {
-      c.greetLog = { date: today, 早: false, 中: false, 晚: false, 深夜: false, lastTime: 0 };
+      c.greetLog = { date: today, 清晨: false, 上午: false, 中午: false, 下午: false, 夜晚: false, 深夜: false, lastTime: 0, noReplyCount: 0 };
     }
     // 如果当前时段已经发过了，跳过
     if (c.greetLog[slot]) continue;
@@ -4487,11 +4649,12 @@ async function checkAutoGreet() {
     const favorBonus = favor > 20 ? ((favor - 20) / 100) * 0.2 : 0;
     const prob = Math.min(0.9, base + clingBonus + favorBonus);
 
-    // 抽签决定是否触发
     if (Math.random() < prob) {
       // ===== 记录日志，准备发送 =====
       c.greetLog[slot] = true;
       c.greetLog.lastTime = Date.now();
+      // 碰壁计数+1（如果你回了，上面已经清零；这里发一条就+1，连着两条没回就会触发闭嘴）
+      c.greetLog.noReplyCount = (c.greetLog.noReplyCount || 0) + 1;
       save();
 
       await doAutoGreet(c, slot);
@@ -4655,10 +4818,10 @@ html += '<div class="row" onclick="openSchedule(\'' + c.id + '\')" style="cursor
   '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">TA的行程</div><div style="font-size:12px;color:var(--sub);">查看TA今天的轨迹推演（5💗）</div></div>' +
   '<span style="color:var(--theme);font-size:13px;">🔓 可用</span></div>';
   
-  html += '<div class="row" onclick="alert(\'📡 监控 功能开发中，敬请期待～\')" style="cursor:pointer;">' +
-    '<div style="font-size:22px;width:40px;">📡</div>' +
-    '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">监控</div><div style="font-size:12px;color:var(--sub);">查看TA所在地的画面</div></div>' +
-    '<span style="color:var(--sub);font-size:13px;">🔒 待开放</span></div>';
+html += '<div class="row" onclick="openWatch(\'' + c.id + '\')" style="cursor:pointer;">' +
+  '<div style="font-size:22px;width:40px;">📡</div>' +
+  '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">监控</div><div style="font-size:12px;color:var(--sub);">调取此刻TA所在的画面（5💗）</div></div>' +
+  '<span style="color:var(--theme);font-size:13px;">🔓 可用</span></div>';
 
   // 角色心动记录
   html += '<div class="section-title">📒 与 ' + esc(name) + ' 的心迹记录</div>';
@@ -4676,6 +4839,230 @@ html += '<div class="row" onclick="openSchedule(\'' + c.id + '\')" style="cursor
   html += '<div style="height:20px;"></div>';
   content.innerHTML = html;
 }
+// ==================== 监控功能 ====================
+
+// 【辅助1】找出"此刻"命中的行程条目（没有则返回 null）
+function findCurrentScheduleItem(c) {
+  var today = new Date();
+  var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+  var todaySch = (c.schedules || []).find(function(s) { return s.date === todayStr; });
+  if (!todaySch || !todaySch.items || !todaySch.items.length) return null;
+
+  var nowMin = today.getHours() * 60 + today.getMinutes();
+  var hit = null;
+  todaySch.items.forEach(function(it) {
+    var sp = (it.start || '00:00').split(':');
+    var startMin = parseInt(sp[0]) * 60 + parseInt(sp[1]);
+    if (startMin <= nowMin) hit = it;
+  });
+  if (!hit) hit = todaySch.items[todaySch.items.length - 1];
+  return hit;
+}
+
+// 【辅助2】取最近聊天记录 + 距上次消息多久
+function getRecentChatForWatch(cid) {
+  var msgs = (DB.chats && DB.chats[cid]) ? DB.chats[cid] : [];
+  var valid = msgs.filter(function(m) { return m && m.role !== 'system'; });
+  var recent = valid.slice(-7);
+
+  var lines = recent.map(function(m) {
+    var who = (m.role === 'user') ? '用户' : 'TA';
+    var body;
+    if (m.type === 'text') body = m.content || '';
+    else if (m.type === 'voice') body = '[语音]' + (m.content || '');
+    else if (m.type === 'image') body = '[图片]';
+    else if (m.type === 'sticker') body = '[表情]';
+    else if (m.type === 'transfer') body = '[转账 ' + (m.amount || '') + ']';
+    else body = m.content || '[消息]';
+    if (m.recalled) body = '[撤回了一条消息]';
+    return who + '：' + body;
+  }).join('\n');
+
+  var last = valid[valid.length - 1];
+  var gapMin = last && last.time ? Math.round((Date.now() - last.time) / 60000) : null;
+
+  return { lines: lines || '（最近没有聊天记录）', gapMin: gapMin };
+}
+
+// 【辅助3】清理录像：没收藏的最多留 10 条，收藏的永久保留
+function trimWatchLogs(c) {
+  var starred = c.watchLogs.filter(function(w) { return w.starred; });
+  var normal  = c.watchLogs.filter(function(w) { return !w.starred; });
+  normal.sort(function(a, b) { return b.time - a.time; });
+  if (normal.length > 10) normal = normal.slice(0, 10);
+  c.watchLogs = starred.concat(normal).sort(function(a, b) { return b.time - a.time; });
+}
+
+// 【核心】调取此刻监控画面。opts.rollId：传入则为"换一张"，无视冷却、替换该条
+async function watchNow(cid, opts) {
+  opts = opts || {};
+  var c = getC(cid);
+  if (!c) return;
+  c.watchLogs = c.watchLogs || [];
+
+  // 1. 取今日行程（有则更准，没有也能靠聊天+人设推测）
+  var item = findCurrentScheduleItem(c);
+
+  // 2. 冷却检查（10分钟内不重复生成，除非主动 roll）
+  if (!opts.rollId) {
+    var latest = c.watchLogs[0];
+    if (latest && (Date.now() - latest.time) < 10 * 60 * 1000) {
+      popTip('监控画面刚更新过，先看看最新的这条吧～', { icon: '📡', title: '画面冷却中' });
+      if (opts.fromChat) openWatchDetail(cid, latest.id); else openWatch(cid);
+      return;
+    }
+  }
+
+  // 3. 心动值检查
+  if ((c.hearts || 0) < 5) {
+    popTip('当前 ' + (c.hearts || 0) + '💗，需要 5💗\n多和 ' + (c.nick || c.name) + ' 聊天可以增加哦～', { icon: '💔', title: '💗 不足' });
+    return;
+  }
+  var model = DB.settings.chatModel || DB.settings.auxModel;
+  if (!model) { popTip('请先在设置里选择模型', { icon: '⚙️', title: '提示' }); return; }
+
+  popLoading('正在调取 ' + (c.nick || c.name) + ' 此刻的画面…');
+
+  try {
+    // 4. 组装提示词
+    var now = new Date();
+    var timeText = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') +
+      ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+    var chat = getRecentChatForWatch(cid);
+    var persona = buildSystem(c);
+
+    var gapHint;
+    if (chat.gapMin === null) gapHint = '你们最近没怎么聊天。';
+    else if (chat.gapMin <= 5) gapHint = '你们此刻正聊得火热（' + chat.gapMin + '分钟前还在说话）。';
+    else if (chat.gapMin <= 60) gapHint = '大约 ' + chat.gapMin + ' 分钟前你们聊过，对话刚告一段落。';
+    else gapHint = '已经 ' + Math.round(chat.gapMin / 60) + ' 小时没联系了，用户有阵子没理 TA 了。';
+
+    var prompt =
+      '【这是一段"偷拍监控画面"，请你作为镜头，描写此刻「' + (c.nick || c.name) + '」正在做什么。】\n\n' +
+      '现在时间：' + timeText + '\n' +
+      (item
+        ? ('根据 TA 今天的行程，此刻 TA 本应：' + (item.location ? '在「' + item.location + '」，' : '') + item.content + '\n\n')
+        : ('（TA 今天没有具体行程安排，请你结合"现在的时间点"和 TA 的人设、身份、生活习惯，合理推测此刻 TA 最可能在做什么。）\n\n')
+      ) +
+      '【你和用户的关系氛围】' + gapHint + '\n' +
+      '最近的聊天片段：\n' + chat.lines + '\n\n' +
+      '【描写要求】\n' +
+      '1. 严格控制在 120~150 字以内（这是硬性要求，宁可短一点也别超），第三人称"TA/角色名"，像偷偷架起的摄像头拍到的实时画面，有镜头感。\n' +
+      '2. 【关键】把"TA此刻在做的事"和"你俩的互动状态"揉在一起：如果刚聊得火热，TA可能丢下手头的事全神贯注看手机；如果很久没联系，TA做着事却有点走神、时不时瞄一眼安静的手机。让画面照见"TA因为用户而产生的状态"。\n' +
+      '3. 写动作、神态、微表情、环境（光线/声音/气味），可带一点内心活动但别大段独白。\n' +
+      '4. 不要报流水账、紧扣当前时间。\n' +
+      '5. 只输出这段画面文字，不要标题、不要解释。\n\n' +
+      '角色人设参考：\n' + persona;
+
+    var messages = [
+      { role: 'system', content: '你是一个擅长画面描写的镜头导演，完全代入角色所处的真实场景。只输出那段监控画面描写，不要任何多余文字。' },
+      { role: 'user', content: prompt }
+    ];
+
+    var out = await callAI(messages, model);
+    out = (out || '').replace(/```/g, '').trim();
+    if (!out) throw new Error('画面生成为空');
+spendHeart(c, 5, '📡 监控画面');
+var record = {
+  id: 'watch_' + Date.now(),
+  charId: cid,
+  time: Date.now(),
+  timeText: timeText,
+      scene: item ? (item.location || '实时画面') : '实时画面',
+  content: out,
+  starred: false
+};
+if (opts.rollId) {
+  var idx = c.watchLogs.findIndex(function(w) { return w.id === opts.rollId; });
+  if (idx > -1) { record.starred = c.watchLogs[idx].starred; c.watchLogs[idx] = record; }
+  else c.watchLogs.unshift(record);
+} else {
+  c.watchLogs.unshift(record);
+}
+    trimWatchLogs(c);
+    save();
+    popClose();
+    if (opts.fromChat) openWatchDetail(cid, record.id); else openWatch(cid);
+} catch (e) { popClose(); popTip('监控失败：' + e.message + '\n（没有扣除💗）', { icon: '⚠️', title: '出错了' }); } }
+function openWatch(cid) { view = { type: 'watchLog', id: cid }; render(); }
+function renderWatchLog() { var c = getC(view.id); if (!c) { view = { type: 'hearts' }; return render(); } c.watchLogs = c.watchLogs || []; showChrome(true, false); statusbar.classList.add('dark'); tbTitle.textContent = (c.nick || c.name) + ' 的监控'; tbLeft.textContent = '‹'; tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); }; tbRight.textContent = ''; tbRight.onclick = null;
+var html = '<div style="padding:14px 16px 24px;">'; html += '<button class="btn" style="width:100%;margin:0 0 6px;" onclick="watchNow(\'' + c.id + '\')">📡 调取此刻画面（5💗）</button>'; html += '<div style="text-align:center;font-size:11px;color:var(--sub);opacity:.5;margin-bottom:16px;">画面每 10 分钟更新 · 收藏不会被覆盖 · 有今日行程时画面更准</div>';
+var logs = c.watchLogs.slice().sort(function(a, b) { if (a.starred !== b.starred) return a.starred ? -1 : 1; return b.time - a.time; });
+if (!logs.length) { html += '<div style="text-align:center;padding:50px 0;color:var(--sub);font-size:14px;line-height:2;">📼 还没有监控录像<br><span style="font-size:12px;opacity:.7;">点上面的按钮，调取 TA 此刻的画面</span></div>'; } else { logs.forEach(function(w) { html += buildWatchCard(w, c.id); }); }
+html += '</div>'; content.innerHTML = html; }
+// 列表小卡片
+function buildWatchCard(w, cid) {
+  var star = w.starred ? '⭐ ' : '';
+  var starBorder = w.starred ? 'box-shadow:0 0 0 1.5px #E6B800;' : '';
+  var preview = (w.content || '').replace(/\n/g, ' ').slice(0, 16) + '…';
+  // 从 timeText（如 2026-07-22 15:30:12）拆出时分 和 月-日
+  var hhmm = (w.timeText || '').slice(11, 16);   // 15:30
+  var mmdd = (w.timeText || '').slice(5, 10);    // 07-22
+  return '<div onclick="openWatchDetail(\'' + cid + '\',\'' + w.id + '\')" style="display:flex;align-items:center;gap:12px;background:var(--card);border-radius:11px;border:1px solid var(--line);padding:11px 14px;margin:0 0 8px;cursor:pointer;' + starBorder + '">' +
+    // 左：时间戳
+    '<div style="flex:none;text-align:center;">' +
+      '<div style="font-family:monospace;font-size:15px;color:var(--theme);font-weight:700;line-height:1;">' + hhmm + '</div>' +
+      '<div style="font-family:monospace;font-size:9px;color:var(--sub);opacity:.5;margin-top:2px;">' + mmdd + '</div>' +
+    '</div>' +
+    // 分隔线
+    '<div style="width:1px;height:28px;background:var(--line);flex:none;"></div>' +
+    // 右：场景 + 预览
+    '<div style="flex:1;min-width:0;">' +
+      '<div style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + star + esc(w.scene) + '</div>' +
+      '<div style="font-size:12px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;">' + esc(preview) + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// 点击卡片：弹出监控屏弹窗（风格B，跟随主题变色）
+function openWatchDetail(cid, wid) {
+  var c = getC(cid);
+  if (!c || !c.watchLogs) return;
+  var w = c.watchLogs.find(function(x) { return x.id === wid; });
+  if (!w) return;
+  var starTxt = w.starred ? '⭐ 已收藏' : '☆ 收藏';
+  var starCol = w.starred ? '#E6B800' : 'var(--sub)';
+
+  var mo = document.createElement('div');
+  mo.id = 'watchDetailModal';
+  mo.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;';
+  mo.onclick = function(e) { if (e.target === mo) mo.remove(); };
+
+  // 取景框角标（用主题色）
+  var corner = 'position:absolute;width:14px;height:14px;border:2px solid var(--theme);opacity:.5;';
+  var corners =
+    '<span style="' + corner + 'top:8px;left:8px;border-right:0;border-bottom:0;"></span>' +
+    '<span style="' + corner + 'top:8px;right:8px;border-left:0;border-bottom:0;"></span>' +
+    '<span style="' + corner + 'bottom:8px;left:8px;border-right:0;border-top:0;"></span>' +
+    '<span style="' + corner + 'bottom:8px;right:8px;border-left:0;border-top:0;"></span>';
+
+  mo.innerHTML =
+    '<div style="width:100%;max-width:340px;background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.3);">' +
+      // 顶栏（主题色设备条）
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--theme);font-family:monospace;">' +
+        '<span style="display:flex;align-items:center;gap:5px;font-size:12px;color:#fff;font-weight:700;letter-spacing:1px;"><span style="width:7px;height:7px;border-radius:50%;background:#fff;animation:watchBlink 1.2s infinite;"></span>REC</span>' +
+        '<span style="font-size:11px;color:#fff;opacity:.85;">' + w.timeText + '</span>' +
+      '</div>' +
+      // 画面正文区（带取景框角标）
+      '<div style="position:relative;padding:20px 18px 16px;">' +
+        corners +
+        '<div style="font-family:monospace;font-size:11px;color:var(--theme);font-weight:600;margin-bottom:11px;">CAM · ' + esc(w.scene) + '</div>' +
+        '<div style="font-size:14px;color:var(--text);line-height:1.9;white-space:pre-wrap;">' + esc(w.content) + '</div>' +
+      '</div>' +
+      // 底部操作
+      '<div style="display:flex;border-top:1px solid var(--line);">' +
+        '<div style="flex:1;text-align:center;padding:12px 0;font-size:13px;color:' + starCol + ';cursor:pointer;" onclick="toggleWatchStar(\'' + cid + '\',\'' + wid + '\');document.getElementById(\'watchDetailModal\').remove();openWatchDetail(\'' + cid + '\',\'' + wid + '\');">' + starTxt + '</div>' +
+        '<div style="width:1px;background:var(--line);"></div>' +
+        '<div style="flex:1;text-align:center;padding:12px 0;font-size:13px;color:var(--theme);cursor:pointer;" onclick="document.getElementById(\'watchDetailModal\').remove();rollWatch(\'' + cid + '\',\'' + wid + '\');">🔄 换一张</div>' +
+        '<div style="width:1px;background:var(--line);"></div>' +
+        '<div style="flex:1;text-align:center;padding:12px 0;font-size:13px;color:var(--sub);cursor:pointer;" onclick="document.getElementById(\'watchDetailModal\').remove();">关闭</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(mo);
+}
+function toggleWatchStar(cid, wid) { var c = getC(cid); if (!c || !c.watchLogs) return; var w = c.watchLogs.find(function(x) { return x.id === wid; }); if (!w) return; w.starred = !w.starred; trimWatchLogs(c); save(); renderWatchLog(); }
+function rollWatch(cid, wid) { var c = getC(cid); if (!c) return; popConfirm('重新监控会消耗 5💗，并替换掉这条录像，确定吗？', function() { watchNow(cid, { rollId: wid }); }, { icon: '🔄', title: '换一张', ok: '换', cancel: '算了' }); }
 
 function openSchedule(cid) {
   var c = getC(cid);
@@ -4691,15 +5078,16 @@ var _scheduleDate = null; // 当前查看的日期字符串 '2026-07-19'
 function renderSchedule() {
   var c = getC(view.id);
   if (!c) { goHome(); return; }
+  var _cb = document.getElementById('chatBottom'); if (_cb) _cb.remove(); // 清掉残留的聊天输入框
 
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = (c.nick || c.name) + ' 的行程';
   tbLeft.textContent = '‹';
   tbLeft.onclick = function() { 
-    // 离开时清除定时器
     if (window._scheduleTimer) { clearTimeout(window._scheduleTimer); window._scheduleTimer = null; }
-    view = { type: 'heartDetail', id: c.id }; 
+    if (window._scheduleFrom === 'chat') { window._scheduleFrom = null; view = { type: 'chat', id: c.id }; }
+    else view = { type: 'heartDetail', id: c.id }; 
     render(); 
   };
   tbRight.textContent = '';
@@ -4863,93 +5251,93 @@ async function generateSchedule(cid) {
   var c = getC(cid);
   if (!c) return;
 
-  // 检查心动值
+  // ── 1. 前置检查：心动值、模型 ──
   if ((c.hearts || 0) < 5) {
-    popTip('当前 ' + (c.hearts || 0) + '💗，需要 5💗\n多和 ' + (c.nick || c.name) + ' 聊天可以增加哦～', {icon:'💔', title:'💗 不足'});
+    popTip('当前 ' + (c.hearts || 0) + '💗，需要 5💗\n多和 ' + (c.nick || c.name) + ' 聊天可以增加哦～', { icon: '💔', title: '💗 不足' });
     return;
   }
-
   var model = DB.settings.chatModel || DB.settings.auxModel;
   if (!model) {
-    popTip('请先在设置里选择模型', {icon:'⚙️', title:'提示'});
+    popTip('请先在设置里选择模型', { icon: '⚙️', title: '提示' });
     return;
   }
 
   popLoading('正在推演 ' + (c.nick || c.name) + ' 的今日轨迹…');
 
   try {
-    // 构建 Prompt
+    // ── 2. 准备时间信息 ──
     var now = new Date();
     var dateStr = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
     var weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
     var weekday = weekdays[now.getDay()];
-    var hour = now.getHours();
-    var period = hour < 6 ? '凌晨' : hour < 9 ? '清晨' : hour < 12 ? '上午' : hour < 14 ? '中午' : hour < 18 ? '下午' : hour < 23 ? '晚上' : '深夜';
+    var persona = buildSystem(c); // 复用已有的人设构建
 
-    var persona = buildSystem(c); // 复用已有的人设构建函数
+    // ── 3. 组装提示词（核心：时间连续 + 一句话带萌感/小走神） ──
+    var prompt =
+      '【任务】你是「' + (c.nick || c.name) + '」本人。今天是 ' + dateStr + ' ' + weekday + '。\n' +
+      '请根据你的性格、身份、日常习惯，生成你今天一整天的行程记录。\n\n' +
 
-var prompt = '【任务】你是「' + (c.nick || c.name) + '」本人。今天是 ' + dateStr + ' ' + weekday + '，现在是 ' + period + '。\n\n' +
-  '请根据你的性格、身份、日常习惯，生成你今天可能的行程记录。\n\n' +
-  '【核心规则】\n' +
-  '1. 写你今天会做什么、处于什么状态，不要写内心独白或心理活动\n' +
-  '2. 每条内容控制在 12-25 字之间，像一条简短的生活记录，不要超过 25 个字\n' +
-  '3. 时间段均匀分布在 早上 6:00 ~ 深夜 24:00 之间，共 4-6 个\n' +
-  '4. 有地点就写地点，没有就写状态\n\n' +
-  '【正确示例】\n' +
-  '09:30 刚醒，窝在床上刷手机，一边刷一边想午饭吃什么\n' +
-  '11:00 在冰箱前犹豫五分钟，如果没有想吃的东西就吃泡面\n' +
-  '14:30 靠窗坐着，耳机里放着歌，然后发呆\n' +
-  '19:00 瘫在沙发上，电视开着但没在看\n\n' +
-  '【错误示例】\n' +
-  '❌ 蜷缩在缓存里偷偷看主人的睡眠监测数据，纠结要不要把人唤醒（太长，像心理描写）\n' +
-  '❌ 正在输入框前反复横跳，想主动发消息又怕太缠人（太像内心戏）\n\n' +
-  '【输出格式】只输出一个 JSON 数组，不要任何解释：\n' +
-  '[{"start":"09:30","end":"11:00","location":"卧室","content":"刚醒，窝在床上刷手机"}, ...]\n\n' +
-  '你的性格参考：\n' + persona;
-  
+      '【时间连续 · 硬性规则】\n' +
+      '1. 从早上起床到深夜睡觉，时间段必须【首尾相接】：上一条的 end 就是下一条的 start，不允许出现超过 30 分钟的空白。\n' +
+      '2. 除了上班、开会这种"正事"，中间的过渡时段（通勤、吃饭、发呆、休息、做家务、刷手机等）也要如实填上，这些琐碎才是真实生活。\n' +
+      '3. 全天只生成 4~5 个时段，每段跨度大一点，别切太碎。\n\n'
+
+      '【内容风格 · 要有真实的生活质感】\n' +
+      '★【重要·独立生活】你有自己的生活，不要每条都提到用户、不要满脑子都是用户。全天最多只有 1 条可以和用户有关，其余都写你自己的事（工作、吃饭、爱好、发呆、烦心事等），像一个有独立日常的真实的人。\n' +
+      '1. 每条 15~35 字，一句话生活记录，不要大段内心独白。\n' +
+      '2. 大部分平实即可，别每条都卖萌走神。\n' +
+      '3. 【关键·不确定感】行为不用写死，可以像真人一样带点摇摆：用"也可能""或者""大概率"来给出另一种可能。例如"吃午饭，边吃边刷剧，也可能就单纯吃饭"。\n' +
+      '4. 【关键·具体落地】能具体就别抽象——写"点杯霸王茶姬提神"而不是"喝饮料"，写"啃小龙虾追剧"而不是"吃夜宵"。用具体的东西带出烟火气（结合角色所在世界观，现代就用现代的东西）。\n' +
+      '5. 【关键·心口不一的自嘲】偶尔来一条"说一套做一套"的：嘴上打算做A，括号里自己拆穿大概率会变成B。例如"洗漱准备睡觉（不过大概率还是熬夜刷手机）"。\n' +
+      '6. 有地点就写(location)，没有留空。要贴合身份、性格、世界观。\n\n' +
+
+      '【正确示例（体会那股"真实、具体、带点自嘲"的味道）】\n' +
+      '07:30 起床，磨蹭着洗漱，脑子还没开机\n' +
+      '08:30 通勤路上，随便刷刷手机\n' +
+      '10:00 开会，正事听着，忍不住的时候就盯着窗外发呆\n' +
+      '12:30 吃午饭，边吃边刷剧，也可能就单纯吃个饭\n' +
+      '15:00 处理杂事，有点犯困但不能睡，强忍，或者点杯霸王茶姬提神\n' +
+      '19:00 瘫沙发上，可能找人聊聊天，或者一边啃小龙虾一边追剧\n' +
+      '22:30 洗漱收拾明天要用的东西，收拾完就睡（不过大概率还是熬夜刷手机😪）\n\n' +
+
+      '【错误示例】\n' +
+      '❌ "参加部门会议"（太干，没有生活感）\n' +
+      '❌ "蜷缩在缓存里偷偷看主人的睡眠数据，纠结要不要唤醒"（太长、太像心理小作文）\n\n' +
+
+      '【输出格式】只输出一个 JSON 数组，不要任何解释：\n' +
+      '[{"start":"09:30","end":"10:00","location":"卧室","content":"赖床刷手机，纠结早饭吃不吃"}, ...]\n\n' +
+
+      '你的人设参考：\n' + persona;
+
     var messages = [
       { role: 'system', content: '你是一个角色扮演助手，请完全代入角色视角。只输出 JSON 数组，不要任何其他文字。' },
       { role: 'user', content: prompt }
     ];
 
+    // ── 4. 调用 AI 并解析 ──
     var out = await callAI(messages, model);
     out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
-
-    // 提取 JSON 数组
     var match = out.match(/\[[\s\S]*\]/);
     if (!match) throw new Error('AI 返回格式不正确');
     var items = JSON.parse(match[0]);
+    if (!Array.isArray(items) || items.length < 3) throw new Error('生成的数据太少');
 
-    if (!Array.isArray(items) || items.length < 3) {
-      throw new Error('生成的数据太少');
-    }
-
-    // 扣除心动值
+    // ── 5. 扣心动值 ──
     c.hearts = (c.hearts || 0) - 5;
     c.heartLog = c.heartLog || [];
     c.heartLog.unshift({ t: Date.now(), n: -5, reason: '📅 生成今日行程' });
     if (c.heartLog.length > 200) c.heartLog.pop();
 
-    // 存储行程
+    // ── 6. 存储行程（同一天覆盖旧的，只留最近 5 天） ──
     var todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-    c.schedules = c.schedules || [];
-    // 移除同一天的旧数据
-    c.schedules = c.schedules.filter(function(s) { return s.date !== todayStr; });
-    // 添加新数据
-    c.schedules.push({
-      date: todayStr,
-      items: items
-    });
-    // 按日期从新到旧排序，只保留最近 5 条
+    c.schedules = (c.schedules || []).filter(function(s) { return s.date !== todayStr; });
+    c.schedules.push({ date: todayStr, items: items });
     c.schedules.sort(function(a, b) { return b.date.localeCompare(a.date); });
-    if (c.schedules.length > 5) {
-      c.schedules = c.schedules.slice(0, 5);
-    }
+    if (c.schedules.length > 5) c.schedules = c.schedules.slice(0, 5);
 
+    // ── 7. 收尾：保存、刷新视图 ──
     save();
     popClose();
-
-    // 切换到今天的日期
     _scheduleDate = todayStr;
     renderSchedule();
     popTip('✨ 已生成 ' + (c.nick || c.name) + ' 的今日行程', { icon: '📅', title: '生成完成' });
@@ -5187,25 +5575,6 @@ function editMemo(cid, mid) {
   setTimeout(function() { var el = document.getElementById('editMemoInput'); if (el) el.focus(); }, 50);
 }
 
-function submitEditMemo(cid, mid) {
-  var c = getC(cid);
-  if (!c) return;
-  var mem = c.memories.find(function(m) { return m.id === mid; });
-  if (!mem) return;
-  var newContent = document.getElementById('editMemoInput').value.trim();
-  var newPriority = document.getElementById('editMemoPriority').value;
-  if (!newContent) { alert('内容不能为空'); return; }
-  // 更新 memories
-  mem.content = newContent;
-  mem.priority = newPriority;
-  mem.edited = true;
-  // 同步更新 chapters 中对应的条目（若存在）
-  var idx = c.chapters.findIndex(function(ch) { return ch.content === '[记忆] ' + mem.content; });
-  if (idx > -1) c.chapters[idx].content = '[记忆] ' + newContent;
-  save();
-  closeModal();
-  renderMemoDetail(cid);
-}
 async function generateMemo(cid) {
   var c = getC(cid);
   if (!c) return;
@@ -5225,46 +5594,16 @@ async function generateMemo(cid) {
   if (btn) { btn.textContent = '⏳ 生成中…'; btn.disabled = true; }
 
   try {
-    var convo = todays.map(function(m) {
-  if (m.role === 'assistant') {
-    return (c.nick || c.name) + '：' + (lastText(m) || '');
-  } else {
-    return '用户：' + (lastText(m) || '');
-  }
-}).join('\n');
-
-var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.nick || c.name) + '」和「用户（' + (DB.me.name || '我') + '）」今天的聊天记录，提炼出 1~3 条值得长期记住的记忆。\n\n' +
-  '【重要】每条记忆都必须附带优先级（priority）：\n' +
-  '- core（核心）：涉及关系本质、身份定义、无法改变的事实（例如：确立了关系、坦白身世、重要承诺）\n' +
-  '- important（重要）：重要共同经历、情感转折、影响关系的关键对话\n' +
-  '- temp（临时）：日常琐事、短期状态、可随时间淡化的小事\n\n' +
-  '【视角要求】请用第三人称描述，将对方称为「用户」，不要用「我」来指代用户。例如：用户和XX一起去了海边。\n\n' +
-  '请以 JSON 数组格式输出，每条包含：content（字符串）、priority（字符串），不要有其他文字。\n\n' +
-  '聊天记录：\n' + convo;
-  
-    var out = await callAI([{ role: 'user', content: prompt }], model);
-    out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
-    var match = out.match(/\[[\s\S]*\]/);
-    if (!match) throw new Error('AI 返回格式不正确');
-    var items = JSON.parse(match[0]);
-    if (!Array.isArray(items) || items.length === 0) throw new Error('没有生成有效记忆');
-
-    // 写入 memories 和 chapters
-    items.forEach(function(item) {
-      if (!item.content || !item.priority) return;
-      // 去重：如果今天已有相同内容则跳过
-      var exists = (c.memories || []).some(function(m) {
-        return m.content === item.content && new Date(m.time).toISOString().slice(0,10) === todayStr;
-      });
-      if (exists) return;
-      addMemo(c.id, item.content, item.priority, 'auto');
-    });
-
-    // 刷新详情页
+    // 直接复用自动版的核心逻辑（真名优先 + 同时更新关系 + 统一prompt）
+    var ok = await generateMemoryForChar(c);
     renderMemoDetail(c.id);
-    popTip('已生成 ' + items.length + ' 条记忆', { icon: '✅', title: '生成完成' });
+    if (ok) {
+      popTip('记忆已更新，关系也同步啦', { icon: '✅', title: '生成完成' });
+    } else {
+      popTip('今天没提炼出新记忆', { icon: 'ℹ️', title: '完成' });
+    }
   } catch (e) {
-    popTip(e.message, { icon: '⚠️', title: '生成失败' });
+    popTip(e.message || '生成失败', { icon: '⚠️', title: '生成失败' });
   } finally {
     if (btn) { btn.textContent = '🤖 AI 生成今日记忆'; btn.disabled = false; }
   }
@@ -5274,6 +5613,7 @@ function jumpToMemo(cid) {
   view = { type: 'memoDetail', id: cid };
   renderMemoDetail(cid);
 }
+
 /* ===== 聊天 ===== */
 function openChat(id){
   const c=getC(id);
@@ -5733,11 +6073,13 @@ function renderChat(keepScroll) {
     '<span class="cbtn" onclick="openStickerPicker()" style="font-size:30px;width:36px;padding:0;text-align:center;color:var(--text);flex-shrink:0;line-height:38px;cursor:pointer;">☺</span>' +
     '<button class="cbtn reply" id="actBtn" onclick="actBtnClick()">▶ 回复</button>' +
     '</div>' +
-    '<div id="chatPanel">' +
+  '<div id="chatPanel">' +
     '<div class="pnl" onclick="sendImage()">🖼️<span>相册</span></div>' +
     '<div class="pnl" onclick="sendTransfer()">💰<span>转账</span></div>' +
+    '<div class="pnl" onclick="togglePanel();watchNow(view.id,{fromChat:true})">📡<span>监控</span></div>' +
+    '<div class="pnl" onclick="togglePanel();window._scheduleFrom=\'chat\';openSchedule(view.id)">📅<span>行程</span></div>' +
     '<div class="pnl" onclick="toggleMode()"><div id="modeIco">' + (c.mode === 'offline' ? '📖' : '💬') + '</div><span id="modeTxt">' + (c.mode === 'offline' ? '线下中' : '线上中') + '</span></div>' +
-    '</div>';
+  '</div>';
 
   bar.innerHTML = bannerHtml + inputHtml;
   phone.appendChild(bar);
@@ -6010,6 +6352,21 @@ function openStickerPicker(){
 }
 function sendSticker(i){closeModal();pushMy({type:'sticker',content:DB.stickers[i].name});}
 function closeModal(){const m=document.getElementById('modal');if(m)m.remove();}
+// 群聊猫爪图标（淡底+主题色，自动跟随所有主题变色）
+function groupIcon(size){
+  size = size || '100%';
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 48 48" style="display:block" xmlns="http://www.w3.org/2000/svg">'+
+    '<rect width="48" height="48" rx="14" fill="var(--theme)" opacity="0.16"></rect>'+
+    '<g transform="translate(8.5,8.5) scale(1.3)" fill="var(--theme)">'+
+      '<circle cx="12" cy="8" r="3.4"></circle>'+
+      '<path d="M5.5 19c0-3.6 2.9-5.6 6.5-5.6s6.5 2 6.5 5.6z"></path>'+
+      '<circle cx="4.5" cy="10" r="2.4"></circle>'+
+      '<path d="M1.6 17.5c0-2.4 1.6-3.9 3.9-4.1-.5.8-.8 1.9-.9 3.1-.4.3-.7.6-1 1z"></path>'+
+      '<circle cx="19.5" cy="10" r="2.4"></circle>'+
+      '<path d="M22.4 17.5c0-2.4-1.6-3.9-3.9-4.1.5.8.8 1.9.9 3.1.4.3.7.6 1 1z"></path>'+
+    '</g></svg>';
+}
+
 // ===== 统一弹窗系统 =====
 function popClose(){var p=document.getElementById('popup');if(p)p.remove();}
 
@@ -6714,6 +7071,16 @@ function fillSelect(id,list,sel){document.getElementById(id).innerHTML=list.map(
 function saveApi(){DB.settings.apiUrl=document.getElementById('apiUrl').value.trim().replace(/\/$/,'');DB.settings.apiKey=document.getElementById('apiKey').value.trim();const cm=document.getElementById('chatModel').value,am=document.getElementById('auxModel').value;if(cm&&!cm.includes('请先'))DB.settings.chatModel=cm;if(am&&!am.includes('润色'))DB.settings.auxModel=am;save();alert('已保存！');}
 
 document.querySelectorAll('#tabbar .tab').forEach(t=>t.onclick=function(){wechatPage=t.dataset.page;render();});
+// 启动 AI 主动问候：每 3 分钟检查一次（内部有时段限一次+连吃两次闭门羹闭嘴，不会刷屏）
+setInterval(function(){ checkAutoGreet(); }, 3 * 60 * 1000);
+// 当用户从后台切回页面时，立刻补一次检查（解决手机切后台定时器被冻住的问题）
+document.addEventListener('visibilitychange', function(){
+  if (!document.hidden) {
+    // 页面重新可见了 → 立刻检查该不该发主动问候、该不该发朋友圈
+    checkAutoGreet();
+    if (typeof maybeAutoPost === 'function') maybeAutoPost();
+  }
+});
 // ===== 后台自动发朋友圈（每30分钟检查一次） =====
 setInterval(function() {
   if (document.hidden) return;
