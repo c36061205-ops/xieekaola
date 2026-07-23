@@ -611,8 +611,7 @@ const SKINS = [
     '--sub': '#A084A0',
     '--line': '#3D2F4A',
     // ✅ 内置壁纸（纯色/渐变色字符串，或图片URL）
-    wallpaper: 'radial-gradient(ellipse at 50% 20%, #3D2F4A, #1F1A2A 70%)'
-  },
+wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), radial-gradient(ellipse at 80% 90%, #2A1A2A 0%, transparent 50%), radial-gradient(ellipse at 50% 60%, #3D2F4A 0%, transparent 60%), linear-gradient(160deg, #1F1A2A 0%, #120E18 100%)'  },
   {
     id: 'aqua_girl',
     name: '🌸 亚系少女',
@@ -624,8 +623,7 @@ color: '#DDB6C9',
   '--text': '#2D2328',        // 改为深紫灰（原先 #493F45）
   '--sub': '#5C4A52',         // 改为中灰粉（原先 #BCADB4）
   '--line': '#EBE1E6',
-  wallpaper: 'radial-gradient(ellipse at 50% 20%, #F7EAF0 0%, #F4EEF1 60%, #EBE1E6 100%)'
-},
+wallpaper: 'radial-gradient(ellipse at 30% 15%, #FCE4EC 0%, transparent 35%), radial-gradient(ellipse at 70% 80%, #F3E5F5 0%, transparent 45%), radial-gradient(ellipse at 50% 50%, #F7EAF0 0%, transparent 60%), linear-gradient(160deg, #F7EAF0 0%, #EBE1E6 100%)'},
 {
   id: 'orchard',
   name: '🐻 林间小集',
@@ -2219,7 +2217,7 @@ async function generateHeartContent(c, callback) {
 }
 function showHeartBubbleDirect(c) {
   removeHeartBubble();
-  var cost = c._pendingHeart > 1 ? 8 : 10;
+  var cost = 5;
   var name = c.nick || c.name;
 
   var bubble = document.createElement('div');
@@ -2544,7 +2542,7 @@ function renderDiscover() {
     // 找最新一条非自己发的朋友圈的作者
     var latestMoment = null;
     var latestAuthor = null;
-    for (var i = DB.moments.length - 1; i >= 0; i--) {
+    for (var i = 0; i < DB.moments.length; i++) {
       var m = DB.moments[i];
       if (m.author !== 'me') {
         latestMoment = m;
@@ -3085,10 +3083,17 @@ async function groupAISpeak(chosen){
       var c = chosen[k].c;
       var nm = c.nick || c.name;
 
+      var stickerNames = (DB.stickers || []).map(function(s){ return s.name; });
       var messages = [
-        { role:'system', content: buildGroupSystem(c, g) },
-        { role:'user', content: '【群聊记录】\n' + buildGroupHistory(g) + '\n\n现在轮到你（' + nm + '）在群里发言。只输出你要说的话本身，不要写名字前缀。' }
+        { role:'system', content: buildGroupSystem(c, g) }
       ];
+      if (stickerNames.length) {
+        messages.push({
+          role: 'system',
+          content: '【可用表情】你可以发表情，但只能从下面这个列表里选，格式为 [表情|名字]，名字必须和列表里完全一致，别自己编：\n' + stickerNames.join('、')
+        });
+      }
+      messages.push({ role:'user', content: '【群聊记录】\n' + buildGroupHistory(g) + '\n\n现在轮到你（' + nm + '）在群里发言。只输出你要说的话本身，不要写名字前缀。' });
 
       var out = '';
       try { out = await callAI(messages, DB.settings.chatModel); }
@@ -3100,7 +3105,7 @@ async function groupAISpeak(chosen){
       var wantPrivate = /\[私聊触发\]/.test(out);
       out = out.replace(/\[私聊触发\]/g,'').trim();
       // 注意：这里不再删除 [语音|]，留给下面逐行解析；其他标记照旧删掉
-      out = out.replace(/\[(转账|撤回|拉黑玩家|表情|心声)[^\]]*\]/g,'').trim();
+out = out.replace(/\[(转账|撤回|拉黑玩家|心声)[^\]]*\]/g,'').trim();
       if(!out) continue;
 
       var esc2 = nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -3110,10 +3115,15 @@ async function groupAISpeak(chosen){
       for(var i=0; i<lines.length; i++){
         var line = lines[i];
         var vm = line.match(/^\[语音\s*[|｜]\s*([\s\S]*?)\]$/);
+        var sm = line.match(/^\[表情\s*[|｜:：]\s*([\s\S]*?)\]$/);   // 新增：识别表情
         if(vm){
           // 是语音消息
           var vtext = vm[1].trim();
           if(vtext) pushGroupAIMsg(c.id, vtext, 'voice');
+        } else if(sm){
+          // 是表情消息（新增）
+          var stext = sm[1].trim();
+          if(stext) pushGroupAIMsg(c.id, stext, 'sticker');
         } else {
           // 普通文本，清掉可能残留的语音标记碎片
           line = line.replace(/\[语音\s*[|｜]?/g,'').replace(/\]/g,'').trim();
@@ -3975,34 +3985,125 @@ html += foldEnd;
   content.scrollTop = scrollTop;
   content.querySelectorAll('textarea').forEach(ag);
 }
-// ==================== 社会关系·渲染 ====================
+var _relExpanded = -1; // 社会关系里当前展开的卡片序号，-1 表示都收起
+// ===== 社会关系·小帮手 =====
+
+// 关系标签对应的颜色
+var REL_COLORS = {
+  '恋人':'#e84393','喜欢':'#fd79a8','暧昧':'#e17055','朋友':'#0984e3',
+  '家人':'#00b894','同事':'#6c5ce7','敌对':'#d63031','讨厌':'#636e72',
+  '陌生':'#b2bec3','中性':'#95a5a6'
+};
+
+// 性别显示：男女出图标，其他（韩吉/不明等）原样显示文字
+function relGenderIcon(g){
+  g = (g || '').trim();
+  if (!g) return '';
+  if (g === '男' || /^male$/i.test(g))   return '♂';
+  if (g === '女' || /^female$/i.test(g)) return '♀';
+  return '⚧' + esc(g); // 其他性别，原样带出
+}
+
+// 取一条关系的展示信息（真实角色自动读 gender/job，NPC 用自己填的）
+function relInfo(r){
+  if (r.targetId === 'npc') {
+    return {
+      name: r.targetName || '(未命名NPC)',
+      gender: r.targetGender || '',
+      job: r.targetJob || '',
+      avatar: '',
+      isNpc: true
+    };
+  }
+  var t = getC(r.targetId);
+  if (!t) return { name:'(已删除的角色)', gender:'', job:'', avatar:'', isNpc:false };
+  return {
+    name: t.name || t.nick || '?',   // 真名优先
+    gender: t.gender || '',
+    job: t.job || '',
+    avatar: t.avatar || '',
+    isNpc: false
+  };
+}
+
+// 点击卡片：展开/收起
+function toggleRel(idx){
+  _relExpanded = (_relExpanded === idx) ? -1 : idx;
+  render();
+}
+
+// ==================== 社会关系·渲染（折叠卡片版） ====================
 function relationEditHtml(c){
   c.relations = c.relations || [];
   var others = DB.contacts.filter(function(x){ return x.id!==c.id && !x._draft; });
   var relTypes = ['恋人','喜欢','暧昧','朋友','家人','同事','敌对','讨厌','陌生','中性'];
-  var html = '<div class="hint" style="padding:4px 16px 8px;color:var(--sub);font-size:13px;">TA对你、以及对群里其他人的关系与态度，影响群聊里TA跟谁多互动、态度如何。</div>';
+
+  var html = '<div class="hint" style="padding:4px 16px 8px;color:var(--sub);font-size:13px;">TA对你、以及对群里其他人的关系与态度，影响群聊里TA跟谁多互动、态度如何。点卡片可展开编辑。</div>';
 
   c.relations.forEach(function(r, idx){
-    var opts = '';
-    others.forEach(function(o){
-      opts += '<option value="'+o.id+'"'+(r.targetId===o.id?' selected':'')+'>'+esc(o.nick||o.name)+'</option>';
-    });
-    opts += '<option value="npc"'+(r.targetId==='npc'?' selected':'')+'>🆕 其他人（NPC·下方填名字）</option>';
+    var info = relInfo(r);
+    var tagColor = REL_COLORS[r.relationType] || '#95a5a6';
+    var expanded = (_relExpanded === idx);
 
-    var typeOpts = relTypes.map(function(t){
-      return '<option value="'+t+'"'+(r.relationType===t?' selected':'')+'>'+t+'</option>';
-    }).join('');
+    // —— 卡片外框 ——
+    html += '<div style="margin:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden;">';
 
-    html += '<div style="margin:8px 12px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);">';
-    html += '<div class="field"><label>对谁</label><select onchange="updRelation('+idx+',\'targetId\',this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);">'+opts+'</select></div>';
-    if(r.targetId==='npc'){
-      html += '<div class="field"><label>对方名字（NPC）</label><input type="text" value="'+esc(r.targetName||'')+'" onchange="updRelation('+idx+',\'targetName\',this.value)" placeholder="如 前男友、林总、闺蜜小美"></div>';
-    }
-    html += '<div class="field"><label>关系标签</label><select onchange="updRelation('+idx+',\'relationType\',this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);">'+typeOpts+'</select></div>';
-    html += '<div class="field"><label>关系描述 <span onclick="polishRelation('+idx+')" style="float:right;color:var(--theme);font-size:12px;cursor:pointer;font-weight:normal;" id="polishRel'+idx+'">✨润色</span></label><textarea oninput="ag(this)" onchange="updRelation('+idx+',\'description\',this.value)" placeholder="一句话说清关系，如：患难与共的兄弟，嘴硬心软。最好先填写关键词再让ai润色">'+esc(r.description||'')+'</textarea></div>';
-    html += '<button class="btn gray" style="width:100%;margin:4px 0 0 0 !important;display:block;box-sizing:border-box;" onclick="delRelation('+idx+')">🗑️ 删除这条</button>';
-
+    // —— 折叠头（永远显示的一小条）——
+    html += '<div onclick="toggleRel('+idx+')" style="cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 12px;">';
+    // 头像/首字
+    html += '<div class="avatar" style="width:38px;height:38px;font-size:15px;'+(info.avatar?'background-image:url(\''+info.avatar+'\')':'')+'">'+(info.avatar?'':esc((info.name||'?')[0]))+'</div>';
+    // 中间信息
+    html += '<div style="flex:1;min-width:0;">';
+    html +=   '<div style="display:flex;align-items:center;gap:6px;">';
+    html +=     '<span style="font-weight:600;color:var(--text);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(info.name)+'</span>';
+    html +=     '<span style="flex-shrink:0;font-size:11px;color:#fff;background:'+tagColor+';padding:1px 7px;border-radius:8px;">'+esc(r.relationType||'中性')+'</span>';
+    html +=     (info.isNpc?'<span style="flex-shrink:0;font-size:10px;color:var(--sub);border:1px solid var(--line);padding:0 5px;border-radius:6px;">NPC</span>':'');
+    html +=   '</div>';
+    // 性别 + 身份
+    var sub = [];
+    var gi = relGenderIcon(info.gender); if (gi) sub.push(gi);
+    if (info.job) sub.push(esc(info.job));
+    html +=   '<div style="font-size:12px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(sub.length?sub.join(' · '):'<span style="opacity:.5;">点此展开填写</span>')+'</div>';
     html += '</div>';
+    // 展开箭头
+    html += '<span style="flex-shrink:0;color:var(--sub);font-size:13px;transform:rotate('+(expanded?'90':'0')+'deg);transition:.2s;">▶</span>';
+    html += '</div>'; // 折叠头结束
+
+    // —— 展开区（点开才显示的编辑表单）——
+    if (expanded){
+      html += '<div style="padding:4px 12px 12px;border-top:1px solid var(--line);">';
+
+      // 对谁
+      var opts = '';
+      others.forEach(function(o){
+        opts += '<option value="'+o.id+'"'+(r.targetId===o.id?' selected':'')+'>'+esc(o.name||o.nick)+'</option>';
+      });
+      opts += '<option value="npc"'+(r.targetId==='npc'?' selected':'')+'>🆕 其他人（NPC·下方填资料）</option>';
+      html += '<div class="field"><label>对谁</label><select onchange="updRelation('+idx+',\'targetId\',this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);">'+opts+'</select></div>';
+
+      // NPC 专属：名字 / 性别 / 身份
+      if(r.targetId==='npc'){
+        html += '<div class="field"><label>对方名字（NPC）</label><input type="text" value="'+esc(r.targetName||'')+'" onchange="updRelation('+idx+',\'targetName\',this.value)" placeholder="如 前男友、林总、闺蜜小美"></div>';
+        html += '<div class="field"><label>性别</label><input type="text" value="'+esc(r.targetGender||'')+'" onchange="updRelation('+idx+',\'targetGender\',this.value)" placeholder="男 / 女 / 或其他，随你填"></div>';
+        html += '<div class="field"><label>身份 / 职业</label><input type="text" value="'+esc(r.targetJob||'')+'" onchange="updRelation('+idx+',\'targetJob\',this.value)" placeholder="如 高中同学、公司老板、便利店店员"></div>';
+      }
+
+      // 关系标签
+      var typeOpts = relTypes.map(function(t){
+        return '<option value="'+t+'"'+(r.relationType===t?' selected':'')+'>'+t+'</option>';
+      }).join('');
+      html += '<div class="field"><label>关系标签</label><select onchange="updRelation('+idx+',\'relationType\',this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);">'+typeOpts+'</select></div>';
+
+      // 关系描述
+      html += '<div class="field"><label>关系描述 <span onclick="polishRelation('+idx+')" style="float:right;color:var(--theme);font-size:12px;cursor:pointer;font-weight:normal;" id="polishRel'+idx+'">✨润色</span></label><textarea oninput="ag(this)" onchange="updRelation('+idx+',\'description\',this.value)" placeholder="一句话说清关系，如：患难与共的兄弟，嘴硬心软。最好先填写关键词再让ai润色">'+esc(r.description||'')+'</textarea></div>';
+
+      // 删除
+      html += '<button class="btn gray" style="width:100%;margin:4px 0 0 0 !important;display:block;box-sizing:border-box;" onclick="delRelation('+idx+')">🗑️ 删除这条</button>';
+
+      html += '</div>'; // 展开区结束
+    }
+
+    html += '</div>'; // 卡片结束
   });
 
   html += '<div style="padding:8px 12px 16px;box-sizing:border-box;"><button class="btn" style="width:100%;margin:0 !important;display:block;box-sizing:border-box;" onclick="addRelation()">＋ 添加一条关系</button></div>';
@@ -4016,7 +4117,8 @@ function addRelation(){
   c.relations = c.relations || [];
   var others = DB.contacts.filter(function(x){ return x.id!==c.id && !x._draft; });
   var defId = others.length ? others[0].id : 'npc';
-  c.relations.push({ targetId:defId, targetName:'', relationType:'中性', description:'' });
+  c.relations.push({ targetId:defId, targetName:'', targetGender:'', targetJob:'', relationType:'中性', description:'' });
+  _relExpanded = c.relations.length - 1;  // 新加的自动展开，方便马上填
   save();
   render();
 }
@@ -4035,6 +4137,35 @@ function updRelation(idx, key, val){
   c.relations[idx][key] = val;
   save();
   if(key==='targetId') render();
+}
+// 把角色的社会关系整理成一段给 AI 看的"人物清单"
+function buildRelationBrief(c){
+  var rels = (c.relations || []);
+  if (!rels.length) return '';
+  var lines = [];
+  rels.forEach(function(r){
+    var name, gender, job;
+    if (r.targetId === 'npc') {
+      name   = r.targetName || '(未命名)';
+      gender = r.targetGender || '';
+      job    = r.targetJob || '';
+    } else {
+      var t = getC(r.targetId);
+      if (!t) return; // 已删除的角色跳过
+      name   = t.name || t.nick || '?';   // 真名优先
+      gender = t.gender || '';
+      job    = t.job || '';
+    }
+    var parts = [];
+    if (gender) parts.push(gender);
+    if (job)    parts.push(job);
+    var meta = parts.length ? '（' + parts.join('，') + '）' : '';
+    var rel  = r.relationType ? ('，与你的关系：' + r.relationType) : '';
+    var desc = r.description ? ('，' + r.description) : '';
+    lines.push('· ' + name + meta + rel + desc);
+  });
+  if (!lines.length) return '';
+  return '\n\n【你生活中已存在的人物（剧情需要时优先让他们登场，别另起炉灶）】\n' + lines.join('\n');
 }
 
 // 折叠切换函数（放在全局，和 renderCharEdit 平级）
@@ -4438,7 +4569,12 @@ async function replyToMyComment(pid,myText,toId){
       m.comments=m.comments||[];
       m.comments.push({by:targetId,text:r.comment,to:'me'});
       save();
-      if(view.type==='moments')renderMoments();else markMomentUnread(1);
+      if (view.type === 'moments') {
+        renderMoments();
+      } else {
+        DB.momentReplyUnread = (DB.momentReplyUnread || 0) + 1;
+        refreshMomentBadge();
+      }
     }
   }catch(e){}
 }
@@ -4730,6 +4866,7 @@ async function checkAutoGreet() {
     // ===== 连吃两次闭门羹就闭嘴 =====
     // 看最后一条消息是谁发的：如果是AI自己发的（说明你还没回），累计碰壁次数
     if (!c.greetLog) c.greetLog = {};
+    var msgs = DB.chats[c.id] || [];	
     var lastMsg = msgs.length ? msgs[msgs.length - 1] : null;
     if (lastMsg && lastMsg.role === 'assistant') {
       // 最后一条是AI发的 = 你还没回。如果已经碰壁≥2次，这个角色暂时不再主动发
@@ -4769,30 +4906,79 @@ async function checkAutoGreet() {
     }
   }
 }
-async function doAutoGreet(c,slot){
-  // ===== 新增：严格检查拉黑状态（关键修复）=====
-  if (c.isBlockedByChar) {
-    // 如果角色拉黑了你，直接终止生成问候
-    return;
+async function doAutoGreet(c, slot) {
+  // 1) 前置检查：被拉黑 / 没配置模型 → 直接退出
+  if (c.isBlockedByChar) return;
+  const model = DB.settings.chatModel;
+  if (!model) return;
+
+  // 2) 组装给 AI 的提示
+  const periodTxt = { '早': '早上', '中': '下午', '晚': '晚上', '深夜': '深夜' }[slot] || '现在';
+  const nudge = `（现在是${periodTxt}，你主动给对方发微信。要求：\n` +
+    `①必须用短句，像真人随手发微信，一次最多1~2句话，绝不长篇大论、不写小作文；\n` +
+    `②内容优先延续你们上次没聊完的话题，或随口分享你此刻在做的事/突然的念头/想问对方的一句话；\n` +
+    `③口语化、自然，符合你的人设与当前作息心情；\n` +
+    `④绝对禁止"早上好/晚上好/吃了吗/在吗"这类空洞客套模板。只输出要发的话本身。）`;
+
+  try {
+    const hist = (DB.chats[c.id] || []).slice(-10).map(toApiMsg);
+    const messages = [
+      { role: 'system', content: buildSystem(c) },
+      { role: 'system', content: '【立即生效·最高优先级】现在是微信线上打字聊天：只输出口语短句，句子要短，禁止括号里的动作/神态/心理描写，禁止旁白，禁止长段落。多句用换行分隔，且总共不超过2句。' },
+      ...hist,
+      { role: 'user', content: nudge }
+    ];
+
+    // 3) 调用 AI + 处理状态标记
+    let out = await callAI(messages, model);
+    out = applyState(c, out);
+
+    // 4) 按行拆分（跟正常聊天一致，不再做任何预处理）
+    const lines = out.split(/\n+/).map(s => s.trim()).filter(Boolean);
+    if (!lines.length) return;
+
+    // 5) 逐行解析并存入聊天记录
+    DB.chats[c.id] = DB.chats[c.id] || [];
+    let cnt = 0;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line) continue;
+
+      // [心声] 相关：主动问候时不弹心声气泡，直接吸收掉，别当文字发出来
+      if (line === '[心声]') {
+        if (i + 1 < lines.length) lines[i + 1] = '';   // 顺带吃掉下一行的心声内容
+        continue;
+      }
+      if (/^\[心声\]/.test(line)) continue;
+
+      // 走跟正常聊天完全相同的解析流水线
+      const parsed = parseAiLine(line);
+
+      // 主动问候里不处理转账收退 / 拉黑等特殊指令
+      if (parsed.type === 'transfer_accept' ||
+          parsed.type === 'transfer_refund' ||
+          parsed.type === 'block_player') continue;
+
+      const m = Object.assign({ id: newId(), role: 'assistant', time: Date.now() }, parsed);
+      DB.chats[c.id].push(m);
+      cnt++;
+    }
+
+    if (!cnt) return;
+
+    // 6) 更新界面 / 未读
+    c.inChatList = true;
+    if (view.type === 'chat' && view.id === c.id) {
+      save();
+      renderChat();
+    } else {
+      markChatUnread(c.id, cnt);
+      save();
+    }
+  } catch (e) {
+    console.warn('doAutoGreet 出错:', e);   // 不再默默吞掉，方便以后排查
   }
-// ===== 原有逻辑继续 =====
-const model = DB.settings.chatModel;
-if (!model) return;
-const periodTxt = { '早':'早上', '中':'下午', '晚':'晚上', '深夜':'深夜' }[slot] || '现在';
-  const nudge=`（现在是${periodTxt}，你主动给对方发微信。要求：\n①必须用短句，像真人随手发微信，一次最多1~2句话，绝不长篇大论、不写小作文；\n②内容优先延续你们上次没聊完的话题，或随口分享你此刻在做的事/突然的念头/想问对方的一句话；\n③口语化、自然，符合你的人设与当前作息心情；\n④绝对禁止"早上好/晚上好/吃了吗/在吗"这类空洞客套模板。只输出要发的话本身。）`;
-  try{
-    const hist=(DB.chats[c.id]||[]).slice(-10).map(toApiMsg);
-    const messages=[{role:'system',content:buildSystem(c)},{role:'system',content:'【立即生效·最高优先级】现在是微信线上打字聊天：只输出口语短句，句子要短，禁止括号里的动作/神态/心理描写，禁止旁白，禁止长段落。多句用换行分隔，且总共不超过2句。'},...hist,{role:'user',content:nudge}];
-    let out=await callAI(messages,model);out=applyState(c,out);
-    const lines=out.split(/\n+/).map(s=>s.trim()).filter(Boolean).slice(0,2);
-    if(!lines.length)return;
-    DB.chats[c.id]=DB.chats[c.id]||[];
-    let cnt=0;
-    lines.forEach(line=>{const m=Object.assign({id:newId(),role:'assistant',time:Date.now()},parseAiLine(line));DB.chats[c.id].push(m);cnt++;});
-    c.inChatList=true;
-    if(view.type==='chat'&&view.id===c.id){save();renderChat();}
-    else{markChatUnread(c.id,cnt);save();}
-  }catch(e){}
 }
 /* ===== 心动值（每个角色独立） ===== */
 function addHeart(c,n,reason){if(!c)return;c.hearts=(c.hearts||0)+n;if(n>0)c.heartsTotal=(c.heartsTotal||0)+n;c.heartLog=c.heartLog||[];c.heartLog.unshift({t:Date.now(),n,reason});if(c.heartLog.length>200)c.heartLog.pop();checkMile(c);save();}
@@ -5387,7 +5573,7 @@ async function generateSchedule(cid) {
       '【时间连续 · 硬性规则】\n' +
       '1. 从早上起床到深夜睡觉，时间段必须【首尾相接】：上一条的 end 就是下一条的 start，不允许出现超过 30 分钟的空白。\n' +
       '2. 除了上班、开会这种"正事"，中间的过渡时段（通勤、吃饭、发呆、休息、做家务、刷手机等）也要如实填上，这些琐碎才是真实生活。\n' +
-      '3. 全天只生成 4~5 个时段，每段跨度大一点，别切太碎。\n\n'
+      '3. 全天只生成 4~5 个时段，每段跨度大一点，别切太碎。\n\n' +
 
       '【内容风格 · 要有真实的生活质感】\n' +
       '★【重要·独立生活】你有自己的生活，不要每条都提到用户、不要满脑子都是用户。全天最多只有 1 条可以和用户有关，其余都写你自己的事（工作、吃饭、爱好、发呆、烦心事等），像一个有独立日常的真实的人。\n' +
@@ -5785,6 +5971,7 @@ function buildSystem(c){
   s += add('性格关键词(最重要)', c.pKeywords);
   s += add('行为模式(高优先级·必须遵循)', c.pBehavior);
   s += add('成长经历(内化,不主动解释,只体现在言行)', c.pBack);
+  s += buildRelationBrief(c);   // ★注入人物关系（线上线下通用）
 
   // ===== 第2层：当前背景 =====
   s += `\n【当前背景】\n`;
@@ -5894,10 +6081,10 @@ s += '  【语音内容要求】语音消息必须语义连贯、逻辑清晰，
 
   // ----- 转账 -----
   s += '- [转账] 触发条件（满足任意一条即可）：\n';
-  s += '  ① 你想讨好对方（金额：6.66、8.88、52.00）\n';
-  s += '  ② 对方帮了你忙，你想感谢（金额：20-100）\n';
-  s += '  ③ 你还欠对方钱（金额：具体金额）\n';
-  s += '  ④ 你开玩笑说请对方喝奶茶/吃饭（金额：20-50）\n';
+  s += '  ① 你想讨好对方（如撒娇、认错、表达心意）\n';
+  s += '  ② 对方帮了你忙，你想感谢\n';
+  s += '  ③ 你还欠对方钱\n';
+  s += '  ④ 请对方喝奶茶/吃饭等\n';
   s += '  ⑤ 涉及金钱往来的场景\n';
   s += '  满足以上任意条件时，**必须**使用 [转账|金额|备注] 格式发起转账。\n';
   s += '  ✅ 正确示例：[转账|52.00|请你喝奶茶]；\n';
@@ -5936,6 +6123,13 @@ s += '  【语音内容要求】语音消息必须语义连贯、逻辑清晰，
   // ===== 第5层：输出格式（线上/线下） =====
   if (c.mode === 'offline') {
     s += `\n【输出格式：线下模式】\n${DB.settings.offlineStyle || DEFAULT_OFFLINE}\n【时间处理】线下剧情按故事内的连续时间推进，无视现实间隔。\n【线下收尾】剧情自然走到尾声时，另起一行输出 [回线上|]。\n`;
+    // ★线下·配角与NPC调度（补充，不与上面镜头规则重复）
+    var _myn = DB.me.realName || DB.me.name || '对方';
+    s += '\n【配角与NPC调度·线下补充】\n';
+    s += '1. 当「' + _myn + '」在和某个配角/NPC说话时，镜头切到那个配角，你要完整扮演他/她接话、行动，用引号写出真实台词。\n';
+    s += '2. 【铁律】当「' + _myn + '」独处、没人与TA互动时，镜头立刻切到角色本人或某个NPC的独立场景（按剧情张力自选），绝不让镜头停在独处的「' + _myn + '」身上干等。\n';
+    s += '3. 剧情需要时可自由创建临时NPC（给出身份+关系+特征即可），让他们主动带消息、制造麻烦、推动剧情，无需「' + _myn + '」许可，符合情境即可登场。\n';
+    s += '4. 上面"人物关系"清单里若有合适的人，优先让清单里的人登场，别凭空另编。\n';
   } else {
     s += `\n【输出格式：线上模式】\n${DB.settings.onlineStyle || DEFAULT_ONLINE}\n【发消息条数】严格根据角色性格决定发几条：话痨/热情→可连发2-4条；高冷/沉默寡言/惜字如金→通常只发1条短句，别硬凑；随心情情境变化，不要每次都机械连发。\n`;
   }
@@ -5990,6 +6184,32 @@ s += '  【语音内容要求】语音消息必须语义连贯、逻辑清晰，
 function toApiMsg(m){if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};if(m.type==='image')return{role:m.role,content:[{type:'text',text:'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};if(m.type==='transfer')return{role:m.role,content:`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};if(m.type==='redpacket')return{role:m.role,content:`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};if(m.type==='voice')return{role:m.role,content:`（语音消息）${m.content}`};if(m.type==='sticker')return{role:m.role,content:`（发了个表情：${m.content}）`};return{role:m.role,content:m.content};}
 function colorLines(s,color){const col=color||'var(--theme)';return esc(s).replace(/(「[^」]*」|“[^”]*”|"[^"]*"|＂[^＂]*＂)/g,'<span style="color:'+col+';font-weight:500">$1</span>');}
 function tsHtml(t){return `<div class="ts"><span class="ts-pill">${fmtTime(t)}</span></div>`;}
+// 根据 AI/用户给的名字，智能查找最匹配的表情
+function findSticker(name) {
+  if (!name) return null;
+  name = name.trim();
+  var list = DB.stickers || [];
+
+  // 1. 先试完全相等（最精准）
+  var hit = list.find(function(s){ return s.name === name; });
+  if (hit) return hit;
+
+  // 2. 去掉括号备注再比一次，如 "（小狗）哭泣" → "哭泣"
+  var clean = function(str){ return str.replace(/[（(【\[].*?[）)】\]]/g, '').trim(); };
+  hit = list.find(function(s){ return clean(s.name) === clean(name); });
+  if (hit) return hit;
+
+  // 3. 互相包含就算命中，如 AI 说"哭" 命中 "（小狗）哭泣"
+  hit = list.find(function(s){
+    var a = clean(s.name), b = clean(name);
+    return a && b && (a.indexOf(b) >= 0 || b.indexOf(a) >= 0);
+  });
+  if (hit) return hit;
+
+  // 4. 实在找不到
+  return null;
+}
+
 function bubble(c,m){if (m.type === 'system') {
   return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';
 }
@@ -6670,7 +6890,7 @@ function peekRecall(id){
     const isAi=m.role==='assistant';
     if(isAi){
       popConfirm('偷看 TA 撤回的内容？将消耗 5 💗（看过后永久解锁）', function(){
-        if(!spendHeart(getC(view.id),10,'偷看'+((getC(view.id)||{}).nick||(getC(view.id)||{}).name||'')+'的撤回'))return;
+        if(!spendHeart(getC(view.id),5,'偷看'+((getC(view.id)||{}).nick||(getC(view.id)||{}).name||'')+'的撤回'))return;
         m.reveal=true;save();renderChat();
       }, {icon:'👀', title:'偷看撤回'});
       return;
@@ -6714,12 +6934,10 @@ function applyState(c, text) {
   }
   // 紧张度自然回落：每次AI回复后调用，每30分钟最多降1点
 
-// ===== 解析心声标记（带频率限制） =====
-// 【修复】如果是线下模式，直接返回，不处理心声
-if (c.mode === 'offline') {
-  if (c._pendingHeart) c._pendingHeart = 0;
+  // 清除可能残留的旧式心声标记（心声:1 / 心声：内容 等），交给 aiReply 统一处理
+  text = text.replace(/^\s*心声\s*[:：]\s*\d+\s*$/gm, '').trim();
+
   return text;
-}
 
 // 检查是否在封禁期内（用户连续叉掉3次后封禁24小时）
 if (c._heartBlockUntil && Date.now() < c._heartBlockUntil) {
@@ -6753,42 +6971,59 @@ if (heartMatch) {
 // =====================
   return text;
 }
-function parseAiLine(line){
+// 把各种变体格式统一成标准的 [类型|内容]
+function normalizeAiLine(line) {
   line = line.trim();
+  // 已经是标准 [标记|内容] 格式的，直接放行，别重复处理（否则会多包一层括号）
+  if (/^\[(语音|表情|撤回|转账|红包|心声|拉黑玩家|接收|退回|见面|回线上)[|｜:：\]]/.test(line)) return line;
+
+  // 语音：(语音消息)内容 / 语音：内容 / 【语音】内容 / (语音)内容
+  line = line.replace(/^[（(【\[]?\s*语音(?:消息)?\s*[）)】\]]?\s*[:：]?\s*(.+)$/, '[语音|$1]');
+
+  // 撤回：（撤回）内容 / 撤回：内容 / 【撤回】内容
+  line = line.replace(/^[（(【\[]?\s*撤回(?:消息)?\s*[）)】\]]?\s*[:：]?\s*(.+)$/, '[撤回|$1]');
+
+  // 表情：（表情）内容 / 表情：内容 / 【表情】内容
+  line = line.replace(/^[（(【\[]?\s*表情\s*[）)】\]]?\s*[:：]?\s*(.+)$/, '[表情|$1]');
+
+  // 转账：转账：金额，备注 / 转账：金额
+  line = line.replace(/^[（(【\[]?\s*转账\s*[）)】\]]?\s*[:：]\s*([\d.]+)\s*[,，]?\s*(.*)$/, '[转账|$1|$2]');
+
+  return line;
+}
+
+function parseAiLine(line){
+  line = normalizeAiLine(line);   // ← 先统一格式，新增的一行
   var m;
 
-  // 转账
-  if (m = line.match(/^\[转账[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/)) {
+  // 转账（支持 | ｜ ： ，等分隔）
+  if (m = line.match(/^\[转账[|｜:：](.+?)(?:[|｜,，]([\s\S]*))?\]$/)) {
     return { type: 'transfer', from: 'ai', amount: m[1].trim(), content: (m[2] || '').trim() };
   }
   // 红包
-  if (m = line.match(/^\[红包[|｜](.+?)(?:[|｜]([\s\S]*))?\]$/)) {
+  if (m = line.match(/^\[红包[|｜:：](.+?)(?:[|｜,，]([\s\S]*))?\]$/)) {
     return { type: 'transfer', amount: m[1].trim(), content: (m[2] || '').trim() };
   }
   // 语音
-  if (m = line.match(/^\[语音[|｜]([\s\S]+)\]$/)) {
+  if (m = line.match(/^\[语音[|｜:：]([\s\S]+)\]$/)) {
     return { type: 'voice', content: m[1].trim() };
   }
   // 表情
-  if (m = line.match(/^\[表情[|｜](.+?)\]$/)) {
+  if (m = line.match(/^\[表情[|｜:：](.+?)\]$/)) {
     return { type: 'sticker', content: m[1].trim() };
   }
   // 撤回
-  if (m = line.match(/^\[撤回[|｜]([\s\S]+)\]$/)) {
+  if (m = line.match(/^\[撤回[|｜:：]([\s\S]+)\]$/)) {
     return { type: 'text', recalled: true, recalledContent: m[1].trim(), reveal: false };
   }
-  // 拉黑玩家 —— 只返回类型，具体逻辑交给调用者处理
-  if (m = line.match(/^\[拉黑玩家[|｜](.+?)\]$/)) {
+  // 拉黑玩家
+  if (m = line.match(/^\[拉黑玩家[|｜:：](.+?)\]$/)) {
     return { type: 'block_player', reason: m[1].trim() };
   }
-  // 接收转账
-  if (m = line.match(/^\[接收\]/)) {
-    return { type: 'transfer_accept' };
-  }
-  // 退回转账
-  if (m = line.match(/^\[退回\]/)) {
-    return { type: 'transfer_refund' };
-  }
+  // 接收/退回转账
+  if (line.match(/^\[接收\]/)) return { type: 'transfer_accept' };
+  if (line.match(/^\[退回\]/)) return { type: 'transfer_refund' };
+
   // 普通文本
   return { type: 'text', content: line };
 }
@@ -6849,6 +7084,14 @@ async function aiReply(nudge) {
       modeReminder = '【立即生效·最高优先级·线下小说模式】现在是线下面对面场景，用第三人称小说笔法叙事：细致描写动作、神态、心理、环境细节，节奏张弛有度，避免流水账。所有人物台词必须用中文双引号“”括起（不要用「」方括号）；叙事描写里绝对不要用引号去强调或包裹词语，引号只保留给人物真正说出口的话。称呼对方请用其真实姓名或你俩关系里的称呼，严禁把对方的"微信网名"当作本名写进叙述。你只演你自己这一个角色，绝不替对方说话或替对方做决定。禁止任何微信功能格式（转账/表情等）。\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实间隔无关，哪怕对方隔很久才回也无缝承接，绝不提"过了一天""好久没见"。\n【线下收尾】当这段见面剧情自然走到尾声（该道别/该各自回家/事情办完了），不要无止境地黏着继续，请在叙事末尾另起一行单独输出标记：[回线上|]，表示这次见面告一段落、可以回到线上。只在剧情真的到收尾时才用，别硬结束。';
     }
     messages.push({ role: 'system', content: modeReminder });
+	    // 把可用的表情清单告诉 AI，让它照着发
+    var stickerNames = (DB.stickers || []).map(function(s){ return s.name; });
+    if (stickerNames.length) {
+      messages.push({
+        role: 'system',
+        content: '【可用表情】你可以发表情，但只能从下面这个列表里选，格式为 [表情|名字]，名字必须和列表里的完全一致，别自己编：\n' + stickerNames.join('、') + '\n如果没有合适的表情就正常打字，不要硬发。'
+      });
+    }
 
     // ---- 5. 转账强制指令 ----
     if (pendingTransfer) {
@@ -7209,56 +7452,99 @@ setInterval(function() {
   maybeAutoPost();
 }, 30 * 60 * 1000);
 render();tick();restoreFocusState();setTimeout(updateAllIcons, 100);if(focusPhase==='work'&&view.type==='focus')render();
-function exportCharacter(id){
+function exportCharacter(id) {
   var c = getC(id);
-  if (!c) { alert('角色不存在'); return; }
+  if (!c) {
+    alert('角色不存在');
+    return;
+  }
+
   var data = {
     character: {
+      // 基础信息
+      id: c.id,
       name: c.name,
       nick: c.nick,
       gender: c.gender,
       age: c.age,
+      birthday: c.birthday || '',
       job: c.job,
       family: c.family,
       body: c.body,
+      avatar: c.avatar || '',
+
+      // 外貌与性格
       pLook: c.pLook,
       pKeywords: c.pKeywords,
+      pBehavior: c.pBehavior || '',          // 行为模式
       pStyle: c.pStyle,
-      pBack: c.pBack,
-      pDaily: c.pDaily,
-      pLike: c.pLike,
-      pLang: c.pLang,
-      negative: c.negative,
-      opening: c.opening,
-      pExtra: c.pExtra,
-      signature: c.signature || '',
-      lineColor: c.lineColor || '',
+      pBack: c.pBack,                        // 成长经历
+      pDaily: c.pDaily,                      // 日常作息
+      pLike: c.pLike,                        // 喜好厌恶
+      pLang: c.pLang,                        // 语言习惯
+      negative: c.negative,                  // 负向约束
+      opening: c.opening,                    // 开场白
+      pExtra: c.pExtra,                      // 补充设定
+      pOnlinePersona: c.pOnlinePersona || '', // 线上人设
+      signature: c.signature || '',           // 个性签名
+      lineColor: c.lineColor || '',           // 台词颜色
+      sampleLines: c.sampleLines || '',       // 事例台词
+
+      // 世界观与背景
       worldType: c.worldType || '',
       worldview: c.worldview || '',
-      activity: c.activity || '中',
+      worldId: c.worldId || '',
+      chatBg: c.chatBg || '',                 // 聊天背景
+
+      // 我方信息
       myGender: c.myGender || '',
       myAge: c.myAge || '',
       myJob: c.myJob || '',
       myLook: c.myLook || '',
       myPersona: c.myPersona || '',
       myRelation: c.myRelation || '',
-      status: c.status || {好感度:50, 信任度:50, 紧张感:0, 当前关系:'初次见面'},
-      chapters: c.chapters || []
+
+      // 状态与关系
+      status: c.status || {好感度: 50, 信任度: 50, 紧张感: 0, 当前关系: '初次见面'},
+      relations: c.relations || [],           // ← 社会关系（新增）
+      clinginess: c.clinginess !== undefined ? c.clinginess : 50,
+
+      // 记忆与行程
+      chapters: c.chapters || [],
+      memories: c.memories || [],             // 长期记忆
+      schedules: c.schedules || [],           // 行程
+
+      // 其他
+      activity: c.activity || '中',
+      inChatList: c.inChatList || false,
+      isBlockedByChar: c.isBlockedByChar || false,
+      blockedByCharAt: c.blockedByCharAt || 0,
+      blockedType: c.blockedType || '',
+      // 心动值相关（如果需要，也可导出）
+      hearts: c.hearts || 0,
+      heartsTotal: c.heartsTotal || 0,
+      heartLog: c.heartLog || [],
+      heartMile: c.heartMile || {},
     },
-    chats: (DB.chats[id] || []).map(function(m){
+    chats: (DB.chats[id] || []).map(function(m) {
       return {
         role: m.role,
         content: m.content,
         type: m.type || 'text',
         time: m.time,
-        amount: m.amount || undefined
+        amount: m.amount || undefined,
+        // 保留语音消息展开状态等（可选）
+        voiceExpanded: m.voiceExpanded || false,
+        recalled: m.recalled || false,
+        recalledContent: m.recalledContent || ''
       };
     })
   };
-  var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = (c.nick || c.name) + '_备份_' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = (c.nick || c.name) + '_备份_' + new Date().toISOString().slice(0, 10) + '.json';
   a.click();
 }
 function importCharacter(){
