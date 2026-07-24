@@ -27,7 +27,7 @@
   #tbTitle{flex:1;text-align:center;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .tb-btn{min-width:44px;font-size:20px;color:var(--text);cursor:pointer;}
   .tb-btn.r{text-align:right;color:var(--theme);}
-#content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;background-size:cover;background-position:center;display:flex;flex-direction:column;}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative;background-size:cover;background-position:center;display:flex;flex-direction:column;}
   #content::-webkit-scrollbar{width:5px;}
   #content::-webkit-scrollbar-thumb{background:var(--theme);border-radius:3px;opacity:.6;}
   #content::-webkit-scrollbar-track{background:transparent;}
@@ -219,10 +219,10 @@
   .empty{text-align:center;color:var(--sub);padding:60px 20px;font-size:14px;line-height:2;}
   .section{margin-top:12px;background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
   .section-title{padding:10px 16px 6px;font-size:12px;color:var(--sub);font-weight:600;}
-  .row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);}
+  .row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);overflow:hidden;}
   .row:last-child{border-bottom:none;}
   .row label{width:90px;font-size:14px;color:var(--text);flex-shrink:0;}
-  .row input,.row select{flex:1;border:none;outline:none;font-size:14px;background:transparent;color:var(--text);text-align:right;}
+  .row input,.row select{flex:1;min-width:0;border:none;outline:none;font-size:14px;background:transparent;color:var(--text);text-align:right;}
   .btn{display:block;width:calc(100% - 32px);margin:12px 16px;padding:12px;border:none;border-radius:8px;background:var(--theme);color:#fff;font-size:15px;cursor:pointer;}
   .btn.gray{background:#eee;color:#333;}.btn.red{background:#fde2e2;color:#e34;}
   .hint{padding:6px 16px;font-size:12px;color:var(--sub);line-height:1.6;}
