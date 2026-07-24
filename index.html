@@ -27,7 +27,21 @@
   #tbTitle{flex:1;text-align:center;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .tb-btn{min-width:44px;font-size:20px;color:var(--text);cursor:pointer;}
   .tb-btn.r{text-align:right;color:var(--theme);}
-#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative;background-size:cover;background-position:center;display:flex;flex-direction:column;}
+#content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;    /* 🟢 关键1：阻止滚动链，禁止边界过度滚动抢夺焦点 */
+  touch-action: pan-y;             /* 🟢 关键2：强制只响应垂直触摸滑动 */
+  scroll-behavior: smooth;         /* 🟢 可选：让滚动更跟手顺滑 */
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+}
   #content::-webkit-scrollbar{width:5px;}
   #content::-webkit-scrollbar-thumb{background:var(--theme);border-radius:3px;opacity:.6;}
   #content::-webkit-scrollbar-track{background:transparent;}
@@ -3654,18 +3668,50 @@ function renderSettings(){
     </div>
     <button class="btn" onclick="saveApi()">保存接口设置</button>
 
-    <!-- ===== 主题皮肤（动态渲染） ===== -->
-    <div class="section-title">✨ 主题皮肤（整体换肤）</div>
-    <div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      ${SKINS.map(skin => `
-        <div onclick="applySkin('${skin.id}');renderSettings()" 
-             style="cursor:pointer;border:2px solid ${skin['--theme']};border-radius:12px;padding:10px 6px;text-align:center;background:${skin['--theme']}22;">
-          <div style="width:100%;height:30px;border-radius:6px;background:${skin['--theme']};margin-bottom:6px"></div>
-          <div style="font-size:12px;color:var(--text);">${skin.name}</div>
-        </div>
-      `).join('')}
+<!-- ===== 主题皮肤（动态渲染） ===== -->
+<div class="section-title">✨ 主题皮肤（整体换肤）</div>
+<div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;touch-action:pan-y;contain:layout style;">
+  ${SKINS.map(skin => `
+    <div onclick="applySkin('${skin.id}');renderSettings()" 
+         style="
+           cursor:pointer;
+           border:2px solid ${skin['--theme']};
+           border-radius:12px;
+           padding:12px 8px;
+           text-align:center;
+           background:${skin['--theme']}18;
+           touch-action:manipulation;
+           will-change:transform;
+           user-select:none;
+           -webkit-touch-callout:none;
+           contain:content;
+           transition:transform 0.12s ease, box-shadow 0.12s ease;
+           box-shadow:0 1px 4px rgba(0,0,0,0.04);
+         "
+         onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 0 0 2px ${skin['--theme']}33';"
+         onmouseup="this.style.transform='scale(1)';this.style.boxShadow='0 1px 4px rgba(0,0,0,0.04)';"
+         onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='0 1px 4px rgba(0,0,0,0.04)';"
+         >
+      <!-- 色块预览：渐变背景 + 主题色圆角块 -->
+      <div style="
+        width:100%;
+        height:38px;
+        border-radius:8px;
+        background:${skin['--theme']};
+        margin-bottom:8px;
+        background-image: linear-gradient(135deg, ${skin['--theme']}cc, ${skin['--theme']});
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.06);
+      "></div>
+      <!-- 主题名称 + 小标签 -->
+      <div style="font-size:13px;font-weight:500;color:var(--text);letter-spacing:0.3px;">
+        ${skin.name}
+      </div>
+      <div style="font-size:10px;color:var(--sub);opacity:0.5;margin-top:2px;">
+        ${skin.id === currentThemeId ? '● 当前' : '点击切换'}
+      </div>
     </div>
-
+  `).join('')}
+</div>
     <div class="section-title">🖼️ 桌面壁纸</div>
     <div class="field">
       <div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div>
