@@ -1256,31 +1256,103 @@ function tick() {
 function pickImage(cb,max,png){max=max||256;
 const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=function(){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=function(){const img=new Image();img.onload=function(){let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max;}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);cb(cv.toDataURL(png?'image/png':'image/jpeg',0.9));};img.src=r.result;};r.readAsDataURL(f);};inp.click();}
 
-function render(){triggerDailyMemoryCheck();triggerDailyMemoryCheck();const h=document.getElementById('home');if(h)h.remove();const b=document.getElementById('chatBottom');if(b)b.remove();closeModal();content.style.backgroundImage='';
+function render() {
+  // ============================================================
+  // 1️⃣ 强制清理所有可能残留的遮挡层（防止卡死元凶）
+  // ============================================================
+  var popup = document.getElementById('popup');
+  if (popup) popup.remove();
+
+  var ftoast = document.getElementById('ftoast');
+  if (ftoast) ftoast.remove();
+
+  var modal = document.getElementById('modal');
+  if (modal) modal.remove();
+
+  // ============================================================
+  // 2️⃣ 清理旧页面元素（桌面、聊天输入框、旧首页等）
+  // ============================================================
+  var home = document.getElementById('home');
+  if (home) home.remove();
+
+  var bottom = document.getElementById('chatBottom');
+  if (bottom) bottom.remove();
+
+  closeModal();                         // 保险，关闭可能残留的模态框
+  content.style.backgroundImage = '';   // 重置聊天背景
+
+  // ============================================================
+  // 3️⃣ 触发每日记忆生成（只调用一次）
+  // ============================================================
+  triggerDailyMemoryCheck();            // 原来这里重复了两次，删掉一个
+
+  // ============================================================
+  // 4️⃣ 路由：根据 view.type 跳转到对应页面
+  // ============================================================
+
+  // ---- 浮光（特殊处理） ----
   if (view.type === 'floating') {
     console.log('✅ render 拦截到 floating，直接调用 renderFloating');
     return renderFloating();
   }
-  if (view.type === 'floating') return renderFloating();
-  if(view.type==='home')return renderHome();content.style.display='block';
-  if(view.type==='wechat')return renderWechat();
-  if(view.type==='settings')return renderSettings();
-  if(view.type==='charEdit')return renderCharEdit();
-  if(view.type==='chat')return renderChat();
-  if(view.type==='groupList')return renderGroupList();
-  if(view.type==='groupChat')return renderGroupChat();
-  if(view.type==='groupSet')return renderGroupSet();
-  if(view.type==='moments')return renderMoments();
-  if(view.type==='hearts')return renderHearts();
-  if(view.type==='heartDetail')return renderHeartDetail();
-  if(view.type==='voiceList')return renderVoiceList();
-  if(view.type==='schedule')return renderSchedule(); 
-  else if (view.type === 'watchLog') renderWatchLog();
-  if(view.type==='focus')return renderFocus();
-  if(view.type==='worlds')return renderWorlds();
+
+  // ---- 桌面 ----
+  if (view.type === 'home') return renderHome();
+
+  // ---- 其他页面：显示 content 区块 ----
+  content.style.display = 'block';
+
+  // ---- 微信相关 ----
+  if (view.type === 'wechat') return renderWechat();
+  if (view.type === 'chats') return renderChats();       // 补充遗漏的路由
+  if (view.type === 'contacts') return renderContacts(); // 补充遗漏的路由
+  if (view.type === 'discover') return renderDiscover(); // 补充遗漏的路由
+  if (view.type === 'me') return renderWxMe();           // 补充遗漏的路由
+
+  // ---- 设置 ----
+  if (view.type === 'settings') return renderSettings();
+
+  // ---- 角色编辑 ----
+  if (view.type === 'charEdit') return renderCharEdit();
+
+  // ---- 私聊 ----
+  if (view.type === 'chat') return renderChat();
+
+  // ---- 群聊相关 ----
+  if (view.type === 'groupList') return renderGroupList();
+  if (view.type === 'groupChat') return renderGroupChat();
+  if (view.type === 'groupSet') return renderGroupSet();
+
+  // ---- 朋友圈 ----
+  if (view.type === 'moments') return renderMoments();
+
+  // ---- 心迹 ----
+  if (view.type === 'hearts') return renderHearts();
+  if (view.type === 'heartDetail') return renderHeartDetail();
+  if (view.type === 'voiceList') return renderVoiceList();
+
+  // ---- 行程 ----
+  if (view.type === 'schedule') return renderSchedule();
+
+  // ---- 监控日志 ----
+  if (view.type === 'watchLog') return renderWatchLog();
+
+  // ---- 专注 ----
+  if (view.type === 'focus') return renderFocus();
+
+  // ---- 世界观 ----
+  if (view.type === 'worlds') return renderWorlds();
+
+  // ---- 备忘录 ----
   if (view.type === 'memo') return renderMemoMain();
-if (view.type === 'memoDetail') return renderMemoDetail(view.id);
-  if(view.type==='placeholder')return renderPlaceholder();
+  if (view.type === 'memoDetail') return renderMemoDetail(view.id);
+
+  // ---- 占位（未实现的功能） ----
+  if (view.type === 'placeholder') return renderPlaceholder();
+
+  // ============================================================
+  // 5️⃣ 兜底：如果以上都没匹配，保持当前页面并应用缩放
+  // ============================================================
   applyPhoneScale();
 }
 function showChrome(t,b){topbar.style.display=t?'flex':'none';tabbar.style.display=b?'flex':'none';}
@@ -2001,12 +2073,13 @@ function openApp(id) {
     return;
   }
   // ★★★★★ 浮光 ★★★★★
-  if (id === 'floating') {
+if (id === 'floating') {
     console.log('✅ 浮光被点击了！');
+    window._floatingFromDesktop = true;
     view = { type: 'floating' };
     renderFloating();
     return;
-  }
+}
   if (id === 'shop') {
     view = { type: 'placeholder', title: '🛍️ 购物', msg: '功能开发中，敬请期待～' };
     render();
@@ -2343,8 +2416,7 @@ function renderWorlds() {
   content.innerHTML = html;
 }
 // ============================================================
-// 浮光 · 完整模块（独立插入，不依赖其他模块）
-// ============================================================
+// ===== 浮光 · 完整模块 =====
 
 // ----- 1. 帖子类型（12种通用）-----
 var FLOATING_TYPES = [
@@ -2394,9 +2466,9 @@ function trimFloatingCache(worldId) {
 var _floatingWorldId = null;
 var _floatingLoading = false;
 var _floatingLastFetch = {};
-var _floatingSplashShown = false;
+var _floatingSplashShown = false;  // 全局只播一次（桌面进入）
 
-// ----- 4. AI 生成帖子（含网名）-----
+// ----- 4. AI 生成帖子（自带点赞和评论）-----
 async function generateFloatingPosts(worldId, count) {
   count = count || 5;
   var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
@@ -2416,21 +2488,37 @@ async function generateFloatingPosts(worldId, count) {
     return '- ' + t + '：' + FLOATING_TYPE_META[t].vibe;
   }).join('\n');
 
-  var prompt = '【角色】你是活在「' + world.name + '」这个世界里的一个普通人，正在逛本地社区/论坛。\n\n' +
-    '【世界观背景】\n' + (world.desc || '一个普通的世界') + '\n\n' +
-    '【当前时间】\n' + timeStr + '\n\n' +
-    '【发帖类型】（每条选一个，不要重复）\n' + typesList + '\n\n' +
-    '【生成要求】\n' +
-    '1. 生成 ' + count + ' 条帖子，每条用不同的类型\n' +
-    '2. 用第一人称“我”（公告可用“我们”）\n' +
-    '3. 口语化、有具体细节、有情绪\n' +
-    '4. 字数 20~80 字\n' +
-    '5. **每条帖子随机生成一个发帖人的网名**（2~6个字，像真人昵称，贴合世界观氛围，不要生僻字，不要符号）\n' +
-    '6. 不要标题、不要引号、不要解释\n\n' +
-    '【输出格式】只输出 JSON 数组：\n' +
-    '[{"type":"吐槽","author":"网名","content":"帖子内容"}, ...]\n' +
-    '只输出 JSON，不要其他文字。';
-
+var prompt = '你是一个活跃在「' + world.name + '」的普通用户，正在刷本地的同城社区/小红书。这里的帖子都是普通人随手发的日常分享，风格轻松口语化。\n\n' +
+  '【世界观背景】\n' + (world.desc || '一个普通的世界') + '\n\n' +
+  '【当前时间】\n' + timeStr + '\n\n' +
+  '【发帖类型】（每条选一个，不要重复）\n' + typesList + '\n\n' +
+  '【生成要求】\n' +
+  '1. 生成 ' + count + ' 条帖子，每条用不同的类型\n' +
+  '2. 用第一人称“我”（公告可用“我们”）\n' +
+  '3. 口语化、简短、有信息量，字数 10~30 字\n' +
+  '4. 每条帖子带 1~2 条评论，评论者网名自拟，评论内容简短真实\n' +
+  '5. 点赞数 2~10 之间浮动\n' +
+  '6. **帖子内容必须简短，一句话说清楚**，不要写长段叙事\n' +
+  '7. 发帖人网名 2~5 个字，自拟，不重复\n' +
+  '8. 【可选配图】如果觉得这条帖子配一张图会更生动，在内容末尾加上 *[图片：xxx]*（一句话描述画面，不是必须的，有的帖子纯文字就好）\n' +
+  '9. 不要标题、不要引号、不要解释\n\n' +
+  '【正确示范】\n' +
+  '✅ 纯文字：「谁懂，出门忘带充电宝，手机还剩5%」\n' +
+  '✅ 带图：「今日OOTD *[图片：米白色大衣配阔腿裤，站在街边咖啡店门口]*」\n' +
+  '✅ 纯文字：「避雷XX路那家烧烤，又贵又难吃」\n' +
+  '✅ 带图：「这家提拉米苏我真的会谢 *[图片：一块切角提拉米苏，旁边放着一杯浓缩]*」\n' +
+  '✅ 纯文字：「求问这附近哪家理发店剪短发好看」\n' +
+  '✅ 纯文字：「新搬的公寓隔音差到离谱，隔壁吵架我连台词都能背下来」\n' +
+  '✅ 纯文字：「有没有人知道这边哪里能修老式机械表，走了好几家都说不会」\n' +
+  '✅ 带图：「雨好大 *[图片：雨打在窗玻璃上，外面模糊成灰绿色]*」\n\n' +
+  '【错误示范】\n' +
+  '❌ 「今天路过河边，看到一个穿黑大衣的人站在桥上看手机，看了很久也没点开什么，最后把手机揣兜里走了」（太长太碎，小红书不发这种观察日记）\n' +
+  '❌ 「生活不易，大家都要加油」（空洞，没有信息量）\n' +
+  '❌ 每条都强行加 *[图片：xxx]*（图片描述是可选的，不是必须的）\n\n' +
+  '【输出格式】只输出 JSON 数组：\n' +
+  '[{"type":"吐槽","author":"网名","content":"帖子内容（可含图片描述）","likes":5,"comments":[{"author":"评论者网名","content":"评论内容"}]}]\n' +
+  '只输出 JSON，不要其他文字。';
+  
   try {
     var out = await callAI([{ role: 'user', content: prompt }], model);
     out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -2454,6 +2542,37 @@ async function generateFloatingPosts(worldId, count) {
         author = roleNameList[Math.floor(Math.random() * roleNameList.length)];
       }
 
+      var likes = item.likes || Math.floor(Math.random() * 5) + 1;  // 1~5
+
+      // 处理评论：补 time
+      var comments = [];
+      if (Array.isArray(item.comments) && item.comments.length) {
+comments = item.comments.slice(0, 3).map(function(c, j) {
+    var author = (c.author && c.author.trim()) ? c.author.trim() : '路人';
+    var text = (c.content && c.content.trim()) ? c.content.trim() : '好帖';
+    // 如果评论内容少于2个字，补一个兜底
+    if (text.length < 2) text = '确实是这样';
+    return {
+        author: author,
+        text: text,
+        time: nowTs + idx * 1000 + j * 10000 + Math.random() * 5000
+    };
+});
+      } else {
+        // 兜底生成几条
+        var fallbackComments = [
+          { author: '过客', text: '有点意思' },
+          { author: '小确幸', text: '真实' }
+        ];
+        comments = fallbackComments.slice(0, Math.floor(Math.random() * 2) + 1).map(function(c, j) {
+          return {
+            author: c.author,
+            text: c.text,
+            time: nowTs + idx * 1000 + j * 10000 + Math.random() * 5000
+          };
+        });
+      }
+
       posts.push({
         id: 'fp_' + nowTs + '_' + idx,
         worldId: worldId,
@@ -2461,9 +2580,9 @@ async function generateFloatingPosts(worldId, count) {
         content: item.content.trim(),
         author: author,
         time: nowTs + idx * 1000,
-        likes: 0,
+        likes: likes,
         godComment: '',
-        comments: [],
+        comments: comments,
         _userLiked: false,
         _commentOpen: false,
         _aiCommentTriggered: false
@@ -2515,8 +2634,7 @@ async function triggerAIComment(postId) {
   if (!model) return;
 
   var prompt = '【场景】有人在「' + world.name + '」发了一条帖子，用户评论了它。请你以路人身份回一条评论。\n\n' +
-    '【帖子】\n' + p.content + '\n\n' +
-    '【要求】简短10~25字，接住情绪，像真人说话，直接输出内容';
+    '【帖子】\n' + p.content + '\n\n【要求】简短10~25字，接住情绪，像真人说话，直接输出内容';
 
   try {
     var out = await callAI([{ role: 'user', content: prompt }], model);
@@ -2524,28 +2642,86 @@ async function triggerAIComment(postId) {
     if (out && out.length > 2) {
       if (!p.comments) p.comments = [];
       if (p.comments.length >= 5) p.comments.shift();
-      p.comments.push({
+      var newComment = {
         id: 'c_ai_' + Date.now(),
         author: '路人',
         text: out,
         time: Date.now()
-      });
+      };
+      p.comments.push(newComment);
       saveFloatingCache(_floatingWorldId, posts);
-      renderFloating();
+      // 局部插入 AI 评论
+      insertComment(postId, newComment);
     }
   } catch (e) {
     console.warn('AI评论彩蛋失败:', e);
   }
 }
 
-// ----- 7. 启动动画 -----
-function showFloatingSplash() {
-  if (_floatingSplashShown) return;
-  _floatingSplashShown = true;
+// 插入神评
+function insertGodComment(postId, godText) {
+  var card = document.querySelector('.floating-post[data-id="' + postId + '"]');
+  if (!card) return;
+  // 移除旧神评（如果有）
+  var oldGod = card.querySelector('.floating-god');
+  if (oldGod) oldGod.remove();
+
+  var godDiv = document.createElement('div');
+  godDiv.className = 'floating-god show';
+  godDiv.innerHTML = '<div class="floating-god-label">✦ 神评</div>' +
+                     '<div class="floating-god-text">' + esc(godText) + '</div>';
+  // 插入到评论区之前
+  var wrap = card.querySelector('.floating-comments-wrap');
+  if (wrap) {
+    card.insertBefore(godDiv, wrap);
+  } else {
+    // 如果没有评论区，追加在footer之后
+    var footer = card.querySelector('.floating-footer');
+    if (footer) {
+      footer.after(godDiv);
+    } else {
+      card.appendChild(godDiv);
+    }
+  }
+}
+
+// 插入评论（AI评论或用户自己的评论）
+function insertComment(postId, comment) {
+  var card = document.querySelector('.floating-post[data-id="' + postId + '"]');
+  if (!card) return;
+  var wrap = card.querySelector('.floating-comments-wrap');
+  if (!wrap) return;
+  // 如果评论区未展开，自动展开
+  wrap.classList.add('show');
+  // 创建评论元素
+  var cmtDiv = document.createElement('div');
+  cmtDiv.className = 'floating-comment';
+  var now = new Date();
+  var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  cmtDiv.innerHTML = '<span class="floating-cauthor">' + esc(comment.author) + '</span>' +
+                     esc(comment.text) + '<span class="floating-ctime">' + timeStr + '</span>';
+  // 插入到输入框之前
+  var inputRow = wrap.querySelector('.floating-comment-input');
+  if (inputRow) {
+    wrap.insertBefore(cmtDiv, inputRow);
+  } else {
+    wrap.appendChild(cmtDiv);
+  }
+  // 更新评论计数
+  var countEl = card.querySelector('.floating-cmtbtn .cmt-count');
+  if (countEl) {
+    var comments = getFloatingCache(_floatingWorldId).find(p => p.id === postId).comments || [];
+    countEl.textContent = comments.length;
+  }
+}
+// ----- 7. 启动动画（只播一次）-----
+function showFloatingSplash(callback) {
+  var old = document.getElementById('floatingSplash');
+  if (old) old.remove();
 
   var splash = document.createElement('div');
   splash.id = 'floatingSplash';
-  splash.style.cssText = 'position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;animation:splashFade 1.8s ease forwards;';
+  splash.style.cssText = 'position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;';
 
   var glows = '';
   for (var i = 0; i < 8; i++) {
@@ -2558,8 +2734,8 @@ function showFloatingSplash() {
 
   splash.innerHTML =
     '<style>' +
-    '@keyframes splashFade { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0;pointer-events:none} }' +
     '@keyframes splashFloat { 0%{opacity:0;transform:translate(0,0) scale(0.3)} 40%{opacity:1;transform:translate(-20px,-30px) scale(1.2)} 100%{opacity:0;transform:translate(-50px,-80px) scale(0.8)} }' +
+    '@keyframes splashFade { 0%{opacity:0} 30%{opacity:1} 70%{opacity:1} 100%{opacity:0} }' +
     '@keyframes splashTitle { 0%{opacity:0;transform:scale(0.9);letter-spacing:20px} 60%{opacity:1;transform:scale(1);letter-spacing:6px} 100%{opacity:1;transform:scale(1);letter-spacing:6px} }' +
     '.splash-glow{position:absolute;border-radius:50%;background:var(--theme);box-shadow:0 0 30px var(--theme),0 0 80px rgba(179,74,106,0.15);opacity:0;animation:splashFloat 1.6s ease-out forwards}' +
     '.splash-title{font-size:40px;font-weight:300;color:var(--text);letter-spacing:6px;animation:splashTitle 1.4s ease forwards;position:relative;z-index:1}' +
@@ -2571,18 +2747,29 @@ function showFloatingSplash() {
     '<div class="splash-sub">✦ 世界碎影 ✦</div>';
 
   document.body.appendChild(splash);
-  setTimeout(function() {
+  splash.style.animation = 'splashFade 1.8s ease forwards';
+
+  var isDone = false;
+  function done() {
+    if (isDone) return;
+    isDone = true;
     var el = document.getElementById('floatingSplash');
     if (el) el.remove();
-  }, 2200);
-}
+    if (callback) callback();
+  }
 
-// ----- 8. 构建帖子卡片 -----
+  splash.addEventListener('animationend', done);
+  // 超时保护，最多等 2.5 秒
+  setTimeout(done, 2500);
+}
+// ----- 8. 构建帖子卡片（美化版）-----
 function buildFloatingCard(p) {
   var meta = FLOATING_TYPE_META[p.type] || { emoji: '📌' };
   var likeActive = p._userLiked ? 'active' : '';
   var likeNum = p.likes || 0;
-  var godShow = p.godComment && p.godComment.trim() ? 'show' : '';
+  // ★ 修复：只有 godComment 存在且内容非空时才显示
+  var hasGod = p.godComment && p.godComment.trim().length > 0;
+  var godShow = hasGod ? 'show' : '';
   var commentShow = p._commentOpen ? 'show' : '';
   var commentCount = (p.comments || []).length;
 
@@ -2594,20 +2781,29 @@ function buildFloatingCard(p) {
       esc(c.text) + '<span class="floating-ctime">' + ctime + '</span></div>';
   });
 
+  // 神评区域：只有 hasGod 为 true 时才生成
+  var godHtml = hasGod ? (
+    '<div class="floating-god show">' +
+      '<div class="floating-god-label">✦ 神评</div>' +
+      '<div class="floating-god-text">' + esc(p.godComment) + '</div>' +
+    '</div>'
+  ) : '';
+
   return '<div class="floating-post" data-id="' + p.id + '">' +
     '<div class="floating-type">' + meta.emoji + ' ' + p.type + '</div>' +
     '<div class="floating-content">' + esc(p.content) + '</div>' +
     '<div class="floating-footer">' +
       '<div class="floating-left">' +
-        '<span class="floating-author">👤 ' + esc(p.author) + '</span>' +
-        '<span class="floating-time">' + fmtTime(p.time) + '</span>' +
+        '<span class="author">👤 ' + esc(p.author) + '</span>' +
+        '<span class="dot"></span>' +
+        '<span class="time">' + fmtTime(p.time) + '</span>' +
       '</div>' +
       '<div class="floating-actions">' +
-        '<span class="floating-like ' + likeActive + '" onclick="floatingLike(\'' + p.id + '\')">✨ <span class="floating-num">' + likeNum + '</span></span>' +
-        '<span class="floating-cmtbtn" onclick="floatingToggleComments(\'' + p.id + '\')">💬 ' + (commentCount > 0 ? commentCount : '') + '</span>' +
+        '<span class="floating-like ' + likeActive + '" onclick="floatingLike(\'' + p.id + '\')">✨ <span class="num">' + likeNum + '</span></span>' +
+        '<span class="floating-cmtbtn" onclick="floatingToggleComments(\'' + p.id + '\')">💬 <span class="cmt-count">' + (commentCount > 0 ? commentCount : '') + '</span></span>' +
       '</div>' +
     '</div>' +
-    '<div class="floating-god ' + godShow + '"><div class="floating-god-label">✦ 神评</div><div class="floating-god-text">' + esc(p.godComment) + '</div></div>' +
+    godHtml +
     '<div class="floating-comments-wrap ' + commentShow + '" id="fc_wrap_' + p.id + '">' +
       commentsHtml +
       '<div class="floating-comment-input">' +
@@ -2617,9 +2813,12 @@ function buildFloatingCard(p) {
     '</div>' +
   '</div>';
 }
-
-// ----- 9. 主渲染函数 -----
+// ----- 9. 主渲染函数（带启动动画控制）-----
 function renderFloating() {
+  // ===== 1. 清理与准备 =====
+  var homeEl = document.getElementById('home');
+  if (homeEl) homeEl.remove();
+
   content.style.display = 'block';
   var worlds = DB.worlds || [];
   if (!worlds.length) {
@@ -2648,120 +2847,191 @@ function renderFloating() {
   var posts = getFloatingCache(_floatingWorldId);
   posts.sort(function(a, b) { return b.time - a.time; });
 
-  var worldOptions = worlds.map(function(w) {
-    var sel = w.id === _floatingWorldId ? ' selected' : '';
-    return '<option value="' + w.id + '"' + sel + '>' + (w.icon || '🌍') + ' ' + w.name + '</option>';
-  }).join('');
+  // ===== 2. 定义实际渲染内容的函数 =====
+  function renderContent() {
+    var worldOptions = worlds.map(function(w) {
+      var sel = w.id === _floatingWorldId ? ' selected' : '';
+      return '<option value="' + w.id + '"' + sel + '>' + (w.icon || '🌍') + ' ' + w.name + '</option>';
+    }).join('');
 
-  var postsHtml = '';
-  if (posts.length === 0) {
-    postsHtml = '<div class="floating-empty">✨ 还没有浮光碎片<br><span style="font-size:12px;color:var(--sub);">正在生成…</span></div>';
-  } else {
-    posts.forEach(function(p) {
-      postsHtml += buildFloatingCard(p);
-    });
-  }
+    var postsHtml = '';
+    if (posts.length === 0) {
+      postsHtml = '<div class="floating-empty">✨ 还没有浮光碎片<br><span style="font-size:13px;color:var(--sub);">正在生成…</span></div>';
+    } else {
+      posts.forEach(function(p) {
+        postsHtml += buildFloatingCard(p);
+      });
+    }
 
-  var loadingHtml = '<div id="floatingLoading" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--sub);">✨ 浮光正在生成…</div>';
+    var loadingHtml = '<div id="floatingLoading" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--sub);">✨ 浮光正在生成…</div>';
 
-  content.innerHTML =
-    '<style>' +
-    '.floating-header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px 8px;background:var(--bg);border-bottom:1px solid var(--line);flex-wrap:wrap;gap:8px}' +
-    '.floating-header .floating-title{font-size:20px;font-weight:700;color:var(--text);letter-spacing:1px}' +
-    '.floating-header .floating-title span{color:var(--theme);font-weight:300}' +
-    '.floating-header .floating-controls{display:flex;align-items:center;gap:8px}' +
-    '.floating-header select{padding:5px 12px 5px 8px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:13px;outline:none;max-width:140px}' +
-    '.floating-header .floating-shuffle{font-size:18px;cursor:pointer;color:var(--sub);padding:4px 8px;border-radius:20px;transition:0.2s;background:var(--card);border:1px solid var(--line);line-height:1}' +
-    '.floating-header .floating-shuffle:hover{color:var(--theme);border-color:var(--theme)}' +
-    '.floating-empty{text-align:center;padding:60px 20px;color:var(--sub);font-size:14px;line-height:2}' +
-    '.floating-post{background:var(--card);border-radius:14px;padding:14px 16px;margin:0 16px 12px;border:1px solid var(--line)}' +
-    '.floating-type{display:inline-block;font-size:10px;font-weight:600;padding:2px 10px;border-radius:20px;background:rgba(179,74,106,0.15);color:var(--theme);letter-spacing:0.3px;margin-bottom:6px}' +
-    '.floating-content{font-size:14px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word}' +
-    '.floating-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:6px}' +
-    '.floating-left{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--sub);opacity:0.7}' +
-    '.floating-left .floating-author{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
-    '.floating-actions{display:flex;align-items:center;gap:12px}' +
-    '.floating-like{display:flex;align-items:center;gap:3px;font-size:13px;color:var(--sub);cursor:pointer;padding:2px 8px;border-radius:16px;background:rgba(255,255,255,0.04);transition:0.2s;user-select:none}' +
-    '.floating-like:hover{background:rgba(179,74,106,0.12);color:var(--text)}' +
-    '.floating-like.active{color:var(--theme);background:rgba(179,74,106,0.2)}' +
-    '.floating-like .floating-num{font-weight:600;min-width:14px;text-align:center}' +
-    '.floating-cmtbtn{font-size:13px;color:var(--sub);cursor:pointer;padding:2px 6px;border-radius:16px;transition:0.2s;user-select:none}' +
-    '.floating-cmtbtn:hover{color:var(--text)}' +
-    '.floating-god{margin-top:10px;padding:10px 12px;background:rgba(179,74,106,0.08);border-radius:10px;border-left:2px solid var(--theme);display:none}' +
-    '.floating-god.show{display:block}' +
-    '.floating-god-label{font-size:10px;color:var(--theme);font-weight:600;letter-spacing:0.5px;margin-bottom:2px}' +
-    '.floating-god-text{font-size:13px;color:var(--text);opacity:0.85;line-height:1.5}' +
-    '.floating-comments-wrap{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;display:none}' +
-    '.floating-comments-wrap.show{display:block}' +
-    '.floating-comment{font-size:13px;color:var(--text);padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);line-height:1.5}' +
-    '.floating-cauthor{color:var(--theme);font-weight:500;margin-right:4px}' +
-    '.floating-ctime{font-size:10px;color:var(--sub);opacity:0.4;margin-left:6px}' +
-    '.floating-comment-input{display:flex;gap:6px;margin-top:8px}' +
-    '.floating-comment-input input{flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:13px;outline:none}' +
-    '.floating-comment-input button{padding:6px 14px;border:none;border-radius:8px;background:var(--theme);color:#fff;font-size:13px;cursor:pointer;flex-shrink:0}' +
-    '.floating-comment-input button:disabled{opacity:0.4;cursor:not-allowed}' +
-    '.floating-foot{text-align:center;padding:8px 0 20px;font-size:11px;color:var(--sub);opacity:0.4}' +
-    '</style>' +
-    '<div class="floating-header">' +
-      '<div class="floating-title">浮<span>光</span></div>' +
-      '<div class="floating-controls">' +
-        '<select id="floatingSelect" onchange="floatingSwitch(this.value)">' + worldOptions + '</select>' +
-        '<span class="floating-shuffle" onclick="floatingShuffle()" title="随机排序">🎲</span>' +
+    content.innerHTML =
+      '<style>' +
+      /* ===== 顶部样式 ===== */
+      '.floating-header{display:flex;justify-content:space-between;align-items:center;padding:2px 16px 18px 16px;}' +
+      '.floating-title{font-size:26px;font-weight:200;letter-spacing:4px;color:var(--text);text-shadow:0 0 60px var(--glow);}' +
+      '.floating-title span{color:var(--theme);font-weight:700;text-shadow:0 0 40px var(--theme);}' +
+      '.floating-controls{display:flex;align-items:center;gap:6px;}' +
+      '.floating-controls select{padding:4px 12px 4px 8px;border-radius:30px;border:1px solid var(--line);background:rgba(255,255,255,0.03);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--text);font-size:12px;outline:none;max-width:100px;opacity:0.8;}' +
+      '.floating-controls select:focus{border-color:var(--theme);opacity:1;}' +
+      '.floating-controls .shuffle{font-size:16px;cursor:pointer;color:var(--sub);padding:4px 6px;border-radius:30px;transition:0.25s;user-select:none;background:rgba(255,255,255,0.02);border:1px solid var(--line);line-height:1.2;opacity:0.7;}' +
+      '.floating-controls .shuffle:hover{opacity:1;color:var(--theme);border-color:var(--theme);}' +
+      '.floating-controls .shuffle-tip{font-size:10px;color:var(--text);opacity:0.55;margin-left:-2px;user-select:none;font-weight:400;}' +
+
+      /* ===== 帖子列表（增加左右内边距） ===== */
+      '.floating-list{display:flex;flex-direction:column;gap:26px;padding:0 16px 16px 16px;}' +
+      '.floating-empty{text-align:center;padding:60px 20px;color:var(--sub);font-size:14px;line-height:2;}' +
+
+      /* ===== 帖子卡片 ===== */
+      '.floating-post{background:none;border:none;box-shadow:none;padding:0 2px 18px 2px;border-bottom:1px solid var(--line);position:relative;opacity:0;transform:translateY(8px);transition:opacity 0.6s ease,transform 0.6s ease;}' +
+      '.floating-post.visible{opacity:1;transform:translateY(0);}' +
+      '.floating-post::before{content:"";position:absolute;left:-4px;top:6px;width:2px;height:2px;border-radius:50%;background:var(--theme);opacity:0.3;box-shadow:0 0 20px var(--theme),0 0 60px var(--theme);transition:opacity 0.4s;}' +
+      '.floating-post:hover::before{opacity:0.7;}' +
+
+      /* ===== 类型标签（字号提升） ===== */
+      '.floating-type{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--theme);opacity:0.85;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;}' +
+      '.floating-type::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.6;box-shadow:0 0 12px var(--theme);}' +
+
+/* ===== 内容 ===== */
+'.floating-content{font-size:16px;line-height:1.9;color:var(--text);white-space:pre-wrap;word-break:break-word;}' +
+
+/* ===== 底部栏 ===== */
+'.floating-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:6px;}' +
+'.floating-left{display:flex;align-items:center;gap:8px;font-size:12px;opacity:0.8;}' +
+'.floating-left .author{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--theme);font-weight:500;opacity:1;}' +
+'.floating-left .dot{width:2px;height:2px;border-radius:50%;background:var(--sub);opacity:0.3;}' +
+'.floating-left .time{font-size:11px;color:var(--text);opacity:0.5;font-weight:400;}' +
+
+      /* ===== 操作按钮 ===== */
+      '.floating-actions{display:flex;align-items:center;gap:14px;}' +
+      '.floating-like{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text);cursor:pointer;padding:2px 6px;border-radius:30px;transition:all 0.25s;user-select:none;opacity:0.65;}' +
+      '.floating-like:hover{opacity:1;color:var(--theme);}' +
+      '.floating-like.active{opacity:1;color:var(--theme);font-weight:600;transform:scale(1.05);}' +
+      '.floating-like .num{font-weight:500;min-width:14px;text-align:center;}' +
+      '.floating-cmtbtn{font-size:13px;color:var(--text);cursor:pointer;padding:2px 4px;border-radius:30px;transition:0.25s;user-select:none;opacity:0.65;}' +
+      '.floating-cmtbtn:hover{opacity:1;}' +
+
+      /* ===== 神评（字号提升） ===== */
+      '.floating-god{margin-top:12px;padding:6px 0 6px 14px;border-left:1px solid color-mix(in srgb,var(--theme) 30%,transparent);display:none;}' +
+      '.floating-god.show{display:block;}' +
+      '.floating-god-label{font-size:10px;color:var(--theme);font-weight:600;letter-spacing:1.5px;margin-bottom:2px;opacity:0.65;text-transform:uppercase;}' +
+      '.floating-god-text{font-size:13px;color:var(--text);opacity:0.8;line-height:1.6;font-style:italic;font-weight:350;}' +
+
+      /* ===== 评论区 ===== */
+      '.floating-comments-wrap{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:none;}' +
+      '.floating-comments-wrap.show{display:block;}' +
+      '.floating-comment{font-size:13px;color:var(--text);padding:4px 0 4px 2px;border-bottom:1px solid var(--line);line-height:1.5;opacity:0.85;}' +
+      '.floating-comment:last-of-type{border-bottom:none;}' +
+      '.floating-cauthor{color:var(--theme);font-weight:500;margin-right:4px;opacity:0.9;}' +
+      '.floating-ctime{font-size:10px;color:var(--sub);opacity:0.4;margin-left:6px;}' +
+      '.floating-comment-input{display:flex;gap:6px;margin-top:10px;}' +
+      '.floating-comment-input input{flex:1;padding:6px 14px;border-radius:30px;border:1px solid var(--line);background:rgba(255,255,255,0.02);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:var(--text);font-size:13px;outline:none;font-weight:300;}' +
+      '.floating-comment-input input::placeholder{color:var(--sub);opacity:0.35;}' +
+      '.floating-comment-input input:focus{border-color:var(--theme);}' +
+      '.floating-comment-input button{padding:6px 18px;border:none;border-radius:30px;background:var(--theme);color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;transition:0.25s;font-weight:500;opacity:0.8;}' +
+      '.floating-comment-input button:hover{opacity:1;}' +
+
+      /* ===== 底部脚标（字号提升） ===== */
+      '.floating-foot{text-align:center;padding:20px 0 6px;font-size:11px;color:var(--sub);opacity:0.35;letter-spacing:2.5px;font-weight:300;}' +
+
+      /* ===== 响应式 ===== */
+      '@media(max-width:420px){.floating-title{font-size:22px;letter-spacing:3px;}.floating-content{font-size:15px;}.floating-list{padding:0 12px 12px 12px;}}' +
+      '</style>' +
+
+      /* ===== HTML 结构 ===== */
+      '<div class="floating-header">' +
+        '<div class="floating-title">浮<span>光</span></div>' +
+        '<div class="floating-controls">' +
+          '<select id="floatingSelect" onchange="floatingSwitch(this.value)">' + worldOptions + '</select>' +
+          '<span class="shuffle" onclick="floatingShuffle()" title="随机排序帖子顺序">🎲</span>' +
+          '<span class="shuffle-tip">随机</span>' +
+        '</div>' +
       '</div>' +
-    '</div>' +
-    '<div style="padding-top:8px;">' + loadingHtml + postsHtml + '</div>' +
-    '<div class="floating-foot">✨ 共鸣 ≥3 自动生成神评 · 浮光碎影</div>';
+      '<div class="floating-list" id="floatingList">' +
+        loadingHtml +
+        postsHtml +
+      '</div>' +
+      '<div class="floating-foot">✦ 共鸣 ≥3 自动生成神评 · 浮光碎影 ✦</div>';
 
-  // 启动动画
-  showFloatingSplash();
-
-  // 检查是否需要生成
-  var lastFetch = _floatingLastFetch[_floatingWorldId] || 0;
-  var needGen = false;
-  if (posts.length === 0) needGen = true;
-  else if (Date.now() - lastFetch > 2 * 60 * 60 * 1000) needGen = true;
-
-  if (needGen && !_floatingLoading) {
-    _floatingLoading = true;
-    var loadEl = document.getElementById('floatingLoading');
-    if (loadEl) loadEl.style.display = 'block';
-
-    var count = posts.length === 0 ? 8 : 4;
-    generateFloatingPosts(_floatingWorldId, count).then(function(newPosts) {
-      var current = getFloatingCache(_floatingWorldId);
-      var existingSet = {};
-      current.forEach(function(p) { existingSet[p.content] = true; });
-      var toAdd = newPosts.filter(function(p) { return !existingSet[p.content]; });
-
-      if (toAdd.length) {
-        var merged = current.concat(toAdd);
-        merged.sort(function(a, b) { return b.time - a.time; });
-        if (merged.length > 60) merged = merged.slice(0, 60);
-        saveFloatingCache(_floatingWorldId, merged);
-        _floatingLastFetch[_floatingWorldId] = Date.now();
-        renderFloating();
-      } else {
-        _floatingLastFetch[_floatingWorldId] = Date.now();
-        var el2 = document.getElementById('floatingLoading');
-        if (el2) el2.style.display = 'none';
-      }
-      _floatingLoading = false;
-    }).catch(function(e) {
-      console.warn('浮光生成失败:', e);
-      _floatingLoading = false;
-      var el3 = document.getElementById('floatingLoading');
-      if (el3) el3.style.display = 'none';
+    // ===== 帖子入场动画 =====
+    var postEls = content.querySelectorAll('.floating-post');
+    postEls.forEach(function(el, i) {
+      var delay = 100 + i * 130;
+      setTimeout(function() {
+        el.classList.add('visible');
+      }, delay);
     });
+
+    // ===== 检查是否需要生成新帖子 =====
+    var lastFetch = _floatingLastFetch[_floatingWorldId] || 0;
+    var needGen = false;
+    if (posts.length === 0) needGen = true;
+    else if (Date.now() - lastFetch > 2 * 60 * 60 * 1000) needGen = true;
+
+    if (needGen && !_floatingLoading) {
+      _floatingLoading = true;
+      var loadEl = document.getElementById('floatingLoading');
+      if (loadEl) loadEl.style.display = 'block';
+
+      var count = posts.length === 0 ? 8 : 4;
+      generateFloatingPosts(_floatingWorldId, count).then(function(newPosts) {
+        var current = getFloatingCache(_floatingWorldId);
+        var existingSet = {};
+        current.forEach(function(p) { existingSet[p.content] = true; });
+        var toAdd = newPosts.filter(function(p) { return !existingSet[p.content]; });
+
+        if (toAdd.length) {
+          var merged = current.concat(toAdd);
+          merged.sort(function(a, b) { return b.time - a.time; });
+          if (merged.length > 60) merged = merged.slice(0, 60);
+          saveFloatingCache(_floatingWorldId, merged);
+          _floatingLastFetch[_floatingWorldId] = Date.now();
+          renderFloating();
+        } else {
+          _floatingLastFetch[_floatingWorldId] = Date.now();
+          var el2 = document.getElementById('floatingLoading');
+          if (el2) el2.style.display = 'none';
+        }
+        _floatingLoading = false;
+      }).catch(function(e) {
+        console.warn('浮光生成失败:', e);
+        _floatingLoading = false;
+        var el3 = document.getElementById('floatingLoading');
+        if (el3) el3.style.display = 'none';
+      });
+    }
+
+    trimFloatingCache(_floatingWorldId);
   }
 
-  trimFloatingCache(_floatingWorldId);
+  // ===== 3. 判断是否播放启动动画 =====
+  if (window._floatingFromDesktop) {
+    window._floatingFromDesktop = false;
+    content.style.display = 'none';
+    showFloatingSplash(function() {
+      content.style.display = 'block';
+      renderContent();
+    });
+    return;
+  }
+
+  // ===== 4. 无动画，直接渲染 =====
+  renderContent();
 }
-
-// ----- 10. 交互函数（暴露给全局）-----
-window.renderFloating = renderFloating;
-
+// ----- 10. 切换世界观（安全）-----
 function floatingSwitch(worldId) {
-  _floatingWorldId = worldId;
+  if (!worldId) return;
+  var worlds = DB.worlds || [];
+  var target = worlds.find(function(w) { return w.id === worldId; });
+  if (!target) {
+    if (worlds.length) {
+      _floatingWorldId = worlds[0].id;
+    } else {
+      return;
+    }
+  } else {
+    _floatingWorldId = worldId;
+  }
   renderFloating();
 }
 window.floatingSwitch = floatingSwitch;
@@ -2796,17 +3066,38 @@ function floatingLike(postId) {
 
   saveFloatingCache(_floatingWorldId, posts);
 
-  if (p.likes >= 3 && !p.godComment) {
-    renderFloating();
+  // 更新当前卡片的点赞按钮（局部）
+  var card = document.querySelector('.floating-post[data-id="' + postId + '"]');
+  if (card) {
+    var numEl = card.querySelector('.floating-like .num');
+    if (numEl) numEl.textContent = p.likes;
+
+    var likeBtn = card.querySelector('.floating-like');
+    if (likeBtn) {
+      likeBtn.innerHTML = '';
+      var iconSpan = document.createElement('span');
+      iconSpan.textContent = p._userLiked ? '❤️' : '✨';
+      var numSpan = document.createElement('span');
+      numSpan.className = 'num';
+      numSpan.textContent = p.likes;
+      likeBtn.appendChild(iconSpan);
+      likeBtn.appendChild(numSpan);
+      if (p._userLiked) likeBtn.classList.add('active');
+      else likeBtn.classList.remove('active');
+    }
+  }
+
+  // 神评触发：点赞数 ≥ 6，未生成过，且未在生成中，且 50% 概率
+  if (p.likes >= 6 && !p.godComment && !p._godPending && Math.random() < 0.5) {
+    p._godPending = true;
     generateGodComment(p, _floatingWorldId).then(function(god) {
       if (god) {
         p.godComment = god;
         saveFloatingCache(_floatingWorldId, posts);
-        renderFloating();
+        insertGodComment(postId, god);
       }
+      p._godPending = false;
     });
-  } else {
-    renderFloating();
   }
 }
 window.floatingLike = floatingLike;
@@ -2817,11 +3108,17 @@ function floatingToggleComments(postId) {
   if (!p) return;
   p._commentOpen = !p._commentOpen;
   saveFloatingCache(_floatingWorldId, posts);
-  renderFloating();
-  setTimeout(function() {
+
+  // 局部切换显示
+  var wrap = document.getElementById('fc_wrap_' + postId);
+  if (wrap) {
+    wrap.classList.toggle('show');
+    // 切换后自动聚焦输入框
     var inp = document.getElementById('fc_input_' + postId);
-    if (inp) inp.focus();
-  }, 100);
+    if (inp && wrap.classList.contains('show')) {
+      setTimeout(function() { inp.focus(); }, 100);
+    }
+  }
 }
 window.floatingToggleComments = floatingToggleComments;
 
@@ -2838,17 +3135,44 @@ function floatingComment(postId) {
   if (!p.comments) p.comments = [];
   if (p.comments.length >= 5) p.comments.shift();
 
+  var myName = (DB.me && DB.me.name) ? DB.me.name : '我';
   p.comments.push({
     id: 'c_' + Date.now(),
-    author: '用户',
+    author: myName,
     text: text,
     time: Date.now()
   });
 
   saveFloatingCache(_floatingWorldId, posts);
   inp.value = '';
-  renderFloating();
 
+  // ===== 只更新当前卡片的 DOM =====
+  var card = document.querySelector('.floating-post[data-id="' + postId + '"]');
+  if (card) {
+    // 更新评论数
+    var countEl = card.querySelector('.floating-cmtbtn .cmt-count');
+    if (countEl) countEl.textContent = p.comments.length;
+
+    // 追加新评论到评论区
+    var wrap = card.querySelector('.floating-comments-wrap');
+    if (wrap) {
+      var newCmt = document.createElement('div');
+      newCmt.className = 'floating-comment';
+      var now = new Date();
+      var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      newCmt.innerHTML = '<span class="floating-cauthor">' + esc(myName) + '</span>' + esc(text) + '<span class="floating-ctime">' + timeStr + '</span>';
+      var inputRow = wrap.querySelector('.floating-comment-input');
+      if (inputRow) {
+        wrap.insertBefore(newCmt, inputRow);
+      } else {
+        wrap.appendChild(newCmt);
+      }
+      // 自动展开评论区
+      wrap.classList.add('show');
+    }
+  }
+
+  // AI 评论彩蛋
   if (!p._aiCommentTriggered && Math.random() < 0.30) {
     p._aiCommentTriggered = true;
     saveFloatingCache(_floatingWorldId, posts);
@@ -2856,6 +3180,8 @@ function floatingComment(postId) {
   }
 }
 window.floatingComment = floatingComment;
+
+// ===== 浮光模块结束 =====
 
 function openWorldEditor(worldId) {
   var w = null;
@@ -5570,8 +5896,11 @@ async function checkAutoGreet() {
 async function doAutoGreet(c, slot) {
   // ===== 1. 前置检查 =====
   if (c.isBlockedByChar) return;
-  const model = getEffectiveChatModel(c);
-  if (!model) return;
+  const model = DB.settings.auxModel || DB.settings.chatModel;
+  if (!model) {
+    console.warn('自动问候：没有可用模型，跳过');
+    return;
+  }
 
   // ===== 2. 构造提示语（含时间段） =====
   const periodTxt = { '早': '早上', '中': '下午', '晚': '晚上', '深夜': '深夜' }[slot] || '现在';
