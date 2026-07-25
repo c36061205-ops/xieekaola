@@ -5,7 +5,7 @@
   "name": "XieEKaoLa",
   "orientation": "any",
   "scope": "/",
-  "short_name": "橙子的手机",
+  "short_name": "XieEKaoLa",
   "start_url": "https://c36061205-ops.github.io/xieekaola/",
   "theme_color": "#000000",
   "id": "com.github.c36061205.xieekaola",
@@ -18,7 +18,7 @@
     },
     {
       "src": "icon.png",
-      "sizes": "192x192",
+      "sizes": "512×512",
       "type": "image/png"
     }
   ]
