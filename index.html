@@ -557,7 +557,7 @@
   </div>
 </div>
 <script>
-const APP_VER='v10086';const DB_KEY='myrp_data_v1';const phone=document.getElementById('phone');
+const APP_VER='v10087';const DB_KEY='myrp_data_v1';const phone=document.getElementById('phone');
 let _weatherSwipeStartX = 0;
 let _weatherSwipeStartY = 0;
 let _weatherCurrentIndex = 0;
@@ -1257,6 +1257,11 @@ function pickImage(cb,max,png){max=max||256;
 const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=function(){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=function(){const img=new Image();img.onload=function(){let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max;}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);cb(cv.toDataURL(png?'image/png':'image/jpeg',0.9));};img.src=r.result;};r.readAsDataURL(f);};inp.click();}
 
 function render(){triggerDailyMemoryCheck();triggerDailyMemoryCheck();const h=document.getElementById('home');if(h)h.remove();const b=document.getElementById('chatBottom');if(b)b.remove();closeModal();content.style.backgroundImage='';
+  if (view.type === 'floating') {
+    console.log('✅ render 拦截到 floating，直接调用 renderFloating');
+    return renderFloating();
+  }
+  if (view.type === 'floating') return renderFloating();
   if(view.type==='home')return renderHome();content.style.display='block';
   if(view.type==='wechat')return renderWechat();
   if(view.type==='settings')return renderSettings();
@@ -1281,6 +1286,9 @@ if (view.type === 'memoDetail') return renderMemoDetail(view.id);
 function showChrome(t,b){topbar.style.display=t?'flex':'none';tabbar.style.display=b?'flex':'none';}
 
 function renderHome() {
+// 删除旧的 #home，防止残留遮挡点击
+var oldHome = document.getElementById('home');
+if (oldHome) oldHome.remove();
   showChrome(false, false);
   statusbar.classList.remove('dark');
   content.style.display = 'none';
@@ -1955,48 +1963,63 @@ function saveWeatherEditor() {
 }
 
 function openApp(id) {
+  console.log('📱 点击了应用：' + id);
+
   if (id === 'wechat') {
     view = { type: 'wechat' };
     wechatPage = 'chats';
     render();
-  } else if (id === 'settings') {
+    return;
+  }
+  if (id === 'settings') {
     view = { type: 'settings' };
     render();
-  } else if (id === 'preset') {
+    return;
+  }
+  if (id === 'preset') {
     openModePreset();
-  } else if (id === 'hearts') {
+    return;
+  }
+  if (id === 'hearts') {
     view = { type: 'hearts' };
     render();
-  } 
-  else if (id === 'world') {
-  view = { type: 'worlds' };
-  render();
-}
-else if (id === 'notes') {
-  view = { type: 'memo' };
-  render();
-}
-else if (id === 'focus') {
+    return;
+  }
+  if (id === 'world') {
+    view = { type: 'worlds' };
+    render();
+    return;
+  }
+  if (id === 'notes') {
+    view = { type: 'memo' };
+    render();
+    return;
+  }
+  if (id === 'focus') {
     view = { type: 'focus' };
     render();
-  } else if (id === 'world') {
-    view = { type: 'placeholder', title: '🌍 世界观', msg: '功能开发中，敬请期待～' };
-    render();
-  } else if (id === 'floating') {
-    view = { type: 'placeholder', title: '✨ 浮光', msg: '功能开发中，敬请期待～' };
-    render();
-  } else if (id === 'shop') {
+    return;
+  }
+  // ★★★★★ 浮光 ★★★★★
+  if (id === 'floating') {
+    console.log('✅ 浮光被点击了！');
+    view = { type: 'floating' };
+    renderFloating();
+    return;
+  }
+  if (id === 'shop') {
     view = { type: 'placeholder', title: '🛍️ 购物', msg: '功能开发中，敬请期待～' };
     render();
-  } else {
-    var a = DB.desktop.apps.find(function(x) { return x.id === id; });
-    if (a) {
-      view = { type: 'placeholder', title: a.name, msg: a.name + ' 功能之后再做～' };
-    } else {
-      view = { type: 'placeholder', title: '未知', msg: '未找到该应用' };
-    }
-    render();
+    return;
   }
+
+  var a = DB.desktop.apps.find(function(x) { return x.id === id; });
+  if (a) {
+    view = { type: 'placeholder', title: a.name, msg: a.name + ' 功能之后再做～' };
+  } else {
+    view = { type: 'placeholder', title: '未知', msg: '未找到该应用' };
+  }
+  render();
 }
 function goHome(){view={type:'home'};render();}
 function goWechat(p){view={type:'wechat'};wechatPage=p;render();}
@@ -2319,6 +2342,520 @@ function renderWorlds() {
   html += '</div>';
   content.innerHTML = html;
 }
+// ============================================================
+// 浮光 · 完整模块（独立插入，不依赖其他模块）
+// ============================================================
+
+// ----- 1. 帖子类型（12种通用）-----
+var FLOATING_TYPES = [
+  '吐槽', '分享', '发疯', '求助', '碎碎念', '记录',
+  '冷知识', '异常', '八卦', '科普', '公告', '树洞'
+];
+
+var FLOATING_TYPE_META = {
+  '吐槽': { emoji: '😤', vibe: '遇到糟心事，发泄一下' },
+  '分享': { emoji: '🥘', vibe: '安利好吃的、好玩的' },
+  '发疯': { emoji: '🤯', vibe: '没理由就是想嚎一嗓子' },
+  '求助': { emoji: '🆘', vibe: '问路、找人、打听事' },
+  '碎碎念': { emoji: '🌙', vibe: '没主题，记录此刻状态' },
+  '记录': { emoji: '📸', vibe: '看见一个画面/瞬间' },
+  '冷知识': { emoji: '🧠', vibe: '分享一个小众知识点' },
+  '异常': { emoji: '⚡', vibe: '遇到反常的事、怪事' },
+  '八卦': { emoji: '👀', vibe: '谁和谁怎么了，偷偷说一下' },
+  '科普': { emoji: '📖', vibe: '解释某个现象/事物的来龙去脉' },
+  '公告': { emoji: '📢', vibe: '以管理处/管理方口吻发通知' },
+  '树洞': { emoji: '🕳️', vibe: '匿名说一句不敢当面说的话' }
+};
+
+// ----- 2. 存储操作 -----
+function getFloatingCache(worldId) {
+  if (!DB.floating) DB.floating = {};
+  if (!DB.floating[worldId]) DB.floating[worldId] = [];
+  return DB.floating[worldId];
+}
+
+function saveFloatingCache(worldId, posts) {
+  if (!DB.floating) DB.floating = {};
+  DB.floating[worldId] = posts;
+  save();
+}
+
+function trimFloatingCache(worldId) {
+  var posts = getFloatingCache(worldId);
+  if (posts.length > 60) {
+    posts.sort(function(a, b) { return b.time - a.time; });
+    posts = posts.slice(0, 60);
+    saveFloatingCache(worldId, posts);
+  }
+  return posts;
+}
+
+// ----- 3. 当前浮光状态 -----
+var _floatingWorldId = null;
+var _floatingLoading = false;
+var _floatingLastFetch = {};
+var _floatingSplashShown = false;
+
+// ----- 4. AI 生成帖子（含网名）-----
+async function generateFloatingPosts(worldId, count) {
+  count = count || 5;
+  var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
+  if (!world) return [];
+
+  var model = DB.settings.auxModel || DB.settings.chatModel;
+  if (!model) {
+    console.warn('浮光：没有可用模型');
+    return [];
+  }
+
+  var now = new Date();
+  var timeStr = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日 ' +
+    String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+  var typesList = FLOATING_TYPES.map(function(t) {
+    return '- ' + t + '：' + FLOATING_TYPE_META[t].vibe;
+  }).join('\n');
+
+  var prompt = '【角色】你是活在「' + world.name + '」这个世界里的一个普通人，正在逛本地社区/论坛。\n\n' +
+    '【世界观背景】\n' + (world.desc || '一个普通的世界') + '\n\n' +
+    '【当前时间】\n' + timeStr + '\n\n' +
+    '【发帖类型】（每条选一个，不要重复）\n' + typesList + '\n\n' +
+    '【生成要求】\n' +
+    '1. 生成 ' + count + ' 条帖子，每条用不同的类型\n' +
+    '2. 用第一人称“我”（公告可用“我们”）\n' +
+    '3. 口语化、有具体细节、有情绪\n' +
+    '4. 字数 20~80 字\n' +
+    '5. **每条帖子随机生成一个发帖人的网名**（2~6个字，像真人昵称，贴合世界观氛围，不要生僻字，不要符号）\n' +
+    '6. 不要标题、不要引号、不要解释\n\n' +
+    '【输出格式】只输出 JSON 数组：\n' +
+    '[{"type":"吐槽","author":"网名","content":"帖子内容"}, ...]\n' +
+    '只输出 JSON，不要其他文字。';
+
+  try {
+    var out = await callAI([{ role: 'user', content: prompt }], model);
+    out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
+    var match = out.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('AI 返回格式不正确');
+    var data = JSON.parse(match[0]);
+    if (!Array.isArray(data)) throw new Error('不是数组');
+
+    var posts = [];
+    var nowTs = Date.now();
+    var roleNames = (DB.contacts || []).filter(function(c) { return c.worldId === worldId && !c._draft; });
+    var roleNameList = roleNames.map(function(c) { return c.nick || c.name; });
+
+    data.forEach(function(item, idx) {
+      if (!item.type || !item.content) return;
+      if (FLOATING_TYPES.indexOf(item.type) === -1) return;
+
+      var author = item.author || '路人';
+      // 10% 概率替换为世界观内的角色名
+      if (roleNameList.length && Math.random() < 0.10) {
+        author = roleNameList[Math.floor(Math.random() * roleNameList.length)];
+      }
+
+      posts.push({
+        id: 'fp_' + nowTs + '_' + idx,
+        worldId: worldId,
+        type: item.type,
+        content: item.content.trim(),
+        author: author,
+        time: nowTs + idx * 1000,
+        likes: 0,
+        godComment: '',
+        comments: [],
+        _userLiked: false,
+        _commentOpen: false,
+        _aiCommentTriggered: false
+      });
+    });
+
+    return posts;
+
+  } catch (e) {
+    console.error('浮光生成失败:', e);
+    return [];
+  }
+}
+
+// ----- 5. 神评生成 -----
+async function generateGodComment(post, worldId) {
+  var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
+  if (!world) return null;
+  var model = DB.settings.auxModel || DB.settings.chatModel;
+  if (!model) return null;
+
+  var prompt = '【场景】有人在「' + world.name + '」的本地社区发了一条帖子，现在共鸣数达到 3 次，触发「神评」。\n\n' +
+    '【帖子内容】\n' + post.content + '\n\n' +
+    '【世界观背景】\n' + (world.desc || '普通世界') + '\n\n' +
+    '【要求】\n' +
+    '1. 路人视角，写一条神评（吐槽、补充、接梗、神转折）\n' +
+    '2. 简短，10~30字\n' +
+    '3. 直接输出神评内容，不要引号、不要解释';
+
+  try {
+    var out = await callAI([{ role: 'user', content: prompt }], model);
+    out = out.replace(/["「」“”]/g, '').trim();
+    return out.length > 2 ? out : null;
+  } catch (e) {
+    console.warn('神评生成失败:', e);
+    return null;
+  }
+}
+
+// ----- 6. AI 评论彩蛋 -----
+async function triggerAIComment(postId) {
+  var posts = getFloatingCache(_floatingWorldId);
+  var p = posts.find(function(x) { return x.id === postId; });
+  if (!p) return;
+
+  var world = (DB.worlds || []).find(function(w) { return w.id === _floatingWorldId; });
+  if (!world) return;
+  var model = DB.settings.auxModel || DB.settings.chatModel;
+  if (!model) return;
+
+  var prompt = '【场景】有人在「' + world.name + '」发了一条帖子，用户评论了它。请你以路人身份回一条评论。\n\n' +
+    '【帖子】\n' + p.content + '\n\n' +
+    '【要求】简短10~25字，接住情绪，像真人说话，直接输出内容';
+
+  try {
+    var out = await callAI([{ role: 'user', content: prompt }], model);
+    out = out.replace(/["「」“”]/g, '').trim();
+    if (out && out.length > 2) {
+      if (!p.comments) p.comments = [];
+      if (p.comments.length >= 5) p.comments.shift();
+      p.comments.push({
+        id: 'c_ai_' + Date.now(),
+        author: '路人',
+        text: out,
+        time: Date.now()
+      });
+      saveFloatingCache(_floatingWorldId, posts);
+      renderFloating();
+    }
+  } catch (e) {
+    console.warn('AI评论彩蛋失败:', e);
+  }
+}
+
+// ----- 7. 启动动画 -----
+function showFloatingSplash() {
+  if (_floatingSplashShown) return;
+  _floatingSplashShown = true;
+
+  var splash = document.createElement('div');
+  splash.id = 'floatingSplash';
+  splash.style.cssText = 'position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;animation:splashFade 1.8s ease forwards;';
+
+  var glows = '';
+  for (var i = 0; i < 8; i++) {
+    var l = 15 + Math.random() * 70;
+    var t = 15 + Math.random() * 70;
+    var s = 3 + Math.random() * 6;
+    var d = 0.1 + Math.random() * 0.8;
+    glows += '<div class="splash-glow" style="left:' + l + '%;top:' + t + '%;width:' + s + 'px;height:' + s + 'px;animation-delay:' + d + 's;"></div>';
+  }
+
+  splash.innerHTML =
+    '<style>' +
+    '@keyframes splashFade { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0;pointer-events:none} }' +
+    '@keyframes splashFloat { 0%{opacity:0;transform:translate(0,0) scale(0.3)} 40%{opacity:1;transform:translate(-20px,-30px) scale(1.2)} 100%{opacity:0;transform:translate(-50px,-80px) scale(0.8)} }' +
+    '@keyframes splashTitle { 0%{opacity:0;transform:scale(0.9);letter-spacing:20px} 60%{opacity:1;transform:scale(1);letter-spacing:6px} 100%{opacity:1;transform:scale(1);letter-spacing:6px} }' +
+    '.splash-glow{position:absolute;border-radius:50%;background:var(--theme);box-shadow:0 0 30px var(--theme),0 0 80px rgba(179,74,106,0.15);opacity:0;animation:splashFloat 1.6s ease-out forwards}' +
+    '.splash-title{font-size:40px;font-weight:300;color:var(--text);letter-spacing:6px;animation:splashTitle 1.4s ease forwards;position:relative;z-index:1}' +
+    '.splash-title span{color:var(--theme);font-weight:700}' +
+    '.splash-sub{font-size:12px;color:var(--sub);opacity:0;animation:splashTitle 1.4s ease 0.3s forwards;margin-top:8px;letter-spacing:4px;position:relative;z-index:1}' +
+    '</style>' +
+    glows +
+    '<div class="splash-title">浮<span>光</span></div>' +
+    '<div class="splash-sub">✦ 世界碎影 ✦</div>';
+
+  document.body.appendChild(splash);
+  setTimeout(function() {
+    var el = document.getElementById('floatingSplash');
+    if (el) el.remove();
+  }, 2200);
+}
+
+// ----- 8. 构建帖子卡片 -----
+function buildFloatingCard(p) {
+  var meta = FLOATING_TYPE_META[p.type] || { emoji: '📌' };
+  var likeActive = p._userLiked ? 'active' : '';
+  var likeNum = p.likes || 0;
+  var godShow = p.godComment && p.godComment.trim() ? 'show' : '';
+  var commentShow = p._commentOpen ? 'show' : '';
+  var commentCount = (p.comments || []).length;
+
+  var commentsHtml = '';
+  (p.comments || []).forEach(function(c) {
+    var ct = new Date(c.time);
+    var ctime = String(ct.getHours()).padStart(2, '0') + ':' + String(ct.getMinutes()).padStart(2, '0');
+    commentsHtml += '<div class="floating-comment"><span class="floating-cauthor">' + esc(c.author) + '</span>' +
+      esc(c.text) + '<span class="floating-ctime">' + ctime + '</span></div>';
+  });
+
+  return '<div class="floating-post" data-id="' + p.id + '">' +
+    '<div class="floating-type">' + meta.emoji + ' ' + p.type + '</div>' +
+    '<div class="floating-content">' + esc(p.content) + '</div>' +
+    '<div class="floating-footer">' +
+      '<div class="floating-left">' +
+        '<span class="floating-author">👤 ' + esc(p.author) + '</span>' +
+        '<span class="floating-time">' + fmtTime(p.time) + '</span>' +
+      '</div>' +
+      '<div class="floating-actions">' +
+        '<span class="floating-like ' + likeActive + '" onclick="floatingLike(\'' + p.id + '\')">✨ <span class="floating-num">' + likeNum + '</span></span>' +
+        '<span class="floating-cmtbtn" onclick="floatingToggleComments(\'' + p.id + '\')">💬 ' + (commentCount > 0 ? commentCount : '') + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="floating-god ' + godShow + '"><div class="floating-god-label">✦ 神评</div><div class="floating-god-text">' + esc(p.godComment) + '</div></div>' +
+    '<div class="floating-comments-wrap ' + commentShow + '" id="fc_wrap_' + p.id + '">' +
+      commentsHtml +
+      '<div class="floating-comment-input">' +
+        '<input id="fc_input_' + p.id + '" placeholder="说点什么…" maxlength="60">' +
+        '<button onclick="floatingComment(\'' + p.id + '\')">发送</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ----- 9. 主渲染函数 -----
+function renderFloating() {
+  content.style.display = 'block';
+  var worlds = DB.worlds || [];
+  if (!worlds.length) {
+    showChrome(true, false);
+    statusbar.classList.add('dark');
+    tbTitle.textContent = '浮光';
+    tbLeft.textContent = '‹';
+    tbLeft.onclick = goHome;
+    tbRight.textContent = '';
+    tbRight.onclick = null;
+    content.innerHTML = '<div class="empty">还没有世界观<br>先去「世界观」App 创建一个吧～</div>';
+    return;
+  }
+  if (!_floatingWorldId || !worlds.find(function(w) { return w.id === _floatingWorldId; })) {
+    _floatingWorldId = worlds[0].id;
+  }
+
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = '浮光';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = goHome;
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+
+  var posts = getFloatingCache(_floatingWorldId);
+  posts.sort(function(a, b) { return b.time - a.time; });
+
+  var worldOptions = worlds.map(function(w) {
+    var sel = w.id === _floatingWorldId ? ' selected' : '';
+    return '<option value="' + w.id + '"' + sel + '>' + (w.icon || '🌍') + ' ' + w.name + '</option>';
+  }).join('');
+
+  var postsHtml = '';
+  if (posts.length === 0) {
+    postsHtml = '<div class="floating-empty">✨ 还没有浮光碎片<br><span style="font-size:12px;color:var(--sub);">正在生成…</span></div>';
+  } else {
+    posts.forEach(function(p) {
+      postsHtml += buildFloatingCard(p);
+    });
+  }
+
+  var loadingHtml = '<div id="floatingLoading" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--sub);">✨ 浮光正在生成…</div>';
+
+  content.innerHTML =
+    '<style>' +
+    '.floating-header{display:flex;justify-content:space-between;align-items:center;padding:12px 18px 8px;background:var(--bg);border-bottom:1px solid var(--line);flex-wrap:wrap;gap:8px}' +
+    '.floating-header .floating-title{font-size:20px;font-weight:700;color:var(--text);letter-spacing:1px}' +
+    '.floating-header .floating-title span{color:var(--theme);font-weight:300}' +
+    '.floating-header .floating-controls{display:flex;align-items:center;gap:8px}' +
+    '.floating-header select{padding:5px 12px 5px 8px;border-radius:16px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:13px;outline:none;max-width:140px}' +
+    '.floating-header .floating-shuffle{font-size:18px;cursor:pointer;color:var(--sub);padding:4px 8px;border-radius:20px;transition:0.2s;background:var(--card);border:1px solid var(--line);line-height:1}' +
+    '.floating-header .floating-shuffle:hover{color:var(--theme);border-color:var(--theme)}' +
+    '.floating-empty{text-align:center;padding:60px 20px;color:var(--sub);font-size:14px;line-height:2}' +
+    '.floating-post{background:var(--card);border-radius:14px;padding:14px 16px;margin:0 16px 12px;border:1px solid var(--line)}' +
+    '.floating-type{display:inline-block;font-size:10px;font-weight:600;padding:2px 10px;border-radius:20px;background:rgba(179,74,106,0.15);color:var(--theme);letter-spacing:0.3px;margin-bottom:6px}' +
+    '.floating-content{font-size:14px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word}' +
+    '.floating-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:6px}' +
+    '.floating-left{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--sub);opacity:0.7}' +
+    '.floating-left .floating-author{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+    '.floating-actions{display:flex;align-items:center;gap:12px}' +
+    '.floating-like{display:flex;align-items:center;gap:3px;font-size:13px;color:var(--sub);cursor:pointer;padding:2px 8px;border-radius:16px;background:rgba(255,255,255,0.04);transition:0.2s;user-select:none}' +
+    '.floating-like:hover{background:rgba(179,74,106,0.12);color:var(--text)}' +
+    '.floating-like.active{color:var(--theme);background:rgba(179,74,106,0.2)}' +
+    '.floating-like .floating-num{font-weight:600;min-width:14px;text-align:center}' +
+    '.floating-cmtbtn{font-size:13px;color:var(--sub);cursor:pointer;padding:2px 6px;border-radius:16px;transition:0.2s;user-select:none}' +
+    '.floating-cmtbtn:hover{color:var(--text)}' +
+    '.floating-god{margin-top:10px;padding:10px 12px;background:rgba(179,74,106,0.08);border-radius:10px;border-left:2px solid var(--theme);display:none}' +
+    '.floating-god.show{display:block}' +
+    '.floating-god-label{font-size:10px;color:var(--theme);font-weight:600;letter-spacing:0.5px;margin-bottom:2px}' +
+    '.floating-god-text{font-size:13px;color:var(--text);opacity:0.85;line-height:1.5}' +
+    '.floating-comments-wrap{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;display:none}' +
+    '.floating-comments-wrap.show{display:block}' +
+    '.floating-comment{font-size:13px;color:var(--text);padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);line-height:1.5}' +
+    '.floating-cauthor{color:var(--theme);font-weight:500;margin-right:4px}' +
+    '.floating-ctime{font-size:10px;color:var(--sub);opacity:0.4;margin-left:6px}' +
+    '.floating-comment-input{display:flex;gap:6px;margin-top:8px}' +
+    '.floating-comment-input input{flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:13px;outline:none}' +
+    '.floating-comment-input button{padding:6px 14px;border:none;border-radius:8px;background:var(--theme);color:#fff;font-size:13px;cursor:pointer;flex-shrink:0}' +
+    '.floating-comment-input button:disabled{opacity:0.4;cursor:not-allowed}' +
+    '.floating-foot{text-align:center;padding:8px 0 20px;font-size:11px;color:var(--sub);opacity:0.4}' +
+    '</style>' +
+    '<div class="floating-header">' +
+      '<div class="floating-title">浮<span>光</span></div>' +
+      '<div class="floating-controls">' +
+        '<select id="floatingSelect" onchange="floatingSwitch(this.value)">' + worldOptions + '</select>' +
+        '<span class="floating-shuffle" onclick="floatingShuffle()" title="随机排序">🎲</span>' +
+      '</div>' +
+    '</div>' +
+    '<div style="padding-top:8px;">' + loadingHtml + postsHtml + '</div>' +
+    '<div class="floating-foot">✨ 共鸣 ≥3 自动生成神评 · 浮光碎影</div>';
+
+  // 启动动画
+  showFloatingSplash();
+
+  // 检查是否需要生成
+  var lastFetch = _floatingLastFetch[_floatingWorldId] || 0;
+  var needGen = false;
+  if (posts.length === 0) needGen = true;
+  else if (Date.now() - lastFetch > 2 * 60 * 60 * 1000) needGen = true;
+
+  if (needGen && !_floatingLoading) {
+    _floatingLoading = true;
+    var loadEl = document.getElementById('floatingLoading');
+    if (loadEl) loadEl.style.display = 'block';
+
+    var count = posts.length === 0 ? 8 : 4;
+    generateFloatingPosts(_floatingWorldId, count).then(function(newPosts) {
+      var current = getFloatingCache(_floatingWorldId);
+      var existingSet = {};
+      current.forEach(function(p) { existingSet[p.content] = true; });
+      var toAdd = newPosts.filter(function(p) { return !existingSet[p.content]; });
+
+      if (toAdd.length) {
+        var merged = current.concat(toAdd);
+        merged.sort(function(a, b) { return b.time - a.time; });
+        if (merged.length > 60) merged = merged.slice(0, 60);
+        saveFloatingCache(_floatingWorldId, merged);
+        _floatingLastFetch[_floatingWorldId] = Date.now();
+        renderFloating();
+      } else {
+        _floatingLastFetch[_floatingWorldId] = Date.now();
+        var el2 = document.getElementById('floatingLoading');
+        if (el2) el2.style.display = 'none';
+      }
+      _floatingLoading = false;
+    }).catch(function(e) {
+      console.warn('浮光生成失败:', e);
+      _floatingLoading = false;
+      var el3 = document.getElementById('floatingLoading');
+      if (el3) el3.style.display = 'none';
+    });
+  }
+
+  trimFloatingCache(_floatingWorldId);
+}
+
+// ----- 10. 交互函数（暴露给全局）-----
+window.renderFloating = renderFloating;
+
+function floatingSwitch(worldId) {
+  _floatingWorldId = worldId;
+  renderFloating();
+}
+window.floatingSwitch = floatingSwitch;
+
+function floatingShuffle() {
+  var posts = getFloatingCache(_floatingWorldId);
+  if (posts.length < 2) return;
+  for (var i = posts.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = posts[i];
+    posts[i] = posts[j];
+    posts[j] = temp;
+  }
+  saveFloatingCache(_floatingWorldId, posts);
+  renderFloating();
+}
+window.floatingShuffle = floatingShuffle;
+
+var _floatingLikeCooldown = {};
+
+function floatingLike(postId) {
+  var posts = getFloatingCache(_floatingWorldId);
+  var p = posts.find(function(x) { return x.id === postId; });
+  if (!p) return;
+
+  if (_floatingLikeCooldown[postId] && Date.now() - _floatingLikeCooldown[postId] < 500) return;
+  _floatingLikeCooldown[postId] = Date.now();
+
+  p._userLiked = !p._userLiked;
+  if (p._userLiked) p.likes = (p.likes || 0) + 1;
+  else p.likes = Math.max(0, (p.likes || 0) - 1);
+
+  saveFloatingCache(_floatingWorldId, posts);
+
+  if (p.likes >= 3 && !p.godComment) {
+    renderFloating();
+    generateGodComment(p, _floatingWorldId).then(function(god) {
+      if (god) {
+        p.godComment = god;
+        saveFloatingCache(_floatingWorldId, posts);
+        renderFloating();
+      }
+    });
+  } else {
+    renderFloating();
+  }
+}
+window.floatingLike = floatingLike;
+
+function floatingToggleComments(postId) {
+  var posts = getFloatingCache(_floatingWorldId);
+  var p = posts.find(function(x) { return x.id === postId; });
+  if (!p) return;
+  p._commentOpen = !p._commentOpen;
+  saveFloatingCache(_floatingWorldId, posts);
+  renderFloating();
+  setTimeout(function() {
+    var inp = document.getElementById('fc_input_' + postId);
+    if (inp) inp.focus();
+  }, 100);
+}
+window.floatingToggleComments = floatingToggleComments;
+
+function floatingComment(postId) {
+  var inp = document.getElementById('fc_input_' + postId);
+  if (!inp) return;
+  var text = inp.value.trim();
+  if (!text) return;
+
+  var posts = getFloatingCache(_floatingWorldId);
+  var p = posts.find(function(x) { return x.id === postId; });
+  if (!p) return;
+
+  if (!p.comments) p.comments = [];
+  if (p.comments.length >= 5) p.comments.shift();
+
+  p.comments.push({
+    id: 'c_' + Date.now(),
+    author: '用户',
+    text: text,
+    time: Date.now()
+  });
+
+  saveFloatingCache(_floatingWorldId, posts);
+  inp.value = '';
+  renderFloating();
+
+  if (!p._aiCommentTriggered && Math.random() < 0.30) {
+    p._aiCommentTriggered = true;
+    saveFloatingCache(_floatingWorldId, posts);
+    triggerAIComment(postId);
+  }
+}
+window.floatingComment = floatingComment;
 
 function openWorldEditor(worldId) {
   var w = null;
@@ -6819,7 +7356,17 @@ function openStickerPicker(){
   phone.appendChild(mo);
 }
 function sendSticker(i){closeModal();pushMy({type:'sticker',content:DB.stickers[i].name});}
-function closeModal(){const m=document.getElementById('modal');if(m)m.remove();}
+function closeModal(){
+  const m = document.getElementById('modal');
+  if (m) m.remove();
+  
+  // ===== 新增：清理其他可能残留的覆盖层 =====
+  const p = document.getElementById('popup');
+  if (p) p.remove();
+  
+  const f = document.getElementById('ftoast');
+  if (f) f.remove();
+}
 // 群聊猫爪图标（淡底+主题色，自动跟随所有主题变色）
 function groupIcon(size){
   size = size || '100%';
