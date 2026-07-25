@@ -951,7 +951,13 @@ function seedAiChan(d){const id='c_aichan';const c=blankChar(id);Object.assign(c
 function addHeart(n,reason){DB.hearts=(DB.hearts||0)+n;if(n>0)DB.heartsTotal=(DB.heartsTotal||0)+n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n,reason});if(DB.heartLog.length>200)DB.heartLog.pop();checkMile();save();}
 function checkMile(){[[50,30],[100,50],[150,100]].forEach(([need,bonus])=>{if(DB.heartsTotal>=need&&!DB.heartMile[need]){DB.heartMile[need]=1;DB.hearts+=bonus;DB.heartLog.unshift({t:Date.now(),n:bonus,reason:`💗累计达成${need}奖励`});setTimeout(()=>popTip(`🎉 心动值累计突破 ${need}！奖励 ${bonus} 心动值`),400);}});}
 function spendHeart(n,reason){if((DB.hearts||0)<n){alert('心动值不足～当前'+(DB.hearts||0)+'，需要'+n+'。多和角色聊天可以获得哦');return false;}DB.hearts-=n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n:-n,reason});save();return true;}
-function save(){try{localStorage.setItem(DB_KEY,JSON.stringify(DB));}catch(e){alert('保存失败(存储满?)：'+e.message);}}
+function save(){
+  try{
+    localStorage.setItem(DB_KEY, JSON.stringify(DB));
+  }catch(e){
+    console.warn('保存失败(可能存储满了)：' + e.message);  // 不再霸屏
+  }
+}
 // ===== 轻量收集：只捞今天、且与该角色直接相关的群聊/朋友圈片段 =====
 function collectExtraContextForChar(c) {
   var todayStr = new Date().toISOString().slice(0, 10);
@@ -1853,12 +1859,18 @@ async function aiGenerateWeather(worldId, callback) {
   var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
   if (!world) { if (callback) callback(false); return; }
   
-  var model = DB.settings.auxModel || DB.settings.chatModel;
-  if (!model) {
-    popTip('请先在设置里选择模型', {icon:'⚙️', title:'提示'});
-    if (callback) callback(false);
-    return;
+var model = DB.settings.auxModel || DB.settings.chatModel;
+if (!model) {
+  // 没连API/没选模型时，也盖个时间戳，否则会无限重试卡死
+  if (world.weather) {
+    world.weather.updatedAt = Date.now();
+  } else {
+    world.weather = { icon:'🌤', state:'晴', temp:22, desc:'（未设置模型）', detail:'', updatedAt: Date.now() };
   }
+  save();
+  if (callback) callback(false);
+  return;
+}
   
   var now = new Date();
   var period = now.getHours() < 6 ? '凌晨' : now.getHours() < 12 ? '上午' : now.getHours() < 18 ? '下午' : '晚上';
@@ -1903,12 +1915,14 @@ async function aiGenerateWeather(worldId, callback) {
     
 // ===== 向所有关联该世界观的角色发送天气消息（不再限制为当前活跃世界观） =====
 var relatedChars = DB.contacts.filter(function(c) { return c.worldId === worldId; });
+var hasChanged = false;   // 加一个"记号"，看有没有真的加了新消息
+
 relatedChars.forEach(function(c) {
   if (!DB.chats[c.id]) DB.chats[c.id] = [];
   var msgs = DB.chats[c.id];
   var sysMsg = '🌤 天气变了：' + data.desc;
-  
-  // 去重：检查最后一条天气消息是否完全相同
+
+  // 找最近一条天气消息，避免重复插入
   var lastWeatherMsg = null;
   for (var i = msgs.length - 1; i >= 0; i--) {
     if (msgs[i].role === 'system' && msgs[i].content && msgs[i].content.startsWith('🌤 天气变了')) {
@@ -1917,7 +1931,7 @@ relatedChars.forEach(function(c) {
     }
   }
   var isDuplicate = lastWeatherMsg && lastWeatherMsg.content === sysMsg;
-  
+
   if (!isDuplicate) {
     msgs.push({
       id: 'sys_' + Date.now(),
@@ -1926,30 +1940,28 @@ relatedChars.forEach(function(c) {
       content: sysMsg,
       time: Date.now()
     });
-    // 立即保存，保证数据持久化
-    save();
-    
-    // 如果当前正在该角色的聊天界面，立即刷新显示（保持滚动位置）
+    hasChanged = true;
     if (view && view.type === 'chat' && view.id === c.id) {
       renderChat(true);
     }
   }
 });
-// 为了保险，再统一保存一次（但已在循环内保存过，这里可留可删，留着无妨）
-save();    
-    if (callback) callback(true);
-  } catch (e) {
-    console.error('AI 生成天气失败:', e);
-    // 失败也盖个时间戳，避免下一轮立刻疯狂重试（隔一个周期后才会再试）
-    if (!world.weather) {
-      world.weather = { icon:'🌤', state:'晴', temp:22, desc:'（天气生成失败，稍后重试）', detail:'', updatedAt: Date.now() };
-      save();
-    } else {
-      world.weather.updatedAt = Date.now();
-      save();
-    }
-    if (callback) callback(false);
+
+if (hasChanged) save();   // 循环全跑完只存一次
+
+  if (callback) callback(true);
+
+} catch (e) {
+  console.error('AI 生成天气失败:', e);
+  // 失败也盖时间戳，避免下一轮立刻疯狂重试
+  if (!world.weather) {
+    world.weather = { icon:'🌤', state:'晴', temp:22, desc:'（天气生成失败，稍后重试）', detail:'', updatedAt: Date.now() };
+  } else {
+    world.weather.updatedAt = Date.now();
   }
+  save();
+  if (callback) callback(false);
+}
 }
 // ============================================================
 // 天气小组件：手动调整天气（长按触发）
