@@ -1,0 +1,13 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "XieEKaoLa",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "橙子的手机",
+  "start_url": "https://c36061205-ops.github.io/xieekaola/",
+  "theme_color": "#000000",
+  "id": "com.github.c36061205.xieekaola",
+  "lang": "zh"
+}
