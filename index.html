@@ -39,7 +39,6 @@
   display: flex;
   flex-direction: column;
   max-width: 100%;
-  touch-action: pan-y;
 }
   #content::-webkit-scrollbar{width:5px;}
   #content::-webkit-scrollbar-thumb{background:var(--theme);border-radius:3px;opacity:.6;}
@@ -3589,7 +3588,7 @@ requestAnimationFrame(function() {
     content.scrollTop = content.scrollHeight;
   }
 });
-
+  else scrollBottom();
   // 【新增】渲染完成后触发心声弹窗（替代旧的内联气泡）
 if (!c.mode || c.mode === 'online') {
     var pending = c._pendingHeart;
@@ -7349,16 +7348,21 @@ if (Math.abs(dx) < 25) return;
   attachSwipe();
 
   // ===== 12. 滚动处理 =====
-  // 强制同步布局，让滚动在同一帧内完成，不闪烁
-  if (keepScroll && savedScroll !== undefined) {
-    content.scrollTop = savedScroll;
-  } else {
+// 在浏览器绘制之前，同步锁定滚动位置到底部
+if (keepScroll && savedScroll !== undefined) {
+  content.scrollTop = savedScroll;
+} else {
+  content.scrollTop = content.scrollHeight;
+}
+
+// 图片加载完成后高度可能会变，但此时不做“滚动动画”，只是静默修正
+// 用 requestAnimationFrame 保证在下一帧绘制前完成，而不是 setTimeout 延迟
+requestAnimationFrame(function() {
+  if (!keepScroll || savedScroll === undefined) {
     content.scrollTop = content.scrollHeight;
-    // 强制浏览器立即计算布局，这样 scrollHeight 变成最新值
-    content.offsetHeight;
-    // 再次设置滚动到底部（此时 scrollHeight 已正确）
-    content.scrollTop = content.scrollHeight;
-  }  // ===== 13. 输入框自动调整 =====
+  }
+});
+  // ===== 13. 输入框自动调整 =====
   var resizeTimer;
   function handleResize() {
     clearTimeout(resizeTimer);
@@ -7535,7 +7539,15 @@ function onChatKey(e){
 function togglePanel(){const p=document.getElementById('chatPanel');if(p)p.classList.toggle('on');scrollBottom();}
 function toggleMode(){const c=getC(view.id);c.mode=c.mode==='offline'?'online':'offline';save();const i=document.getElementById('modeIco'),t=document.getElementById('modeTxt');if(i)i.textContent=c.mode==='offline'?'📖':'💬';if(t)t.textContent=c.mode==='offline'?'线下中':'线上中';}
 function appendBubble(c,m){if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
-
+function scrollBottom(){
+  requestAnimationFrame(() => {
+    content.scrollTop = content.scrollHeight;
+    // 双重保险：如果图片还没加载完，延迟再滚一次
+    setTimeout(() => {
+      content.scrollTop = content.scrollHeight;
+    }, 150);
+  });
+}
 function pushMy(m){
   var c = getC(view.id);
   if (!c) return;
