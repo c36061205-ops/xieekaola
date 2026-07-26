@@ -3530,7 +3530,7 @@ function renderGroupChat(keepScroll){
     var t = m.time || Date.now();
     if(!lastBubbleTime || t-lastBubbleTime>300000){ html += tsHtml(t); lastBubbleTime = t; }
     html += groupBubble(m);
-  <!-- }); -->
+  });
   content.innerHTML = html;
   
     // ===== 群聊·绑定消息左滑 =====
@@ -7358,8 +7358,7 @@ if (Math.abs(dx) < 25) return;
     content.offsetHeight;
     // 再次设置滚动到底部（此时 scrollHeight 已正确）
     content.scrollTop = content.scrollHeight;
-  }
-  // ===== 13. 输入框自动调整 =====
+  }  // ===== 13. 输入框自动调整 =====
   var resizeTimer;
   function handleResize() {
     clearTimeout(resizeTimer);
