@@ -32,15 +32,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;    /* 🟢 关键1：阻止滚动链，禁止边界过度滚动抢夺焦点 */
-  touch-action: pan-y;             /* 🟢 关键2：强制只响应垂直触摸滑动 */
-  scroll-behavior: smooth;         /* 🟢 可选：让滚动更跟手顺滑 */
+  scroll-behavior: smooth;
   position: relative;
   background-size: cover;
   background-position: center;
   display: flex;
   flex-direction: column;
   max-width: 100%;
+  touch-action: pan-y;
 }
   #content::-webkit-scrollbar{width:5px;}
   #content::-webkit-scrollbar-thumb{background:var(--theme);border-radius:3px;opacity:.6;}
@@ -172,60 +171,6 @@
 }
   .app.big{grid-column:span 2;grid-row:span 2;justify-content:center;}
   .app.big .app-ic{width:130px;height:130px;border-radius:28px;font-size:72px;}
-.clockbig {
-  background: var(--card);
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.06);
-  padding: 18px 18px 14px;
-  text-align: center;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-.clockbig .t {
-  font-size: 50px;
-  font-weight: 300;
-  color: var(--text);
-  letter-spacing: 8px;
-  line-height: 1.2;
-}
-.clockbig .t::before {
-  content: "✦";
-  color: var(--theme);
-  font-size: 18px;
-  opacity: 0.4;
-  margin-right: 8px;
-}
-.clockbig .t::after {
-  content: "✦";
-  color: var(--theme);
-  font-size: 18px;
-  opacity: 0.4;
-  margin-left: 8px;
-}
-.clockbig .d {
-  font-size: 14px;
-  color: var(--sub);
-  margin-top: 4px;
-  letter-spacing: 2px;
-}
-.clockbig::before {
-  content: "✦ ✦ ✦";
-  display: block;
-  font-size: 13px;
-  color: var(--theme);
-  opacity: 0.4;
-  letter-spacing: 4px;
-  margin-bottom: 4px;
-}
-.clockbig::after {
-  content: "✦ ✦ ✦";
-  display: block;
-  font-size: 11px;
-  color: var(--theme);
-  opacity: 0.15;
-  letter-spacing: 10px;
-  margin-top: 8px;
-}
   .cell{display:flex;align-items:center;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);cursor:pointer;}
   .avatar{width:36px;height:36px;border-radius:6px;background:var(--theme);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background-size:cover;background-position:center;}
   .cell-body{flex:1;margin-left:12px;overflow:hidden;}.cell-title{font-size:16px;color:var(--text);}
@@ -250,6 +195,12 @@
   .field .prio{color:var(--theme);}
   .field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;font-family:inherit;background:var(--bg);color:var(--text);resize:none;line-height:1.6;outline:none;}
   .field textarea{min-height:70px;max-height:220px;overflow-y:auto;}
+  /* 全局禁止横向拉伸，只允许纵向调整大小 */
+textarea {
+  resize: vertical;
+  max-width: 100%;
+  box-sizing: border-box;
+}
   .frow{display:flex;gap:10px;}
   .frow .field{flex:1;border-bottom:none;padding:12px 0;}
   .avapick{width:80px;height:80px;border-radius:12px;background:var(--bg) var(--ava) center/cover;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:12px;border:1px dashed #ccc;cursor:pointer;text-align:center;}
@@ -327,16 +278,6 @@
   100% { transform: translate(-8px, 8px) scale(1); opacity: 0.3; }
 }
 
-/* 星夜十字 · 星星闪烁动画 */
-@keyframes twinkle {
-  0% { opacity: 0.2; transform: scale(0.95); }
-  50% { opacity: 0.9; transform: scale(1.1); }
-  100% { opacity: 0.2; transform: scale(0.95); }
-}
-/* ============================================================
-   时钟小组件 · 背景透明版
-   ============================================================ */
-
 /* ----- 基础条形时钟（单行） ----- */
 .clock-starry {
     background: transparent;                /* 完全透明 */
@@ -389,7 +330,6 @@
     font-size: 12px;
     opacity: 0.35;
     margin: 0 2px;
-    animation: twinkle 3s ease-in-out infinite 0.3s;
 }
 
 .clock-starry .date {
@@ -442,7 +382,6 @@
 .clock-starry.widget-2x2 .corners span {
     position: absolute;
     color: var(--theme);
-    animation: twinkle 3s ease-in-out infinite;
 }
 .clock-starry.widget-2x2 .corners span:nth-child(1) {
     top: 16px;
@@ -629,18 +568,19 @@ const SKINS = [
     '--line': '#3D2F4A',
     // ✅ 内置壁纸（纯色/渐变色字符串，或图片URL）
 wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), radial-gradient(ellipse at 80% 90%, #2A1A2A 0%, transparent 50%), radial-gradient(ellipse at 50% 60%, #3D2F4A 0%, transparent 60%), linear-gradient(160deg, #1F1A2A 0%, #120E18 100%)'  },
-  {
-    id: 'aqua_girl',
-    name: '🌸 亚系少女',
-color: '#DDB6C9',
+{
+  id: 'aqua_girl',
+  name: '🌸 亚系少女',
+  color: '#DDB6C9',
   '--theme': '#DDB6C9',
   '--bg': '#F9F4F7',
   '--nav': '#FFFFFF',
   '--card': '#FFFFFF',
-  '--text': '#2D2328',        // 改为深紫灰（原先 #493F45）
-  '--sub': '#5C4A52',         // 改为中灰粉（原先 #BCADB4）
-  '--line': '#EBE1E6',
-wallpaper: 'radial-gradient(ellipse at 30% 15%, #FCE4EC 0%, transparent 35%), radial-gradient(ellipse at 70% 80%, #F3E5F5 0%, transparent 45%), radial-gradient(ellipse at 50% 50%, #F7EAF0 0%, transparent 60%), linear-gradient(160deg, #F7EAF0 0%, #EBE1E6 100%)'},
+  '--text': '#261D22',        // 柔和的深紫灰（比原版深，但不死黑）
+  '--sub': '#4A3640',         // 中灰粉（柔和清晰）
+  '--line': '#D5C5CC',        // 深边框（保留区分度）
+  wallpaper: 'radial-gradient(ellipse at 30% 15%, #FCE4EC 0%, transparent 35%), radial-gradient(ellipse at 70% 80%, #F3E5F5 0%, transparent 45%), radial-gradient(ellipse at 50% 50%, #F7EAF0 0%, transparent 60%), linear-gradient(160deg, #F7EAF0 0%, #EBE1E6 100%)'
+},
 {
   id: 'orchard',
   name: '🐻 林间小集',
@@ -648,17 +588,10 @@ wallpaper: 'radial-gradient(ellipse at 30% 15%, #FCE4EC 0%, transparent 35%), ra
   '--theme': '#C85B53',
   '--bg': '#F3E9D8',
   '--nav': '#F5EDE0',
-  '--card': '#EAD7C0',           // ← 比背景深了一个色号，气泡更立体
-  '--text': '#5D3A2A',
-  '--sub': '#5A8291',
-  '--line': '#D6C2A8',           // ← 加深边框，增强分割感
-  '--island-bg': 'rgba(243, 233, 216, 0.75)',
-  '--island-shadow': '0 4px 30px rgba(200, 91, 83, 0.12), inset 0 1px 0 rgba(255,255,255,0.9)',
-  '--island-border': '1px solid rgba(200, 91, 83, 0.2)',
-  '--island-glow': 'radial-gradient(circle at 50% 30%, rgba(232, 184, 102, 0.25), transparent 70%)',
-  '--island-glow-opacity': '1',
-  '--island-particles': 'radial-gradient(circle at 20% 40%, rgba(232, 184, 102, 0.5) 2px, transparent 2px), radial-gradient(circle at 80% 60%, rgba(200, 91, 83, 0.3) 2px, transparent 2px), radial-gradient(circle at 50% 80%, rgba(136, 160, 102, 0.4) 2px, transparent 2px)',
-  '--island-particles-opacity': '0.8',
+  '--card': '#EAD7C0',
+  '--text': '#2D1A12',        // 调深
+  '--sub': '#2E4A55',         // 调深
+  '--line': '#C4AFA0',        // 调深
   wallpaper: 'radial-gradient(ellipse at 30% 10%, #E8C9A0 0%, transparent 40%), radial-gradient(ellipse at 70% 90%, #A8B88A 0%, transparent 50%), linear-gradient(145deg, #F3E9D8 0%, #E8DCC8 100%)'
 }
 ];
@@ -1322,7 +1255,7 @@ function render() {
   if (view.type === 'charEdit') return renderCharEdit();
 
   // ---- 私聊 ----
-  if (view.type === 'chat') return renderChat(true);
+if (view.type === 'chat') return renderChat(false);
 
   // ---- 群聊相关 ----
   if (view.type === 'groupList') return renderGroupList();
@@ -1417,71 +1350,75 @@ if (oldHome) oldHome.remove();
   // ================================================================
   
   // ---- 构建时钟 HTML ----
-  var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
-    <div class="corners">
-      <span>✦</span>
-      <span>✦</span>
-      <span>✦</span>
-    </div>
-    <div class="time">
-      <span class="hour-val">--</span><span class="star">✦</span><span class="min-val">--</span>
-    </div>
-    <div class="date">
-      <span class="date-val">--月--日 · 周-</span>
-    </div>
-    <div class="greet">今夜星辰</div>
-    <div class="footer">✦ ✦ ✦</div>
-  </div>`;
+var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
+  <!-- 静态星环 1 -->
+  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);opacity:0.2;mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
+  <!-- 静态星环 2 -->
+  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%) rotate(70deg);border:1px solid var(--theme);opacity:0.12;mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);-webkit-mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);"></div>
+
+  <!-- 小光点 × 5 -->
+  <span style="position:absolute;top:6%;left:48%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:0.5;pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;top:38%;right:8%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.4;pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;bottom:20%;left:12%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.35;pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;top:25%;left:6%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:0.3;pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;bottom:32%;right:15%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:0.25;pointer-events:none;z-index:1;"></span>
+
+  <!-- 时间、日期、问候语（保留类名，让 JS 继续更新） -->
+  <div class="time" style="position:relative;z-index:2;">
+    <span class="hour-val">--</span>
+    <span class="star" style="color:var(--theme);font-size:14px;opacity:0.5;margin:0 4px;">✦</span>
+    <span class="min-val">--</span>
+  </div>
+  <div class="date" style="position:relative;z-index:2;">
+    <span class="date-val">--月--日 · 周-</span>
+  </div>
+  <div class="greet" style="position:relative;z-index:2;">今夜星辰</div>
+</div>`;
   
   // ---- 构建天气 HTML（独立卡片） ----
   var weatherHtml = '';
   if (weatherApp) {
-    // ===== 根据当前主题动态设置天气卡背景 =====
-    var skinId = DB.settings.skin || 'fusion';
-    var isLight = (skinId === 'aqua_girl' || skinId === 'pink_tea' || skinId === 'milktea');
-    var isOrchard = (skinId === 'orchard');
 
-// 安全方案：浅色主题不使用 backdrop-filter，改用纯色背景，彻底避免 WebView 合成层问题
-var wBg = isLight ? 'rgba(255,255,255,0.85)' : (isOrchard ? 'rgba(243, 233, 216, 0.85)' : 'rgba(255,255,255,0.06)');
-var wBorder = isLight ? '1px solid rgba(255,255,255,0.9)' : (isOrchard ? '1px solid rgba(200, 91, 83, 0.25)' : '1px solid rgba(255,255,255,0.08)');
-var wBlur = 'none';  // 所有主题都不使用模糊效果，彻底安全
-var wParticle = isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.35)';
-var wParticleGlow = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.2)';    var wParticle = isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.35)';
-    var wParticleGlow = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)';
-    // =============================================
+weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:24px;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:120px;background:transparent !important;border:1.5px solid var(--line);box-shadow:none;">
 
-weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:20px;background:${wBg};backdrop-filter:${wBlur};-webkit-backdrop-filter:${wBlur};border:${wBorder};padding:14px 16px 10px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.3s;position:relative;overflow:hidden;min-height:130px;pointer-events:auto;">
-  <!-- 装饰粒子（所有粒子均忽略点击） -->
-  <div style="position:absolute;top:8%;left:6%;width:6px;height:6px;border-radius:50%;background:${wParticle};box-shadow:0 0 12px ${wParticleGlow};animation:floatParticle 7s ease-in-out infinite;pointer-events:none;"></div>
-  <div style="position:absolute;bottom:30%;right:10%;width:5px;height:5px;border-radius:50%;background:${wParticle};box-shadow:0 0 10px ${wParticleGlow};animation:floatParticle 9s ease-in-out infinite 2s;pointer-events:none;"></div>
-  <div style="position:absolute;top:50%;left:75%;width:4px;height:4px;border-radius:50%;background:${wParticle};box-shadow:0 0 8px ${wParticleGlow};animation:floatParticle 8s ease-in-out infinite 3.5s;pointer-events:none;"></div>
-  <div style="position:absolute;top:25%;right:20%;width:3px;height:3px;border-radius:50%;background:${wParticle};box-shadow:0 0 6px ${wParticleGlow};animation:floatParticle 6s ease-in-out infinite 1s;pointer-events:none;"></div>
-  <div style="position:absolute;bottom:10%;left:15%;width:4px;height:4px;border-radius:50%;background:${wParticle};box-shadow:0 0 8px ${wParticleGlow};animation:floatParticle 10s ease-in-out infinite 4s;pointer-events:none;"></div>
+  <!-- ★ 星环 1 -->
+  <div style="position:absolute;right:-4px;top:-4px;width:72px;height:72px;border-radius:50%;border:1.5px solid var(--theme);opacity:0.18;pointer-events:none;z-index:0;"></div>
+  <!-- ★ 星环 2 -->
+  <div style="position:absolute;right:12px;top:12px;width:48px;height:48px;border-radius:50%;border:1px solid var(--theme);opacity:0.09;pointer-events:none;z-index:0;transform:rotate(25deg);"></div>
+
+  <!-- ★ 小光点 × 4 -->
+  <span style="position:absolute;top:8%;right:22%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:0.45;pointer-events:none;z-index:0;"></span>
+  <span style="position:absolute;top:32%;right:4%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.30;pointer-events:none;z-index:0;"></span>
+  <span style="position:absolute;bottom:20%;right:16%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:0.25;pointer-events:none;z-index:0;"></span>
+  <span style="position:absolute;top:16%;right:36%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.20;pointer-events:none;z-index:0;"></span>
+
+  <!-- 内容区 -->
   <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
-    <span id="widgetIcon" style="font-size:28px;line-height:1;">🌤</span>
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span id="widgetTemp" style="font-size:28px;font-weight:300;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:4px;">
-        <span id="widgetState" style="font-size:16px;font-weight:400;opacity:0.8;">晴</span>
-        <span id="widgetTempNum">--</span><span style="font-size:18px;opacity:0.5;">℃</span>
+    <span id="widgetIcon" style="font-size:26px;line-height:1;">🌤</span>
+    <div style="display:flex;align-items:center;gap:4px;">
+      <span id="widgetTemp" style="font-size:26px;font-weight:400;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:3px;">
+        <span id="widgetState" style="font-size:14px;font-weight:400;opacity:0.6;">晴</span>
+        <span id="widgetTempNum" style="font-weight:400;">--</span><span style="font-size:16px;opacity:0.4;font-weight:300;">℃</span>
       </span>
-      <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.08);color:var(--theme);font-size:14px;cursor:pointer;transition:all 0.2s;" onclick="event.stopPropagation();refreshWeather()">↻</span>
-      <span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.05);color:var(--sub);font-size:14px;cursor:pointer;transition:all 0.2s;opacity:0.4;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
+      <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.04);color:var(--theme);font-size:12px;cursor:pointer;opacity:0.4;" onclick="event.stopPropagation();refreshWeather()">↻</span>
+      <span style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.02);color:var(--sub);font-size:12px;cursor:pointer;opacity:0.2;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
     </div>
   </div>
+
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:2px 0;position:relative;z-index:1;overflow:hidden;">
-    <div id="widgetDesc" style="font-size:15px;font-weight:500;color:var(--text);line-height:1.5;opacity:0.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
-    <div id="widgetDetail" style="font-size:12px;color:var(--sub);opacity:0.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
+    <div id="widgetDesc" style="font-size:14px;font-weight:400;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
+    <div id="widgetDetail" style="font-size:13px;font-weight:350;color:var(--sub);margin-top:1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
   </div>
-  <div style="position:relative;z-index:1;flex-shrink:0;padding-bottom:2px;">
+
+  <div style="position:relative;z-index:1;flex-shrink:0;padding-top:6px;margin-top:4px;border-top:1px solid var(--line);">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <span id="widgetWorldName" style="font-size:12px;color:var(--sub);opacity:0.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;">未关联</span>
-      <span id="widgetUpdateTime" style="font-size:11px;color:var(--sub);opacity:0.4;white-space:nowrap;flex-shrink:0;">刚刚</span>
+<span id="widgetWorldName" style="font-size:12px;font-weight:350;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;">未关联</span>
+<span id="widgetUpdateTime" style="font-size:12px;font-weight:300;color:var(--sub);white-space:nowrap;flex-shrink:0;">刚刚</span>
     </div>
-    <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:4px;"></div>
+    <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:6px;"></div>
   </div>
 </div>`;
-  }
-  
+}
   // ---- 构建应用网格（只放普通 App） ----
   var appsHtml = otherApps.map(function(a) {
         var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>' : '';
@@ -1554,7 +1491,6 @@ function renderWeatherWidget() {
   
   _weatherWorlds = worlds;
   
-  // 边界修正
   if (_weatherCurrentIndex >= worlds.length) _weatherCurrentIndex = 0;
   if (_weatherCurrentIndex < 0) _weatherCurrentIndex = 0;
   
@@ -1567,15 +1503,25 @@ function renderWeatherWidget() {
   var nameEl = document.getElementById('widgetWorldName');
   var dotsEl = document.getElementById('widgetDots');
   var timeEl = document.getElementById('widgetUpdateTime');
+
+  // ===== 判断当前主题是否为浅色 =====
+  var currentSkin = DB.settings.skin || 'fusion';
+  var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard');
+  
+  // 根据主题调整透明度系数
+  var opacityMap = {
+    detail: isLight ? 0.75 : 0.35,
+    update: isLight ? 0.65 : 0.3,
+    name:   isLight ? 0.75 : 0.4,
+    desc:   isLight ? 0.9 : 0.7
+  };
   
   // 图标
   if (iconEl) iconEl.textContent = w.weather.icon || '🌤';
   
-  // 状态文字
   var state = w.weather.state || mapIconToState(w.weather.icon) || '晴';
   if (stateEl) stateEl.textContent = state;
   
-  // 温度
   if (tempEl) {
     if (w.weather.temp !== undefined && w.weather.temp !== null && w.weather.temp !== '--') {
       tempEl.textContent = w.weather.temp;
@@ -1584,19 +1530,18 @@ function renderWeatherWidget() {
     }
   }
   
-  // 氛围句
   if (descEl) {
     var d = w.weather.desc || '天气宜人';
     descEl.textContent = '「' + d + '」';
+    descEl.style.opacity = opacityMap.desc;
   }
   
-  // 细节行
   if (detailEl) {
     var detail = w.weather.detail || '';
     if (detail.trim()) {
       detailEl.textContent = detail;
       detailEl.style.display = 'block';
-      detailEl.style.opacity = '0.5';
+      detailEl.style.opacity = opacityMap.detail;
     } else {
       detailEl.textContent = ' ';
       detailEl.style.display = 'block';
@@ -1604,10 +1549,11 @@ function renderWeatherWidget() {
     }
   }
   
-  // 世界名
-  if (nameEl) nameEl.textContent = (w.id === '_placeholder') ? '未关联' : (w.name || '未命名');
+  if (nameEl) {
+    nameEl.textContent = (w.id === '_placeholder') ? '未关联' : (w.name || '未命名');
+    nameEl.style.opacity = opacityMap.name;
+  }
   
-  // 更新时间
   if (timeEl && w.weather.updatedAt) {
     var diff = Date.now() - w.weather.updatedAt;
     var hours = Math.floor(diff / (60 * 60 * 1000));
@@ -1617,9 +1563,9 @@ function renderWeatherWidget() {
     else if (mins > 0) timeText = mins + '分钟前';
     else timeText = '刚刚';
     timeEl.textContent = '更新 ' + timeText;
+    timeEl.style.opacity = opacityMap.update;
   }
   
-  // ★ 小圆点（已修复颜色，但无额外逻辑）
   if (dotsEl) {
     dotsEl.innerHTML = worlds.map(function(_, i) {
       var isActive = (i === _weatherCurrentIndex);
@@ -1630,7 +1576,6 @@ function renderWeatherWidget() {
     }).join('');
   }
   
-  // 不再在这里保存 _activeWorld，也不重新绑定事件
   autoCheckWeatherUpdate();
 }
 // 天气小组件：滑动绑定
@@ -2821,10 +2766,8 @@ function buildFloatingCard(p) {
 }
 // ----- 9. 主渲染函数（带启动动画控制）-----
 function renderFloating() {
-  // ===== 1. 清理与准备 =====
   var homeEl = document.getElementById('home');
   if (homeEl) homeEl.remove();
-
   content.style.display = 'block';
   var worlds = DB.worlds || [];
   if (!worlds.length) {
@@ -2841,7 +2784,6 @@ function renderFloating() {
   if (!_floatingWorldId || !worlds.find(function(w) { return w.id === _floatingWorldId; })) {
     _floatingWorldId = worlds[0].id;
   }
-
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '浮光';
@@ -2849,17 +2791,14 @@ function renderFloating() {
   tbLeft.onclick = goHome;
   tbRight.textContent = '';
   tbRight.onclick = null;
-
   var posts = getFloatingCache(_floatingWorldId);
   posts.sort(function(a, b) { return b.time - a.time; });
 
-  // ===== 2. 定义实际渲染内容的函数 =====
   function renderContent() {
     var worldOptions = worlds.map(function(w) {
       var sel = w.id === _floatingWorldId ? ' selected' : '';
       return '<option value="' + w.id + '"' + sel + '>' + (w.icon || '🌍') + ' ' + w.name + '</option>';
     }).join('');
-
     var postsHtml = '';
     if (posts.length === 0) {
       postsHtml = '<div class="floating-empty">✨ 还没有浮光碎片<br><span style="font-size:13px;color:var(--sub);">正在生成…</span></div>';
@@ -2868,12 +2807,9 @@ function renderFloating() {
         postsHtml += buildFloatingCard(p);
       });
     }
-
     var loadingHtml = '<div id="floatingLoading" style="display:none;text-align:center;padding:12px;font-size:13px;color:var(--sub);">✨ 浮光正在生成…</div>';
-
     content.innerHTML =
       '<style>' +
-      /* ===== 顶部样式 ===== */
       '.floating-header{display:flex;justify-content:space-between;align-items:center;padding:2px 16px 18px 16px;}' +
       '.floating-title{font-size:26px;font-weight:200;letter-spacing:4px;color:var(--text);text-shadow:0 0 60px var(--glow);}' +
       '.floating-title span{color:var(--theme);font-weight:700;text-shadow:0 0 40px var(--theme);}' +
@@ -2883,32 +2819,20 @@ function renderFloating() {
       '.floating-controls .shuffle{font-size:16px;cursor:pointer;color:var(--sub);padding:4px 6px;border-radius:30px;transition:0.25s;user-select:none;background:rgba(255,255,255,0.02);border:1px solid var(--line);line-height:1.2;opacity:0.7;}' +
       '.floating-controls .shuffle:hover{opacity:1;color:var(--theme);border-color:var(--theme);}' +
       '.floating-controls .shuffle-tip{font-size:10px;color:var(--text);opacity:0.55;margin-left:-2px;user-select:none;font-weight:400;}' +
-
-      /* ===== 帖子列表（增加左右内边距） ===== */
-      '.floating-list{display:flex;flex-direction:column;gap:26px;padding:0 16px 16px 16px;}' +
+      '.floating-list{display:flex;flex-direction:column;gap:26px;padding:0 16px 16px 16px;max-width:100%;box-sizing:border-box;}' +
       '.floating-empty{text-align:center;padding:60px 20px;color:var(--sub);font-size:14px;line-height:2;}' +
-
-      /* ===== 帖子卡片 ===== */
-      '.floating-post{background:none;border:none;box-shadow:none;padding:0 2px 18px 2px;border-bottom:1px solid var(--line);position:relative;opacity:0;transform:translateY(8px);transition:opacity 0.6s ease,transform 0.6s ease;}' +
+      '.floating-post{background:none;border:none;box-shadow:none;padding:0 2px 18px 2px;border-bottom:1px solid var(--line);position:relative;width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;opacity:0;transform:translateY(8px);transition:opacity 0.6s ease,transform 0.6s ease;}' +
       '.floating-post.visible{opacity:1;transform:translateY(0);}' +
       '.floating-post::before{content:"";position:absolute;left:-4px;top:6px;width:2px;height:2px;border-radius:50%;background:var(--theme);opacity:0.3;box-shadow:0 0 20px var(--theme),0 0 60px var(--theme);transition:opacity 0.4s;}' +
       '.floating-post:hover::before{opacity:0.7;}' +
-
-      /* ===== 类型标签（字号提升） ===== */
       '.floating-type{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--theme);opacity:0.85;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;}' +
       '.floating-type::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.6;box-shadow:0 0 12px var(--theme);}' +
-
-/* ===== 内容 ===== */
-'.floating-content{font-size:16px;line-height:1.9;color:var(--text);white-space:pre-wrap;word-break:break-word;}' +
-
-/* ===== 底部栏 ===== */
-'.floating-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:6px;}' +
-'.floating-left{display:flex;align-items:center;gap:8px;font-size:12px;opacity:0.8;}' +
-'.floating-left .author{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--theme);font-weight:500;opacity:1;}' +
-'.floating-left .dot{width:2px;height:2px;border-radius:50%;background:var(--sub);opacity:0.3;}' +
-'.floating-left .time{font-size:11px;color:var(--text);opacity:0.5;font-weight:400;}' +
-
-      /* ===== 操作按钮 ===== */
+      '.floating-content{font-size:16px;line-height:1.9;color:var(--text);white-space:pre-wrap;word-break:break-word;}' +
+      '.floating-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:6px;}' +
+      '.floating-left{display:flex;align-items:center;gap:8px;font-size:12px;opacity:0.8;}' +
+      '.floating-left .author{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--theme);font-weight:500;opacity:1;}' +
+      '.floating-left .dot{width:2px;height:2px;border-radius:50%;background:var(--sub);opacity:0.3;}' +
+      '.floating-left .time{font-size:11px;color:var(--text);opacity:0.5;font-weight:400;}' +
       '.floating-actions{display:flex;align-items:center;gap:14px;}' +
       '.floating-like{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text);cursor:pointer;padding:2px 6px;border-radius:30px;transition:all 0.25s;user-select:none;opacity:0.65;}' +
       '.floating-like:hover{opacity:1;color:var(--theme);}' +
@@ -2916,35 +2840,25 @@ function renderFloating() {
       '.floating-like .num{font-weight:500;min-width:14px;text-align:center;}' +
       '.floating-cmtbtn{font-size:13px;color:var(--text);cursor:pointer;padding:2px 4px;border-radius:30px;transition:0.25s;user-select:none;opacity:0.65;}' +
       '.floating-cmtbtn:hover{opacity:1;}' +
-
-      /* ===== 神评（字号提升） ===== */
       '.floating-god{margin-top:12px;padding:6px 0 6px 14px;border-left:1px solid color-mix(in srgb,var(--theme) 30%,transparent);display:none;}' +
       '.floating-god.show{display:block;}' +
       '.floating-god-label{font-size:10px;color:var(--theme);font-weight:600;letter-spacing:1.5px;margin-bottom:2px;opacity:0.65;text-transform:uppercase;}' +
       '.floating-god-text{font-size:13px;color:var(--text);opacity:0.8;line-height:1.6;font-style:italic;font-weight:350;}' +
-
-      /* ===== 评论区 ===== */
-'.floating-comments-wrap{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:none;width:100%;box-sizing:border-box;overflow:hidden;}' +
-'.floating-comments-wrap.show{display:block;}' +
-'.floating-comment{font-size:13px;color:var(--text);padding:4px 0 4px 2px;border-bottom:1px solid var(--line);line-height:1.5;opacity:0.85;word-break:break-word;}' +
-'.floating-comment:last-of-type{border-bottom:none;}' +
-'.floating-cauthor{color:var(--theme);font-weight:500;margin-right:4px;opacity:0.9;}' +
-'.floating-ctime{font-size:10px;color:var(--sub);opacity:0.4;margin-left:6px;}' +
-'.floating-comment-input{display:flex;gap:6px;margin-top:10px;width:100%;box-sizing:border-box;overflow:hidden;}' +
-'.floating-comment-input input{flex:1 1 0%;min-width:0;padding:6px 14px;border-radius:30px;border:1px solid var(--line);background:rgba(255,255,255,0.02);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:var(--text);font-size:13px;outline:none;font-weight:300;box-sizing:border-box;}' +
-'.floating-comment-input input::placeholder{color:var(--sub);opacity:0.35;}' +
-'.floating-comment-input input:focus{border-color:var(--theme);}' +
-'.floating-comment-input button{padding:6px 18px;border:none;border-radius:30px;background:var(--theme);color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;transition:0.25s;font-weight:500;opacity:0.8;box-sizing:border-box;white-space:nowrap;}' +
-'.floating-comment-input button:hover{opacity:1;}'
-
-      /* ===== 底部脚标（字号提升） ===== */
+      '.floating-comments-wrap{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:none;width:100%;box-sizing:border-box;overflow:hidden;}' +
+      '.floating-comments-wrap.show{display:block;}' +
+      '.floating-comment{font-size:13px;color:var(--text);padding:4px 0 4px 2px;border-bottom:1px solid var(--line);line-height:1.5;opacity:0.85;word-break:break-word;}' +
+      '.floating-comment:last-of-type{border-bottom:none;}' +
+      '.floating-cauthor{color:var(--theme);font-weight:500;margin-right:4px;opacity:0.9;}' +
+      '.floating-ctime{font-size:10px;color:var(--sub);opacity:0.4;margin-left:6px;}' +
+      '.floating-comment-input{display:flex;gap:6px;margin-top:10px;width:100%;box-sizing:border-box;overflow:hidden;}' +
+      '.floating-comment-input input{flex:1 1 0%;min-width:0;padding:6px 14px;border-radius:30px;border:1px solid var(--line);background:rgba(255,255,255,0.02);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:var(--text);font-size:13px;outline:none;font-weight:300;box-sizing:border-box;}' +
+      '.floating-comment-input input::placeholder{color:var(--sub);opacity:0.35;}' +
+      '.floating-comment-input input:focus{border-color:var(--theme);}' +
+      '.floating-comment-input button{padding:6px 18px;border:none;border-radius:30px;background:var(--theme);color:#fff;font-size:12px;cursor:pointer;flex-shrink:0;transition:0.25s;font-weight:500;opacity:0.8;box-sizing:border-box;white-space:nowrap;}' +
+      '.floating-comment-input button:hover{opacity:1;}' +
       '.floating-foot{text-align:center;padding:20px 0 6px;font-size:11px;color:var(--sub);opacity:0.35;letter-spacing:2.5px;font-weight:300;}' +
-
-      /* ===== 响应式 ===== */
       '@media(max-width:420px){.floating-title{font-size:22px;letter-spacing:3px;}.floating-content{font-size:15px;}.floating-list{padding:0 12px 12px 12px;}}' +
       '</style>' +
-
-      /* ===== HTML 结构 ===== */
       '<div class="floating-header">' +
         '<div class="floating-title">浮<span>光</span></div>' +
         '<div class="floating-controls">' +
@@ -2958,8 +2872,6 @@ function renderFloating() {
         postsHtml +
       '</div>' +
       '<div class="floating-foot">✦ 共鸣 ≥3 自动生成神评 · 浮光碎影 ✦</div>';
-
-    // ===== 帖子入场动画 =====
     var postEls = content.querySelectorAll('.floating-post');
     postEls.forEach(function(el, i) {
       var delay = 100 + i * 130;
@@ -2967,25 +2879,20 @@ function renderFloating() {
         el.classList.add('visible');
       }, delay);
     });
-
-    // ===== 检查是否需要生成新帖子 =====
     var lastFetch = _floatingLastFetch[_floatingWorldId] || 0;
     var needGen = false;
     if (posts.length === 0) needGen = true;
     else if (Date.now() - lastFetch > 2 * 60 * 60 * 1000) needGen = true;
-
     if (needGen && !_floatingLoading) {
       _floatingLoading = true;
       var loadEl = document.getElementById('floatingLoading');
       if (loadEl) loadEl.style.display = 'block';
-
       var count = posts.length === 0 ? 8 : 4;
       generateFloatingPosts(_floatingWorldId, count).then(function(newPosts) {
         var current = getFloatingCache(_floatingWorldId);
         var existingSet = {};
         current.forEach(function(p) { existingSet[p.content] = true; });
         var toAdd = newPosts.filter(function(p) { return !existingSet[p.content]; });
-
         if (toAdd.length) {
           var merged = current.concat(toAdd);
           merged.sort(function(a, b) { return b.time - a.time; });
@@ -3006,11 +2913,8 @@ function renderFloating() {
         if (el3) el3.style.display = 'none';
       });
     }
-
     trimFloatingCache(_floatingWorldId);
   }
-
-  // ===== 3. 判断是否播放启动动画 =====
   if (window._floatingFromDesktop) {
     window._floatingFromDesktop = false;
     content.style.display = 'none';
@@ -3020,27 +2924,8 @@ function renderFloating() {
     });
     return;
   }
-
-  // ===== 4. 无动画，直接渲染 =====
   renderContent();
 }
-// ----- 10. 切换世界观（安全）-----
-function floatingSwitch(worldId) {
-  if (!worldId) return;
-  var worlds = DB.worlds || [];
-  var target = worlds.find(function(w) { return w.id === worldId; });
-  if (!target) {
-    if (worlds.length) {
-      _floatingWorldId = worlds[0].id;
-    } else {
-      return;
-    }
-  } else {
-    _floatingWorldId = worldId;
-  }
-  renderFloating();
-}
-window.floatingSwitch = floatingSwitch;
 
 function floatingShuffle() {
   var posts = getFloatingCache(_floatingWorldId);
@@ -3211,7 +3096,7 @@ function openWorldEditor(worldId) {
     '<input id="we_keyword" value="' + keywordVal + '" placeholder="关键词（如：赛博朋克、义体、霓虹）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:6px;background:var(--bg);color:var(--text);">' +
     '<input id="we_places" value="' + placesVal + '" placeholder="关联地点（如：咖啡馆、书店、江边，用中文逗号分隔）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:6px;background:var(--bg);color:var(--text);">' +
     '<button class="btn gray" style="margin:0 0 6px 0;padding:6px 0;font-size:13px;" onclick="aiPolishWorld()">✨ AI润色生成描述</button>' +
-    '<textarea id="we_desc" placeholder="世界观描述（可手动填写，也可用AI润色生成）" style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6;margin-top:6px;">' + descVal + '</textarea>' +
+    '<textarea id="we_desc" placeholder="世界观描述（可手动填写，也可用AI润色生成）" style="width:100%;min-height:80px;max-width:100%;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6;margin-top:6px;">' + descVal + '</textarea>'	+
     '<button class="btn" style="width:100%;margin:10px 0 4px;" onclick="saveWorld(\'' + (isEdit ? w.id : '') + '\')">保存</button>' +
     (isEdit ? '<button class="btn gray" style="width:100%;margin:0;" onclick="deleteWorld(\'' + w.id + '\')">🗑️ 删除此世界观</button>' : '') +
     '<button class="btn gray" style="width:100%;margin:4px 0 0;" onclick="closeModal()">取消</button>' +
@@ -3645,7 +3530,7 @@ function renderGroupChat(keepScroll){
     var t = m.time || Date.now();
     if(!lastBubbleTime || t-lastBubbleTime>300000){ html += tsHtml(t); lastBubbleTime = t; }
     html += groupBubble(m);
-  });
+  <!-- }); -->
   content.innerHTML = html;
   
     // ===== 群聊·绑定消息左滑 =====
@@ -3694,8 +3579,17 @@ function renderGroupChat(keepScroll){
   phone.appendChild(bar);
   updateGroupActBtn();
 
-  if (keepScroll && savedScroll !== undefined) content.scrollTop = savedScroll;
-  else scrollBottom();
+  if (keepScroll && savedScroll !== undefined) {
+  content.scrollTop = savedScroll;
+} else {
+  content.scrollTop = content.scrollHeight;
+}
+requestAnimationFrame(function() {
+  if (!keepScroll || savedScroll === undefined) {
+    content.scrollTop = content.scrollHeight;
+  }
+});
+
   // 【新增】渲染完成后触发心声弹窗（替代旧的内联气泡）
 if (!c.mode || c.mode === 'online') {
     var pending = c._pendingHeart;
@@ -4013,12 +3907,12 @@ async function groupAISpeak(chosen) {
       const messages = [
         { role: 'system', content: buildGroupSystem(c, g) }
       ];
-      if (stickerNames.length) {
-        messages.push({
-          role: 'system',
-          content: '【可用表情】你可以发表情，但只能从下面这个列表里选，格式为 <sticker>名字</sticker>，名字必须和列表完全一致，别自己编：\n' + stickerNames.join('、')
-        });
-      }
+if (stickerNames.length) {
+  messages.push({
+    role: 'system',
+    content: '【可用表情】你可以发表情，但只能从下面这个列表里选，格式为 [表情|名字]，名字必须和列表完全一致：\n' + stickerNames.join('、') + '\n【铁律】如果上面没有合适你此刻心情的表情，**禁止编造新名字**，请改用 Emoji（如 😭😂😡）或颜文字（如 T_T ^_^）表达情绪，绝不允许输出不存在于列表里的表情名。'
+  });
+}
       messages.push({
         role: 'user',
         content: '【群聊记录】\n' + buildGroupHistory(g) + '\n\n现在轮到你（' + nm + '）在群里发言。只输出你要说的话本身，不要写名字前缀。'
@@ -4418,7 +4312,8 @@ function attachSwipe() {
       var dx = t.clientX - startX;
       var dy = t.clientY - startY;
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 20) {
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 40) return;
+if (Math.abs(dx) < 30) return; {
         return;
       }
       e.preventDefault();
@@ -4846,7 +4741,7 @@ function renderCharEdit() {
   var Field = function(label, tip, value, onchange, placeholder, area) {
     var tipHtml = tip ? '<span class="tip">' + tip + '</span>' : '';
     var inputHtml = area
-      ? '<textarea oninput="ag(this)" onchange="' + onchange + '" placeholder="' + (placeholder || '') + '" style="min-height:80px;">' + esc(value || '') + '</textarea>'
+      ? '<textarea oninput="ag(this)" onchange="' + onchange + '" placeholder="' + (placeholder || '') + '" style="min-height:120px;max-height:400px;overflow-y:auto;touch-action:auto;-webkit-overflow-scrolling:touch;">' + esc(value || '') + '</textarea>'
       : '<input type="text" value="' + esc(value || '') + '" onchange="' + onchange + '" placeholder="' + (placeholder || '') + '">';
     return '<div class="field"><label>' + label + '</label>' + tipHtml + inputHtml + '</div>';
   };
@@ -5277,7 +5172,12 @@ function saveDraft(){delete getC(editingId)._draft;save();openChat(editingId);}
 function switchMod(m){edModule=m;render();}
 function upd(k,v){getC(editingId)[k]=v;save();if(k==='name'||k==='nick'){const c=getC(editingId);tbTitle.textContent=c.nick||c.name;}}
 function updStatus(k,v){getC(editingId).status[k]=v;save();}
-function ag(t){t.style.height='auto';t.style.height=Math.min(t.scrollHeight,220)+'px';}
+function ag(t){
+    if (!t) return;
+    t.style.height = 'auto';
+    var h = Math.min(t.scrollHeight, 400);
+    t.style.height = h + 'px';
+}
 function pickAvatar(){pickImage(d=>{getC(editingId).avatar=d;save();render();});}
 function pickChatBg(){pickImage(d=>{getC(editingId).chatBg=d;save();render();},900);}
 function pickMomentBg(){pickImage(d=>{DB.settings.momentCover=d;save();if(view.type==='moments')renderMoments();},1200);}
@@ -7019,6 +6919,7 @@ function openChat(id){
     
     save();
   }
+  window._chatJustOpened = true;
   view={type:'chat',id};
   render();
 }
@@ -7284,6 +7185,10 @@ else if(m.type==='voice'){
   else body=`<div class="mbody">${me?esc(m.content):(c.mode==='offline'?colorLines(m.content,c.lineColor):esc(m.content))}</div>`;
   return `<div class="msg ${me?'me':''}" data-mid="${m.id||''}"><div class="cavatar" style="${av?`background-image:url('${av}')`:''}">${av?'':nm}</div>${body}</div>`;}
 function renderChat(keepScroll) {
+  if (window._chatJustOpened) {
+    keepScroll = false;
+    window._chatJustOpened = false;
+  }
   // ===== 1. 保存滚动位置 =====
   var savedScroll = keepScroll ? content.scrollTop : 0;
 
@@ -7378,7 +7283,10 @@ function renderChat(keepScroll) {
       var t = e.touches[0];
       var dx = t.clientX - startX;
       var dy = t.clientY - startY;
-      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 15) return;
+// 如果垂直偏移明显大于水平，且垂直超过30px，认定为垂直滚动，不拦截
+if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 30) return;
+// 如果水平偏移小于25px，也视为误触，不拦截垂直滚动
+if (Math.abs(dx) < 25) return;
       if (Math.abs(dx) < 10) return;
       e.preventDefault();
       moved = true;
@@ -7441,12 +7349,16 @@ function renderChat(keepScroll) {
   attachSwipe();
 
   // ===== 12. 滚动处理 =====
+  // 强制同步布局，让滚动在同一帧内完成，不闪烁
   if (keepScroll && savedScroll !== undefined) {
     content.scrollTop = savedScroll;
   } else {
-    scrollBottom();
+    content.scrollTop = content.scrollHeight;
+    // 强制浏览器立即计算布局，这样 scrollHeight 变成最新值
+    content.offsetHeight;
+    // 再次设置滚动到底部（此时 scrollHeight 已正确）
+    content.scrollTop = content.scrollHeight;
   }
-
   // ===== 13. 输入框自动调整 =====
   var resizeTimer;
   function handleResize() {
@@ -7624,7 +7536,7 @@ function onChatKey(e){
 function togglePanel(){const p=document.getElementById('chatPanel');if(p)p.classList.toggle('on');scrollBottom();}
 function toggleMode(){const c=getC(view.id);c.mode=c.mode==='offline'?'online':'offline';save();const i=document.getElementById('modeIco'),t=document.getElementById('modeTxt');if(i)i.textContent=c.mode==='offline'?'📖':'💬';if(t)t.textContent=c.mode==='offline'?'线下中':'线上中';}
 function appendBubble(c,m){if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
-function scrollBottom(){setTimeout(()=>{content.scrollTop=content.scrollHeight;},30);}
+
 function pushMy(m){
   var c = getC(view.id);
   if (!c) return;
