@@ -481,7 +481,17 @@ textarea {
 </style>
 </head>
 <body>
-<script>window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整）：\n'+m+'\n第'+l+'行\n请检查该段是否复制完整。');};</script>
+<script>
+(function() {
+  var origPreventDefault = Event.prototype.preventDefault;
+  Event.prototype.preventDefault = function() {
+    if (this.type === 'touchmove') {
+      return;
+    }
+    return origPreventDefault.apply(this, arguments);
+  };
+})();
+window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整）：\n'+m+'\n第'+l+'行\n请检查该段是否复制完整。');};</script>
 <div id="phone">
   <div id="statusbar"><span id="sbTime">00:00</span><div id="island"></div><span class="sb-right"><span class="sb-right">
   <span>5G</span>
