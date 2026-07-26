@@ -482,15 +482,7 @@ textarea {
 </head>
 <body>
 <script>
-(function() {
-  var origPreventDefault = Event.prototype.preventDefault;
-  Event.prototype.preventDefault = function() {
-    if (this.type === 'touchmove') {
-      return;
-    }
-    return origPreventDefault.apply(this, arguments);
-  };
-})();
+
 window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整）：\n'+m+'\n第'+l+'行\n请检查该段是否复制完整。');};</script>
 <div id="phone">
   <div id="statusbar"><span id="sbTime">00:00</span><div id="island"></div><span class="sb-right"><span class="sb-right">
@@ -9071,21 +9063,5 @@ function importData() {
   };
   inp.click();
 }
-// ===== 修复 WebView 首次加载触摸区域错位 =====
-window.addEventListener('load', function() {
-  function forceReflow() {
-    var content = document.getElementById('content');
-    if (!content) return;
-    // 强制 WebView 重新计算布局和触摸区域
-    content.style.display = 'none';
-    content.offsetHeight; // 触发重排
-    content.style.display = 'block';
-  }
-  // 加载后延迟触发几次，确保 WebView 完成初始化
-  setTimeout(forceReflow, 100);
-  setTimeout(forceReflow, 300);
-  setTimeout(forceReflow, 600);
-});
 </script>
-
 </html>
