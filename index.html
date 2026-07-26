@@ -27,6 +27,24 @@
   #tbTitle{flex:1;text-align:center;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .tb-btn{min-width:44px;font-size:20px;color:var(--text);cursor:pointer;}
   .tb-btn.r{text-align:right;color:var(--theme);}
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#content, .chat-list, .swipe-wrap {
+  pointer-events: auto !important;
+  touch-action: pan-y !important;
+}
+
+.swipe-cell::before,
+.swipe-cell::after,
+.chat-item::before,
+.chat-item::after {
+  pointer-events: none !important;
+}
 #content {
   flex: 1;
   overflow-y: auto;
