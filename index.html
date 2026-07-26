@@ -32,13 +32,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   position: relative;
   background-size: cover;
   background-position: center;
   display: flex;
   flex-direction: column;
   max-width: 100%;
+  touch-action: pan-y;
 }
   #content::-webkit-scrollbar{width:5px;}
   #content::-webkit-scrollbar-thumb{background:var(--theme);border-radius:3px;opacity:.6;}
@@ -1599,8 +1600,13 @@ function bindWeatherWidgetEvents() {
     var t = e.touches[0];
     var dx = t.clientX - _weatherSwipeStartX;
     var dy = t.clientY - _weatherSwipeStartY;
-    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 15) return;
+    
+    // 垂直偏移大于水平，判定为垂直滚动
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) return;
+    
+    // 水平偏移太小
     if (Math.abs(dx) < 10) return;
+    
     e.preventDefault();
     this._swipeMoved = true;
     var progress = Math.max(-1, Math.min(1, dx / 80));
@@ -3543,10 +3549,18 @@ function renderGroupChat(keepScroll){
     el.addEventListener('touchstart', function(e){ var t=e.touches[0]; startX=t.clientX; startY=t.clientY; moved=false; slideEl.style.transition='none'; }, {passive:true});
     el.addEventListener('touchmove', function(e){
       if(startX===undefined) return;
-      var t=e.touches[0]; var dx=t.clientX-startX; var dy=t.clientY-startY;
-      if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>15) return;
+      var t=e.touches[0]; 
+      var dx=t.clientX-startX; 
+      var dy=t.clientY-startY;
+      
+      // 垂直偏移大于水平，判定为垂直滚动
+      if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dy)>10) return;
+      
+      // 水平偏移太小
       if(Math.abs(dx)<10) return;
-      e.preventDefault(); moved=true;
+      
+      e.preventDefault(); 
+      moved=true;
       var target=Math.max(-80,Math.min(0,dx));
       slideEl.style.transform='translateX('+target+'px)';
     }, {passive:false});
@@ -4297,12 +4311,14 @@ function attachSwipe() {
 
     var startX = 0, startY = 0, curX = 0, open = false, moved = false;
     var delWidth = 74;
+    var isVertical = false;
 
     el.addEventListener('touchstart', function(e) {
       var t = e.touches[0];
       startX = t.clientX;
       startY = t.clientY;
       moved = false;
+      isVertical = false;
       el.style.transition = 'none';
     }, { passive: true });
 
@@ -4310,13 +4326,23 @@ function attachSwipe() {
       var t = e.touches[0];
       var dx = t.clientX - startX;
       var dy = t.clientY - startY;
-      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 40) return;
-if (Math.abs(dx) < 30) return; {
+      
+      // 如果已经判定为垂直滑动，直接放行不拦截
+      if (isVertical) return;
+      
+      // 初次判断：垂直偏移明显大于水平，判定为垂直滚动
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+        isVertical = true;
         return;
       }
+      
+      // 水平偏移太小，还在犹豫区，不做任何操作
+      if (Math.abs(dx) < 10) return;
+      
+      // 确定是水平滑动，拦截默认滚动
       e.preventDefault();
       moved = true;
+      
       var target = open ? dx - delWidth : dx;
       if (target > 0) target = 0;
       if (target < -delWidth) target = -delWidth;
@@ -4325,6 +4351,9 @@ if (Math.abs(dx) < 30) return; {
     }, { passive: false });
 
     el.addEventListener('touchend', function(e) {
+      isVertical = false;
+      if (!moved) return;
+      
       el.style.transition = 'transform .2s';
       var shouldOpen = curX < -delWidth * 0.4;
       if (shouldOpen) {
@@ -4338,57 +4367,15 @@ if (Math.abs(dx) < 30) return; {
       }
     }, { passive: true });
 
-    var pStartX = 0,
-      pCurX = 0,
-      pOpen = false,
-      pMoved = false;
-    el.addEventListener('pointerdown', function(e) {
-      pStartX = e.clientX;
-      pMoved = false;
-      el.style.transition = 'none';
-    });
-
-    el.addEventListener('pointermove', function(e) {
-      if (pStartX === undefined) return;
-      var dx = e.clientX - pStartX;
-      if (Math.abs(dx) < 5) return;
-      pMoved = true;
-      var target = pOpen ? dx - delWidth : dx;
-      if (target > 0) target = 0;
-      if (target < -delWidth) target = -delWidth;
-      pCurX = target;
-      el.style.transform = 'translateX(' + target + 'px)';
-    });
-
-    var pointerEnd = function() {
-      if (!pMoved) return;
-      el.style.transition = 'transform .2s';
-      var shouldOpen = pCurX < -delWidth * 0.4;
-      if (shouldOpen) {
-        el.style.transform = 'translateX(-' + delWidth + 'px)';
-        pOpen = true;
-        pCurX = -delWidth;
-      } else {
-        el.style.transform = 'translateX(0)';
-        pOpen = false;
-        pCurX = 0;
-      }
-      pStartX = undefined;
-    };
-    el.addEventListener('pointerup', pointerEnd);
-    el.addEventListener('pointercancel', pointerEnd);
-
     el.addEventListener('click', function(e) {
-      if (moved || pMoved) {
+      if (moved) {
         e.stopPropagation();
         e.preventDefault();
-        if (open || pOpen) {
+        if (open) {
           el.style.transition = 'transform .2s';
           el.style.transform = 'translateX(0)';
           open = false;
-          pOpen = false;
           curX = 0;
-          pCurX = 0;
         }
       }
     }, true);
@@ -7282,17 +7269,20 @@ function renderChat(keepScroll) {
       var t = e.touches[0];
       var dx = t.clientX - startX;
       var dy = t.clientY - startY;
-// 如果垂直偏移明显大于水平，且垂直超过30px，认定为垂直滚动，不拦截
-if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 30) return;
-// 如果水平偏移小于25px，也视为误触，不拦截垂直滚动
-if (Math.abs(dx) < 25) return;
+      
+      // 初次判断：垂直偏移明显大于水平，判定为垂直滚动，不拦截
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) return;
+      
+      // 水平偏移太小，还在犹豫区
       if (Math.abs(dx) < 10) return;
+      
+      // 确定是水平滑动，拦截默认滚动
       e.preventDefault();
       moved = true;
       var target = Math.max(-80, Math.min(0, dx));
       slideEl.style.transform = 'translateX(' + target + 'px)';
     }, { passive: false });
-
+	
     el.addEventListener('touchend', function(e) {
       slideEl.style.transition = 'transform .2s';
       if (moved && slideEl.style.transform) {
