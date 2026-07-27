@@ -8858,20 +8858,14 @@ function applyPhoneScale() {
   phone.style.transform = 'scale(' + scale + ')';
 }
 
+// 页面加载时执行
 window.addEventListener('load', function() {
   applyPhoneScale();
+});
 
-  // 新增：键盘弹起时调整手机容器高度
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', function () {
-      var phone = document.getElementById('phone');
-      if (phone) {
-        phone.style.height = window.visualViewport.height + 'px';
-      }
-      var content = document.getElementById('content');
-      if (content) content.scrollTop = content.scrollHeight;
-    });
-  }
+// 窗口大小变化时重新计算（如旋转屏幕、调整窗口）
+window.addEventListener('resize', function() {
+  applyPhoneScale();
 });
 
 // 每次渲染页面后也执行一次（保证切换页面后重新适配）
