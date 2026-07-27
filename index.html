@@ -9,7 +9,6 @@
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="./manifest.json">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>XieEKaoLa</title>
 <style>
   :root{--theme:#07c160;--bg:#ededed;--nav:#f7f7f7;--card:#fff;--text:#111;--sub:#888;--line:#e5e5e5;}
@@ -165,7 +164,8 @@
 .voice-bubble.expanded .voice-text {
   display: block;
 }
-#tabbar{height:68px;background:var(--nav);display:flex;border-top:1px solid var(--line);flex-shrink:0;padding:4px 4px 8px 4px;}
+#chatBottom { padding-bottom: 4px; box-sizing: border-box; }
+#tabbar { height:68px; background:var(--nav); display:flex; border-top:1px solid var(--line); flex-shrink:0; padding:4px 4px 12px 4px; }
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;color:var(--sub);gap:3px;cursor:pointer;}
   .tab.active{color:var(--theme);}.tab .ic{font-size:22px;}
   #home{position:absolute;inset:0;background-size:cover;background-position:center;background-image:radial-gradient(ellipse at 50% 20%, #3D2F4A, #1F1A2A 70%);padding:10px 16px 20px;overflow:hidden;z-index:5;}
@@ -6254,8 +6254,9 @@ async function watchNow(cid, opts) {
       { role: 'user', content: prompt }
     ];
 
-    var out = await callAI(messages, model);
-    out = (out || '').replace(/```/g, '').trim();
+var out = await callAI(messages, model);
+out = (out || '').replace(/```/g, '').trim();
+out = stripStateTag(out);   // ← 新加的这行，擦掉小纸条
     if (!out) throw new Error('画面生成为空');
 spendHeart(c, 5, '📡 监控画面');
 var record = {
@@ -8857,14 +8858,20 @@ function applyPhoneScale() {
   phone.style.transform = 'scale(' + scale + ')';
 }
 
-// 页面加载时执行
 window.addEventListener('load', function() {
   applyPhoneScale();
-});
 
-// 窗口大小变化时重新计算（如旋转屏幕、调整窗口）
-window.addEventListener('resize', function() {
-  applyPhoneScale();
+  // 新增：键盘弹起时调整手机容器高度
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function () {
+      var phone = document.getElementById('phone');
+      if (phone) {
+        phone.style.height = window.visualViewport.height + 'px';
+      }
+      var content = document.getElementById('content');
+      if (content) content.scrollTop = content.scrollHeight;
+    });
+  }
 });
 
 // 每次渲染页面后也执行一次（保证切换页面后重新适配）
@@ -9062,6 +9069,12 @@ function importData() {
     reader.readAsText(file);
   };
   inp.click();
+}
+// ===== 【新增】专门擦除监控里的 <state> 标签（不动好感度） =====
+function stripStateTag(text) {
+    if (!text) return '';
+    // 把 <state>好感+1</state> 这种整段删掉
+    return text.replace(/<state>[\s\S]*?<\/state>/g, '').trim();
 }
 </script>
 </html>
