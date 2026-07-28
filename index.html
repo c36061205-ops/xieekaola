@@ -9,6 +9,9 @@
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="./manifest.json">
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>XieEKaoLa</title>
 <style>
   :root{--theme:#07c160;--bg:#ededed;--nav:#f7f7f7;--card:#fff;--text:#111;--sub:#888;--line:#e5e5e5;}
@@ -525,7 +528,14 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER='728更新';const DB_KEY='myrp_data_v1';const phone=document.getElementById('phone');
+const APP_VER='v728更新';
+// ===== 版本缓存控制（每次更新改 APP_VER 即可） =====
+const cachedVer = localStorage.getItem('app_cached_ver');
+if (cachedVer !== APP_VER) {
+  localStorage.setItem('app_cached_ver', APP_VER);
+  window.location.reload(true);
+}
+const DB_KEY='myrp_data_v1';const phone=document.getElementById('phone');
 let _weatherSwipeStartX = 0;
 let _weatherSwipeStartY = 0;
 let _weatherCurrentIndex = 0;
@@ -1455,10 +1465,10 @@ function renderHome() {
   text-shadow: 0 0 40px rgba(140,115,165,0.10);
   font-size: 28px;
 }
-.ghost-star.small { font-size: 18px; opacity: 0.65; }
-.ghost-star.xsmall { font-size: 13px; opacity: 0.55; }
-.ghost-star.large { font-size: 40px; opacity: 0.50; }
-.ghost-star.xlarge { font-size: 52px; opacity: 0.40; }
+.ghost-star.small { font-size: 18px; opacity: 0.60; }
+.ghost-star.xsmall { font-size: 13px; opacity: 0.50; }
+.ghost-star.large { font-size: 40px; opacity: 0.45; }
+.ghost-star.xlarge { font-size: 52px; opacity: 0.35; }
       </style>
       <span style="position:absolute;right:18px;top:12px;width:5px;height:5px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 2.8s ease-in-out infinite;will-change:transform,opacity;"></span>
       <span style="position:absolute;right:40px;top:30px;width:4px;height:4px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.6s ease-in-out infinite 0.6s;will-change:transform,opacity;"></span>
