@@ -796,6 +796,34 @@ if (isLight) {
   root.style.setProperty('--clock-theme-color', 'var(--theme)');
   root.style.setProperty('--star-opacity', '0.4');
 }
+// ===== 幽灵戏班主题：清晰硬阴影（无模糊，偏移明显） =====
+var ghostShadow = document.getElementById('ghostTroupeShadow');
+if (id === 'ghost_troupe') {
+  if (!ghostShadow) {
+    ghostShadow = document.createElement('style');
+    ghostShadow.id = 'ghostTroupeShadow';
+    ghostShadow.textContent = `
+      .app-ic {
+        filter: drop-shadow(2px 2px 0px rgba(92,79,79,0.25)) !important;
+        transition: filter 0.2s ease, transform 0.15s ease;
+        will-change: transform;
+      }
+      .app-ic:hover {
+        filter: drop-shadow(3px 3px 0px rgba(92,79,79,0.30)) !important;
+        transform: translateY(-1px);
+      }
+      #tabbar .tab img {
+        filter: drop-shadow(1px 1px 0px rgba(92,79,79,0.20)) !important;
+      }
+      .app-nm {
+        text-shadow: 1px 1px 0px rgba(92,79,79,0.20) !important;
+      }
+    `;
+    document.head.appendChild(ghostShadow);
+  }
+} else {
+  if (ghostShadow) ghostShadow.remove();
+}
   // 5. 刷新当前页面
   if (view.type === 'home') {
     if (typeof renderHome === 'function') renderHome();
