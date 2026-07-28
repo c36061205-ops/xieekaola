@@ -780,8 +780,13 @@ if (isLight) {
   root.style.setProperty('--clock-sub-opacity', '1');
   root.style.setProperty('--clock-theme-opacity', '1');
   root.style.setProperty('--deco-opacity', '0.55');
-  root.style.setProperty('--clock-sub-color', '#222');
-  root.style.setProperty('--clock-theme-color', '#9A8AA8');
+  root.style.setProperty('--clock-sub-color', 'var(--sub)');
+  
+  // ★ 关键：浅色主题下，让星星和问候语使用深色（sub），不再用淡粉色/淡紫色
+  root.style.setProperty('--clock-theme-color', 'var(--sub)');
+  // ★ 星星透明度大幅提高，让星星变亮
+  root.style.setProperty('--star-opacity', '0.85');
+  
 } else {
   root.style.setProperty('--app-text-shadow', '0 1px 4px rgba(0,0,0,0.5)');
   root.style.setProperty('--clock-sub-opacity', '0.7');
@@ -789,8 +794,8 @@ if (isLight) {
   root.style.setProperty('--deco-opacity', '0.35');
   root.style.setProperty('--clock-sub-color', 'var(--sub)');
   root.style.setProperty('--clock-theme-color', 'var(--theme)');
+  root.style.setProperty('--star-opacity', '0.4');
 }
-
   // 5. 刷新当前页面
   if (view.type === 'home') {
     if (typeof renderHome === 'function') renderHome();
@@ -1436,7 +1441,7 @@ function renderHome() {
     <span style="position:absolute;bottom:32%;right:15%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.25);pointer-events:none;z-index:1;"></span>
     <div class="time" style="position:relative;z-index:2;">
       <span class="hour-val">--</span>
-      <span class="star" style="color:var(--clock-theme-color, var(--theme));font-size:14px;opacity:0.5;margin:0 4px;">✦</span>
+<span class="star" style="color:var(--clock-theme-color, var(--theme));font-size:14px;opacity:var(--star-opacity, 0.5);margin:0 4px;">✦</span>
       <span class="min-val">--</span>
     </div>
     <div class="date" style="position:relative;z-index:2;color:var(--clock-sub-color, var(--sub));">
