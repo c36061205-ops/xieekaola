@@ -172,10 +172,10 @@
 #appgrid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 14px 6px;           /* 原来是 20px 10px，缩小行距和列距 */
-    grid-auto-rows: 84px;    /* 原来是 88px，稍微收一点 */
+    gap: 14px 2px;        /* 左右间距从 6px 收窄到 2px，上下 14px 保持不变 */
+    grid-auto-rows: 84px;  /* 完全恢复原样，不变 */
     align-content: start;
-    margin-top: 4px;         /* 原来是 8px，往上收一点 */
+    margin-top: 4px;       /* 保持原样，不变 */
 }
   .app{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;justify-content:flex-start;}
 .app-ic {
@@ -525,7 +525,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER='v10088';const DB_KEY='myrp_data_v1';const phone=document.getElementById('phone');
+const APP_VER='728更新';const DB_KEY='myrp_data_v1';const phone=document.getElementById('phone');
 let _weatherSwipeStartX = 0;
 let _weatherSwipeStartY = 0;
 let _weatherCurrentIndex = 0;
@@ -627,7 +627,19 @@ wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), ra
   '--line': '#C4AFA0',        // 调深
   wallpaper: 'radial-gradient(ellipse at 30% 10%, #E8C9A0 0%, transparent 40%), radial-gradient(ellipse at 70% 90%, #A8B88A 0%, transparent 50%), linear-gradient(145deg, #F3E9D8 0%, #E8DCC8 100%)'
 },
-
+{
+  id: 'ghost_troupe',
+  name: '🎪 幽灵戏班',
+  color: '#9A8AA8',
+  '--theme': '#9A8AA8',
+  '--bg': '#F6F5F3',
+  '--nav': '#F0EDEA',
+  '--card': '#FCFBF9',
+  '--text': '#5C4F4F',
+  '--sub': '#8A7A82',
+  '--line': '#C5BCB4',
+  wallpaper: 'radial-gradient(ellipse at 30% 15%, #D5C8D8 0%, #E8DDE6 30%, #F0EAEF 55%, #F5F0F0 80%, #FAF8F8 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 30px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 30px)'
+}
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -697,7 +709,27 @@ orchard: {
   tabMe:       'https://s1.imagehub.cc/images/2026/07/22/881c5b2e97cc7febac866c7af070943b.png',
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/22/90508b72d72612459f2ab7aae746bb23.png',
 },
-
+ghost_troupe: {
+  // 桌面应用图标
+  wechat:   'https://s1.imagehub.cc/images/2026/07/28/67e7d5b51867d98ce606f8eb518921a7.png',
+  notes:    'https://s1.imagehub.cc/images/2026/07/28/af837f78e22e7b19a1df37618e78f443.png',
+  focus:    'https://s1.imagehub.cc/images/2026/07/28/e152f3e770f42a79159522efd4c21f4a.png',
+  settings: 'https://s1.imagehub.cc/images/2026/07/28/2f753e0d614b31f87338c0c7eb086e3b.png',
+  album:    'https://s1.imagehub.cc/images/2026/07/28/8468b78a0936580c38ca96ac04c557a2.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/07/28/75c3f30993a816ab0183a3d60c418289.png',
+  music:    'https://s1.imagehub.cc/images/2026/07/28/c4b2ecf55c3e58a6ef48adebbfe49a4e.png',
+  preset:   'https://s1.imagehub.cc/images/2026/07/28/f7b10e60e79857071a24fb1e57758b3e.png',
+  floating: 'https://s1.imagehub.cc/images/2026/07/28/0b130dd08866ad4d281fbd7685ea7c24.png',
+  shop:     'https://s1.imagehub.cc/images/2026/07/28/037bc243ec64eb050151a992f5b6ff8d.png',
+  world:    'https://s1.imagehub.cc/images/2026/07/28/d0c36f963e4b45c8b0df5a213b3ab6e2.png',
+  // 底栏
+  tabChats:    'https://s1.imagehub.cc/images/2026/07/28/e1cbd76dd0d9f9679de7004fe9f939bb.png',
+  tabContacts: 'https://s1.imagehub.cc/images/2026/07/28/6aee1c8d3b0ea46d734caceed9de6fa5.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/07/28/936f595a38e796e74e60e8bb326900db.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/07/28/5ebba54a6c31da793c1d7cabb4ac6197.png',
+  // 发现页
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/07/28/ae1610619ea654132eaa7f3c46dd2cd0.png',
+}
 };
 // =====================================
 function applySkin(id) {
@@ -723,18 +755,23 @@ function applySkin(id) {
   save();
   updateAllIcons();
 
-  // ===== 新增：浅色主题适配（通过 CSS 变量，不再用内联样式） =====
-var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard');
-if (isLight) {
-  root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
-  root.style.setProperty('--clock-sub-opacity', '1');
-  root.style.setProperty('--clock-theme-opacity', '1');
+  // ===== 主题适配（浅色/深色） =====
+  var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe');
+  if (isLight) {
+    root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
+    root.style.setProperty('--clock-sub-opacity', '1');
+    root.style.setProperty('--clock-theme-opacity', '1');
+    root.style.setProperty('--deco-opacity', '0.55');          // 柔和显眼
+    root.style.setProperty('--clock-sub-color', '#222');       // 深色替代 --sub
+    root.style.setProperty('--clock-theme-color', '#B34A6A');  // 固定主题色（可保持不变）
   } else {
     root.style.setProperty('--app-text-shadow', '0 1px 4px rgba(0,0,0,0.5)');
     root.style.setProperty('--clock-sub-opacity', '0.7');
     root.style.setProperty('--clock-theme-opacity', '0.45');
+    root.style.setProperty('--deco-opacity', '0.35');
+    root.style.setProperty('--clock-sub-color', 'var(--sub)');
+    root.style.setProperty('--clock-theme-color', 'var(--theme)');
   }
-  // ===========================================================
 
   // 5. 刷新当前页面
   if (view.type === 'home') {
@@ -745,7 +782,6 @@ if (isLight) {
     else if (wechatPage === 'contacts' && typeof renderContacts === 'function') renderContacts();
     else if (wechatPage === 'me' && typeof renderWxMe === 'function') renderWxMe();
   }
-  // 注：原来的 setTimeout 已删除，天气卡片背景由 renderHome 动态生成
 }
 function updateAllIcons() {
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
@@ -1343,16 +1379,11 @@ if (oldHome) oldHome.remove();
   d.id = 'home';
   // 桌面壁纸：支持图片 URL 或 CSS 渐变字符串
   var bg = DB.desktop.wallpaper;
-  if (bg) {
-    if (bg.startsWith('http') || bg.startsWith('data:')) {
-      d.style.backgroundImage = 'url(' + bg + ')';
-      d.style.backgroundSize = 'cover';
-      d.style.backgroundPosition = 'center';
-    } else {
-      d.style.background = bg;
-    }
-  }
-  
+if (bg) {
+    d.style.background = bg;
+    d.style.backgroundSize = 'cover';
+    d.style.backgroundPosition = 'center';
+}
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
   
   // ---- 分离天气 App 和其他 App ----
@@ -1387,27 +1418,27 @@ if (oldHome) oldHome.remove();
   // ---- 构建时钟 HTML ----
 var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
   <!-- 静态星环 1 -->
-  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);opacity:0.2;mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
+  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);opacity:var(--deco-opacity, 0.2);mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
   <!-- 静态星环 2 -->
-  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%) rotate(70deg);border:1px solid var(--theme);opacity:0.12;mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);-webkit-mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);"></div>
+  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%) rotate(70deg);border:1px solid var(--theme);opacity:var(--deco-opacity, 0.12);mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);-webkit-mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);"></div>
 
   <!-- 小光点 × 5 -->
-  <span style="position:absolute;top:6%;left:48%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:0.5;pointer-events:none;z-index:1;"></span>
-  <span style="position:absolute;top:38%;right:8%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.4;pointer-events:none;z-index:1;"></span>
-  <span style="position:absolute;bottom:20%;left:12%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.35;pointer-events:none;z-index:1;"></span>
-  <span style="position:absolute;top:25%;left:6%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:0.3;pointer-events:none;z-index:1;"></span>
-  <span style="position:absolute;bottom:32%;right:15%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:0.25;pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;top:6%;left:48%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.5);pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;top:38%;right:8%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.4);pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;bottom:20%;left:12%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.35);pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;top:25%;left:6%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.3);pointer-events:none;z-index:1;"></span>
+  <span style="position:absolute;bottom:32%;right:15%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.25);pointer-events:none;z-index:1;"></span>
 
   <!-- 时间、日期、问候语（保留类名，让 JS 继续更新） -->
   <div class="time" style="position:relative;z-index:2;">
     <span class="hour-val">--</span>
-    <span class="star" style="color:var(--theme);font-size:14px;opacity:0.5;margin:0 4px;">✦</span>
+    <span class="star" style="color:var(--clock-theme-color, var(--theme));font-size:14px;opacity:0.5;margin:0 4px;">✦</span>
     <span class="min-val">--</span>
   </div>
-  <div class="date" style="position:relative;z-index:2;">
-    <span class="date-val">--月--日 · 周-</span>
-  </div>
-  <div class="greet" style="position:relative;z-index:2;">今夜星辰</div>
+<div class="date" style="position:relative;z-index:2;color:var(--clock-sub-color, var(--sub));">
+  <span class="date-val">--月--日 · 周-</span>
+</div>
+<div class="greet" style="position:relative;z-index:2;color:var(--clock-theme-color, var(--theme));">今夜星辰</div>
 </div>`;
   
   // ---- 构建天气 HTML（独立卡片） ----
@@ -1416,16 +1447,17 @@ var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
 
 weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:24px;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:120px;background:transparent !important;border:1.5px solid var(--line);box-shadow:none;">
 
-  <!-- ★ 星环 1 -->
-  <div style="position:absolute;right:-4px;top:-4px;width:72px;height:72px;border-radius:50%;border:1.5px solid var(--theme);opacity:0.18;pointer-events:none;z-index:0;"></div>
-  <!-- ★ 星环 2 -->
-  <div style="position:absolute;right:12px;top:12px;width:48px;height:48px;border-radius:50%;border:1px solid var(--theme);opacity:0.09;pointer-events:none;z-index:0;transform:rotate(25deg);"></div>
+  <style>
+    @keyframes floatDot {
+      0%, 100% { transform: translateY(0px) scale(1); opacity: 0.25; }
+      50% { transform: translateY(-8px) scale(1.4); opacity: 0.7; }
+    }
+  </style>
 
-  <!-- ★ 小光点 × 4 -->
-  <span style="position:absolute;top:8%;right:22%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:0.45;pointer-events:none;z-index:0;"></span>
-  <span style="position:absolute;top:32%;right:4%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.30;pointer-events:none;z-index:0;"></span>
-  <span style="position:absolute;bottom:20%;right:16%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:0.25;pointer-events:none;z-index:0;"></span>
-  <span style="position:absolute;top:16%;right:36%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:0.20;pointer-events:none;z-index:0;"></span>
+  <!-- ★ 悬浮粒子 × 3（替换原来的两个圆环） -->
+  <span style="position:absolute;right:18px;top:12px;width:5px;height:5px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 2.8s ease-in-out infinite;will-change:transform,opacity;"></span>
+  <span style="position:absolute;right:40px;top:30px;width:4px;height:4px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.6s ease-in-out infinite 0.6s;will-change:transform,opacity;"></span>
+  <span style="position:absolute;right:8px;top:44px;width:3px;height:3px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.2s ease-in-out infinite 1.2s;will-change:transform,opacity;"></span>
 
   <!-- 内容区 -->
   <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
@@ -1447,8 +1479,8 @@ weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;
 
   <div style="position:relative;z-index:1;flex-shrink:0;padding-top:6px;margin-top:4px;border-top:1px solid var(--line);">
     <div style="display:flex;justify-content:space-between;align-items:center;">
-<span id="widgetWorldName" style="font-size:12px;font-weight:350;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;">未关联</span>
-<span id="widgetUpdateTime" style="font-size:12px;font-weight:300;color:var(--sub);white-space:nowrap;flex-shrink:0;">刚刚</span>
+      <span id="widgetWorldName" style="font-size:12px;font-weight:350;color:var(--clock-sub-color, var(--sub));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;">未关联</span>
+      <span id="widgetUpdateTime" style="font-size:12px;font-weight:300;color:var(--clock-sub-color, var(--sub));white-space:nowrap;flex-shrink:0;">刚刚</span>
     </div>
     <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:6px;"></div>
   </div>
@@ -1457,10 +1489,14 @@ weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;
   // ---- 构建应用网格（只放普通 App） ----
   var appsHtml = otherApps.map(function(a) {
         var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>' : '';
-    var iconUrl = a.icon || icons[a.id] || null;
+var iconUrl = a.icon || icons[a.id] || null;
 var style = 'position:relative;';
 if (iconUrl) {
   style += 'background-image:url(\'' + iconUrl + '\');background-color:transparent;box-shadow:none;background-size:contain;background-repeat:no-repeat;background-position:center;';
+  // 幽灵戏班：仅保留干净透明背景，无边框
+  if (currentThemeId === 'ghost_troupe') {
+    style += 'background-color:transparent;background-size:contain;';
+  }
 }
 var content = iconUrl ? '' : a.emoji;
     return '<div class="app" onclick="openApp(\'' + a.id + '\')"><div class="app-ic" style="' + style + '">' + content + badge + '</div><div class="app-nm">' + a.name + '</div></div>';
