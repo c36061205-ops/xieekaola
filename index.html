@@ -530,7 +530,11 @@ let _weatherSwipeStartX = 0;
 let _weatherSwipeStartY = 0;
 let _weatherCurrentIndex = 0;
 let _weatherWorlds = [];
-let _weatherUpdateInterval = 3.5 * 60 * 60 * 1000; // 3.5 小时
+// 天气更新间隔
+var FULL_UPDATE_INTERVAL = 6 * 60 * 60 * 1000;   // 氛围句完整更新：6小时（一天4次）
+var TEMP_UPDATE_INTERVAL = 1 * 60 * 60 * 1000;   // 温度微调：1小时
+var MAX_PUSH_PER_DAY = 4;                        // 每日最多推送次数（与6小时间隔对齐）
+
 var _weatherUpdating = false;
 let view={type:'home'},wechatPage='chats',editingId=null,edModule='role',editFrom='contacts',lastBubbleTime=0;var _scheduleDate = null; // 行程页面当前查看的日期
 const DEFAULT_ONLINE = `你在微信上跟对方聊天。核心要求：每条消息极短，像真人随手打的字。禁止使用句号、逗号、分号等标点符号，用空格或换行来自然断句。禁止写任何动作、神态、心理或环境描写——只输出聊天内容本身。语气自然口语化，可适当用语气词（嗯、哦、哈、啧）来传递情绪。多条消息用换行分隔，每条不超过15字。
@@ -622,7 +626,8 @@ wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), ra
   '--sub': '#2E4A55',         // 调深
   '--line': '#C4AFA0',        // 调深
   wallpaper: 'radial-gradient(ellipse at 30% 10%, #E8C9A0 0%, transparent 40%), radial-gradient(ellipse at 70% 90%, #A8B88A 0%, transparent 50%), linear-gradient(145deg, #F3E9D8 0%, #E8DCC8 100%)'
-}
+},
+
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -719,7 +724,8 @@ function applySkin(id) {
   updateAllIcons();
 
   // ===== 新增：浅色主题适配（通过 CSS 变量，不再用内联样式） =====
-var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard');if (isLight) {
+var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard');
+if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
   root.style.setProperty('--clock-sub-opacity', '1');
   root.style.setProperty('--clock-theme-opacity', '1');
@@ -760,7 +766,7 @@ function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrat
 function migrate(d){
 d.coins = d.coins || 0;
   d.me=d.me||{name:'我',avatar:''};d.me.realName=d.me.realName||'';
-  d.settings=d.settings||{apiUrl:'',apiKey:'',chatModel:'',auxModel:''};
+d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: '', lightModel: '' };
   // ===== 群聊新增：上下文条数 =====
   if(d.settings.groupCtxLimit===undefined)d.settings.groupCtxLimit='';
   delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
@@ -1452,11 +1458,11 @@ weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;
   var appsHtml = otherApps.map(function(a) {
         var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>' : '';
     var iconUrl = a.icon || icons[a.id] || null;
-    var style = 'position:relative;';
-    if (iconUrl) {
-      style += 'background-image:url(\'' + iconUrl + '\');background-color:transparent;box-shadow:none;';
-    }
-    var content = iconUrl ? '' : a.emoji;
+var style = 'position:relative;';
+if (iconUrl) {
+  style += 'background-image:url(\'' + iconUrl + '\');background-color:transparent;box-shadow:none;background-size:contain;background-repeat:no-repeat;background-position:center;';
+}
+var content = iconUrl ? '' : a.emoji;
     return '<div class="app" onclick="openApp(\'' + a.id + '\')"><div class="app-ic" style="' + style + '">' + content + badge + '</div><div class="app-nm">' + a.name + '</div></div>';
   }).join('');
   
@@ -1509,20 +1515,33 @@ function renderWeatherWidget() {
         state: '晴',
         desc: '微风拂面，是个好天气。',
         detail: '舒适',
-        updatedAt: Date.now()
+        updatedAt: 0,              // 设为0，让第一次完整更新立即触发
+        tempUpdatedAt: 0,
+        lastPushedDesc: '',
+        lastPushedDetail: '',
+        pushDate: '',
+        pushCount: 0
       };
+    } else {
+      // 补全缺失字段（兼容旧数据）
+      if (w.weather.updatedAt === undefined) w.weather.updatedAt = 0;
+      if (w.weather.tempUpdatedAt === undefined) w.weather.tempUpdatedAt = 0;
+      if (w.weather.lastPushedDesc === undefined) w.weather.lastPushedDesc = '';
+      if (w.weather.lastPushedDetail === undefined) w.weather.lastPushedDetail = '';
+      if (w.weather.pushDate === undefined) w.weather.pushDate = '';
+      if (w.weather.pushCount === undefined) w.weather.pushCount = 0;
     }
   });
-  
+
   if (!worlds.length) {
     worlds = [{ id: '_placeholder', name: '未关联', weather: { icon: '🌤', temp: '--', state: '晴', desc: '还没有世界观，快去创建吧', detail: '' } }];
   }
-  
+
   _weatherWorlds = worlds;
-  
+
   if (_weatherCurrentIndex >= worlds.length) _weatherCurrentIndex = 0;
   if (_weatherCurrentIndex < 0) _weatherCurrentIndex = 0;
-  
+
   var w = worlds[_weatherCurrentIndex];
   var iconEl = document.getElementById('widgetIcon');
   var stateEl = document.getElementById('widgetState');
@@ -1532,10 +1551,9 @@ function renderWeatherWidget() {
   var nameEl = document.getElementById('widgetWorldName');
   var dotsEl = document.getElementById('widgetDots');
   var timeEl = document.getElementById('widgetUpdateTime');
-
   // ===== 判断当前主题是否为浅色 =====
   var currentSkin = DB.settings.skin || 'fusion';
-  var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard');
+var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || currentSkin === 'circus');
   
   // 根据主题调整透明度系数
   var opacityMap = {
@@ -1726,7 +1744,7 @@ function bindWeatherWidgetEvents() {
 }
 
 // ============================================================
-// 天气小组件：自动检查更新（每 3.5 小时）
+// 天气小组件：自动检查更新（拆分：完整更新 + 温度微调）
 // ============================================================
 function autoCheckWeatherUpdate() {
   // 门锁：如果已经在更新了，直接退出
@@ -1736,211 +1754,444 @@ function autoCheckWeatherUpdate() {
   if (!worlds.length) return;
 
   var now = Date.now();
-  var needUpdate = false;
+  var needFullUpdate = false;
+  var needTempUpdate = false;
+  var fullTargets = [];
+  var tempTargets = [];
 
-  // 检查是否有任何一个世界观需要更新
+  // 第一遍遍历：分类
   for (var i = 0; i < worlds.length; i++) {
     var w = worlds[i];
+
+    // ---- 初始化 weather（如果不存在） ----
     if (!w.weather) {
-      needUpdate = true;
-      break;
+      w.weather = {
+        icon: '🌤',
+        temp: 22,
+        state: '晴',
+        desc: '天气宜人',
+        detail: '',
+        updatedAt: 0,
+        tempUpdatedAt: 0,
+        lastPushedDesc: '',
+        lastPushedDetail: '',
+        pushDate: '',
+        pushCount: 0
+      };
+      needFullUpdate = true;
+      fullTargets.push(w.id);
+      continue;
     }
-    var lastUpdate = w.weather.updatedAt || 0;
-    if (now - lastUpdate > _weatherUpdateInterval) {
-      needUpdate = true;
-      break;
+
+    // ---- 检查是否需要完整更新（氛围句） ----
+    var lastFull = w.weather.updatedAt || 0;
+    if (now - lastFull > FULL_UPDATE_INTERVAL) {
+      needFullUpdate = true;
+      fullTargets.push(w.id);
+      continue; // 完整更新会连带温度一起刷新，所以跳过温度检查
+    }
+
+    // ---- 检查是否需要温度微调（仅当不需要完整更新时） ----
+    var lastTemp = w.weather.tempUpdatedAt || 0;
+    if (now - lastTemp > TEMP_UPDATE_INTERVAL) {
+      needTempUpdate = true;
+      tempTargets.push(w.id);
     }
   }
 
-  // 如果没有任何世界观需要更新，直接退出
-  if (!needUpdate) return;
+  // ---- 如果没有需要更新的，直接退出 ----
+  if (!needFullUpdate && !needTempUpdate) return;
 
-  // 锁上门，开始更新
+  // ---- 锁上门 ----
   _weatherUpdating = true;
 
-  // 遍历所有需要更新的世界观
-  var updatedCount = 0;
-  var totalToUpdate = 0;
+  var total = fullTargets.length + tempTargets.length;
+  var completed = 0;
 
-  // 先数一下有几个需要更新的
-  for (var j = 0; j < worlds.length; j++) {
-    var wj = worlds[j];
-    if (!wj.weather || (Date.now() - (wj.weather.updatedAt || 0) > _weatherUpdateInterval)) {
-      totalToUpdate++;
-    }
-  }
-
-  // 如果没有需要更新的，解锁退出
-  if (totalToUpdate === 0) {
-    _weatherUpdating = false;
-    return;
-  }
-
-  // 依次更新每个世界观（串行，不是并行）
-  var tried = {};
-
-  function updateNext() {
-    var target = null;
-    for (var k = 0; k < worlds.length; k++) {
-      var wk = worlds[k];
-      if (tried[wk.id]) continue;
-      if (!wk.weather || (Date.now() - (wk.weather.updatedAt || 0) > _weatherUpdateInterval)) {
-        target = wk;
-        break;
-      }
-    }
-
-    if (!target) {
+  function done() {
+    completed++;
+    if (completed >= total) {
       _weatherUpdating = false;
       renderWeatherWidget();
-      return;
     }
-
-    tried[target.id] = true;
-
-    aiGenerateWeather(target.id, function(success) {
-      setTimeout(updateNext, 0);
-    });
   }
 
-  updateNext();
+  // ---- 阶段1：完整更新（氛围句 + 温度，串行执行） ----
+  if (fullTargets.length) {
+    var fullIdx = 0;
+
+    function runNextFull() {
+      if (fullIdx >= fullTargets.length) {
+        // 完整更新全部完成后，如果有温度微调任务，进入阶段2
+        if (tempTargets.length) {
+          runNextTemp();
+        }
+        return;
+      }
+      var wid = fullTargets[fullIdx];
+      fullIdx++;
+      aiGenerateWeather(wid, function(success) {
+        // 无论成功失败，都继续下一个
+        done();
+        setTimeout(runNextFull, 200);
+      });
+    }
+
+    runNextFull();
+  } else {
+    // 没有完整更新，直接进入温度微调阶段
+    if (tempTargets.length) {
+      runNextTemp();
+    }
+  }
+
+  // ---- 阶段2：温度微调（轻量模型，串行执行） ----
+  function runNextTemp() {
+    // 如果 fullTargets 还没跑完，说明被阶段1调用了，这里不再重复启动
+    // 只有在 fullTargets 为空时才从这里开始
+    if (!fullTargets.length) {
+      // 复制一份 tempTargets 的索引
+      var tempIdx = 0;
+
+      function doNextTemp() {
+        if (tempIdx >= tempTargets.length) {
+          // 全部完成
+          return;
+        }
+        var wid = tempTargets[tempIdx];
+        tempIdx++;
+        updateTemperatureOnly(wid, function(success) {
+          done();
+          setTimeout(doNextTemp, 150);
+        });
+      }
+
+      doNextTemp();
+    }
+  }
+
+  // 如果完全没有任务，解锁（兜底）
+  if (!fullTargets.length && !tempTargets.length) {
+    _weatherUpdating = false;
+  }
 }
 function refreshWeather() {
   var worlds = DB.worlds || [];
   if (!worlds.length) {
-    popTip('还没有世界观，先去创建吧～', {icon:'🌍', title:'提示'});
+    popTip('还没有世界观，先去创建吧～', { icon: '🌍', title: '提示' });
     return;
   }
   var w = worlds[_weatherCurrentIndex];
   if (!w) return;
-  
+
+  // ---- 检查今日推送是否已满 ----
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var pushDate = (w.weather && w.weather.pushDate) || '';
+  var pushCount = (w.weather && w.weather.pushCount) || 0;
+  if (pushDate === todayStr && pushCount >= MAX_PUSH_PER_DAY) {
+    // 卡片仍然会更新，但提示用户
+    popTip('今日天气播报已满 ' + MAX_PUSH_PER_DAY + ' 次\n卡片仍会更新，但不会推送新消息', { icon: '🔕', title: '推送已达上限' });
+  }
+
   var iconEl = document.getElementById('widgetIcon');
   var descEl = document.getElementById('widgetDesc');
   if (iconEl) iconEl.textContent = '⏳';
   if (descEl) descEl.textContent = '生成中…';
-  
+
   aiGenerateWeather(w.id, function(success) {
     if (success) {
       renderWeatherWidget();
-      popTip('天气已刷新', {icon:'✅', title:'完成'});
+      popTip('天气已刷新', { icon: '✅', title: '完成' });
     } else {
       renderWeatherWidget();
-      popTip('生成失败，请重试', {icon:'⚠️', title:'出错了'});
+      popTip('生成失败，请重试', { icon: '⚠️', title: '出错了' });
     }
   });
 }
-
-
 // ============================================================
-// 天气小组件：AI 生成天气（适配异世界）
+// 天气小组件：仅更新温度（轻量模型 · 不推送）
+// ============================================================
+function updateTemperatureOnly(worldId, callback) {
+  var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
+  if (!world) {
+    if (callback) callback(false);
+    return;
+  }
+
+  // 确保 weather 存在
+  if (!world.weather) {
+    world.weather = {
+      icon: '🌤',
+      temp: 22,
+      state: '晴',
+      desc: '天气宜人',
+      detail: '',
+      updatedAt: 0,
+      tempUpdatedAt: 0,
+      lastPushedDesc: '',
+      lastPushedDetail: '',
+      pushDate: '',
+      pushCount: 0
+    };
+  }
+
+  // 用轻量模型
+  var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+  if (!model) {
+    // 没有模型时，做一次温和的随机变化（兜底）
+    var current = world.weather.temp || 22;
+    var climate = world._climate || '';
+    var range = 2;
+    if (/北方|沙漠|高原|内陆/.test(climate)) range = 4;
+    else if (/南方|热带|海洋|沿海/.test(climate)) range = 1.5;
+    var delta = (Math.random() - 0.5) * range * 2;
+    var newTemp = Math.round(Math.max(-10, Math.min(45, current + delta)));
+    world.weather.temp = newTemp;
+    world.weather.tempUpdatedAt = Date.now();
+    save();
+    if (callback) callback(true);
+    return;
+  }
+
+  // ===== 构造 Prompt（仅让 AI 调整温度） =====
+  var currentDesc = world.weather.desc || '天气宜人';
+  var currentTemp = world.weather.temp || 22;
+  var climate = world._climate || '未指定';
+
+  var prompt = '【任务】根据当前天气氛围和地区气候特征，微调当前温度。\n\n' +
+    '【当前氛围句】' + currentDesc + '\n' +
+    '【地区气候特征】' + climate + '\n' +
+    '【当前温度】' + currentTemp + '°C\n\n' +
+    '【要求】\n' +
+    '1. 根据气候特征判断温差大小：北方/沙漠/高原地区昼夜温差大，温度波动较大；南方/热带/沿海地区温差小，波动较小。\n' +
+    '2. 保持温度在 -30~45°C 合理范围内，根据各地区季节不同自然变化。\n' +
+    '3. **只输出一个数字**（整数），不要任何解释、不要单位、不要其他文字。\n\n' +
+    '【输出示例】\n' +
+    '如果当前温度是 22°C，北方干燥地区可能输出 18 或 26；南方湿润地区可能输出 21 或 23。';
+
+  try {
+    callAI([{ role: 'user', content: prompt }], model)
+      .then(function(out) {
+        var newTemp = parseInt(out.trim());
+        if (isNaN(newTemp) || newTemp < -10 || newTemp > 45) {
+          // 解析失败，做兜底随机
+          var fallback = currentTemp + Math.round((Math.random() - 0.5) * 4);
+          newTemp = Math.max(-10, Math.min(45, fallback));
+        }
+        world.weather.temp = newTemp;
+        world.weather.tempUpdatedAt = Date.now();
+        save();
+        if (callback) callback(true);
+      })
+      .catch(function(e) {
+        console.warn('温度微调失败，使用兜底随机:', e.message);
+        var fallback = currentTemp + Math.round((Math.random() - 0.5) * 4);
+        world.weather.temp = Math.max(-10, Math.min(45, fallback));
+        world.weather.tempUpdatedAt = Date.now();
+        save();
+        if (callback) callback(false);
+      });
+  } catch (e) {
+    console.warn('温度微调异常:', e.message);
+    var fallback = currentTemp + Math.round((Math.random() - 0.5) * 4);
+    world.weather.temp = Math.max(-10, Math.min(45, fallback));
+    world.weather.tempUpdatedAt = Date.now();
+    save();
+    if (callback) callback(false);
+  }
+}
+// ============================================================
+// 天气小组件：AI 生成完整天气（含推送去重 + 每日计数）
 // ============================================================
 async function aiGenerateWeather(worldId, callback) {
   var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
-  if (!world) { if (callback) callback(false); return; }
-  
-var model = DB.settings.auxModel || DB.settings.chatModel;
-if (!model) {
-  // 没连API/没选模型时，也盖个时间戳，否则会无限重试卡死
-  if (world.weather) {
-    world.weather.updatedAt = Date.now();
-  } else {
-    world.weather = { icon:'🌤', state:'晴', temp:22, desc:'（未设置模型）', detail:'', updatedAt: Date.now() };
+  if (!world) {
+    if (callback) callback(false);
+    return;
   }
-  save();
-  if (callback) callback(false);
-  return;
-}
-  
+
+  // 初始化 weather（如果不存在）
+  if (!world.weather) {
+    world.weather = {
+      icon: '🌤',
+      temp: 22,
+      state: '晴',
+      desc: '天气宜人',
+      detail: '',
+      updatedAt: 0,
+      tempUpdatedAt: 0,
+      lastPushedDesc: '',
+      lastPushedDetail: '',
+      pushDate: '',
+      pushCount: 0
+    };
+  }
+
+  var model = DB.settings.chatModel || DB.settings.auxModel || DB.settings.lightModel;
+  if (!model) {
+    // 没模型时，生成一个简单天气占位
+    var now = new Date();
+    var hour = now.getHours();
+    var defaultIcon = (hour >= 6 && hour < 18) ? '☀️' : '🌙';
+    world.weather.icon = defaultIcon;
+    world.weather.temp = 22 + Math.round((Math.random() - 0.5) * 8);
+    world.weather.state = '晴';
+    world.weather.desc = '天气不错';
+    world.weather.detail = '';
+    world.weather.updatedAt = Date.now();
+    world.weather.tempUpdatedAt = Date.now();
+    save();
+    if (callback) callback(false);
+    return;
+  }
+
   var now = new Date();
   var period = now.getHours() < 6 ? '凌晨' : now.getHours() < 12 ? '上午' : now.getHours() < 18 ? '下午' : '晚上';
   var month = now.getMonth() + 1;
   var season = month >= 3 && month <= 5 ? '春天' : month >= 6 && month <= 8 ? '夏天' : month >= 9 && month <= 11 ? '秋天' : '冬天';
-  
+
+  // ===== 读取气候偏好 =====
+  var climate = world._climate || '未指定';
+
   var prompt = '根据世界观生成一条简洁的天气描述。\n\n' +
     '【世界观】' + (world.desc || '现代都市') + '\n' +
-    '【时间】' + season + '，' + period + '\n\n' +
+    '【时间】' + season + '，' + period + '\n' +
+    '【气候特征（必须遵循）】' + climate + '\n\n' +
     '【要求】\n' +
-    '1. desc是一句朴素、清楚的天气描写，就写天气本身（如"晴空万里，微风和煦""细雨绵绵，空气微凉"）。\n' +
-    '2. 禁止出现任何人物（他/她/你）、禁止出现屏幕/手机等现代设备意象、禁止把天气写成带情节的小场景。只描写天空、温度、风、光这类自然现象。\n' +
-    '3. 只有当世界观明确含魔法/灵气/妖气/赛博等设定时，才可轻微融入；普通现代/都市世界就写正常真实的天气，不要硬凑奇幻词。\n' +
-    '4. desc 控制在12-22字，简洁自然。\n' +
-    '5. 只输出JSON：{"icon":"天气emoji","state":"晴/雨/雪/多云/阴等","temp":数字,"desc":"天气描写","detail":"补充如湿度/风力"}。不要解释、不要代码块。\n\n' +
+    '1. desc 是一句朴素、清楚的天气描写（如"晴空万里，微风和煦""细雨绵绵，空气微凉"），12-22字。\n' +
+    '2. 禁止出现任何人物（他/她/你）、禁止出现屏幕/手机等现代设备意象。只描写自然现象。\n' +
+    '3. 只有当世界观明确含魔法/灵气/妖气/赛博等设定时，才可轻微融入；普通世界就写正常真实天气。\n' +
+    '4. detail 是补充信息（如"湿度 65% · 南风 3级"），可留空。\n' +
+    '5. 必须严格遵守「气候特征」中描述的温度规律（如北方干燥昼夜温差大、南方湿润温差小等）。\n' +
+    '6. 只输出JSON：{"icon":"天气emoji","state":"晴/雨/雪/多云/阴等","temp":数字,"desc":"天气描写","detail":"补充信息"}。\n\n' +
     '可用icon：☀️晴 ⛅多云 ☁️阴 🌧雨 ⛈雷暴 ❄️雪 🌫雾 🌪风 🌙夜\n' +
     'temp：-5~45之间合理数字';
-  
+
   try {
     var out = await callAI([{ role: 'user', content: prompt }], model);
     out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
     var match = out.match(/\{[\s\S]*\}/);
     if (match) out = match[0];
     var data = JSON.parse(out);
-    
+
     if (!data.icon || data.temp === undefined || !data.desc) {
       throw new Error('AI 返回数据不完整');
     }
-    
-    // ===== 如果 AI 没返回 state，用 Emoji 映射兜底 =====
+
     var state = data.state || mapIconToState(data.icon) || '晴';
-    
-    world.weather = {
-      icon: data.icon || '🌤',
-      state: state,
-      temp: data.temp !== undefined ? data.temp : 22,
-      desc: data.desc || '天气宜人',
-      detail: data.detail || '',
-      updatedAt: Date.now()
-    };
-    save();
-    
-// ===== 向所有关联该世界观的角色发送天气消息（不再限制为当前活跃世界观） =====
-var relatedChars = DB.contacts.filter(function(c) { return c.worldId === worldId; });
-var hasChanged = false;   // 加一个"记号"，看有没有真的加了新消息
 
-relatedChars.forEach(function(c) {
-  if (!DB.chats[c.id]) DB.chats[c.id] = [];
-  var msgs = DB.chats[c.id];
-  var sysMsg = '🌤 天气变了：' + data.desc;
+    // ===== 保存新天气数据 =====
+    var newDesc = data.desc || '天气宜人';
+    var newDetail = data.detail || '';
 
-  // 找最近一条天气消息，避免重复插入
-  var lastWeatherMsg = null;
-  for (var i = msgs.length - 1; i >= 0; i--) {
-    if (msgs[i].role === 'system' && msgs[i].content && msgs[i].content.startsWith('🌤 天气变了')) {
-      lastWeatherMsg = msgs[i];
-      break;
+    // ---- 判断是否需要推送 ----
+    var todayStr = now.toISOString().slice(0, 10);
+    var lastPushedDesc = world.weather.lastPushedDesc || '';
+    var lastPushedDetail = world.weather.lastPushedDetail || '';
+    var pushDate = world.weather.pushDate || '';
+    var pushCount = world.weather.pushCount || 0;
+
+    // 如果日期变了，重置推送计数
+    if (pushDate !== todayStr) {
+      pushCount = 0;
+      pushDate = todayStr;
     }
-  }
-  var isDuplicate = lastWeatherMsg && lastWeatherMsg.content === sysMsg;
 
-  if (!isDuplicate) {
-    msgs.push({
-      id: 'sys_' + Date.now(),
-      role: 'system',
-      type: 'system',
-      content: sysMsg,
-      time: Date.now()
-    });
-    hasChanged = true;
-    if (view && view.type === 'chat' && view.id === c.id) {
-      renderChat(true);
-    }
-  }
-});
+    var descChanged = (newDesc !== lastPushedDesc);
+    var detailChanged = (newDetail !== lastPushedDetail);
+    var shouldPush = (descChanged || detailChanged) && (pushCount < MAX_PUSH_PER_DAY);
 
-if (hasChanged) save();   // 循环全跑完只存一次
-
-  if (callback) callback(true);
-
-} catch (e) {
-  console.error('AI 生成天气失败:', e);
-  // 失败也盖时间戳，避免下一轮立刻疯狂重试
-  if (!world.weather) {
-    world.weather = { icon:'🌤', state:'晴', temp:22, desc:'（天气生成失败，稍后重试）', detail:'', updatedAt: Date.now() };
-  } else {
+    // ---- 更新 weather 对象 ----
+    world.weather.icon = data.icon || '🌤';
+    world.weather.state = state;
+    world.weather.temp = data.temp !== undefined ? data.temp : 22;
+    world.weather.desc = newDesc;
+    world.weather.detail = newDetail;
     world.weather.updatedAt = Date.now();
+    world.weather.tempUpdatedAt = Date.now();
+
+    // ---- 如果推送 ----
+    if (shouldPush) {
+      world.weather.lastPushedDesc = newDesc;
+      world.weather.lastPushedDetail = newDetail;
+      world.weather.pushDate = todayStr;
+      world.weather.pushCount = pushCount + 1;
+
+      // ===== 发送天气推送 =====
+      var relatedChars = DB.contacts.filter(function(c) { return c.worldId === worldId; });
+      var sysMsg = '🌤 天气变了：' + newDesc + (newDetail ? '（' + newDetail + '）' : '');
+
+      relatedChars.forEach(function(c) {
+        if (!DB.chats[c.id]) DB.chats[c.id] = [];
+        var msgs = DB.chats[c.id];
+
+        // 找最近一条天气消息，避免重复插入（精确匹配）
+        var lastWeatherMsg = null;
+        for (var i = msgs.length - 1; i >= 0; i--) {
+          if (msgs[i].role === 'system' && msgs[i].content && msgs[i].content.startsWith('🌤 天气变了')) {
+            lastWeatherMsg = msgs[i];
+            break;
+          }
+        }
+        // 如果上一条天气消息内容不同，才插入新消息
+        if (!lastWeatherMsg || lastWeatherMsg.content !== sysMsg) {
+          msgs.push({
+            id: 'sys_' + Date.now() + '_' + Math.random().toString(36).slice(2, 4),
+            role: 'system',
+            type: 'system',
+            content: sysMsg,
+            time: Date.now()
+          });
+        }
+      });
+
+      // 如果当前在聊天界面且是该角色，刷新视图
+      if (view && view.type === 'chat' && view.id && relatedChars.some(function(c) { return c.id === view.id; })) {
+        renderChat(true);
+      }
+
+      save();
+      if (callback) callback(true);
+
+    } else {
+      // ---- 不推送：只保存数据 ----
+      // 如果 desc/detail 没变，保留 lastPushed 不变（避免重复推送）
+      // 如果今日推送已满，保留 lastPushed 不变（卡片已更新，但推送计数不增加）
+      world.weather.lastPushedDesc = world.weather.lastPushedDesc || newDesc;
+      world.weather.lastPushedDetail = world.weather.lastPushedDetail || newDetail;
+      world.weather.pushDate = pushDate;
+      world.weather.pushCount = pushCount;
+      save();
+      if (callback) callback(true);
+    }
+
+    // 刷新卡片显示
+    renderWeatherWidget();
+
+  } catch (e) {
+    console.error('AI 生成天气失败:', e);
+    // 失败也盖时间戳，避免下一轮立刻疯狂重试
+    if (!world.weather) {
+      world.weather = {
+        icon: '🌤',
+        state: '晴',
+        temp: 22,
+        desc: '（天气生成失败，稍后重试）',
+        detail: '',
+        updatedAt: Date.now(),
+        tempUpdatedAt: Date.now(),
+        lastPushedDesc: '',
+        lastPushedDetail: '',
+        pushDate: '',
+        pushCount: 0
+      };
+    } else {
+      world.weather.updatedAt = Date.now();
+      world.weather.tempUpdatedAt = Date.now();
+    }
+    save();
+    if (callback) callback(false);
   }
-  save();
-  if (callback) callback(false);
-}
 }
 // ============================================================
 // 天气小组件：手动调整天气（长按触发）
@@ -2586,7 +2837,7 @@ comments = item.comments.slice(0, 3).map(function(c, j) {
 async function generateGodComment(post, worldId) {
   var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
   if (!world) return null;
-  var model = DB.settings.auxModel || DB.settings.chatModel;
+var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
   if (!model) return null;
 
   var prompt = '【场景】有人在「' + world.name + '」的本地社区发了一条帖子，现在共鸣数达到 3 次，触发「神评」。\n\n' +
@@ -2615,7 +2866,7 @@ async function triggerAIComment(postId) {
 
   var world = (DB.worlds || []).find(function(w) { return w.id === _floatingWorldId; });
   if (!world) return;
-  var model = DB.settings.auxModel || DB.settings.chatModel;
+var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
   if (!model) return;
 
   var prompt = '【场景】有人在「' + world.name + '」发了一条帖子，用户评论了它。请你以路人身份回一条评论。\n\n' +
@@ -3119,6 +3370,7 @@ function openWorldEditor(worldId) {
   var descVal = isEdit ? esc(w.desc || '') : '';
   var keywordVal = '';
   var placesVal = isEdit ? esc(w._places || '') : '';
+  var climateVal = isEdit ? esc(w._climate || '') : '';   // ★ 读取已保存的气候
 
   var mo = document.createElement('div');
   mo.className = 'modal';
@@ -3129,8 +3381,10 @@ function openWorldEditor(worldId) {
     '<input id="we_icon" value="' + iconVal + '" placeholder="图标（一个emoji）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:10px;background:var(--bg);color:var(--text);">' +
     '<input id="we_keyword" value="' + keywordVal + '" placeholder="关键词（如：赛博朋克、义体、霓虹）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:6px;background:var(--bg);color:var(--text);">' +
     '<input id="we_places" value="' + placesVal + '" placeholder="关联地点（如：咖啡馆、书店、江边，用中文逗号分隔）" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:6px;background:var(--bg);color:var(--text);">' +
+    // ★ 新增气候输入框
+    '<input id="we_climate" value="' + climateVal + '" placeholder="🌦️ 气候偏好（可选）：如 北方干燥、四季分明、夏季有沙尘暴" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;margin-bottom:6px;background:var(--bg);color:var(--text);">' +
     '<button class="btn gray" style="margin:0 0 6px 0;padding:6px 0;font-size:13px;" onclick="aiPolishWorld()">✨ AI润色生成描述</button>' +
-    '<textarea id="we_desc" placeholder="世界观描述（可手动填写，也可用AI润色生成）" style="width:100%;min-height:80px;max-width:100%;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6;margin-top:6px;">' + descVal + '</textarea>'	+
+    '<textarea id="we_desc" placeholder="世界观描述（可手动填写，也可用AI润色生成）" style="width:100%;min-height:80px;max-width:100%;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6;margin-top:6px;">' + descVal + '</textarea>' +
     '<button class="btn" style="width:100%;margin:10px 0 4px;" onclick="saveWorld(\'' + (isEdit ? w.id : '') + '\')">保存</button>' +
     (isEdit ? '<button class="btn gray" style="width:100%;margin:0;" onclick="deleteWorld(\'' + w.id + '\')">🗑️ 删除此世界观</button>' : '') +
     '<button class="btn gray" style="width:100%;margin:4px 0 0;" onclick="closeModal()">取消</button>' +
@@ -3173,6 +3427,7 @@ function saveWorld(editId) {
   var icon = document.getElementById('we_icon').value.trim() || '🌍';
   var desc = document.getElementById('we_desc').value.trim();
   var places = document.getElementById('we_places').value.trim();
+  var climate = document.getElementById('we_climate').value.trim();   // ★ 新增
 
   if (editId) {
     var w = (DB.worlds || []).find(function(x) { return x.id === editId; });
@@ -3181,6 +3436,7 @@ function saveWorld(editId) {
     w.icon = icon;
     w.desc = desc;
     w._places = places;
+    w._climate = climate;   // ★ 保存气候
   } else {
     DB.worlds = DB.worlds || [];
     DB.worlds.push({
@@ -3188,7 +3444,8 @@ function saveWorld(editId) {
       name: name,
       icon: icon,
       desc: desc,
-      _places: places
+      _places: places,
+      _climate: climate     // ★ 保存气候
     });
   }
   save();
@@ -3225,6 +3482,8 @@ async function aiPolishWorld() {
 
   var keyword = document.getElementById('we_keyword').value.trim();
   var places = document.getElementById('we_places').value.trim();
+  var climate = document.getElementById('we_climate').value.trim();   // ★ 读取用户填写的气候
+
   if (!keyword) {
     alert('请先输入关键词');
     window._polishLock_world = false;
@@ -3244,12 +3503,33 @@ async function aiPolishWorld() {
   }
 
   try {
-    var prompt = '根据以下关键词，生成一个世界观描述。\n\n【要求】\n- 世界观是给 AI 用的上下文提示词，必须能直接指导对话。不要纯氛围描写，不要华丽词藻。\n- 必须包含以下信息：时代背景、社会结构、核心规则、主要势力、当前局势。\n- 结构清晰，用 Markdown 格式输出（## 标题、- 列表）。\n\n另外，请根据关键词生成 3-6 个关键地点，每个地点用一句话描述它是什么地方、适合做什么。\n\n【硬性规则】生成地点时，必须在每个地点条目中明确标注归属：\n- 如果地点是"AI角色"经常去的地方，必须用角色名称标注，例如：「杨深常去的街角咖啡馆」\n- 如果地点是"用户"经常去的地方，必须用"用户"标注，例如：「用户常去的24小时便利店」\n- 如果地点是双方共同活动的地方，标注为「共同地点：江边长椅」\n绝对不允许出现"你常去的地方""你的秘密基地""你住的地方"这类模糊表述。\n\n输出格式：先写世界观正文（Markdown 格式），然后单独列出关键地点。\n\n关键词：' + keyword;
+    // ★ 构建完整 prompt（包含气候要求，无省略）
+    var prompt = '根据以下关键词，生成一个世界观描述。\n\n【要求】\n' +
+      '- 世界观是给 AI 用的上下文提示词，必须能直接指导对话。不要纯氛围描写，不要华丽词藻。\n' +
+      '- 必须包含以下信息：时代背景、社会结构、核心规则、主要势力、当前局势、区域气候特征。\n' +
+      '- 区域气候特征必须清晰写明：属于南方还是北方（或类似的地理划分）、潮湿还是干燥、多雨还是少雨、是否有台风/暴雪/沙尘暴等极端天气。\n' +
+      '- 结构清晰，用 Markdown 格式输出（## 标题、- 列表）。\n\n' +
+      '另外，请根据关键词生成 3-6 个关键地点，每个地点用一句话描述它是什么地方、适合做什么。\n\n' +
+      '【硬性规则】生成地点时，必须在每个地点条目中明确标注归属：\n' +
+      '- 如果地点是"AI角色"经常去的地方，必须用角色名称标注，例如：「杨深的xx公司」「杨深的住所xx」\n' +
+      '- 如果地点是"用户"经常去的地方，必须用"用户"标注，例如：「用户常去的24小时便利店」「用户的住所xx」\n' +
+      '- 如果地点是双方共同活动的地方，标注为「共同地点：江边长椅」\n' +
+      '绝对不允许出现"你常去的地方""你的秘密基地""你住的地方"这类模糊表述。\n\n';
+
+    // ★ 如果用户填写了气候，以最高优先级插入；否则让 AI 自动推断
+    if (climate) {
+      prompt += '【🔴 用户强制指定的气候要求（必须严格遵守，优先级最高）】\n' + climate + '\n\n';
+    } else {
+      prompt += '【🔵 自动推断规则】如果用户没有指定具体气候，请你根据世界观类型和风格自动推断合理的气候（例如：妖怪世界可设定为"终年雾霭潮湿的南方丘陵"；现代都市可设定为"四季分明、秋季干燥的北方城市"；废土世界可设定为"干旱少雨、沙尘暴频发"）。\n\n';
+    }
+
+    prompt += '输出格式：先写世界观正文（Markdown 格式），然后单独列出关键地点。\n\n关键词：' + keyword;
 
     if (places) {
       prompt += '\n\n用户提供的关联地点参考（可选择性使用）：' + places;
     }
 
+    // 调用 AI
     var result = await callAI([{ role: 'user', content: prompt }], model);
     var descEl = document.getElementById('we_desc');
     if (descEl) descEl.value = result.trim();
@@ -3488,50 +3768,15 @@ function openGroupChat(gid){
 
 // ==================== 群聊气泡（带昵称 + 撤回显示）====================
 function groupBubble(m){
-  if (m.recalled){
-    var whoR = (m.role==='user') ? (DB.me.name||'我') : (function(){ var cc=getC(m.charId); return cc?(cc.nick||cc.name):'对方'; })();
-    return '<div class="ts">'+esc(whoR)+' 撤回了一条消息</div>';
-  }
-
-  var me = (m.role === 'user');
-  var c = (!me && m.charId) ? getC(m.charId) : null;
-
-  var av = me ? DB.me.avatar : (c ? c.avatar : '');
-  var initial = me ? ((DB.me.name||'我')[0]) : (c ? ((c.name||'?')[0]) : '?');
-  var senderName = me ? '' : (c ? (c.nick||c.name) : '未知');
-
-  var body;
-  if (m.type === 'image') {
-    body = '<div class="mbody" style="display:inline-block;padding:3px;background:'+(me?'var(--theme)':'var(--card)')+'"><img src="'+m.content+'" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>';
-  } else if (m.type === 'sticker') {
-    var s = DB.stickers.find(function(x){ return x.name===m.content; });
-    body = s ? '<div style="display:inline-block;padding:0"><img src="'+s.img+'" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>' : '<div class="mbody" style="display:inline-block;">[表情:'+esc(m.content)+']</div>';
-  } else if (m.type === 'voice') {
-    var dur = Math.max(1, Math.min(60, Math.round((m.content||'').length / 2.2)));
-    var expandedClass = m.voiceExpanded ? 'expanded' : '';
-    body = '<div class="mbody voice-bubble '+expandedClass+'" style="cursor:pointer;display:inline-flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;text-align:left;'+(me?'background:var(--theme);color:#fff;':'')+'" onclick="toggleVoice(\''+m.id+'\')">'+
-      '<div class="voice-top">'+
-        '<span class="play-icon">▶</span>'+
-        '<div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>'+
-        '<span class="duration">'+dur+'″</span>'+
-      '</div>'+
-      '<div class="voice-text">'+esc(m.content)+'</div>'+
-    '</div>';
-  } else {
-    body = '<div class="mbody" style="display:inline-block;max-width:100%;text-align:left;word-break:break-word;white-space:pre-wrap;">'+esc(m.content)+'</div>';
-  }
-
-  var nameTag = (!me && senderName)
-    ? '<div style="font-size:11px;color:var(--sub);line-height:1.2;margin:0 0 1px 2px;">'+esc(senderName)+'</div>'
-    : '';
-
-  var avExtra = nameTag ? 'margin-top:15px;' : '';
-  return '<div class="msg '+(me?'me':'')+'" data-mid="'+(m.id||'')+'">'+
-    '<div class="avatar" style="'+(av?"background-image:url('"+av+"');":'')+avExtra+'">'+(av?'':initial)+'</div>'+
-    '<div class="msg-slide" style="max-width:70%;min-width:0;'+(me?'text-align:right;':'text-align:left;')+'">'+
-      nameTag + body +
-    '</div>'+
-  '</div>';
+  if(m.recalled){var whoR=(m.role==='user')?(DB.me.name||'我'):(function(){var cc=getC(m.charId);return cc?(cc.nick||cc.name):'对方';})();return '<div class="ts">'+esc(whoR)+' 撤回了一条消息</div>';}
+  var me=(m.role==='user');var c=(!me&&m.charId)?getC(m.charId):null;var av=me?DB.me.avatar:(c?c.avatar:'');var initial=me?((DB.me.name||'我')[0]):(c?((c.name||'?')[0]):'?');var senderName=me?'':(c?(c.nick||c.name):'未知');var body;
+  if(m.type==='image'){body='<div class="mbody" style="display:inline-block;padding:3px;background:'+(me?'var(--theme)':'var(--card)')+'"><img src="'+m.content+'" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>';}
+  else if(m.type==='sticker'){var s=DB.stickers.find(function(x){return x.name===m.content;});body=s?'<div style="display:inline-block;padding:0"><img src="'+s.img+'" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>':'<div class="mbody" style="display:inline-block;">[表情:'+esc(m.content)+']</div>';}
+  else if(m.type==='voice'){var dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));var expandedClass=m.voiceExpanded?'expanded':'';body='<div class="mbody voice-bubble '+expandedClass+'" style="cursor:pointer;display:inline-flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;text-align:left;'+(me?'background:var(--theme);color:#fff;':'')+'" onclick="toggleVoice(\''+m.id+'\')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">'+dur+'″</span></div><div class="voice-text">'+esc(m.content)+'</div></div>';}
+  else{var displayContent=m.editedContent||m.content;body='<div class="mbody" style="display:inline-block;max-width:100%;text-align:left;word-break:break-word;white-space:pre-wrap;">'+esc(displayContent)+'</div>';}
+  var nameTag=(!me&&senderName)?'<div style="font-size:11px;color:var(--sub);line-height:1.2;margin:0 0 1px 2px;">'+esc(senderName)+'</div>':'';
+  var avExtra=nameTag?'margin-top:15px;':'';
+  return '<div class="msg '+(me?'me':'')+'" data-mid="'+(m.id||'')+'"><div class="avatar" style="'+(av?"background-image:url('"+av+"');":'')+avExtra+'">'+(av?'':initial)+'</div><div class="msg-slide" style="max-width:70%;min-width:0;'+(me?'text-align:right;':'text-align:left;')+'">'+nameTag+body+'</div></div>';
 }
 
 // ==================== 群聊界面 ====================
@@ -3676,6 +3921,10 @@ function openGroupMsgMenu(id, isMe){
     btns += '<button class="btn gray" onclick="closeModal();groupDelMsg(\''+id+'\')">🗑️ 单条删除</button>';
   } else {
     btns += '<button class="btn" onclick="closeModal();groupRegenMsg(\''+id+'\')">🔄 让TA重新回复</button>';
+    // ★ 新增：编辑按钮（仅纯文本且未撤回）
+    if (m.type === 'text' && !m.recalled) {
+        btns += '<button class="btn" onclick="closeModal();editMessage(\''+id+'\')">✏️ 编辑</button>';
+    }
     btns += '<button class="btn" onclick="closeModal();groupRecallMsg(\''+id+'\')">↩️ 撤回这条</button>';
     btns += '<button class="btn gray" onclick="closeModal();groupDelMsg(\''+id+'\')">🗑️ 单条删除</button>';
   }
@@ -3686,7 +3935,6 @@ function openGroupMsgMenu(id, isMe){
   mo.onclick = function(e){ if(e.target===mo) closeModal(); };
   phone.appendChild(mo);
 }
-
 // 撤回
 function groupRecallMsg(id){
   var arr = DB.chats[view.id]; if(!arr) return;
@@ -3996,18 +4244,18 @@ if (stickerNames.length) {
             msgType = 'voice';
             content = part.content;
             break;
-          case 'sticker':
-            // 检查表情是否存在（以防 AI 自己编名字）
-            const exists = DB.stickers.some(s => s.name === part.content);
-            if (exists) {
-              msgType = 'sticker';
-              content = part.content;
-            } else {
-              // 降级为纯文本
-              msgType = 'text';
-              content = '[表情:' + part.content + ']';
-            }
-            break;
+case 'sticker': {
+    const exists = DB.stickers.some(s => s.name === part.content);
+    if (exists) {
+        msgType = 'sticker';
+        content = part.content;
+    } else {
+        // 不存在就置空，后面的 if (msgType && content) 会跳过这条
+        msgType = null;
+        content = null;
+    }
+    break;
+}
           case 'text':
             if (part.recalled) {
               // 群聊不处理撤回，直接显示撤回内容作为普通文本
@@ -4469,10 +4717,20 @@ function renderSettings(){
       <div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div>
     </div>
     <button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button>
-    <div class="section">
-      <div class="row"><label>主聊天模型</label><select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select></div>
-      <div class="row"><label>辅助模型</label><select id="auxModel"><option>${s.auxModel||'（润色/生成用）'}</option></select></div>
-    </div>
+<div class="section">
+  <div class="row">
+    <label>主聊天模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">角色对话 · 深度推理</span></label>
+    <select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select>
+  </div>
+  <div class="row">
+    <label>辅助模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">润色 · 生成 · 推演</span></label>
+    <select id="auxModel"><option>${s.auxModel||'请先拉取'}</option></select>
+  </div>
+  <div class="row">
+    <label>轻量模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">高频后台 · 快速响应</span></label>
+    <select id="lightModel"><option>${s.lightModel||'请先拉取'}</option></select>
+  </div>
+</div>
     <button class="btn" onclick="saveApi()">保存接口设置</button>
 
 <!-- ===== 主题皮肤（动态渲染） ===== -->
@@ -5845,7 +6103,7 @@ async function checkAutoGreet() {
 async function doAutoGreet(c, slot) {
   // ===== 1. 前置检查 =====
   if (c.isBlockedByChar) return;
-  const model = DB.settings.auxModel || DB.settings.chatModel;
+  const model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
   if (!model) {
     console.warn('自动问候：没有可用模型，跳过');
     return;
@@ -5903,15 +6161,15 @@ async function doAutoGreet(c, slot) {
           };
           break;
 
-        case 'sticker': {
-          // 验证表情是否存在
-          const exists = DB.stickers.some(s => s.name === part.content);
-          msgObj = exists
-            ? { id: newId(), role: 'assistant', type: 'sticker', content: part.content, time: Date.now() }
-            : { id: newId(), role: 'assistant', type: 'text', content: '[表情:' + part.content + ']', time: Date.now() };
-          break;
-        }
-
+case 'sticker': {
+    const exists = DB.stickers.some(s => s.name === part.content);
+    if (exists) {
+        msgObj = { id: newId(), role: 'assistant', type: 'sticker', content: part.content, time: Date.now() };
+    } else {
+        msgObj = null; // 不存在就丢掉
+    }
+    break;
+}
         case 'transfer':
           // 主动问候一般不会发转账，但保留处理（作为 AI 发起的转账）
           msgObj = {
@@ -7128,7 +7386,17 @@ if (todaySchedule && todaySchedule.items && todaySchedule.items.length) {
 
   return s;
 }
-function toApiMsg(m){if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};if(m.type==='image')return{role:m.role,content:[{type:'text',text:'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};if(m.type==='transfer')return{role:m.role,content:`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};if(m.type==='redpacket')return{role:m.role,content:`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};if(m.type==='voice')return{role:m.role,content:`（语音消息）${m.content}`};if(m.type==='sticker')return{role:m.role,content:`（发了个表情：${m.content}）`};return{role:m.role,content:m.content};}
+function toApiMsg(m){
+  if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};
+  if(m.type==='image')return{role:m.role,content:[{type:'text',text:'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};
+  if(m.type==='transfer')return{role:m.role,content:`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};
+  if(m.type==='redpacket')return{role:m.role,content:`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};
+  if(m.type==='voice')return{role:m.role,content:`（语音消息）${m.content}`};
+  if(m.type==='sticker')return{role:m.role,content:`（发了个表情：${m.content}）`};
+  // ★ 修改：纯文本优先使用 editedContent
+  var content = m.editedContent || m.content;
+  return{role:m.role,content:content};
+}
 function colorLines(s,color){const col=color||'var(--theme)';return esc(s).replace(/(「[^」]*」|“[^”]*”|"[^"]*"|＂[^＂]*＂)/g,'<span style="color:'+col+';font-weight:500">$1</span>');}
 function tsHtml(t){return `<div class="ts"><span class="ts-pill">${fmtTime(t)}</span></div>`;}
 // 根据 AI/用户给的名字，智能查找最匹配的表情
@@ -7157,49 +7425,17 @@ function findSticker(name) {
   return null;
 }
 
-function bubble(c,m){if (m.type === 'system') {
-  return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';
-}
+function bubble(c,m){if(m.type==='system'){return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';}
 const me=m.role==='user';const av=me?DB.me.avatar:c.avatar;const nm=me?((DB.me.name||'我')[0]):((c.name||'?')[0]);let body;
-  if(m.recalled){const who=me?'你':(c.nick||c.name);body=`<div class="mbody" style="background:transparent;box-shadow:none;color:var(--sub);font-size:13px;border:1px dashed var(--line)">${who} 撤回了一条消息 ${m.recalledContent?`<span style="color:var(--theme);cursor:pointer" onclick="peekRecall('${m.id}')">${m.reveal?'· '+esc(m.recalledContent):(me?'· 查看':'· 偷看(5💗)')}</span>`:''}</div>`;}
-  else if(m.type==='image')body=`<div class="mbody" style="padding:3px;background:${me?'var(--theme)':'var(--card)'}"><img src="${m.content}" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>`;
-else if (m.type === 'transfer') {
-  var statusText = '';
-  if (m.status === 'accepted') statusText = '✅ 已接收';
-  else if (m.status === 'refunded') statusText = '⏳ 已退回';
-  else statusText = '待处理';
-  body = '<div class="transfer-card" data-mid="' + m.id + '" style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">' +
-    '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530;">' +
-      '<div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="color:#F99530;font-size:22px;font-weight:bold;">¥</span></div>' +
-      '<div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:500;">¥ ' + esc(String(m.amount)) + '</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px;">' + (m.content ? esc(m.content) : '转账') + '</div></div>' +
-    '</div>' +
-    '<div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px;display:flex;justify-content:space-between;">' +
-      '<span>微信转账</span>' +
-      '<span>' + statusText + '</span>' +
-    '</div>' +
-    '</div>';
-}
-  else if(m.type==='redpacket')body=`<div style="width:220px;background:#fff;border-radius:10px;overflow:hidden"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#e05a49"><div style="width:36px;height:36px;background:#fbe0a6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px">🧧</div><div style="flex:1"><div style="color:#fff;font-size:14px">${esc(m.content)||'恭喜发财'}</div><div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:2px">¥${esc(String(m.amount))}</div></div></div><div style="background:#f2c879;color:#8a4b00;font-size:11px;padding:6px 12px">微信红包</div></div>`;
-else if(m.type==='voice'){
-  const dur = Math.max(1, Math.min(60, Math.round((m.content || '').length / 2.2)));
-  const isExpanded = !!m.voiceExpanded;
-  const expandedClass = isExpanded ? 'expanded' : '';
-  body = `<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')">
-    <div class="voice-top">
-      <span class="play-icon">▶</span>
-      <div class="wave-bars">
-        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-        <span class="bar"></span><span class="bar"></span>
-      </div>
-      <span class="duration">${dur}″</span>
-    </div>
-    <div class="voice-text">${esc(m.content)}</div>
-  </div>`;
-}
-  else if(m.type==='sticker'){const s=DB.stickers.find(x=>x.name===m.content);body=s?`<div style="padding:0"><img src="${s.img}" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>`:`<div class="mbody">[表情:${esc(m.content)}]</div>`;}
-  else body=`<div class="mbody">${me?esc(m.content):(c.mode==='offline'?colorLines(m.content,c.lineColor):esc(m.content))}</div>`;
-  return `<div class="msg ${me?'me':''}" data-mid="${m.id||''}"><div class="cavatar" style="${av?`background-image:url('${av}')`:''}">${av?'':nm}</div>${body}</div>`;}
+if(m.recalled){const who=me?'你':(c.nick||c.name);body=`<div class="mbody" style="background:transparent;box-shadow:none;color:var(--sub);font-size:13px;border:1px dashed var(--line)">${who} 撤回了一条消息 ${m.recalledContent?`<span style="color:var(--theme);cursor:pointer" onclick="peekRecall('${m.id}')">${m.reveal?'· '+esc(m.recalledContent):(me?'· 查看':'· 偷看(5💗)')}</span>`:''}</div>`;}
+else if(m.type==='image')body=`<div class="mbody" style="padding:3px;background:${me?'var(--theme)':'var(--card)'}"><img src="${m.content}" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>`;
+else if(m.type==='transfer'){var statusText='';if(m.status==='accepted')statusText='✅ 已接收';else if(m.status==='refunded')statusText='⏳ 已退回';else statusText='待处理';body='<div class="transfer-card" data-mid="'+m.id+'" style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530;"><div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="color:#F99530;font-size:22px;font-weight:bold;">¥</span></div><div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:500;">¥ '+esc(String(m.amount))+'</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px;">'+(m.content?esc(m.content):'转账')+'</div></div></div><div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px;display:flex;justify-content:space-between;"><span>微信转账</span><span>'+statusText+'</span></div></div>';}
+else if(m.type==='redpacket')body=`<div style="width:220px;background:#fff;border-radius:10px;overflow:hidden"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#e05a49"><div style="width:36px;height:36px;background:#fbe0a6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px">🧧</div><div style="flex:1"><div style="color:#fff;font-size:14px">${esc(m.content)||'恭喜发财'}</div><div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:2px">¥${esc(String(m.amount))}</div></div></div><div style="background:#f2c879;color:#8a4b00;font-size:11px;padding:6px 12px">微信红包</div></div>`;
+else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body=`<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">${dur}″</span></div><div class="voice-text">${esc(m.content)}</div></div>`;}
+else if(m.type==='sticker'){const s=DB.stickers.find(x=>x.name===m.content);body=s?`<div style="padding:0"><img src="${s.img}" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>`:`<div class="mbody">[表情:${esc(m.content)}]</div>`;}
+else if(m.type==='text'){var displayContent=m.editedContent||m.content;body=`<div class="mbody">${me?esc(displayContent):(c.mode==='offline'?colorLines(displayContent,c.lineColor):esc(displayContent))}</div>`;}
+else{body=`<div class="mbody">${me?esc(m.content):(c.mode==='offline'?colorLines(m.content,c.lineColor):esc(m.content))}</div>`;}
+return `<div class="msg ${me?'me':''}" data-mid="${m.id||''}"><div class="cavatar" style="${av?`background-image:url('${av}')`:''}">${av?'':nm}</div>${body}</div>`;}
 function renderChat(keepScroll) {
   if (window._chatJustOpened) {
     keepScroll = false;
@@ -7785,6 +8021,65 @@ function attachLongPress(){
     el.addEventListener('contextmenu',function(e){e.preventDefault();});
   });
 }
+// ===== 编辑 AI 回复消息 =====
+function editMessage(msgId) {
+    var arr = DB.chats[view.id];
+    if (!arr) return;
+    var m = arr.find(function(x) { return x.id === msgId; });
+    if (!m || m.recalled || m.type !== 'text' || m.role !== 'assistant') {
+        popTip('该消息不可编辑', {icon:'🚫', title:'提示'});
+        return;
+    }
+
+    var currentText = m.editedContent || m.content;
+    closeModal();
+
+    var mo = document.createElement('div');
+    mo.className = 'modal';
+    mo.id = 'modal';
+    mo.innerHTML =
+        '<div class="sheet-box">' +
+        '<h3 style="text-align:center;">✏️ 编辑消息</h3>' +
+        '<textarea id="editMsgInput" style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6;resize:vertical;">' + esc(currentText) + '</textarea>' +
+        '<button class="btn" style="width:100%;margin:10px 0 4px;" onclick="saveEditedMessage(\'' + msgId + '\')">💾 保存</button>' +
+        '<button class="btn gray" style="width:100%;margin:0;" onclick="closeModal()">取消</button>' +
+        '</div>';
+    mo.onclick = function(e) { if (e.target === mo) closeModal(); };
+    phone.appendChild(mo);
+
+    setTimeout(function() {
+        var el = document.getElementById('editMsgInput');
+        if (el) { el.focus(); el.select(); }
+    }, 100);
+}
+function saveEditedMessage(msgId) {
+    var el = document.getElementById('editMsgInput');
+    if (!el) return;
+    var newText = el.value.trim();
+    if (!newText) {
+        popTip('内容不能为空', {icon:'⚠️', title:'提示'});
+        return;
+    }
+    var arr = DB.chats[view.id];
+    if (!arr) return;
+    var m = arr.find(function(x) { return x.id === msgId; });
+    if (!m || m.recalled || m.type !== 'text' || m.role !== 'assistant') {
+        popTip('消息已不可编辑', {icon:'🚫', title:'提示'});
+        closeModal();
+        return;
+    }
+    m.editedContent = newText;
+    m.editedAt = Date.now();
+    save();
+    closeModal();
+
+    if (view.type === 'chat') {
+        renderChat(true);
+    } else if (view.type === 'groupChat') {
+        renderGroupChat(true);
+    }
+    popTip('消息已更新', {icon:'✅', title:'编辑完成'});
+}
 function openMsgMenu(id, isMe){
   var arr = DB.chats[view.id];
   if (!arr) return;
@@ -7793,7 +8088,6 @@ function openMsgMenu(id, isMe){
   
   var btns = '';
   if (isMe) {
-    // 用户自己的消息：撤回（5分钟内）+ 删除
     var isRecallable = (Date.now() - (m.time || 0)) < 300000;
     if (isRecallable) {
       btns += '<button class="btn" onclick="closeModal();recallMsg(\'' + id + '\')">↩️ 撤回（5分钟内）</button>';
@@ -7802,9 +8096,12 @@ function openMsgMenu(id, isMe){
     }
     btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\', true)">🗑️ 单条删除</button>';
   } else {
-    // AI的消息：重新回复 + 删除
-btns += '<button class="btn" onclick="closeModal();regenMsg(\'' + id + '\')">🔄 让TA重新回复</button>';
-btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\', true)">🗑️ 单条删除</button>';
+    btns += '<button class="btn" onclick="closeModal();regenMsg(\'' + id + '\')">🔄 让TA重新回复</button>';
+    // ★ 新增：编辑按钮（仅纯文本且未撤回）
+    if (m.type === 'text' && !m.recalled) {
+        btns += '<button class="btn" onclick="closeModal();editMessage(\'' + id + '\')">✏️ 编辑</button>';
+    }
+    btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\', true)">🗑️ 单条删除</button>';
   }
   
   var mo = document.createElement('div');
@@ -7955,8 +8252,9 @@ function parseAIMessage(raw) {
     text = text.replace(/[（(]\s*语音(?:消息)?\s*[）)]\s*[:：]?\s*([\s\S]*?)(?=\n|$|\[)/g, '<voice>$1</voice>');
 
     // --- 表情 ---
-    text = text.replace(/\[(?:表情|表情包)[|｜:：]\s*([^\]]+)\]/g, '<sticker>$1</sticker>');
-    text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]+)/g, '<sticker>$1</sticker>');
+// 兼容 [表情|微笑]、[表情 | 微笑]、【表情|微笑】、[表情：微笑] 等多种变体，允许空格
+text = text.replace(/[【\[]\s*(?:表情|表情包)\s*[|｜:：]\s*([^\]】]+)\s*[】\]]/g, '<sticker>$1</sticker>');
+text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]+)/g, '<sticker>$1</sticker>');
 
     // --- 撤回 ---
     text = text.replace(/\[撤回[|｜:：]\s*([\s\S]*?)\]/g, '<recall>$1</recall>');
@@ -8363,15 +8661,17 @@ if (part.type === 'heart') {
         if (part.type === 'voice') {
             msgObj = { id: newId(), role: 'assistant', type: 'voice', content: part.content, time: Date.now(), voiceExpanded: false };
         } else if (part.type === 'sticker') {
-            // 验证表情是否存在
-            var stickerExists = DB.stickers.some(function(s) { return s.name === part.content; });
-            if (stickerExists) {
-                msgObj = { id: newId(), role: 'assistant', type: 'sticker', content: part.content, time: Date.now() };
-            } else {
-                // 表情不存在，降级为文本提示
-                msgObj = { id: newId(), role: 'assistant', type: 'text', content: '[表情:' + part.content + ']', time: Date.now() };
-            }
-        } else if (part.type === 'transfer') {
+    var stickerExists = DB.stickers.some(function(s) { return s.name === part.content; });
+    if (stickerExists) {
+        msgObj = { id: newId(), role: 'assistant', type: 'sticker', content: part.content, time: Date.now() };
+    } else {
+        // 表情不存在 → 直接跳过，不生成任何消息对象（相当于这条“消息”被丢弃）
+        // 如果担心整句回复为空，可以在后面统一处理，这里先跳过
+        msgObj = null;
+        // 或者，如果你希望显示一条普通文本提示，可以用下面这行（但会引入新文本，不推荐）：
+        // msgObj = { id: newId(), role: 'assistant', type: 'text', content: '（表情未找到）', time: Date.now() };
+    }
+} else if (part.type === 'transfer') {
             msgObj = { id: newId(), role: 'assistant', type: 'transfer', from: 'ai', amount: part.amount, content: part.content, status: 'pending', time: Date.now() };
         } else if (part.type === 'text' && part.recalled) {
              msgObj = { id: newId(), role: 'assistant', type: 'text', recalled: true, recalledContent: part.recalledContent, reveal: false, time: Date.now() };
@@ -8659,8 +8959,9 @@ async function fetchModels(){
     const data=await res.json();
     const list=(data.data||data.models||[]).map(m=>m.id||m.name).filter(Boolean);
     if(!list.length)throw new Error('没拉到模型');
-    fillSelect('chatModel',list,DB.settings.chatModel);
-    fillSelect('auxModel',list,DB.settings.auxModel);
+fillSelect('chatModel', list, DB.settings.chatModel);
+fillSelect('auxModel', list, DB.settings.auxModel);
+fillSelect('lightModel', list, DB.settings.lightModel);
     // ===== 新增：保存模型列表到全局设置 =====
     DB.settings.availableModels = list;
     save();
@@ -8671,7 +8972,18 @@ async function fetchModels(){
   }
 }
 function fillSelect(id,list,sel){document.getElementById(id).innerHTML=list.map(m=>`<option ${m===sel?'selected':''}>${m}</option>`).join('');}
-function saveApi(){DB.settings.apiUrl=document.getElementById('apiUrl').value.trim().replace(/\/$/,'');DB.settings.apiKey=document.getElementById('apiKey').value.trim();const cm=document.getElementById('chatModel').value,am=document.getElementById('auxModel').value;if(cm&&!cm.includes('请先'))DB.settings.chatModel=cm;if(am&&!am.includes('润色'))DB.settings.auxModel=am;save();alert('已保存！');}
+function saveApi(){
+  DB.settings.apiUrl = document.getElementById('apiUrl').value.trim().replace(/\/$/, '');
+  DB.settings.apiKey = document.getElementById('apiKey').value.trim();
+  var cm = document.getElementById('chatModel').value;
+  var am = document.getElementById('auxModel').value;
+  var lm = document.getElementById('lightModel').value;
+  if (cm && !cm.includes('请先')) DB.settings.chatModel = cm;
+  if (am && !am.includes('请先')) DB.settings.auxModel = am;
+  if (lm && !lm.includes('请先')) DB.settings.lightModel = lm;
+  save();
+  alert('已保存！');
+}
 
 document.querySelectorAll('#tabbar .tab').forEach(t=>t.onclick=function(){wechatPage=t.dataset.page;render();});
 // 启动 AI 主动问候：每 3 分钟检查一次（内部有时段限一次+连吃两次闭门羹闭嘴，不会刷屏）
