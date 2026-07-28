@@ -638,7 +638,15 @@ wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), ra
   '--text': '#5C4F4F',
   '--sub': '#8A7A82',
   '--line': '#C5BCB4',
-  wallpaper: 'radial-gradient(ellipse at 30% 15%, #D5C8D8 0%, #E8DDE6 30%, #F0EAEF 55%, #F5F0F0 80%, #FAF8F8 100%), repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 30px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 30px)'
+  wallpaper: `radial-gradient(ellipse at 50% 30%, rgba(210,190,215,0.12) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 80%, rgba(180,160,185,0.06) 0%, transparent 30%),
+    radial-gradient(ellipse at 10% 20%, rgba(200,180,200,0.04) 0%, transparent 20%),
+    radial-gradient(ellipse at 90% 70%, rgba(200,180,200,0.04) 0%, transparent 20%),
+    radial-gradient(circle at 10% 12%, rgba(200,180,200,0.03) 0%, transparent 15%),
+    radial-gradient(circle at 85% 80%, rgba(200,180,200,0.03) 0%, transparent 15%),
+    radial-gradient(circle at 30% 65%, rgba(200,180,200,0.025) 0%, transparent 12%),
+    radial-gradient(circle at 75% 30%, rgba(200,180,200,0.025) 0%, transparent 12%),
+    linear-gradient(160deg, #f5edf0 0%, #ede4e8 50%, #e6dce0 100%)`
 }
 ];
 // ========== 主题图标集 ==========
@@ -756,22 +764,22 @@ function applySkin(id) {
   updateAllIcons();
 
   // ===== 主题适配（浅色/深色） =====
-  var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe');
-  if (isLight) {
-    root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
-    root.style.setProperty('--clock-sub-opacity', '1');
-    root.style.setProperty('--clock-theme-opacity', '1');
-    root.style.setProperty('--deco-opacity', '0.55');          // 柔和显眼
-    root.style.setProperty('--clock-sub-color', '#222');       // 深色替代 --sub
-    root.style.setProperty('--clock-theme-color', '#B34A6A');  // 固定主题色（可保持不变）
-  } else {
-    root.style.setProperty('--app-text-shadow', '0 1px 4px rgba(0,0,0,0.5)');
-    root.style.setProperty('--clock-sub-opacity', '0.7');
-    root.style.setProperty('--clock-theme-opacity', '0.45');
-    root.style.setProperty('--deco-opacity', '0.35');
-    root.style.setProperty('--clock-sub-color', 'var(--sub)');
-    root.style.setProperty('--clock-theme-color', 'var(--theme)');
-  }
+var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe');
+if (isLight) {
+  root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
+  root.style.setProperty('--clock-sub-opacity', '1');
+  root.style.setProperty('--clock-theme-opacity', '1');
+  root.style.setProperty('--deco-opacity', '0.55');
+  root.style.setProperty('--clock-sub-color', '#222');
+  root.style.setProperty('--clock-theme-color', '#9A8AA8');
+} else {
+  root.style.setProperty('--app-text-shadow', '0 1px 4px rgba(0,0,0,0.5)');
+  root.style.setProperty('--clock-sub-opacity', '0.7');
+  root.style.setProperty('--clock-theme-opacity', '0.45');
+  root.style.setProperty('--deco-opacity', '0.35');
+  root.style.setProperty('--clock-sub-color', 'var(--sub)');
+  root.style.setProperty('--clock-theme-color', 'var(--theme)');
+}
 
   // 5. 刷新当前页面
   if (view.type === 'home') {
@@ -1368,25 +1376,22 @@ if (view.type === 'chat') return renderChat(false);
 function showChrome(t,b){topbar.style.display=t?'flex':'none';tabbar.style.display=b?'flex':'none';}
 
 function renderHome() {
-// 删除旧的 #home，防止残留遮挡点击
-var oldHome = document.getElementById('home');
-if (oldHome) oldHome.remove();
+  var oldHome = document.getElementById('home');
+  if (oldHome) oldHome.remove();
   showChrome(false, false);
   statusbar.classList.remove('dark');
   content.style.display = 'none';
   
   const d = document.createElement('div');
   d.id = 'home';
-  // 桌面壁纸：支持图片 URL 或 CSS 渐变字符串
   var bg = DB.desktop.wallpaper;
-if (bg) {
+  if (bg) {
     d.style.background = bg;
     d.style.backgroundSize = 'cover';
     d.style.backgroundPosition = 'center';
-}
+  }
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
   
-  // ---- 分离天气 App 和其他 App ----
   var weatherApp = null;
   var otherApps = [];
   DB.desktop.apps.forEach(function(a) {
@@ -1397,124 +1402,154 @@ if (bg) {
     }
   });
   
-  // ===== 【新增】在渲染天气之前，根据上次聊天的世界观设置当前索引 =====
   if (DB.desktop._activeWorld) {
     var worlds = DB.worlds || [];
     var idx = worlds.findIndex(function(w) { return w.id === DB.desktop._activeWorld; });
     if (idx !== -1) {
       _weatherCurrentIndex = idx;
     } else {
-      // 如果储存的世界观已被删除，重置
       DB.desktop._activeWorld = null;
       save();
       _weatherCurrentIndex = 0;
     }
   } else {
-    // 没有记录，默认第一个
     _weatherCurrentIndex = 0;
   }
-  // ================================================================
   
-  // ---- 构建时钟 HTML ----
-var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
-  <!-- 静态星环 1 -->
-  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);opacity:var(--deco-opacity, 0.2);mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
-  <!-- 静态星环 2 -->
-  <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%) rotate(70deg);border:1px solid var(--theme);opacity:var(--deco-opacity, 0.12);mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);-webkit-mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);"></div>
-
-  <!-- 小光点 × 5 -->
-  <span style="position:absolute;top:6%;left:48%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.5);pointer-events:none;z-index:1;"></span>
-  <span style="position:absolute;top:38%;right:8%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.4);pointer-events:none;z-index:1;"></span>
-  <span style="position:absolute;bottom:20%;left:12%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.35);pointer-events:none;z-index:1;"></span>
-  <span style="position:absolute;top:25%;left:6%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.3);pointer-events:none;z-index:1;"></span>
-  <span style="position:absolute;bottom:32%;right:15%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.25);pointer-events:none;z-index:1;"></span>
-
-  <!-- 时间、日期、问候语（保留类名，让 JS 继续更新） -->
-  <div class="time" style="position:relative;z-index:2;">
-    <span class="hour-val">--</span>
-    <span class="star" style="color:var(--clock-theme-color, var(--theme));font-size:14px;opacity:0.5;margin:0 4px;">✦</span>
-    <span class="min-val">--</span>
-  </div>
-<div class="date" style="position:relative;z-index:2;color:var(--clock-sub-color, var(--sub));">
-  <span class="date-val">--月--日 · 周-</span>
-</div>
-<div class="greet" style="position:relative;z-index:2;color:var(--clock-theme-color, var(--theme));">今夜星辰</div>
-</div>`;
+  var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
+    <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);opacity:var(--deco-opacity, 0.2);mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%) rotate(70deg);border:1px solid var(--theme);opacity:var(--deco-opacity, 0.12);mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);-webkit-mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);"></div>
+    <span style="position:absolute;top:6%;left:48%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.5);pointer-events:none;z-index:1;"></span>
+    <span style="position:absolute;top:38%;right:8%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.4);pointer-events:none;z-index:1;"></span>
+    <span style="position:absolute;bottom:20%;left:12%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.35);pointer-events:none;z-index:1;"></span>
+    <span style="position:absolute;top:25%;left:6%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.3);pointer-events:none;z-index:1;"></span>
+    <span style="position:absolute;bottom:32%;right:15%;width:3px;height:3px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.25);pointer-events:none;z-index:1;"></span>
+    <div class="time" style="position:relative;z-index:2;">
+      <span class="hour-val">--</span>
+      <span class="star" style="color:var(--clock-theme-color, var(--theme));font-size:14px;opacity:0.5;margin:0 4px;">✦</span>
+      <span class="min-val">--</span>
+    </div>
+    <div class="date" style="position:relative;z-index:2;color:var(--clock-sub-color, var(--sub));">
+      <span class="date-val">--月--日 · 周-</span>
+    </div>
+    <div class="greet" style="position:relative;z-index:2;color:var(--clock-theme-color, var(--theme));">今夜星辰</div>
+  </div>`;
   
-  // ---- 构建天气 HTML（独立卡片） ----
   var weatherHtml = '';
   if (weatherApp) {
-
-weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:24px;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:120px;background:transparent !important;border:1.5px solid var(--line);box-shadow:none;">
-
-  <style>
-    @keyframes floatDot {
-      0%, 100% { transform: translateY(0px) scale(1); opacity: 0.25; }
-      50% { transform: translateY(-8px) scale(1.4); opacity: 0.7; }
-    }
-  </style>
-
-  <!-- ★ 悬浮粒子 × 3（替换原来的两个圆环） -->
-  <span style="position:absolute;right:18px;top:12px;width:5px;height:5px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 2.8s ease-in-out infinite;will-change:transform,opacity;"></span>
-  <span style="position:absolute;right:40px;top:30px;width:4px;height:4px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.6s ease-in-out infinite 0.6s;will-change:transform,opacity;"></span>
-  <span style="position:absolute;right:8px;top:44px;width:3px;height:3px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.2s ease-in-out infinite 1.2s;will-change:transform,opacity;"></span>
-
-  <!-- 内容区 -->
-  <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
-    <span id="widgetIcon" style="font-size:26px;line-height:1;">🌤</span>
-    <div style="display:flex;align-items:center;gap:4px;">
-      <span id="widgetTemp" style="font-size:26px;font-weight:400;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:3px;">
-        <span id="widgetState" style="font-size:14px;font-weight:400;opacity:0.6;">晴</span>
-        <span id="widgetTempNum" style="font-weight:400;">--</span><span style="font-size:16px;opacity:0.4;font-weight:300;">℃</span>
-      </span>
-      <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.04);color:var(--theme);font-size:12px;cursor:pointer;opacity:0.4;" onclick="event.stopPropagation();refreshWeather()">↻</span>
-      <span style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.02);color:var(--sub);font-size:12px;cursor:pointer;opacity:0.2;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
-    </div>
-  </div>
-
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:2px 0;position:relative;z-index:1;overflow:hidden;">
-    <div id="widgetDesc" style="font-size:14px;font-weight:400;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
-    <div id="widgetDetail" style="font-size:13px;font-weight:350;color:var(--sub);margin-top:1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
-  </div>
-
-  <div style="position:relative;z-index:1;flex-shrink:0;padding-top:6px;margin-top:4px;border-top:1px solid var(--line);">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <span id="widgetWorldName" style="font-size:12px;font-weight:350;color:var(--clock-sub-color, var(--sub));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;">未关联</span>
-      <span id="widgetUpdateTime" style="font-size:12px;font-weight:300;color:var(--clock-sub-color, var(--sub));white-space:nowrap;flex-shrink:0;">刚刚</span>
-    </div>
-    <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:6px;"></div>
-  </div>
-</div>`;
+    weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:24px;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:120px;background:transparent !important;border:1.5px solid var(--line);box-shadow:none;">
+      <style>
+        @keyframes floatDot {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.25; }
+          50% { transform: translateY(-8px) scale(1.4); opacity: 0.7; }
+        }
+        @keyframes twinkleStar {
+          0%, 100% { opacity: 0.2; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.2); }
+        }
+.ghost-star {
+  position: absolute;
+  color: rgba(140,115,165,0.55);
+  pointer-events: none;
+  z-index: 0;
+  text-shadow: 0 0 40px rgba(140,115,165,0.10);
+  font-size: 28px;
 }
-  // ---- 构建应用网格（只放普通 App） ----
-  var appsHtml = otherApps.map(function(a) {
-        var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>' : '';
-var iconUrl = a.icon || icons[a.id] || null;
-var style = 'position:relative;';
-if (iconUrl) {
-  style += 'background-image:url(\'' + iconUrl + '\');background-color:transparent;box-shadow:none;background-size:contain;background-repeat:no-repeat;background-position:center;';
-  // 幽灵戏班：仅保留干净透明背景，无边框
-  if (currentThemeId === 'ghost_troupe') {
-    style += 'background-color:transparent;background-size:contain;';
+.ghost-star.small { font-size: 18px; opacity: 0.65; }
+.ghost-star.xsmall { font-size: 13px; opacity: 0.55; }
+.ghost-star.large { font-size: 40px; opacity: 0.50; }
+.ghost-star.xlarge { font-size: 52px; opacity: 0.40; }
+      </style>
+      <span style="position:absolute;right:18px;top:12px;width:5px;height:5px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 2.8s ease-in-out infinite;will-change:transform,opacity;"></span>
+      <span style="position:absolute;right:40px;top:30px;width:4px;height:4px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.6s ease-in-out infinite 0.6s;will-change:transform,opacity;"></span>
+      <span style="position:absolute;right:8px;top:44px;width:3px;height:3px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.2s ease-in-out infinite 1.2s;will-change:transform,opacity;"></span>
+      <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
+        <span id="widgetIcon" style="font-size:26px;line-height:1;">🌤</span>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span id="widgetTemp" style="font-size:26px;font-weight:400;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:3px;">
+            <span id="widgetState" style="font-size:14px;font-weight:400;opacity:0.6;">晴</span>
+            <span id="widgetTempNum" style="font-weight:400;">--</span><span style="font-size:16px;opacity:0.4;font-weight:300;">℃</span>
+          </span>
+          <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.04);color:var(--theme);font-size:12px;cursor:pointer;opacity:0.4;" onclick="event.stopPropagation();refreshWeather()">↻</span>
+          <span style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.02);color:var(--sub);font-size:12px;cursor:pointer;opacity:0.2;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:2px 0;position:relative;z-index:1;overflow:hidden;">
+        <div id="widgetDesc" style="font-size:14px;font-weight:400;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
+        <div id="widgetDetail" style="font-size:13px;font-weight:350;color:var(--sub);margin-top:1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
+      </div>
+      <div style="position:relative;z-index:1;flex-shrink:0;padding-top:6px;margin-top:4px;border-top:1px solid var(--line);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span id="widgetWorldName" style="font-size:12px;font-weight:350;color:var(--clock-sub-color, var(--sub));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;">未关联</span>
+          <span id="widgetUpdateTime" style="font-size:12px;font-weight:300;color:var(--clock-sub-color, var(--sub));white-space:nowrap;flex-shrink:0;">刚刚</span>
+        </div>
+        <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:6px;"></div>
+      </div>
+    </div>`;
   }
+  
+// ---- 星星（幽灵戏班专属 30 颗 · 均匀分布全屏） ----
+var starHtml = '';
+if (currentThemeId === 'ghost_troupe') {
+  starHtml = `
+    <span class="ghost-star xlarge" style="top:4%; left:8%;">✦</span>
+    <span class="ghost-star large" style="top:12%; right:15%;">✦</span>
+    <span class="ghost-star" style="top:20%; left:5%;">✦</span>
+    <span class="ghost-star small" style="top:28%; right:28%;">✦</span>
+    <span class="ghost-star xlarge" style="top:35%; left:18%;">✦</span>
+    <span class="ghost-star large" style="top:42%; right:8%;">✦</span>
+    <span class="ghost-star" style="top:50%; left:28%;">✦</span>
+    <span class="ghost-star small" style="top:56%; right:18%;">✦</span>
+    <span class="ghost-star xlarge" style="top:63%; left:8%;">✦</span>
+    <span class="ghost-star large" style="top:70%; right:25%;">✦</span>
+    <span class="ghost-star" style="top:78%; left:18%;">✦</span>
+    <span class="ghost-star small" style="top:85%; right:10%;">✦</span>
+    <span class="ghost-star" style="top:92%; left:28%;">✦</span>
+    <span class="ghost-star small" style="top:8%; left:28%;">✦</span>
+    <span class="ghost-star xsmall" style="top:16%; right:35%;">✦</span>
+    <span class="ghost-star" style="top:24%; left:38%;">✦</span>
+    <span class="ghost-star xsmall" style="top:32%; right:42%;">✦</span>
+    <span class="ghost-star small" style="top:40%; left:45%;">✦</span>
+    <span class="ghost-star" style="top:48%; right:38%;">✦</span>
+    <span class="ghost-star xsmall" style="top:54%; left:52%;">✦</span>
+    <span class="ghost-star large" style="top:62%; right:48%;">✦</span>
+    <span class="ghost-star small" style="top:68%; left:58%;">✦</span>
+    <span class="ghost-star xsmall" style="top:76%; right:55%;">✦</span>
+    <span class="ghost-star" style="top:82%; left:65%;">✦</span>
+    <span class="ghost-star small" style="top:90%; right:60%;">✦</span>
+    <span class="ghost-star xsmall" style="top:5%; left:55%;">✦</span>
+    <span class="ghost-star" style="top:14%; right:50%;">✦</span>
+    <span class="ghost-star xsmall" style="top:45%; left:70%;">✦</span>
+    <span class="ghost-star small" style="top:60%; right:70%;">✦</span>
+    <span class="ghost-star xsmall" style="top:75%; left:75%;">✦</span>
+  `;
 }
-var content = iconUrl ? '' : a.emoji;
+  var appsHtml = otherApps.map(function(a) {
+    var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>' : '';
+    var iconUrl = a.icon || icons[a.id] || null;
+    var style = 'position:relative;';
+    if (iconUrl) {
+      style += 'background-image:url(\'' + iconUrl + '\');background-color:transparent;box-shadow:none;background-size:contain;background-repeat:no-repeat;background-position:center;';
+      if (currentThemeId === 'ghost_troupe') {
+        style += 'background-color:transparent;background-size:contain;';
+      }
+    }
+    var content = iconUrl ? '' : a.emoji;
     return '<div class="app" onclick="openApp(\'' + a.id + '\')"><div class="app-ic" style="' + style + '">' + content + badge + '</div><div class="app-nm">' + a.name + '</div></div>';
   }).join('');
   
-  // ---- 组装：天气(顶部) → 应用网格(时钟作为2×2组件排最前) ----
-  d.innerHTML = `
-    <div style="padding:40px 0 16px 0;">
-      ${weatherHtml}
-    </div>
-    <div id="appgrid">
-      ${clockHtml}
-      ${appsHtml}
-    </div>
-  `;
+d.innerHTML = `
+  <div style="padding:40px 0 16px 0;position:relative;">
+    ${weatherHtml}
+  </div>
+  ${starHtml}
+  <div id="appgrid">
+    ${clockHtml}
+    ${appsHtml}
+  </div>
+`;
   
   phone.appendChild(d);
-  
   tick();
   refreshChatBadges();
   renderWeatherWidget();
@@ -1589,7 +1624,7 @@ function renderWeatherWidget() {
   var timeEl = document.getElementById('widgetUpdateTime');
   // ===== 判断当前主题是否为浅色 =====
   var currentSkin = DB.settings.skin || 'fusion';
-var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || currentSkin === 'circus');
+var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || currentSkin === 'ghost_troupe');
   
   // 根据主题调整透明度系数
   var opacityMap = {
