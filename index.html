@@ -528,7 +528,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER='v728更新';
+const APP_VER='v729更新';
 // ===== 版本缓存控制（每次更新改 APP_VER 即可） =====
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
@@ -640,24 +640,18 @@ wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), ra
 {
   id: 'ghost_troupe',
   name: '🎪 幽灵戏班',
-  color: '#9A8AA8',
-  '--theme': '#9A8AA8',
-  '--bg': '#F6F5F3',
-  '--nav': '#F0EDEA',
-  '--card': '#FCFBF9',
-  '--text': '#5C4F4F',
-  '--sub': '#8A7A82',
-  '--line': '#C5BCB4',
-  wallpaper: `radial-gradient(ellipse at 50% 30%, rgba(210,190,215,0.12) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 80%, rgba(180,160,185,0.06) 0%, transparent 30%),
-    radial-gradient(ellipse at 10% 20%, rgba(200,180,200,0.04) 0%, transparent 20%),
-    radial-gradient(ellipse at 90% 70%, rgba(200,180,200,0.04) 0%, transparent 20%),
-    radial-gradient(circle at 10% 12%, rgba(200,180,200,0.03) 0%, transparent 15%),
-    radial-gradient(circle at 85% 80%, rgba(200,180,200,0.03) 0%, transparent 15%),
-    radial-gradient(circle at 30% 65%, rgba(200,180,200,0.025) 0%, transparent 12%),
-    radial-gradient(circle at 75% 30%, rgba(200,180,200,0.025) 0%, transparent 12%),
-    linear-gradient(160deg, #f5edf0 0%, #ede4e8 50%, #e6dce0 100%)`
-}
+  color: '#A77BAB',
+  '--theme': '#A77BAB',
+  '--bg': '#F5F0F5',
+  '--nav': '#FCF8FC',
+  '--card': '#FFFFFF',
+  '--text': '#3A2A3A',
+  '--sub': '#8A7A8A',
+  '--line': '#E5DCE5',
+  wallpaper: `radial-gradient(ellipse at 30% 20%, rgba(167,123,171,0.08) 0%, transparent 35%),
+    radial-gradient(ellipse at 70% 80%, rgba(200,180,160,0.06) 0%, transparent 50%),
+    linear-gradient(145deg, #F5F0F5 0%, #F8F4F8 50%, #FCF8FC 100%)`
+},
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -728,26 +722,26 @@ orchard: {
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/22/90508b72d72612459f2ab7aae746bb23.png',
 },
 ghost_troupe: {
-  // 桌面应用图标
+  // 桌面应用图标（复古做旧）
   wechat:   'https://s1.imagehub.cc/images/2026/07/28/67e7d5b51867d98ce606f8eb518921a7.png',
-  notes:    'https://s1.imagehub.cc/images/2026/07/28/af837f78e22e7b19a1df37618e78f443.png',
+  notes:    'https://s1.imagehub.cc/images/2026/07/29/8933e0ee81932d01a42ce5d96b53c809.png',
   focus:    'https://s1.imagehub.cc/images/2026/07/28/e152f3e770f42a79159522efd4c21f4a.png',
-  settings: 'https://s1.imagehub.cc/images/2026/07/28/2f753e0d614b31f87338c0c7eb086e3b.png',
+  settings: 'https://s1.imagehub.cc/images/2026/07/29/64b984639d67eec73c355bacc9deb655.png',
   album:    'https://s1.imagehub.cc/images/2026/07/28/8468b78a0936580c38ca96ac04c557a2.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/07/28/75c3f30993a816ab0183a3d60c418289.png',
-  music:    'https://s1.imagehub.cc/images/2026/07/28/c4b2ecf55c3e58a6ef48adebbfe49a4e.png',
-  preset:   'https://s1.imagehub.cc/images/2026/07/28/f7b10e60e79857071a24fb1e57758b3e.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/07/29/9883b09d61b4815d372b3f45380e9c88.png',
+  music:    'https://s1.imagehub.cc/images/2026/07/29/9f906acf0b614055dadfff5b316cbbd8.png',
+  preset:   'https://s1.imagehub.cc/images/2026/07/29/25d9803b37469299b0bbafd5c9cab582.png',
   floating: 'https://s1.imagehub.cc/images/2026/07/28/0b130dd08866ad4d281fbd7685ea7c24.png',
   shop:     'https://s1.imagehub.cc/images/2026/07/28/037bc243ec64eb050151a992f5b6ff8d.png',
-  world:    'https://s1.imagehub.cc/images/2026/07/28/d0c36f963e4b45c8b0df5a213b3ab6e2.png',
-  // 底栏
+  world:    'https://s1.imagehub.cc/images/2026/07/29/460297687832428cb4bd53cfc4e54adb.png',
+  // 底栏不变
   tabChats:    'https://s1.imagehub.cc/images/2026/07/28/e1cbd76dd0d9f9679de7004fe9f939bb.png',
   tabContacts: 'https://s1.imagehub.cc/images/2026/07/28/6aee1c8d3b0ea46d734caceed9de6fa5.png',
   tabDiscover: 'https://s1.imagehub.cc/images/2026/07/28/936f595a38e796e74e60e8bb326900db.png',
   tabMe:       'https://s1.imagehub.cc/images/2026/07/28/5ebba54a6c31da793c1d7cabb4ac6197.png',
-  // 发现页
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/28/ae1610619ea654132eaa7f3c46dd2cd0.png',
-}
+},
+
 };
 // =====================================
 function applySkin(id) {
@@ -808,10 +802,6 @@ if (id === 'ghost_troupe') {
         transition: filter 0.2s ease, transform 0.15s ease;
         will-change: transform;
       }
-      .app-ic:hover {
-        filter: drop-shadow(3px 3px 0px rgba(92,79,79,0.30)) !important;
-        transform: translateY(-1px);
-      }
       #tabbar .tab img {
         filter: drop-shadow(1px 1px 0px rgba(92,79,79,0.20)) !important;
       }
@@ -851,7 +841,11 @@ function updateAllIcons() {
 let DB=load();
 function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrate(JSON.parse(raw));}catch(e){}}return migrate({});}
 function migrate(d){
-d.coins = d.coins || 0;
+d.coins = d.coins || 100;
+if (d.shopItems === undefined) d.shopItems = [];
+if (d.shopLastGenerated === undefined) d.shopLastGenerated = 0;
+if (d.shopLastSent === undefined) d.shopLastSent = {};
+
   d.me=d.me||{name:'我',avatar:''};d.me.realName=d.me.realName||'';
 d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: '', lightModel: '' };
   // ===== 群聊新增：上下文条数 =====
@@ -1013,6 +1007,840 @@ function save(){
     console.warn('保存失败(可能存储满了)：' + e.message);  // 不再霸屏
   }
 }
+// 更新"用户送给AI的礼物"卡片状态
+function shopMarkUserGift(c, msgId, accepted) {
+  var m = (DB.chats[c.id] || []).find(function (x) { return x.id === msgId; });
+  if (!m || m.giftStatus !== 'given') return;
+  m.giftStatus = accepted ? 'ai_accepted' : 'ai_declined';
+  save();
+  if (view.type === 'chat' && view.id === c.id && typeof renderChat === 'function') renderChat();
+}
+
+// ===== 购物系统：金币操作 =====
+function addCoins(n) {
+  DB.coins = (DB.coins || 0) + n;
+  save();
+  // 如果商店界面正开着，顺手刷新余额显示
+  var el = document.getElementById('shopCoinBal');
+  if (el) el.textContent = DB.coins;
+}
+// ===== 购物系统：商品生成 + 缓存 =====
+
+// 判断今天的日期字符串（用于每日刷新）
+function shopTodayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+
+// 获取当前活跃世界观（没有就当现代都市）
+function shopActiveWorld() {
+  var wid = DB.desktop && DB.desktop._activeWorld;
+  var w = (DB.worlds || []).find(function(x) { return x.id === wid; });
+  return w || null;
+}
+
+// 检查缓存是否需要重新生成：超过6小时 或 跨天了
+function shopNeedRegen() {
+  if (!DB.shopItems || !DB.shopItems.length) return true;
+  var last = DB.shopLastGenerated || 0;
+  if (!last) return true;
+  // 超过6小时
+  if (Date.now() - last > 6 * 60 * 60 * 1000) return true;
+  // 跨天（上次生成的日期 != 今天）
+  var lastDay = new Date(last);
+  var lastStr = lastDay.getFullYear() + '-' + (lastDay.getMonth() + 1) + '-' + lastDay.getDate();
+  if (lastStr !== shopTodayStr()) return true;
+  return false;
+}
+
+// 从 AI 返回的文本里安全地抠出 JSON 数组
+function shopParseJSON(raw) {
+  if (!raw) return null;
+  var text = raw.replace(/```(json)?/gi, '').replace(/```/g, '').trim();
+  // 找到第一个 [ 和最后一个 ]
+  var start = text.indexOf('[');
+  var end = text.lastIndexOf(']');
+  if (start === -1 || end === -1) return null;
+  try {
+    return JSON.parse(text.substring(start, end + 1));
+  } catch (e) {
+    return null;
+  }
+}
+// ===== 购物系统：世界观通用固定商品（每次都出现） =====
+var SHOP_FIXED_ITEMS = [
+  // 饮品
+  { name: '奶茶', emoji: '🥤', desc: '三分糖，温着刚好', tag: '饮品', price: 12 },
+  { name: '咖啡', emoji: '☕', desc: '续命', tag: '饮品', price: 15 },
+  { name: '鲜榨果汁', emoji: '🧃', desc: '维C满满，清爽', tag: '饮品', price: 10 },
+  { name: '气泡水', emoji: '🥂', desc: '微醺感', tag: '饮品', price: 14 },
+  // 美食
+  { name: '奶油蛋糕', emoji: '🍰', desc: '入口即化的绵软', tag: '美食', price: 20 },
+  { name: '手工巧克力', emoji: '🍫', desc: '微苦回甘', tag: '美食', price: 18 },
+  { name: '寿司拼盘', emoji: '🍣', desc: '新鲜', tag: '美食', price: 28 },
+  { name: '关东煮', emoji: '🍢', desc: '深夜里热乎乎的一串', tag: '美食', price: 16 },
+  { name: '焦糖布丁', emoji: '🍮', desc: '嫩滑弹牙', tag: '美食', price: 13 },
+  // 生活
+  { name: '一束满天星', emoji: '💐', desc: '小小的浪漫心意', tag: '生活', price: 25 },
+  { name: '助眠香薰蜡烛', emoji: '🕯️', desc: '点上就很安心', tag: '生活', price: 22 },
+  { name: '暖手宝', emoji: '♨️', desc: '冬天必备', tag: '生活', price: 24 },
+  { name: '毛绒抱枕', emoji: '🧸', desc: '软乎乎，抱着治愈', tag: '生活', price: 30 },
+  { name: '安全套', emoji: '🎈', desc: '备一盒，有备无患', tag: '生活', price: 18 },
+  // 服饰（更丰富、更有款式感）
+  { name: '羊绒围巾', emoji: '🧣', desc: '燕麦色，绕两圈刚好', tag: '服饰', price: 38 },
+  { name: '棒球帽', emoji: '🧢', desc: '压低帽檐有点酷', tag: '服饰', price: 26 },
+  { name: '针织手套', emoji: '🧤', desc: '露指的，方便打字', tag: '服饰', price: 20 },
+  { name: '中筒棉袜', emoji: '🧦', desc: '踩上去软软的', tag: '服饰', price: 12 },
+  { name: 'oversize卫衣', emoji: '👕', desc: '慵懒宽松，居家超舒服', tag: '服饰', price: 48 },
+  { name: '风衷外套', emoji: '🧥', desc: '经典卡其，怎么穿都对', tag: '服饰', price: 68 },
+  { name: '小白鞋', emoji: '👟', desc: '百搭', tag: '服饰', price: 55 },
+  // 数码
+  { name: '无线耳机', emoji: '🎧', desc: '降噪，戴上世界安静了', tag: '数码', price: 55 },
+  { name: '充电宝', emoji: '🔋', desc: '大容量，出门不慌', tag: '数码', price: 40 },
+  { name: '拍立得', emoji: '📷', desc: '定格', tag: '数码', price: 60 },
+  // 珠宝（2个）
+  { name: '锁骨链', emoji: '📿', desc: '细细一条，恰到好处', tag: '珠宝', price: 45 },
+  { name: '对戒', emoji: '💍', desc: '闪耀的承诺', tag: '珠宝', price: 50 },
+  // 奇物（2个）
+  { name: '星光许愿瓶', emoji: '🔮', desc: '据说装满一整年的心愿', tag: '奇物', price: 35 },
+  { name: '复古八音盒', emoji: '🎁', desc: '拧开会流淌旧时光', tag: '奇物', price: 40 }
+];
+
+// 核心：调用轻量模型生成商品
+async function shopGenerate() {
+  var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+  if (!model) throw new Error('请先在设置里选择模型');
+
+  var world = shopActiveWorld();
+  var worldDesc = world ? (world.name + '：' + world.desc) : '现代都市，普通的现实生活';
+  var charHints = shopCharHints(world ? world.id : null);
+
+  var prompt =
+    '你是一个商店的选品官。请根据下面这个"世界观设定"，生成一批适合在这个世界里售卖的商品。\n\n' +
+    '【世界观】' + worldDesc + '\n\n' +
+    '【要求】\n' +
+    '1. 生成 16 到 20 件商品，数量要充足。\n' +
+    '2. 尽量覆盖这些品类，每个品类争取有 2~3 件：美食、饮品、服饰、珠宝、数码、周边、生活、奇物。其中"周边"品类要especially贴合世界观特色（比如该世界特有的纪念品、挂件、收藏品）。\n' +
+    '3. 其中要有 1 到 2 件是"珍稀商品"（rare=true）。\n' +
+	(charHints ? ('★特别加分项：这个世界里有以下角色，请专门生成 1~3 件"特别适合送给他们、贴合他们喜好或习性"的商品（不用写明送给谁，融进商品里即可）。角色信息如下：\n' + charHints + '\n（比如某角色爱吃某物就出对应吃食，喜欢某类东西就出对应小物）\n') : '') +
+    '4. 商品必须贴合世界观：现代都市就是正常商品；妖怪/仙侠世界带点奇异色彩；赛博/科幻世界带科技感。\n' +
+	'★重要：以下这些商品店里已经有了，你生成的商品名和它们【不能重复、也不能是它们的变体】（比如已有"关东煮"，就不要再生成"深夜的关东煮"）：' + fixedNames + '\n' +
+    '5. 每件商品的品类标签(tag)从这些里选一个最贴切的：美食、饮品、服饰、珠宝、数码、周边、生活、奇物。\n' +
+    '6. 普通商品价格用金币，范围 5~60 的整数。珍稀商品价格 8~30 的整数。\n' +
+    '7. 每件商品配一个最贴切的 emoji（用常见通用的 emoji，别用太生僻的）。\n' +
+    '8. 描述(desc)控制在 6 到 12 个字，要有画面感或情绪，别只写两个字那么干巴，也别写成长句。\n' +
+    '9. 珍稀商品额外写一句 story（一句话的故事感描述，20字内）；非珍稀 story 留空字符串。\n\n' +
+    '【只输出 JSON 数组，不要任何多余文字】格式如下：\n' +
+    '[{"name":"商品名","emoji":"🍵","desc":"香甜暖手的一杯","tag":"饮品","price":20,"rare":false,"story":""}]';
+
+  var messages = [
+    { role: 'system', content: '你只输出合法的 JSON 数组，不输出任何解释、不加代码块标记。' },
+    { role: 'user', content: prompt }
+  ];
+
+  var raw = await callAI(messages, model);
+  var arr = shopParseJSON(raw);
+  if (!arr || !arr.length) throw new Error('商品生成失败，请重试');
+
+  // 清洗数据 + 补默认值，防止 AI 漏字段
+  var worldName = world ? world.name : '现代都市';
+  var items = arr.map(function(it, i) {
+    var rare = !!it.rare;
+    return {
+      id: 'sp_' + Date.now() + '_' + i,
+      name: (it.name || '神秘商品').toString().slice(0, 20),
+      emoji: (it.emoji || '🎁').toString().slice(0, 4),
+      desc: (it.desc || '').toString().slice(0, 10),
+      tag: (it.tag || '奇物').toString().slice(0, 6),
+      price: Math.max(1, parseInt(it.price) || 10),
+      rare: rare,
+      currency: rare ? 'heart' : 'coin', // 珍稀用心动值，普通用金币
+      story: (it.story || '').toString().slice(0, 40),
+      fromWorld: worldName,
+      soldOut: false // 珍稀售罄标记
+    };
+  });
+  // 合并固定商品（世界观通用）
+  var fixed = SHOP_FIXED_ITEMS.map(function (it, i) {
+    return {
+      id: 'spf_' + Date.now() + '_' + i,
+      name: it.name, emoji: it.emoji, desc: it.desc, tag: it.tag,
+      price: it.price, rare: false, currency: 'coin', story: '',
+      fromWorld: worldName, soldOut: false
+    };
+  });
+  items = fixed.concat(items);
+  // 按名字去重：完全同名、或"XX的关东煮"这类带"的"的形容词变体 → 判为重复；
+  // 但"布丁奶茶"这类名词组合的新商品 → 保留
+  var _kept = [];
+  items.forEach(function (it) {
+    var dup = _kept.some(function (k) {
+      if (k.name === it.name) return true; // 完全同名
+      // 带"的"字，且包含某个已有商品名 → 视为形容词变体（深夜的关东煮）
+      if (it.name.indexOf('的') !== -1 && it.name.indexOf(k.name) !== -1) return true;
+      return false;
+    });
+    if (!dup) _kept.push(it);
+  });
+  items = _kept;
+
+  // 珍稀排前面
+  items.sort(function(a, b) { return (b.rare ? 1 : 0) - (a.rare ? 1 : 0); });
+
+  DB.shopItems = items;
+  DB.shopLastGenerated = Date.now();
+  save();
+  return items;
+}
+// 购物系统：顶层提示（比弹窗更高层，不会被挡）
+function shopToast(msg) {
+  var old = document.getElementById('shopToast');
+  if (old) old.remove();
+  var t = document.createElement('div');
+  t.id = 'shopToast';
+  t.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;background:rgba(0,0,0,0.85);color:#fff;padding:14px 20px;border-radius:12px;font-size:14px;line-height:1.6;max-width:80%;text-align:center;white-space:pre-line;box-shadow:0 4px 20px rgba(0,0,0,0.4);';
+  t.textContent = msg;
+  (document.getElementById('phone') || document.body).appendChild(t);
+  setTimeout(function () { if (t.parentNode) t.remove(); }, 2200);
+}
+
+// 对外统一入口：打开商店时调用它。needRegen 时生成，否则用缓存
+async function shopEnsureItems() {
+  // 每日刷新：如果跨天了，把珍稀售罄状态重置
+  if (shopNeedRegen()) {
+    return await shopGenerate();
+  }
+  return DB.shopItems;
+}
+// ===== 购物系统：商店界面 =====
+
+var _shopActiveTag = '全部'; // 当前选中的分类标签
+var _shopTagScroll = 0;
+
+// 商店首页
+async function renderShop() {
+  content.innerHTML =
+    '<div style="padding:20px;text-align:center;color:var(--sub)">🛍️ 正在上新…</div>';
+
+  var items;
+  try {
+    items = await shopEnsureItems();
+  } catch (e) {
+    content.innerHTML =
+      '<div style="padding:40px 20px;text-align:center;color:var(--sub)">' +
+      '😢 ' + esc(e.message) +
+      '<br><br>' +
+      '<span style="color:var(--theme);cursor:pointer" onclick="renderShop()">点我重试</span>' +
+      '<br><br>' +
+      '<span style="color:var(--sub);cursor:pointer;border:1px solid var(--line);padding:6px 18px;border-radius:20px;display:inline-block" onclick="view={type:\'home\'};render()">‹ 返回桌面</span>' +
+      '</div>';
+    return;
+  }
+
+  shopRenderView(items);
+}
+
+// 真正画界面（生成好商品后调用，也用于切换分类时重画）
+function shopRenderView(items) {
+  // 顶部：标题 + 金币余额 + 刷新
+  var html = '';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)">';
+  // 左：返回 + 标题
+  html += '<div style="display:flex;align-items:center;gap:10px">';
+  html += '<span style="font-size:15px;color:var(--sub);cursor:pointer" onclick="view={type:\'home\'};render()">‹ 返回</span>';
+  html += '<span style="font-size:18px;font-weight:600">🏪 商店</span>';
+  html += '</div>';
+  // 右：金币 + 刷新
+  html += '<div style="display:flex;align-items:center;gap:10px">';
+  html += '<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);padding:4px 10px;border-radius:20px">';
+  html += '<span>💎</span><span id="shopCoinBal" style="font-weight:600">' + (DB.coins || 0) + '</span>';
+  html += '</div>';
+  html += '<span onclick="shopForceRegen()" style="font-size:16px;cursor:pointer" title="换一批">↻</span>';
+  html += '</div>';
+  html += '</div>';
+
+  // 分类标签（从商品里自动提取）
+  var tags = ['全部'];
+  items.forEach(function(it) {
+    if (tags.indexOf(it.tag) === -1) tags.push(it.tag);
+  });
+  if (tags.indexOf(_shopActiveTag) === -1) _shopActiveTag = '全部';
+
+  html += '<div id="shopTagBar" onscroll="_shopTagScroll=this.scrollLeft" style="display:flex;gap:8px;overflow-x:auto;padding:12px 16px;white-space:nowrap">';
+  tags.forEach(function(tag) {
+    var active = tag === _shopActiveTag;
+    html += '<span onclick="shopSelectTag(\'' + esc(tag) + '\')" style="flex:0 0 auto;padding:5px 14px;border-radius:16px;font-size:13px;cursor:pointer;' +
+      (active ? 'background:var(--theme);color:#fff;' : 'background:rgba(255,255,255,0.06);color:var(--sub);') + '">' + esc(tag) + '</span>';
+  });
+  html += '</div>';
+
+  // 二宫格商品卡片
+  var showItems = items.filter(function(it) {
+    return _shopActiveTag === '全部' || it.tag === _shopActiveTag;
+  });
+
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 24px">';
+  showItems.forEach(function(it) {
+    var isSold = it.rare && it.soldOut;
+    var rareStyle = it.rare
+      ? 'border:1.5px solid #E6B422;box-shadow:0 0 8px rgba(230,180,34,0.3);'
+      : 'border:1px solid var(--line);';
+    html += '<div onclick="' + (isSold ? '' : 'shopOpenDetail(\'' + it.id + '\')') + '" style="position:relative;background:var(--card);border-radius:12px;padding:14px 12px;cursor:' + (isSold ? 'default' : 'pointer') + ';' + rareStyle + (isSold ? 'opacity:0.45;' : '') + '">';
+    html += '<div style="font-size:40px;text-align:center;line-height:1.2">' + esc(it.emoji) + '</div>';
+    html += '<div style="font-size:14px;font-weight:600;margin-top:8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.name) + '</div>';
+    html += '<div style="font-size:12px;color:var(--sub);text-align:center;margin-top:2px">' + esc(it.desc) + '</div>';
+    // 价格标签
+    html += '<div style="text-align:center;margin-top:8px"><span style="font-size:13px;font-weight:600;color:' + (it.currency === 'heart' ? '#e0507a' : 'var(--theme)') + '">' + (it.currency === 'heart' ? '❤️' : '💎') + ' ' + it.price + '</span></div>';
+    // 珍稀角标
+    if (it.rare) {
+      html += '<div style="position:absolute;right:6px;bottom:6px;background:#E6B422;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">珍稀</div>';
+    }
+    // 随机生成商品角标（id 以 sp_ 开头的是 AI 随机款，spf_ 是固定款）
+    if (it.id && it.id.indexOf('sp_') === 0) {
+      html += '<div style="position:absolute;left:6px;top:6px;background:#4a9;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">新品</div>';
+    }
+
+    // 售罄遮罩
+    if (isSold) {
+      html += '<div style="position:absolute;top:8px;left:8px;background:#888;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">已售罄</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+
+  content.innerHTML = html;
+    var _tb = document.getElementById('shopTagBar');
+  if (_tb) _tb.scrollLeft = _shopTagScroll || 0;
+
+}
+
+async function shopForceRegen() {
+  DB.shopLastGenerated = 0; // 强制过期
+  save();
+  await renderShop();
+}
+// 珍稀送礼特效：金色爱心/星光飘落
+function shopRareEffect(charName, giftName) {
+  var old = document.getElementById('shopRareFx');
+  if (old) old.remove();
+  var box = document.createElement('div');
+  box.id = 'shopRareFx';
+  box.style.cssText = 'position:fixed;inset:0;z-index:99998;pointer-events:none;overflow:hidden;';
+  // 中央提示
+  var tip = document.createElement('div');
+  tip.style.cssText = 'position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#E6B422,#F5D76E);color:#fff;padding:14px 22px;border-radius:14px;font-size:15px;font-weight:600;text-align:center;box-shadow:0 4px 24px rgba(230,180,34,0.6);white-space:nowrap;animation:shopFxPop 0.5s ease;';
+  tip.innerHTML = '💝 你为 ' + esc(charName) + ' 送上了珍贵的心意<br><span style="font-size:12px;opacity:0.9">「' + esc(giftName) + '」</span>';
+  box.appendChild(tip);
+  // 飘落粒子
+  var syms = ['✨', '💛', '🌟', '💫', '⭐'];
+  for (var i = 0; i < 18; i++) {
+    var s = document.createElement('div');
+    s.textContent = syms[Math.floor(Math.random() * syms.length)];
+    var left = Math.random() * 100;
+    var dur = 1.8 + Math.random() * 1.4;
+    var delay = Math.random() * 0.6;
+    var size = 14 + Math.random() * 16;
+    s.style.cssText = 'position:absolute;top:-30px;left:' + left + '%;font-size:' + size + 'px;animation:shopFxFall ' + dur + 's linear ' + delay + 's forwards;';
+    box.appendChild(s);
+  }
+  (document.getElementById('phone') || document.body).appendChild(box);
+  setTimeout(function () { if (box.parentNode) box.remove(); }, 3200);
+}
+
+// ===== 购物系统：无对话自动送礼 =====
+
+// 判断某角色今天是否已经"自动送过礼"（互斥用）
+function shopGiftedToday(c) {
+  var rec = (DB.shopLastSent || {})[c.id];
+  if (!rec) return false;
+  var d = new Date(rec);
+  var str = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  return str === shopTodayStr();
+}
+
+// 距离上次自动送礼是否已满 7 天
+function shopGiftCooldownOk(c) {
+  var rec = (DB.shopLastSent || {})[c.id];
+  if (!rec) return true; // 从没送过
+  return (Date.now() - rec) >= 7 * 24 * 60 * 60 * 1000;
+}
+
+// 自动送礼主检查（在打开聊天列表/进入聊天时调用）
+async function checkAutoGift() {
+  if (replying) return;
+  if (!DB.settings.chatModel) return;
+
+  for (var i = 0; i < DB.contacts.length; i++) {
+    var c = DB.contacts[i];
+    if (c._draft || c.type === 'group') continue;
+    if (!c.inChatList) continue;
+    if (c.isBlockedByChar) continue;
+    if ((c.status && c.status.好感度 || 0) < 60) continue; // 好感≥60
+    if (!shopGiftCooldownOk(c)) continue;                   // 距上次≥7天
+    if (shopGiftedToday(c)) continue;                       // 今天没送过
+
+    // 基础触发概率 5%~8%
+    var prob = 0.05 + Math.random() * 0.03;
+
+    // 单向让步：今天若已经自动问候过，送礼概率大幅降低（不是禁止，只是很少）
+    if (c.greetLog && c.greetLog.date === new Date().toDateString()) {
+      var greeted = ['清晨', '上午', '中午', '下午', '夜晚', '深夜'].some(function (k) { return c.greetLog[k]; });
+      if (greeted) prob = prob * 0.25; // 问候过 → 概率降到原来的 1/4
+    }
+
+    if (Math.random() >= prob) continue;
+
+    // 命中！挑一件礼物送出
+    await shopDoAutoGift(c);
+    break; // 一次最多触发一个角色
+  }
+}
+
+// 执行自动送礼：优先从当前商店挑一件普通商品，实在没有就让轻量模型现编一件
+async function shopDoAutoGift(c) {
+  var picked = null;
+
+  // 从商店现有普通商品里随机挑一件
+  var pool = (DB.shopItems || []).filter(function (it) { return !it.rare; });
+  if (pool.length) {
+    picked = pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  // 没有就现编一件（贴合角色世界观）
+  if (!picked) {
+    try {
+      var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+      var world = (DB.worlds || []).find(function (w) { return w.id === c.worldId; });
+      var wd = world ? (world.name + '：' + world.desc) : '现代都市';
+      var raw = await callAI([
+        { role: 'system', content: '你只输出合法 JSON，不加代码块标记。' },
+        { role: 'user', content: '在"' + wd + '"这个世界观里，构造一件适合角色随手送给朋友的小礼物。只输出JSON：{"emoji":"🎁","name":"名字","desc":"2-4字描述"}' }
+      ], model);
+      var t = raw.replace(/```(json)?/gi, '').replace(/```/g, '').trim();
+      var s = t.indexOf('{'), e = t.lastIndexOf('}');
+      if (s !== -1 && e !== -1) picked = JSON.parse(t.substring(s, e + 1));
+    } catch (err) {
+      picked = { emoji: '🎁', name: '小礼物', desc: '给你的' };
+    }
+  }
+  if (!picked) return;
+
+  // 记录送礼时间（互斥 + 冷却）
+  DB.shopLastSent = DB.shopLastSent || {};
+  DB.shopLastSent[c.id] = Date.now();
+  save();
+
+  // 先让 AI 说一句"为什么突然送你东西"的话（用轻量模型，短句）
+  try {
+    var gModel = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+    var gName = c.name || c.nick || '对方';
+    var uName = DB.me.realName || DB.me.name || '对方';
+    var gNudge = '（你突然想给' + uName + '送一件小东西：' + picked.emoji + '「' + picked.name + '」' +
+      (picked.desc ? '，' + picked.desc : '') + '。请你按自己的人设，用微信聊天的口语短句，自然地说一句"为什么突然送TA东西"的开场白，' +
+      '比如路过看到想起对方、单纯想对TA好、找个小借口等。只输出1到2句话，不要提任何价格数字系统内容，不要写动作旁白。）';
+    var gHist = (DB.chats[c.id] || []).slice(-6).map(toApiMsg);
+    var gMessages = [
+      { role: 'system', content: buildSystem(c) },
+      { role: 'system', content: '【立即生效】微信线上打字聊天：只输出口语短句，最多2句，禁止括号动作/心理描写，禁止旁白。' }
+    ].concat(gHist).concat([{ role: 'user', content: gNudge }]);
+
+    var gOut = await callAI(gMessages, gModel);
+    gOut = applyState(c, gOut);
+    var gParts = parseAIMessage(gOut);
+    gParts.forEach(function (p) {
+      if (p.type === 'text' && p.content && p.content.trim()) {
+        var tm = { id: newId(), role: 'assistant', type: 'text', content: p.content.trim(), time: Date.now() };
+        DB.chats[c.id].push(tm);
+        if (view.type === 'chat' && view.id === c.id) appendBubble(c, tm);
+      }
+    });
+    save();
+  } catch (e) {
+    console.warn('自动送礼配文失败，只发卡片', e);
+  }
+
+  // 再送出礼物卡片（silent:true 避免和上面文字重复计未读，最后统一记一次）
+  shopAiSendGift(c, {
+    emoji: picked.emoji,
+    name: picked.name,
+    desc: picked.desc,
+    rare: false
+  }, { silent: true });
+
+  // 统一处理未读/滚动
+  if (view.type === 'chat' && view.id === c.id) {
+    if (typeof scrollBottom === 'function') scrollBottom();
+  } else {
+    markChatUnread(c.id, 1);
+  }
+}
+// 购物系统：精准提取某世界观下角色的喜好/习性，供选品参考
+function shopCharHints(worldId) {
+  var list = (DB.contacts || []).filter(function (c) {
+    return !c._draft && c.type !== 'group' && c.worldId === worldId;
+  });
+  if (!list.length) return '';
+
+  // 只读这几个最相关的字段（喜好、作息饮食、行为习性）
+  var fieldMap = [
+    { key: 'pLike', label: '喜好厌恶' },
+    { key: 'pDaily', label: '日常饮食作息' },
+    { key: 'pBehavior', label: '行为习性' }
+  ];
+
+  var lines = [];
+  list.slice(0, 5).forEach(function (c) {  // 最多取5个角色
+    var nm = c.name || c.nick || '角色';
+    var bits = [];
+    fieldMap.forEach(function (f) {
+      var v = (c[f.key] || '').toString().trim();
+      if (v) {
+        if (v.length > 120) v = v.slice(0, 120); // 单字段截断，防太长
+        bits.push(f.label + '：' + v);
+      }
+    });
+    if (bits.length) {
+      lines.push('·' + nm + '｜' + bits.join('；'));
+    }
+  });
+
+  return lines.join('\n');
+}
+
+// 切换分类
+function shopSelectTag(tag) {
+  _shopActiveTag = tag;
+  shopRenderView(DB.shopItems || []);
+}
+
+// ===== 购物系统：弹窗基础 =====
+
+// 关闭购物弹窗
+function shopClosePopup() {
+  var p = document.getElementById('shopPopup');
+  if (p) p.remove();
+}
+
+// 通用弹窗容器：传入内容 HTML，底部从屏幕下方弹出
+function shopShowPopup(innerHtml) {
+  shopClosePopup();
+  var mask = document.createElement('div');
+  mask.id = 'shopPopup';
+  mask.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;';
+  mask.onclick = function (e) { if (e.target === mask) shopClosePopup(); };
+  var box = document.createElement('div');
+  box.style.cssText = 'width:100%;max-width:420px;max-height:80%;overflow-y:auto;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:18px 18px 26px;box-sizing:border-box;';
+  box.innerHTML = innerHtml;
+  mask.appendChild(box);
+  // 挂到手机屏幕容器里（优先 content，其次 body）
+  (document.getElementById('phone') || document.body).appendChild(mask);
+}
+
+// ===== 商品详情弹窗 =====
+function shopOpenDetail(itemId) {
+  var it = (DB.shopItems || []).find(function (x) { return x.id === itemId; });
+  if (!it) return;
+
+  var h = '';
+  h += '<div style="text-align:center;font-size:56px;line-height:1.1">' + esc(it.emoji) + '</div>';
+  h += '<div style="text-align:center;font-size:20px;font-weight:700;margin-top:10px;color:var(--text)">' + esc(it.name) + '</div>';
+  h += '<div style="text-align:center;font-size:13px;color:var(--sub);margin-top:4px">' + esc(it.desc) + ' · ' + esc(it.tag) + '</div>';
+
+  if (it.rare && it.story) {
+    h += '<div style="margin:14px 0;padding:12px;background:rgba(230,180,34,0.1);border:1px solid rgba(230,180,34,0.4);border-radius:10px;font-size:13px;color:#B8860B;line-height:1.6;font-style:italic">「' + esc(it.story) + '」</div>';
+  }
+
+  h += '<div style="text-align:center;margin:18px 0;font-size:22px;font-weight:700;color:' + (it.currency === 'heart' ? '#e0507a' : 'var(--theme)') + '">' +
+    (it.currency === 'heart' ? '❤️ ' : '💎 ') + it.price + '</div>';
+
+  h += '<div style="font-size:11px;color:var(--sub);text-align:center;margin-bottom:16px">来自世界：' + esc(it.fromWorld) + '</div>';
+
+  h += '<div onclick="shopOpenCharPicker(\'' + it.id + '\')" style="text-align:center;padding:13px;background:var(--theme);color:#fff;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer">🎁 送给 TA</div>';
+  h += '<div onclick="shopClosePopup()" style="text-align:center;padding:12px;margin-top:8px;color:var(--sub);font-size:14px;cursor:pointer">取消</div>';
+
+  shopShowPopup(h);
+}
+
+// ===== 角色选择器 =====
+function shopOpenCharPicker(itemId) {
+  var it = (DB.shopItems || []).find(function (x) { return x.id === itemId; });
+  if (!it) return;
+
+  // 非草稿角色（排除群聊 type=group）
+  var chars = (DB.contacts || []).filter(function (c) {
+    return !c._draft && c.type !== 'group';
+  });
+
+  var h = '';
+  h += '<div style="font-size:17px;font-weight:700;margin-bottom:4px;color:var(--text)">送给谁？</div>';
+  h += '<div style="font-size:12px;color:var(--sub);margin-bottom:14px">' + esc(it.emoji) + ' ' + esc(it.name) +
+    (it.currency === 'heart' ? '（消耗对方的 ❤️ 心动值）' : '（消耗 💎 金币）') + '</div>';
+
+  if (!chars.length) {
+    h += '<div style="text-align:center;color:var(--sub);padding:20px">还没有可以赠送的角色～</div>';
+  } else {
+    h += '<div style="display:flex;flex-direction:column;gap:8px">';
+    chars.forEach(function (c) {
+      var av = c.avatar
+        ? 'background-image:url(\'' + c.avatar + '\');background-size:cover;'
+        : 'background:var(--theme);';
+      var nm = c.nick || c.name;
+      // 珍稀显示该角色心动值，普通不显示
+      var right = it.currency === 'heart'
+        ? '<span style="font-size:13px;color:#e0507a">❤️ ' + (c.hearts || 0) + '</span>'
+        : '<span style="font-size:18px;color:var(--sub)">›</span>';
+      h += '<div onclick="shopConfirmGift(\'' + it.id + '\',\'' + c.id + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border-radius:10px;cursor:pointer">' +
+        '<div style="width:38px;height:38px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;' + av + '">' + (c.avatar ? '' : esc((nm || '?')[0])) + '</div>' +
+        '<div style="flex:1;font-size:15px;color:var(--text)">' + esc(nm) + '</div>' +
+        right +
+        '</div>';
+    });
+    h += '</div>';
+  }
+
+  h += '<div onclick="shopClosePopup()" style="text-align:center;padding:12px;margin-top:12px;color:var(--sub);font-size:14px;cursor:pointer">返回</div>';
+  shopShowPopup(h);
+}
+
+// ===== 送礼确认（检查余额 + 珍稀二次确认） =====
+function shopConfirmGift(itemId, charId) {
+  var it = (DB.shopItems || []).find(function (x) { return x.id === itemId; });
+  var c = getC(charId);
+  if (!it || !c) return;
+
+  var nm = c.nick || c.name;
+
+  // 珍稀商品若已售罄，拦截
+  if (it.rare && it.soldOut) {
+    alert('这件珍稀商品今天已经被买走了，明天再来看看吧～');
+    return;
+  }
+
+  // 余额检查
+  if (it.currency === 'heart') {
+    if ((c.hearts || 0) < it.price) {
+      shopToast('你和 ' + nm + ' 的心动值不够哦（需要 ❤️' + it.price + '，当前 ❤️' + (c.hearts || 0) + '）。\n多和 TA 相处来积累心动值吧～');
+      return;
+    }
+  } else {
+    if ((DB.coins || 0) < it.price) {
+      shopToast('金币不够哦（需要 💎' + it.price + '，当前 💎' + (DB.coins || 0) + '）。\n多和角色聊天来赚金币吧～');
+      return;
+    }
+  }
+
+  // 珍稀二次确认
+  if (it.rare) {
+    if (!confirm('这份礼物很珍贵，确定要送给 ' + nm + ' 吗？')) return;
+  }
+
+  shopDoGift(it, c);
+}
+
+// ===== 送礼核心：扣币 + 翻译 + 插入聊天 + 触发 AI =====
+async function shopDoGift(it, c) {
+  var nm = c.nick || c.name;
+
+  // 关闭弹窗，给个"处理中"的过渡（跨世界观翻译可能要等一下）
+  shopShowPopup('<div style="text-align:center;padding:30px;color:var(--sub)">🎁 正在送出…</div>');
+
+  // 1) 扣货币
+  if (it.currency === 'heart') {
+    c.hearts = Math.max(0, (c.hearts || 0) - it.price);
+  } else {
+    addCoins(-it.price); // addCoins 会 save 并刷新余额显示
+  }
+
+  // 2) 好感度变化（代码固定给，静默，不告诉 AI）
+  var favAdd = it.rare
+    ? (3 + Math.floor(Math.random() * 3))   // 珍稀 +3~5
+    : (1 + Math.floor(Math.random() * 2));  // 普通 +1~2
+  if (c.status) c.status.好感度 = Math.min(100, (c.status.好感度 || 0) + favAdd);
+
+  // 3) 珍稀商品：标记当天售罄
+  if (it.rare) {
+    it.soldOut = true;
+  }
+  save();
+  // 珍稀彩蛋 C：写入角色长期记忆（用真名，第三人称，避免"你/你"混淆）
+  if (it.rare) {
+    c.chapters = c.chapters || [];
+    var _now = new Date();
+    var _ds = _now.getFullYear() + '-' + (_now.getMonth() + 1) + '-' + _now.getDate();
+    var _userName = DB.me.realName || DB.me.name || '对方';  // 用户真名优先
+    var _charName = c.name || c.nick || '我';                // 角色真名
+    c.chapters.push({
+      date: _ds,
+      content: _userName + '郑重地送给' + _charName + '一件珍贵的礼物「' + it.name + '」，' + _charName + '很珍惜这份心意，记在了心里。'
+    });
+    save();
+  }
+
+  // 4) 跨世界观翻译（商品来源世界 != 目标角色世界，才翻译）
+  var giftName = it.name;
+  var giftDesc = it.desc;
+  var targetWorld = (DB.worlds || []).find(function (w) { return w.id === c.worldId; });
+  var targetWorldName = targetWorld ? targetWorld.name : '现代都市';
+
+  if (it.fromWorld && targetWorldName && it.fromWorld !== targetWorldName) {
+    try {
+      var tModel = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+      var tPrompt =
+        '把下面这件商品，改写成适合"' + targetWorldName + '（' + (targetWorld ? targetWorld.desc : '') + '）"这个世界观风格的名字和描述。' +
+        '保持它本质是同一件东西，只是换个符合当地风味的说法。\n' +
+        '原名：' + it.name + '\n原描述：' + it.desc + '\n' +
+        '【只输出 JSON，不要多余文字】格式：{"name":"新名字","desc":"新描述(2-4字)"}';
+      var tRaw = await callAI([
+        { role: 'system', content: '你只输出合法 JSON，不加代码块标记。' },
+        { role: 'user', content: tPrompt }
+      ], tModel);
+      var tText = tRaw.replace(/```(json)?/gi, '').replace(/```/g, '').trim();
+      var ts = tText.indexOf('{'), te = tText.lastIndexOf('}');
+      if (ts !== -1 && te !== -1) {
+        var obj = JSON.parse(tText.substring(ts, te + 1));
+        if (obj.name) giftName = obj.name;
+        if (obj.desc) giftDesc = obj.desc;
+      }
+    } catch (e) {
+      // 翻译失败就用原名，不影响送礼
+      console.warn('跨世界观翻译失败，使用原名', e);
+    }
+  }
+
+  // 5) 生成"用户发送"的商品卡片消息，插入该角色聊天
+  var msg = {
+    id: newId(),
+    role: 'user',
+    type: 'shop_item',
+    content: giftName,
+    emoji: it.emoji,
+    desc: giftDesc,
+    price: it.price,
+    currency: it.currency,
+    rare: it.rare,
+    story: it.rare ? it.story : '',
+    fromWorld: it.fromWorld,
+    from: 'user',
+    giftStatus: 'given',
+    time: Date.now()
+  };
+  DB.chats[c.id] = DB.chats[c.id] || [];
+  DB.chats[c.id].push(msg);
+  c.inChatList = true;
+  save();
+
+  // 6) 关闭弹窗 → 跳进该角色聊天
+  shopClosePopup();
+  openChat(c.id); // 会切 view、激活世界观、render
+  // 珍稀彩蛋 A：金色特效
+  if (it.rare) {
+    setTimeout(function () { shopRareEffect(nm, giftName); }, 400);
+  }
+
+  // 7) 触发 AI 回复（nudge 只描述礼物本身，绝不提价格/金币/珍稀）
+  var nudge;
+  if (it.rare) {
+    nudge = '（对方郑重地送了你一件极其珍贵、难得的礼物：' + it.emoji + '「' + giftName + '」' +
+      (giftDesc ? '，' + giftDesc : '') + '。这份心意分量很重、很走心。' +
+      '请你给出人设中最真挚、最动情的一次回应，可以是深深的触动、久久的怔忪、藏不住的欢喜或郑重的珍视——' +
+      '比平时更投入一些。像真人收到毕生难忘的礼物那样回应，绝不提及任何价格、数字或系统内容。）';
+  } else {
+    nudge = '（对方刚刚送了你一件礼物：' + it.emoji + '「' + giftName + '」' +
+      (giftDesc ? '，' + giftDesc : '') + '。' +
+      '请你完全按照自己的人设，自然地做出反应——可以欣然收下、害羞、感动、调侃，也可以按性格委婉推辞。' +
+      '像真人收到礼物那样用聊天语气回应，不要提及任何价格、数字或系统内容。）';
+  }
+
+  // 稍等一下再触发，确保聊天界面已渲染
+  setTimeout(function () {
+    if (typeof aiReply === 'function') aiReply(nudge);
+  }, 300);
+}
+// ===== 购物系统：AI 主动送礼 =====
+
+// 让 AI 送一件礼物（生成一张 assistant 的 shop_item 卡片，带收下/婉拒按钮）
+// itemLike: { emoji, name, desc, rare, story }（可来自商店商品，也可临时构造）
+function shopAiSendGift(c, itemLike, opts) {
+  opts = opts || {};
+  var msg = {
+    id: newId(),
+    role: 'assistant',
+    type: 'shop_item',
+    content: itemLike.name || '小礼物',
+    emoji: itemLike.emoji || '🎁',
+    desc: itemLike.desc || '',
+    price: 0,            // AI 送的不涉及货币
+    currency: '',
+    rare: !!itemLike.rare,
+    story: itemLike.rare ? (itemLike.story || '') : '',
+    fromWorld: itemLike.fromWorld || '',
+    from: 'ai',
+    giftStatus: 'pending', // 等待用户收下/婉拒
+    time: Date.now()
+  };
+  DB.chats[c.id] = DB.chats[c.id] || [];
+  DB.chats[c.id].push(msg);
+  c.inChatList = true;
+  save();
+
+  // 如果正开着这个聊天就直接渲染，否则加未读角标
+  if (view.type === 'chat' && view.id === c.id) {
+    appendBubble(c, msg);
+    if (typeof scrollBottom === 'function') scrollBottom();
+  } else if (!opts.silent) {
+    markChatUnread(c.id, 1);
+  }
+  return msg;
+}
+
+// 用户点击【收下】/【婉拒】
+function shopGiftRespond(msgId, action) {
+  var c = getC(view.id);
+  if (!c) return;
+  var msgs = DB.chats[c.id] || [];
+  var m = msgs.find(function (x) { return x.id === msgId; });
+  if (!m || m.giftStatus !== 'pending') return;
+
+  var nm = c.nick || c.name;
+
+  if (action === 'accept') {
+    m.giftStatus = 'accepted';
+    var add = 2 + Math.floor(Math.random() * 2); // +2~3
+    if (c.status) c.status.好感度 = Math.min(100, (c.status.好感度 || 0) + add);
+    save();
+    insertSystemMessage('你收下了 ' + (m.emoji || '') + m.content);
+  } else {
+    m.giftStatus = 'declined';
+    var sub = 1 + Math.floor(Math.random() * 2); // -1~2
+    if (c.status) c.status.好感度 = Math.max(0, (c.status.好感度 || 0) - sub);
+    save();
+    insertSystemMessage('你婉拒了 ' + (m.emoji || '') + m.content);
+  }
+
+  // 重画聊天，让按钮变成"已收下/已婉拒"
+  if (typeof renderChat === 'function') renderChat();
+
+  // 让 AI 对用户的选择自然接一句（nudge 不提好感度数字）
+  var nudge = action === 'accept'
+    ? '（对方收下了你送的' + (m.emoji || '') + '「' + m.content + '」，请按你的人设自然回应一句，别提任何数值。）'
+    : '（对方婉拒了你送的' + (m.emoji || '') + '「' + m.content + '」，请按你的人设自然回应一句，可以是失落、体贴或不在意，别提任何数值。）';
+  setTimeout(function () {
+    if (typeof aiReply === 'function') aiReply(nudge);
+  }, 300);
+}
+
+// ===== 购物系统：注入珍稀光晕 + 特效动画 =====
+(function () {
+  if (document.getElementById('shopStyle')) return;
+  var st = document.createElement('style');
+  st.id = 'shopStyle';
+  st.textContent =
+    '@keyframes shopGlow{0%,100%{box-shadow:0 0 6px rgba(230,180,34,0.4)}50%{box-shadow:0 0 15px rgba(230,180,34,0.8)}}' +
+    '@keyframes shopFxFall{to{transform:translateY(105vh) rotate(360deg);opacity:0}}' +
+    '@keyframes shopFxPop{from{transform:translate(-50%,-50%) scale(0.6);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}';
+  document.head.appendChild(st);
+})();
+
 // ===== 轻量收集：只捞今天、且与该角色直接相关的群聊/朋友圈片段 =====
 function collectExtraContextForChar(c) {
   var todayStr = new Date().toISOString().slice(0, 10);
@@ -1319,7 +2147,7 @@ const inp=document.createElement('input');inp.type='file';inp.accept='image/*';i
 
 function render() {
   // ============================================================
-  // 1️⃣ 强制清理所有可能残留的遮挡层（防止卡死元凶）
+  // 1️⃣ 强制清理所有可能残留的遮挡层
   // ============================================================
   var popup = document.getElementById('popup');
   if (popup) popup.remove();
@@ -1331,7 +2159,7 @@ function render() {
   if (modal) modal.remove();
 
   // ============================================================
-  // 2️⃣ 清理旧页面元素（桌面、聊天输入框、旧首页等）
+  // 2️⃣ 清理旧页面元素
   // ============================================================
   var home = document.getElementById('home');
   if (home) home.remove();
@@ -1339,80 +2167,63 @@ function render() {
   var bottom = document.getElementById('chatBottom');
   if (bottom) bottom.remove();
 
-  closeModal();                         // 保险，关闭可能残留的模态框
-  content.style.backgroundImage = '';   // 重置聊天背景
+  closeModal();
+  content.style.backgroundImage = '';
 
   // ============================================================
-  // 3️⃣ 触发每日记忆生成（只调用一次）
+  // 3️⃣ 触发每日记忆生成
   // ============================================================
-  triggerDailyMemoryCheck();            // 原来这里重复了两次，删掉一个
+  triggerDailyMemoryCheck();
 
   // ============================================================
-  // 4️⃣ 路由：根据 view.type 跳转到对应页面
+  // 4️⃣ 路由
   // ============================================================
-
-  // ---- 浮光（特殊处理） ----
   if (view.type === 'floating') {
     console.log('✅ render 拦截到 floating，直接调用 renderFloating');
     return renderFloating();
   }
 
-  // ---- 桌面 ----
   if (view.type === 'home') return renderHome();
 
-  // ---- 其他页面：显示 content 区块 ----
   content.style.display = 'block';
 
   // ---- 微信相关 ----
   if (view.type === 'wechat') return renderWechat();
-  if (view.type === 'chats') return renderChats();       // 补充遗漏的路由
-  if (view.type === 'contacts') return renderContacts(); // 补充遗漏的路由
-  if (view.type === 'discover') return renderDiscover(); // 补充遗漏的路由
-  if (view.type === 'me') return renderWxMe();           // 补充遗漏的路由
+  if (view.type === 'chats') return renderChats();
+  if (view.type === 'contacts') return renderContacts();
+  if (view.type === 'discover') return renderDiscover();
+  if (view.type === 'me') return renderWxMe();
 
-  // ---- 设置 ----
   if (view.type === 'settings') return renderSettings();
-
-  // ---- 角色编辑 ----
   if (view.type === 'charEdit') return renderCharEdit();
+  if (view.type === 'chat') return renderChat(false);
 
-  // ---- 私聊 ----
-if (view.type === 'chat') return renderChat(false);
-
-  // ---- 群聊相关 ----
+  // ---- 群聊 ----
   if (view.type === 'groupList') return renderGroupList();
   if (view.type === 'groupChat') return renderGroupChat();
   if (view.type === 'groupSet') return renderGroupSet();
 
-  // ---- 朋友圈 ----
   if (view.type === 'moments') return renderMoments();
 
-  // ---- 心迹 ----
   if (view.type === 'hearts') return renderHearts();
   if (view.type === 'heartDetail') return renderHeartDetail();
   if (view.type === 'voiceList') return renderVoiceList();
 
-  // ---- 行程 ----
   if (view.type === 'schedule') return renderSchedule();
-
-  // ---- 监控日志 ----
   if (view.type === 'watchLog') return renderWatchLog();
-
-  // ---- 专注 ----
   if (view.type === 'focus') return renderFocus();
-
-  // ---- 世界观 ----
   if (view.type === 'worlds') return renderWorlds();
 
-  // ---- 备忘录 ----
   if (view.type === 'memo') return renderMemoMain();
   if (view.type === 'memoDetail') return renderMemoDetail(view.id);
 
-  // ---- 占位（未实现的功能） ----
+  // ---- 🛍️ 购物（新增这一行） ----
+  if (view.type === 'shop') return renderShop();
+
   if (view.type === 'placeholder') return renderPlaceholder();
 
   // ============================================================
-  // 5️⃣ 兜底：如果以上都没匹配，保持当前页面并应用缩放
+  // 5️⃣ 兜底
   // ============================================================
   applyPhoneScale();
 }
@@ -1535,36 +2346,44 @@ function renderHome() {
 var starHtml = '';
 if (currentThemeId === 'ghost_troupe') {
   starHtml = `
-    <span class="ghost-star xlarge" style="top:4%; left:8%;">✦</span>
-    <span class="ghost-star large" style="top:12%; right:15%;">✦</span>
-    <span class="ghost-star" style="top:20%; left:5%;">✦</span>
-    <span class="ghost-star small" style="top:28%; right:28%;">✦</span>
-    <span class="ghost-star xlarge" style="top:35%; left:18%;">✦</span>
-    <span class="ghost-star large" style="top:42%; right:8%;">✦</span>
-    <span class="ghost-star" style="top:50%; left:28%;">✦</span>
-    <span class="ghost-star small" style="top:56%; right:18%;">✦</span>
-    <span class="ghost-star xlarge" style="top:63%; left:8%;">✦</span>
-    <span class="ghost-star large" style="top:70%; right:25%;">✦</span>
-    <span class="ghost-star" style="top:78%; left:18%;">✦</span>
-    <span class="ghost-star small" style="top:85%; right:10%;">✦</span>
-    <span class="ghost-star" style="top:92%; left:28%;">✦</span>
-    <span class="ghost-star small" style="top:8%; left:28%;">✦</span>
-    <span class="ghost-star xsmall" style="top:16%; right:35%;">✦</span>
-    <span class="ghost-star" style="top:24%; left:38%;">✦</span>
-    <span class="ghost-star xsmall" style="top:32%; right:42%;">✦</span>
-    <span class="ghost-star small" style="top:40%; left:45%;">✦</span>
-    <span class="ghost-star" style="top:48%; right:38%;">✦</span>
-    <span class="ghost-star xsmall" style="top:54%; left:52%;">✦</span>
-    <span class="ghost-star large" style="top:62%; right:48%;">✦</span>
-    <span class="ghost-star small" style="top:68%; left:58%;">✦</span>
-    <span class="ghost-star xsmall" style="top:76%; right:55%;">✦</span>
-    <span class="ghost-star" style="top:82%; left:65%;">✦</span>
-    <span class="ghost-star small" style="top:90%; right:60%;">✦</span>
-    <span class="ghost-star xsmall" style="top:5%; left:55%;">✦</span>
-    <span class="ghost-star" style="top:14%; right:50%;">✦</span>
-    <span class="ghost-star xsmall" style="top:45%; left:70%;">✦</span>
-    <span class="ghost-star small" style="top:60%; right:70%;">✦</span>
-    <span class="ghost-star xsmall" style="top:75%; left:75%;">✦</span>
+    <span class="ghost-star xlarge" style="top:4%; left:8%; color:#6B5A6E; opacity:0.25;">✦</span>
+    <span class="ghost-star large" style="top:12%; right:15%; color:#8A7A8E; opacity:0.20;">✦</span>
+    <span class="ghost-star" style="top:20%; left:5%; color:#6B5A6E; opacity:0.18;">✦</span>
+    <span class="ghost-star small" style="top:28%; right:28%; color:#8A7A8E; opacity:0.14;">✦</span>
+    <span class="ghost-star xlarge" style="top:35%; left:18%; color:#6B5A6E; opacity:0.25;">✦</span>
+    <span class="ghost-star large" style="top:42%; right:8%; color:#A392A8; opacity:0.18;">✦</span>
+    <span class="ghost-star" style="top:50%; left:28%; color:#6B5A6E; opacity:0.18;">✦</span>
+    <span class="ghost-star small" style="top:56%; right:18%; color:#8A7A8E; opacity:0.14;">✦</span>
+    <span class="ghost-star xlarge" style="top:63%; left:8%; color:#6B5A6E; opacity:0.25;">✦</span>
+    <span class="ghost-star large" style="top:70%; right:25%; color:#A392A8; opacity:0.18;">✦</span>
+    <span class="ghost-star" style="top:78%; left:18%; color:#6B5A6E; opacity:0.18;">✦</span>
+    <span class="ghost-star small" style="top:85%; right:10%; color:#8A7A8E; opacity:0.14;">✦</span>
+    <span class="ghost-star" style="top:92%; left:28%; color:#A392A8; opacity:0.16;">✦</span>
+    <span class="ghost-star small" style="top:8%; left:28%; color:#8A7A8E; opacity:0.14;">✦</span>
+    <span class="ghost-star xsmall" style="top:16%; right:35%; color:#6B5A6E; opacity:0.12;">✦</span>
+    <span class="ghost-star" style="top:24%; left:38%; color:#A392A8; opacity:0.16;">✦</span>
+    <span class="ghost-star xsmall" style="top:32%; right:42%; color:#8A7A8E; opacity:0.12;">✦</span>
+    <span class="ghost-star small" style="top:40%; left:45%; color:#6B5A6E; opacity:0.14;">✦</span>
+    <span class="ghost-star" style="top:48%; right:38%; color:#A392A8; opacity:0.16;">✦</span>
+    <span class="ghost-star xsmall" style="top:54%; left:52%; color:#8A7A8E; opacity:0.12;">✦</span>
+    <span class="ghost-star large" style="top:62%; right:48%; color:#6B5A6E; opacity:0.18;">✦</span>
+    <span class="ghost-star small" style="top:68%; left:58%; color:#A392A8; opacity:0.14;">✦</span>
+    <span class="ghost-star xsmall" style="top:76%; right:55%; color:#8A7A8E; opacity:0.12;">✦</span>
+    <span class="ghost-star" style="top:82%; left:65%; color:#6B5A6E; opacity:0.18;">✦</span>
+    <span class="ghost-star small" style="top:90%; right:60%; color:#A392A8; opacity:0.14;">✦</span>
+    <span class="ghost-star xsmall" style="top:5%; left:55%; color:#8A7A8E; opacity:0.12;">✦</span>
+    <span class="ghost-star" style="top:14%; right:50%; color:#6B5A6E; opacity:0.18;">✦</span>
+    <span class="ghost-star xsmall" style="top:45%; left:70%; color:#A392A8; opacity:0.12;">✦</span>
+    <span class="ghost-star small" style="top:60%; right:70%; color:#8A7A8E; opacity:0.14;">✦</span>
+    <span class="ghost-star xsmall" style="top:75%; left:75%; color:#6B5A6E; opacity:0.12;">✦</span>
+    <!-- 小圆点星星（新增） -->
+    <span style="position:absolute;border-radius:50%;background:#6B5A6E;opacity:0.20;width:4px;height:4px;top:6%;left:25%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#8A7A8E;opacity:0.15;width:3px;height:3px;top:18%;right:30%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#6B5A6E;opacity:0.20;width:5px;height:5px;top:32%;left:50%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#8A7A8E;opacity:0.15;width:3px;height:3px;top:50%;left:15%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#6B5A6E;opacity:0.20;width:4px;height:4px;top:68%;right:20%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#8A7A8E;opacity:0.15;width:5px;height:5px;top:82%;left:35%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#6B5A6E;opacity:0.20;width:3px;height:3px;top:95%;right:45%;"></span>
   `;
 }
   var appsHtml = otherApps.map(function(a) {
@@ -2436,11 +3255,11 @@ if (id === 'floating') {
     renderFloating();
     return;
 }
-  if (id === 'shop') {
-    view = { type: 'placeholder', title: '🛍️ 购物', msg: '功能开发中，敬请期待～' };
+if (id === 'shop') {
+    view = { type: 'shop' };
     render();
     return;
-  }
+}
 
   var a = DB.desktop.apps.find(function(x) { return x.id === id; });
   if (a) {
@@ -5629,25 +6448,25 @@ async function polishChar() {
   ];
 
   // ===== 新 Prompt：保留所有细节，只做整理和补全 =====
-  const pr = `你是一位角色设定润色助手。用户已经填写了一些角色设定草稿，请你在【完全保留用户原有文字和细节】的基础上，完成以下工作：
+const pr = `你是一位资深的角色设定润色助手。用户已经填写了一些角色设定草稿，请你在【完全保留用户原有文字和细节】的基础上，完成润色与补全。
 
-1. 如果某字段用户已填写，请仅做以下微调：
-   - 修正明显的错别字或语法错误（不要改风格）。
-   - 将零散的词语整理成自然的短句（但不要删减原有信息）。
-   - 如果该字段内容明显不完整（例如只有几个关键词），可根据整体人设适当补充 1~2 句合理的细节。
+【最高原则】
+用户已填写的每一条内容都是宝贵的，你只做锦上添花：修正错别字语病、把零散词语整理成自然短句、在信息不完整时补充1~2句合理细节。绝对不要删减、压缩或改变用户原有信息的风格与含义。字段为空时，才根据整体人设合理补全（补全要符合人设逻辑，不脑补无关剧情）。
 
-2. 如果某字段为空，请根据整体人设合理补全（补全内容需符合人设逻辑，不要脑补无关剧情）。
-
-3. 【特别重要】针对“成长经历”（pBack）字段：
-   - 如果用户已填写了带箭头的格式（例如“事件 → 影响”），请保留原有箭头逻辑，并适当补充使因果链更清晰。
-   - 如果用户未填写，则用“事件 → 影响”的格式补全。
-   - 【禁止】将用户的箭头格式改成散文叙述。
-
-4. 【特别重要】针对“行为模式”（pBehavior）字段：
-   - 如果用户已填写，请完整保留用户写的内容，只对其中的逻辑顺序做轻微调整（如合并同类项），但绝对不要删减用户的描述。
-   - 如果用户未填写，则按照“外在印象 → 行为习惯 → 情绪表达”的逻辑补全，但补全内容要简洁。
-
-5. 【总体原则】用户的每一条已填写内容都是宝贵的，你有责任保留它们，只做锦上添花，不要自作主张删减或压缩。
+【各字段补全细则】
+· gender/age/job/family/body（性别/年龄/职业/家庭/身材）：简洁准确，与整体人设一致，一句话即可。
+· pLook（外貌）：突出3~5个有辨识度的外貌特征（发色瞳色、体态、标志性穿着或配饰等），有画面感。
+· pKeywords（性格关键词）：提炼3~6个精准的性格词，用顿号分隔，避免笼统的"善良""温柔"，尽量具体（如"外冷内热""护短""慢热但专一"）。
+· 【重要】pLike（喜好与厌恶）：这是塑造角色的关键。必须写得【具体、可落地】，分别列出"喜欢"和"讨厌"的东西——包括具体的食物、物件、颜色、活动、场景、类型的人等（例如"喜欢圆溜溜会发光的小东西、爱吃滚烫辛辣的食物；讨厌吵闹和被人碰尾巴"），避免只写抽象概念。若用户已填，务必保留其具体喜好，只做补充。
+· 【重要】pDaily（日常作息）：包含起居时间、饮食习惯、独处时爱做的事等具体生活细节，让角色"活"起来。
+· 【重要】pBehavior（行为模式）：保留用户原文，只轻微调整逻辑顺序（合并同类项），绝不删减。为空时按"外在印象 → 行为习惯 → 情绪表达"的逻辑简洁补全。
+· pStyle（说话风格/口头禅）：说明语气特点，并给出1~2个具体口头禅或常用句式示例。
+· pLang（语言习惯）：用词偏好、称呼习惯、语气助词等具体特征。
+· 【重要】pBack（成长经历）：若用户用了"事件 → 影响"的箭头格式，务必【保留箭头逻辑】并补充使因果链更清晰；为空则用"事件 → 影响"格式补全。【禁止】把箭头格式改成散文叙述。
+· negative（负面/禁忌）：角色绝不会做的事、雷区、需回避的话题。
+· opening（开场白）：符合人设与说话风格的第一句话，有代入感。
+· pExtra（补充设定）：保留用户所有额外设定，酌情理顺。
+· my开头字段（myGender/myAge/myJob/myLook/myPersona/myRelation，即"用户在故事中的身份"）与chatBg（聊天背景）：这些是关于"用户"或场景的设定，同样遵循"已填保留微调、为空合理补全"原则，补全时要与角色人设及世界观自洽。
 
 【输入的角色信息】
 ${JSON.stringify(cur, null, 2)}
@@ -5785,8 +6604,9 @@ function momentCard(m,i){
   
   // 修复：完善评论HTML结构，增加点击回复功能
   const cmtHtml = (m.comments || []).map(function(cm) {
-    var cc = nameOf(cm.by);
-    var toStr = cm.to ? '<span style="color:var(--sub)"> 回复 </span><b style="color:var(--theme)">' + esc(nameOf(cm.to)) + '</b>' : '';
+var cc = cm.name || nameOf(cm.by);
+var _toName = cm.toName || (cm.to ? nameOf(cm.to) : '');
+var toStr = _toName ? '<span style="color:var(--sub)"> 回复 </span><b style="color:var(--theme)">' + esc(_toName) + '</b>' : '';
     // 修复：点击评论区任意位置也可以唤起回复
     return '<div style="font-size:13px;padding:3px 10px;background:var(--bg);cursor:pointer;color:var(--text);" onclick="replyComment(' + i + ',\'' + cm.by + '\')">' +
       '<b style="color:var(--theme)">' + esc(cc) + '</b>' + toStr +
@@ -6089,6 +6909,7 @@ async function aiPostMoment(cid, silent) {
       comments: [],
       _settled: true
     });
+triggerC2CInteractions(DB.moments[0]); // 【新增】角色间朋友圈互动彩蛋
 
     DB.momentUnread = (DB.momentUnread || 0) + 1;
     refreshMomentBadge();
@@ -6233,13 +7054,24 @@ async function doAutoGreet(c, slot) {
     `④绝对禁止"早上好/晚上好/吃了吗/在吗"这类空洞客套模板。只输出要发的话本身。）`;
 
   try {
+      let c2cHint = '';
+    try {
+      const _c2c = getC2CContextFor(c.id);
+      if (_c2c) {
+        c2cHint = '\n（另外：你最近在朋友圈有一些互动。如果其中有让你想吐槽、告状、分享或安利给对方的事'
+                + '——比如和谁在评论区拌了嘴、被安利/发现了什么好东西、被夸得很开心——'
+                + '你可以很自然地借这次消息说给对方听，就像朋友随口聊近况。若没什么特别的就别提。）';
+      }
+    } catch(e) {}
+
     // ===== 3. 构建历史 + 系统提示 =====
     const hist = (DB.chats[c.id] || []).slice(-10).map(toApiMsg);
     const messages = [
       { role: 'system', content: buildSystem(c) },
       { role: 'system', content: '【立即生效·最高优先级】现在是微信线上打字聊天：只输出口语短句，句子要短，禁止括号里的动作/神态/心理描写，禁止旁白，禁止长段落。多句用换行分隔，且总共不超过2句。' },
       ...hist,
-      { role: 'user', content: nudge }
+      { role: 'user', content: nudge + c2cHint }
+
     ];
 
     // ===== 4. 调用 AI + 应用状态变化 =====
@@ -7307,6 +8139,7 @@ function openChat(id){
     
     save();
   }
+  setTimeout(function () { try { checkAutoGift(); } catch (e) {} }, 800);
   window._chatJustOpened = true;
   view={type:'chat',id};
   render();
@@ -7498,6 +8331,13 @@ if (todaySchedule && todaySchedule.items && todaySchedule.items.length) {
   s += `- 闹情绪/吃醋/生气时，**必须**使用 [拉黑玩家|原因]\n`;
   s += `这些格式不受其他指令影响，任何时候都必须遵守。**禁止**使用任何自然语言替代这些格式。\n`;
 
+try { s += getC2CContextFor(c.id); } catch(e) {}
+
+  s += '\n【送礼能力·购物系统】\n';
+  s += '当对话中对方（用户）自然流露出某种需要或情绪时——比如说饿了、累了、冷了、心情不好、想要某样东西——如果符合你的人设和你俩的关系，你【可以（不是必须）】顺手送对方一件贴合当下情境、贴合你所在世界观的小东西。\n';
+  s += '格式：<gift emoji="一个emoji" name="东西的名字" desc="2到4字简短描述"></gift>\n';
+  s += '规则：①这是心意，不是每次都送，只在真的合情合景时才送，别频繁、别刻意；②送的东西要符合你的身份、性格和世界观；③标签单独占一行，除标签外照常正常说话（比如一边关心一边把东西递过去）；④绝对不要提任何价格、金币、数值或系统字眼，就当是真实生活里随手送的东西。\n';
+
   return s;
 }
 function toApiMsg(m){
@@ -7548,6 +8388,41 @@ else if(m.type==='redpacket')body=`<div style="width:220px;background:#fff;borde
 else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body=`<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">${dur}″</span></div><div class="voice-text">${esc(m.content)}</div></div>`;}
 else if(m.type==='sticker'){const s=DB.stickers.find(x=>x.name===m.content);body=s?`<div style="padding:0"><img src="${s.img}" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>`:`<div class="mbody">[表情:${esc(m.content)}]</div>`;}
 else if(m.type==='text'){var displayContent=m.editedContent||m.content;body=`<div class="mbody">${me?esc(displayContent):(c.mode==='offline'?colorLines(displayContent,c.lineColor):esc(displayContent))}</div>`;}
+else if (m.type === 'shop_item') {
+    var _isRare = !!m.rare;
+    var _topBg = _isRare ? 'linear-gradient(135deg,#E6B422,#F5D76E)' : 'var(--theme)';
+    var _cardStyle = _isRare
+      ? 'border:1.5px solid #E6B422;box-shadow:0 0 10px rgba(230,180,34,0.55);animation:shopGlow 2s ease-in-out infinite;'
+      : 'box-shadow:0 2px 8px rgba(0,0,0,0.12);';
+    var _foot = '';
+    if (m.from === 'ai') {
+      if (m.giftStatus === 'pending') {
+        _foot = '<div style="display:flex;border-top:1px solid rgba(0,0,0,0.06)">' +
+          '<div onclick="shopGiftRespond(\'' + m.id + '\',\'accept\')" style="flex:1;text-align:center;padding:9px 0;color:var(--theme);font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid rgba(0,0,0,0.06)">收下</div>' +
+          '<div onclick="shopGiftRespond(\'' + m.id + '\',\'decline\')" style="flex:1;text-align:center;padding:9px 0;color:#999;font-size:13px;cursor:pointer">婉拒</div>' +
+          '</div>';
+      } else if (m.giftStatus === 'accepted') {
+        _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:#4caf50;border-top:1px solid rgba(0,0,0,0.06)">✔ 已收下</div>';
+      } else if (m.giftStatus === 'declined') {
+        _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:#999;border-top:1px solid rgba(0,0,0,0.06)">已婉拒</div>';
+      }
+    } else {
+      var _st = '等待对方查收…', _cl = '#999';
+      if (m.giftStatus === 'ai_accepted') { _st = '❤ 对方收下了'; _cl = '#e0507a'; }
+      else if (m.giftStatus === 'ai_declined') { _st = '对方婉拒了'; _cl = '#999'; }
+      _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:' + _cl + ';border-top:1px solid rgba(0,0,0,0.06)">' + _st + '</div>';
+    }
+    body = '<div class="mbody" style="padding:0;width:186px;background:#fff;border-radius:14px;overflow:hidden;' + _cardStyle + '">' +
+      '<div style="background:' + _topBg + ';padding:7px 0;text-align:center;color:#fff;font-size:12px;letter-spacing:1px">' + (_isRare ? '✨ 珍稀好礼 ✨' : '🎁 礼物') + '</div>' +
+      '<div style="padding:14px 12px 12px;text-align:center">' +
+      '<div style="font-size:44px;line-height:1">' + esc(m.emoji || '🎁') + '</div>' +
+      '<div style="font-size:15px;font-weight:700;margin-top:8px;color:#222">' + esc(m.content || '礼物') + '</div>' +
+      (m.desc ? '<div style="font-size:12px;color:#999;margin-top:3px">' + esc(m.desc) + '</div>' : '') +
+      (_isRare && m.story ? '<div style="font-size:11px;color:#B8860B;margin-top:8px;font-style:italic;line-height:1.5">「' + esc(m.story) + '」</div>' : '') +
+      '</div>' + _foot +
+      '</div>';
+  }
+
 else{body=`<div class="mbody">${me?esc(m.content):(c.mode==='offline'?colorLines(m.content,c.lineColor):esc(m.content))}</div>`;}
 return `<div class="msg ${me?'me':''}" data-mid="${m.id||''}"><div class="cavatar" style="${av?`background-image:url('${av}')`:''}">${av?'':nm}</div>${body}</div>`;}
 function renderChat(keepScroll) {
@@ -8399,9 +9274,15 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
     // --- 接收/退回 ---
     text = text.replace(/\[接收\]/g, '<action type="accept"></action>');
     text = text.replace(/\[退回\]/g, '<action type="refund"></action>');
+    // --- 礼物（购物系统） ---
+    // 兼容 [礼物|emoji|名字|描述] 等野格式，统一转成 <gift> 标签
+    text = text.replace(/\[礼物[|｜:：]\s*([^\]|｜]*)[|｜]\s*([^\]|｜]*)[|｜]?\s*([^\]]*)\]/g,
+      function (mm, a, b, cc) {
+        return '<gift emoji="' + (a || '🎁').trim() + '" name="' + (b || '礼物').trim() + '" desc="' + (cc || '').trim() + '"></gift>';
+      });
 
     // 3. 提取逻辑：先取出所有标签及其位置
-    const regex = /<(voice|sticker|recall|transfer|block|inner|action)([^>]*)>([\s\S]*?)<\/\1>/g;
+    const regex = /<(voice|sticker|recall|transfer|block|inner|action|gift|giftback)([^>]*)>([\s\S]*?)<\/\1>/g;
     const parts = [];
     let lastIndex = 0;
     let match;
@@ -8472,6 +9353,19 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
                 if (actionType === 'refund') parts.push({ type: 'transfer_refund' });
                 break;
             }
+            case 'gift': {
+              var gEmoji = (t.attrs.match(/emoji=["']([^"']*)["']/) || [])[1] || '🎁';
+              var gName = (t.attrs.match(/name=["']([^"']*)["']/) || [])[1] || '礼物';
+              var gDesc = (t.attrs.match(/desc=["']([^"']*)["']/) || [])[1] || '';
+              parts.push({ type: 'gift', emoji: gEmoji, name: gName, desc: gDesc });
+              break;
+            }
+            case 'giftback': {
+              var gbType = (t.attrs.match(/type=["']([^"']+)["']/) || [])[1] || 'accept';
+              parts.push({ type: gbType === 'reject' ? 'gift_reject' : 'gift_accept' });
+              break;
+            }
+			
         }
 
         lastIndex = t.end;
@@ -8650,6 +9544,13 @@ if (!getEffectiveChatModel(c)) {
       lastMsg.status !== 'accepted' &&
       lastMsg.status !== 'refunded'
     );
+	    const pendingGift = (
+      lastMsg &&
+      lastMsg.role === 'user' &&
+      lastMsg.type === 'shop_item' &&
+      lastMsg.giftStatus === 'given'
+    );
+
     const transferAmount = pendingTransfer ? lastMsg.amount : 0;
     const transferNote = pendingTransfer ? (lastMsg.content || '') : '';
 
@@ -8688,6 +9589,12 @@ if (!getEffectiveChatModel(c)) {
         content: '【强制指令】上一条消息是对方转给你的 ¥' + transferAmount +
           (transferNote ? '（备注：' + transferNote + '）' : '') +
           '。你必须在回复末尾单独一行输出 [接收] 或 [退回]，二选一，没有第三种选择。接收就感谢对方，退回就说明理由。这条标记必须单独占一行。'
+      });
+    }
+    if (pendingGift) {
+      messages.push({
+        role: 'system',
+        content: '【礼物反应·必须执行】对方刚送了你一件礼物「' + lastMsg.content + '」。你要按人设自然回应（开心/害羞/感动/或委婉推辞），并在回复末尾单独一行输出 <giftback type="accept"></giftback>（收下）或 <giftback type="reject"></giftback>（婉拒），二选一，必须输出。绝不提任何价格、数字或系统内容。'
       });
     }
 
@@ -8738,6 +9645,12 @@ let out = await callAI(messages, getEffectiveChatModel(c));
             }
             continue;
         }
+      if (part.type === 'gift_accept' || part.type === 'gift_reject') {
+        if (pendingGift && lastMsg) {
+          shopMarkUserGift(c, lastMsg.id, part.type === 'gift_accept');
+        }
+        continue;
+      }
 
 // ----- 3. 心声处理 -----
 if (part.type === 'heart') {
@@ -8768,6 +9681,17 @@ if (part.type === 'heart') {
     }
     continue; // 不发送到聊天记录
 }
+      if (part.type === 'gift') {
+        // AI 主动送礼：生成一张带收下/婉拒的卡片
+        shopAiSendGift(c, {
+          emoji: part.emoji,
+          name: part.name,
+          desc: part.desc,
+          rare: false
+        });
+        continue;
+      }
+
         // --- 处理常规消息 (文本、语音、表情、转账、撤回) ---
         
         let msgObj = null;
@@ -8829,10 +9753,27 @@ if (part.type === 'heart') {
             }
         }
     }
+    // 兜底：模型没输出标记时，默认处理，避免卡在"待处理"
+    if (pendingTransfer && lastMsg) {
+      var _tf = (DB.chats[c.id] || []).find(function (x) { return x.id === lastMsg.id; });
+      if (_tf && _tf.status !== 'accepted' && _tf.status !== 'refunded') {
+        try { handleTransferAction(lastMsg.id, 'accept', true); } catch (e) {}
+      }
+    }
+    if (pendingGift && lastMsg) {
+      var _gf = (DB.chats[c.id] || []).find(function (x) { return x.id === lastMsg.id; });
+      if (_gf && _gf.giftStatus === 'given') {
+        shopMarkUserGift(c, lastMsg.id, true); // 默认收下
+      }
+    }
 
     // ---- 10. 更新状态 & 处理见面/回线上 ----
     lastActivity = Date.now();
     addHeart(c, 1, '和' + (c.nick || c.name) + '聊天');
+	// 购物系统：完成一轮对话静默发放金币（不提示、不告诉AI）
+var _favor = (c.status && c.status.好感度) || 0;
+var _reward = _favor >= 80 ? (7 + Math.floor(Math.random() * 2)) : 5; // 好感≥80给7~8，否则5
+addCoins(_reward);
 
     if (meetPlace !== null && c.mode === 'online') proposeMeet(c, meetPlace);
     if (wantBack && c.mode === 'offline') proposeBackOnline(c);
@@ -9057,6 +9998,142 @@ function restoreFocusState(){
   if(Date.now()>=s.end){focusPhase='idle';clearFocusState();return;}
   if(s.leaveAt){const gap=Date.now()-s.leaveAt;if(gap>30000){const c=getC(focusSuper);if(c)setTimeout(()=>distractMsg(c,'（对方在专注学习期间离开了'+Math.round(gap/1000)+'秒，还把页面切走了才回来。请以你的身份口吻，抓包式地提醒Ta别开小差、快回来学习，简短有性格）','👀 你刚刚离开了 '+Math.round(gap/1000)+' 秒'),1200);}}
   focusLeaveAt=0;saveFocusState();runFocus();
+}
+/* ======================================================
+   朋友圈·角色间互动小彩蛋（Character-to-Character）
+   低频 / 每条动态最多1次调用 / 不发红点 / 不入库 / 2小时自动清
+   ====================================================== */
+
+function c2cShuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+function collectC2CCommenters(poster){
+  var list=[];
+  DB.contacts.forEach(function(other){
+    if(other.id===poster.id||other._draft) return;
+    var rel=(other.relations||[]).find(function(r){return r.targetId===poster.id;});
+    if(rel) list.push({kind:'char',id:other.id,name:(other.nick||other.name),rel:rel,char:other});
+  });
+  (poster.relations||[]).forEach(function(r){
+    if(r.targetId&&r.targetId!=='npc'){
+      if(!list.some(function(x){return x.id===r.targetId;})){
+        var ch=getC(r.targetId);
+        if(ch) list.push({kind:'char',id:ch.id,name:(ch.nick||ch.name),rel:r,char:ch});
+      }
+    }else if(r.targetName){
+      list.push({kind:'npc',id:'npc',name:r.targetName,rel:r,char:null});
+    }
+  });
+  return list;
+}
+
+function c2cShouldComment(commenter,moment){
+  var type=(commenter.rel.relationType||'').trim();
+  var p=0.15;
+  if(/恋人|夫妻|情侣|男女朋友/.test(type)) p=0.4;
+  else if(/闺蜜|挚友|兄弟|好友/.test(type)) p=0.3;
+  else if(/家人|父|母|哥|弟|姐|妹|亲/.test(type)) p=0.3;
+  else if(/朋友|同学|同事|同伴/.test(type)) p=0.2;
+  else if(/敌|仇|前任|讨厌/.test(type)) p=0.18;
+  if(moment.images&&moment.images.length) p+=0.03;
+  return Math.random()<p;
+}
+
+function c2cBrief(char,fallbackName){
+  if(!char) return fallbackName||'某人';
+  var s=(char.nick||char.name||fallbackName||'某人');
+  if(char.pKeywords) s+='（性格：'+String(char.pKeywords).slice(0,40)+'）';
+  if(char.pStyle) s+='（说话风格：'+String(char.pStyle).slice(0,30)+'）';
+  return s;
+}
+
+async function c2cGenerateBundle(commenter,poster,moment){
+  var model=DB.settings.auxModel||DB.settings.chatModel;
+  if(!model) return null;
+  var relType=commenter.rel.relationType||'朋友';
+  var relDesc=commenter.rel.description||'';
+  var commenterBrief=(commenter.kind==='char')?c2cBrief(commenter.char,commenter.name):commenter.name+(commenter.rel.targetJob?'（'+commenter.rel.targetJob+'）':'');
+  var task='【微信朋友圈评论区，请分别扮演两个人各说一句】\n'
+    +'发布者：'+c2cBrief(poster)+'，发了动态：“'+(moment.text||'（一张图片）')+'”\n'
+    +'评论者：'+commenterBrief+'，与发布者的关系是【'+relType+'】。'+(relDesc?'关系补充：'+relDesc+'。':'')+'\n\n'
+    +'请生成：\n1) 评论者以自己性格和这段关系为基调，对这条动态写一句自然简短的评论（15字左右）。\n'
+    +'2) 发布者是否回复：合适就回一句简短的（20字内），不回复则留空。\n'
+    +'严格只输出JSON：{"comment":"评论内容","reply":"回复内容或空字符串"}，不要任何多余文字。';
+  var messages=[{role:'system',content:'你在模拟朋友圈评论区的自然互动，只输出要求的JSON。'},{role:'user',content:task}];
+  try{
+    var out=await callAI(messages,model);
+    out=out.replace(/```json/gi,'').replace(/```/g,'').trim();
+    var mm=out.match(/\{[\s\S]*\}/); if(mm) out=mm[0];
+    var obj=JSON.parse(out);
+    if(obj.comment) obj.comment=String(obj.comment).replace(/^["'“”\s]+|["'“”\s]+$/g,'').slice(0,60);
+    if(obj.reply) obj.reply=String(obj.reply).replace(/^["'“”\s]+|["'“”\s]+$/g,'').slice(0,60); else obj.reply='';
+    return obj.comment?obj:null;
+  }catch(e){ console.error('c2c生成失败',e); return null; }
+}
+
+function pushRecentC2C(posterName,posterId,commenterName,commenterId,moment,text,kind){
+  DB._c2cRecent=DB._c2cRecent||[];
+  DB._c2cRecent.push({ts:Date.now(),posterId:posterId,posterName:posterName,commenterId:commenterId,commenterName:commenterName,momentText:(moment.text||'').slice(0,40),commentText:text,kind:kind});
+  if(DB._c2cRecent.length>40) DB._c2cRecent=DB._c2cRecent.slice(-40);
+  pruneRecentC2C();
+}
+function pruneRecentC2C(){
+  if(!DB._c2cRecent) return;
+  var cut=Date.now()-2*60*60*1000;
+  DB._c2cRecent=DB._c2cRecent.filter(function(x){return x.ts>=cut;});
+}
+function getC2CContextFor(cid){
+  pruneRecentC2C();
+  if(!DB._c2cRecent||!DB._c2cRecent.length) return '';
+  var rel=DB._c2cRecent.filter(function(x){return x.posterId===cid||x.commenterId===cid;});
+  if(!rel.length) return '';
+  var lines=rel.map(function(x){
+    if(x.kind==='comment'){
+      if(x.posterId===cid) return '· 你发的朋友圈「'+x.momentText+'」，'+x.commenterName+'评论：“'+x.commentText+'”';
+      return '· 你在'+x.posterName+'的朋友圈「'+x.momentText+'」下评论：“'+x.commentText+'”';
+    }else{
+      if(x.posterId===cid) return '· 你在自己朋友圈回复'+x.commenterName+'：“'+x.commentText+'”';
+      return '· '+x.posterName+'回复了你的评论：“'+x.commentText+'”';
+    }
+  });
+  return '\n【近期朋友圈动态·可自然聊起】\n以下是最近两小时内和你有关的朋友圈互动：\n'
+    +lines.join('\n')+'\n'
+    +'处理原则：\n'
+    +'1) 如果对方问起"谁评论了你""你最近在朋友圈干嘛了"之类，就据此如实自然作答。\n'
+    +'2) 如果其中某件事情绪上值得一提——比如和某人在评论区起了争执/拌嘴（你可能想找对方吐槽、告状），'
+    +'或被安利/发现了什么有意思的东西（你可能想分享、安利给对方），或被夸得很开心——'
+    +'你【可以】像朋友分享近况那样，自然地主动提起。\n'
+    +'3) 但不要每次都提，也别生硬复述原文；平淡无奇的互动就别没事找事说。保持真实的分寸感。\n';
+}
+
+async function triggerC2CInteractions(moment){
+  try{
+    if(DB.settings.c2cEnabled===false) return;
+    if(!moment||moment.author==='me') return;
+    if(moment._c2cDone) return;
+    if(DB._c2cLastRun&&Date.now()-DB._c2cLastRun<20*60*1000) return; // 20分钟全局冷却
+    var poster=getC(moment.author);
+    if(!poster) return;
+    moment._c2cDone=true;
+
+    var pool=c2cShuffle(collectC2CCommenters(poster));
+    var chosen=null;
+    for(var i=0;i<pool.length;i++){ if(c2cShouldComment(pool[i],moment)){ chosen=pool[i]; break; } }
+    if(!chosen) return;
+
+    DB._c2cLastRun=Date.now();
+    var bundle=await c2cGenerateBundle(chosen,poster,moment);
+    if(!bundle||!bundle.comment) return;
+
+    moment.comments=moment.comments||[];
+    moment.comments.push({by:(chosen.kind==='char'?chosen.id:'npc'),name:chosen.name,text:bundle.comment,to:null,toName:null,ts:Date.now(),src:'c2c'});
+    pushRecentC2C((poster.nick||poster.name),poster.id,chosen.name,(chosen.kind==='char'?chosen.id:'npc'),moment,bundle.comment,'comment');
+    if(bundle.reply){
+      moment.comments.push({by:poster.id,name:(poster.nick||poster.name),text:bundle.reply,to:(chosen.kind==='char'?chosen.id:'npc'),toName:chosen.name,ts:Date.now(),src:'c2c'});
+      pushRecentC2C((poster.nick||poster.name),poster.id,chosen.name,(chosen.kind==='char'?chosen.id:'npc'),moment,bundle.reply,'reply');
+    }
+    save();
+    if(typeof renderMoments==='function') renderMoments();
+  }catch(e){ console.error('c2c互动失败',e); }
 }
 
 /* ===== API / 备份 ===== */
