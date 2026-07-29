@@ -640,18 +640,21 @@ wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), ra
 {
   id: 'ghost_troupe',
   name: '🎪 幽灵戏班',
-  color: '#A77BAB',
-  '--theme': '#A77BAB',
-  '--bg': '#F5F0F5',
-  '--nav': '#FCF8FC',
-  '--card': '#FFFFFF',
-  '--text': '#3A2A3A',
-  '--sub': '#8A7A8A',
-  '--line': '#E5DCE5',
-  wallpaper: `radial-gradient(ellipse at 30% 20%, rgba(167,123,171,0.08) 0%, transparent 35%),
-    radial-gradient(ellipse at 70% 80%, rgba(200,180,160,0.06) 0%, transparent 50%),
-    linear-gradient(145deg, #F5F0F5 0%, #F8F4F8 50%, #FCF8FC 100%)`
-},
+  color: '#C68A94',
+  '--theme': '#C68A94',
+  '--bg': '#EDE8DC',
+  '--nav': '#F0EAE0',
+  '--card': '#F7F2EA',
+  '--text': '#4A4947',
+  '--sub': '#8A9FB0',
+  '--line': '#C8B4BE',
+wallpaper: `
+  linear-gradient(160deg, #FCF9F2 0%, #F6F3EA 50%, #F8F4EC 100%),
+  linear-gradient(180deg, rgba(180,165,195,0.04) 0%, rgba(160,140,180,0.01) 100%),
+  radial-gradient(circle at 20% 40%, rgba(180,160,190,0.06) 0%, transparent 40%),
+  radial-gradient(circle at 80% 60%, rgba(160,140,180,0.04) 0%, transparent 45%)
+`
+  },
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -722,26 +725,25 @@ orchard: {
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/22/90508b72d72612459f2ab7aae746bb23.png',
 },
 ghost_troupe: {
-  // 桌面应用图标（复古做旧）
-  wechat:   'https://s1.imagehub.cc/images/2026/07/28/67e7d5b51867d98ce606f8eb518921a7.png',
-  notes:    'https://s1.imagehub.cc/images/2026/07/29/8933e0ee81932d01a42ce5d96b53c809.png',
-  focus:    'https://s1.imagehub.cc/images/2026/07/28/e152f3e770f42a79159522efd4c21f4a.png',
-  settings: 'https://s1.imagehub.cc/images/2026/07/29/64b984639d67eec73c355bacc9deb655.png',
-  album:    'https://s1.imagehub.cc/images/2026/07/28/8468b78a0936580c38ca96ac04c557a2.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/07/29/9883b09d61b4815d372b3f45380e9c88.png',
-  music:    'https://s1.imagehub.cc/images/2026/07/29/9f906acf0b614055dadfff5b316cbbd8.png',
-  preset:   'https://s1.imagehub.cc/images/2026/07/29/25d9803b37469299b0bbafd5c9cab582.png',
-  floating: 'https://s1.imagehub.cc/images/2026/07/28/0b130dd08866ad4d281fbd7685ea7c24.png',
-  shop:     'https://s1.imagehub.cc/images/2026/07/28/037bc243ec64eb050151a992f5b6ff8d.png',
-  world:    'https://s1.imagehub.cc/images/2026/07/29/460297687832428cb4bd53cfc4e54adb.png',
-  // 底栏不变
+  // 桌面应用图标（新）
+  wechat:   'https://s1.imagehub.cc/images/2026/07/29/28f7c4c0ed05d63ec814ad19869e1fbf.png',
+  notes:    'https://s1.imagehub.cc/images/2026/07/29/9b08046fa24f979093f6785a5996a7bb.png',
+  focus:    'https://s1.imagehub.cc/images/2026/07/29/7082d4f4303125814a0768b20a17a213.png',
+  settings: 'https://s1.imagehub.cc/images/2026/07/29/d97234e8a651513a1ea084028dcad1ab.png',
+  album:    'https://s1.imagehub.cc/images/2026/07/29/7ccac68b67cbfff22ed73bba45a1802c.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/07/29/ab03b87b94072e82d6e887690fd50bdc.png',
+  music:    'https://s1.imagehub.cc/images/2026/07/29/c03f6b7c1de14890a6c2574e7cbc046f.png',
+  preset:   'https://s1.imagehub.cc/images/2026/07/29/8b02df8042c6964e02500b2cc40e3e71.png',
+  floating: 'https://s1.imagehub.cc/images/2026/07/29/32f5767d0ab51f8f920071367d6aae51.png',
+  shop:     'https://s1.imagehub.cc/images/2026/07/29/d4ba310fc86a9e91b94486cd6b27305c.png',
+  world:    'https://s1.imagehub.cc/images/2026/07/29/061ef8c1ddf7cf4430abcc0a89c782c2.png',
+  // 底栏不变（保持原样）
   tabChats:    'https://s1.imagehub.cc/images/2026/07/28/e1cbd76dd0d9f9679de7004fe9f939bb.png',
   tabContacts: 'https://s1.imagehub.cc/images/2026/07/28/6aee1c8d3b0ea46d734caceed9de6fa5.png',
   tabDiscover: 'https://s1.imagehub.cc/images/2026/07/28/936f595a38e796e74e60e8bb326900db.png',
   tabMe:       'https://s1.imagehub.cc/images/2026/07/28/5ebba54a6c31da793c1d7cabb4ac6197.png',
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/28/ae1610619ea654132eaa7f3c46dd2cd0.png',
 },
-
 };
 // =====================================
 function applySkin(id) {
@@ -790,30 +792,6 @@ if (isLight) {
   root.style.setProperty('--clock-theme-color', 'var(--theme)');
   root.style.setProperty('--star-opacity', '0.4');
 }
-// ===== 幽灵戏班主题：清晰硬阴影（无模糊，偏移明显） =====
-var ghostShadow = document.getElementById('ghostTroupeShadow');
-if (id === 'ghost_troupe') {
-  if (!ghostShadow) {
-    ghostShadow = document.createElement('style');
-    ghostShadow.id = 'ghostTroupeShadow';
-    ghostShadow.textContent = `
-      .app-ic {
-        filter: drop-shadow(2px 2px 0px rgba(92,79,79,0.25)) !important;
-        transition: filter 0.2s ease, transform 0.15s ease;
-        will-change: transform;
-      }
-      #tabbar .tab img {
-        filter: drop-shadow(1px 1px 0px rgba(92,79,79,0.20)) !important;
-      }
-      .app-nm {
-        text-shadow: 1px 1px 0px rgba(92,79,79,0.20) !important;
-      }
-    `;
-    document.head.appendChild(ghostShadow);
-  }
-} else {
-  if (ghostShadow) ghostShadow.remove();
-}
   // 5. 刷新当前页面
   if (view.type === 'home') {
     if (typeof renderHome === 'function') renderHome();
@@ -841,7 +819,9 @@ function updateAllIcons() {
 let DB=load();
 function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrate(JSON.parse(raw));}catch(e){}}return migrate({});}
 function migrate(d){
-d.coins = d.coins || 100;
+  if (d.coins === undefined || d.coins === null) d.coins = 100; // 仅新用户送100启动金
+  else d.coins = Math.max(0, Math.round(d.coins));
+
 if (d.shopItems === undefined) d.shopItems = [];
 if (d.shopLastGenerated === undefined) d.shopLastGenerated = 0;
 if (d.shopLastSent === undefined) d.shopLastSent = {};
@@ -1018,9 +998,8 @@ function shopMarkUserGift(c, msgId, accepted) {
 
 // ===== 购物系统：金币操作 =====
 function addCoins(n) {
-  DB.coins = (DB.coins || 0) + n;
+  DB.coins = Math.max(0, Math.round((DB.coins || 0) + n)); // 强制整数、不为负
   save();
-  // 如果商店界面正开着，顺手刷新余额显示
   var el = document.getElementById('shopCoinBal');
   if (el) el.textContent = DB.coins;
 }
@@ -1120,7 +1099,15 @@ async function shopGenerate() {
     '【世界观】' + worldDesc + '\n\n' +
     '【要求】\n' +
     '1. 生成 16 到 20 件商品，数量要充足。\n' +
-    '2. 尽量覆盖这些品类，每个品类争取有 2~3 件：美食、饮品、服饰、珠宝、数码、周边、生活、奇物。其中"周边"品类要especially贴合世界观特色（比如该世界特有的纪念品、挂件、收藏品）。\n' +
+    '2. 尽量覆盖这些品类，每个品类争取有 2~3 件，各品类定位如下：\n' +
+    '   ·美食：偏【外卖/餐厅现做】的热乎成品餐食（如一碗牛肉面、一份炸鸡、一笼小笼包），不是超市的包装食材或生鲜。\n' +
+    '   ·饮品：偏【现做现调】的成品饮料（如现煮咖啡、手打柠檬茶、热可可），可直接饮用。\n' +
+    '   ·服饰：可穿戴的衣物鞋帽配饰，要有具体款式和材质感（如羊绒围巾、oversize卫衣、复古皮靴）。\n' +
+    '   ·珠宝：项链、戒指、耳饰、手链等有质感的饰品，可点明材质或工艺。\n' +
+    '   ·数码：电子产品或科技小物，贴合世界观科技水平（现代就是耳机充电宝，科幻可以更炫）。\n' +
+    '   ·周边：【最能体现世界观特色】的纪念品、挂件、收藏品、印着元素的小物（如角色/势力/名场景相关）。\n' +
+    '   ·生活：日用小物、家居、香氛、治愈系小东西等提升生活幸福感的物件。\n' +
+    '   ·奇物：脑洞新奇、带点神秘或趣味的东西，尤其适合非现代世界观（如会发光的石头、装着回忆的瓶子）。\n' +
     '3. 其中要有 1 到 2 件是"珍稀商品"（rare=true）。\n' +
 	(charHints ? ('★特别加分项：这个世界里有以下角色，请专门生成 1~3 件"特别适合送给他们、贴合他们喜好或习性"的商品（不用写明送给谁，融进商品里即可）。角色信息如下：\n' + charHints + '\n（比如某角色爱吃某物就出对应吃食，喜欢某类东西就出对应小物）\n') : '') +
     '4. 商品必须贴合世界观：现代都市就是正常商品；妖怪/仙侠世界带点奇异色彩；赛博/科幻世界带科技感。\n' +
@@ -1151,7 +1138,7 @@ async function shopGenerate() {
       id: 'sp_' + Date.now() + '_' + i,
       name: (it.name || '神秘商品').toString().slice(0, 20),
       emoji: (it.emoji || '🎁').toString().slice(0, 4),
-      desc: (it.desc || '').toString().slice(0, 10),
+      desc: (it.desc || '').toString().slice(0, 40),
       tag: (it.tag || '奇物').toString().slice(0, 6),
       price: Math.max(1, parseInt(it.price) || 10),
       rare: rare,
@@ -1289,7 +1276,8 @@ function shopRenderView(items) {
     html += '<div onclick="' + (isSold ? '' : 'shopOpenDetail(\'' + it.id + '\')') + '" style="position:relative;background:var(--card);border-radius:12px;padding:14px 12px;cursor:' + (isSold ? 'default' : 'pointer') + ';' + rareStyle + (isSold ? 'opacity:0.45;' : '') + '">';
     html += '<div style="font-size:40px;text-align:center;line-height:1.2">' + esc(it.emoji) + '</div>';
     html += '<div style="font-size:14px;font-weight:600;margin-top:8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.name) + '</div>';
-    html += '<div style="font-size:12px;color:var(--sub);text-align:center;margin-top:2px">' + esc(it.desc) + '</div>';
+    html += '<div style="text-align:center;font-size:13px;color:var(--sub);margin-top:6px;line-height:1.5;padding:0 10px">' + esc(it.desc) + '<br><span style="opacity:0.7">· ' + esc(it.tag) + ' ·</span></div>';
+	
     // 价格标签
     html += '<div style="text-align:center;margin-top:8px"><span style="font-size:13px;font-weight:600;color:' + (it.currency === 'heart' ? '#e0507a' : 'var(--theme)') + '">' + (it.currency === 'heart' ? '❤️' : '💎') + ' ' + it.price + '</span></div>';
     // 珍稀角标
@@ -2343,48 +2331,57 @@ function renderHome() {
     </div>`;
   }
   
-// ---- 星星（幽灵戏班专属 30 颗 · 均匀分布全屏） ----
+// ---- 星星（幽灵戏班专属 · 马戏团彩色版 · 调深后） ----
 var starHtml = '';
 if (currentThemeId === 'ghost_troupe') {
   starHtml = `
-    <span class="ghost-star xlarge" style="top:4%; left:8%; color:#6B5A6E; opacity:0.25;">✦</span>
-    <span class="ghost-star large" style="top:12%; right:15%; color:#8A7A8E; opacity:0.20;">✦</span>
-    <span class="ghost-star" style="top:20%; left:5%; color:#6B5A6E; opacity:0.18;">✦</span>
-    <span class="ghost-star small" style="top:28%; right:28%; color:#8A7A8E; opacity:0.14;">✦</span>
-    <span class="ghost-star xlarge" style="top:35%; left:18%; color:#6B5A6E; opacity:0.25;">✦</span>
-    <span class="ghost-star large" style="top:42%; right:8%; color:#A392A8; opacity:0.18;">✦</span>
-    <span class="ghost-star" style="top:50%; left:28%; color:#6B5A6E; opacity:0.18;">✦</span>
-    <span class="ghost-star small" style="top:56%; right:18%; color:#8A7A8E; opacity:0.14;">✦</span>
-    <span class="ghost-star xlarge" style="top:63%; left:8%; color:#6B5A6E; opacity:0.25;">✦</span>
-    <span class="ghost-star large" style="top:70%; right:25%; color:#A392A8; opacity:0.18;">✦</span>
-    <span class="ghost-star" style="top:78%; left:18%; color:#6B5A6E; opacity:0.18;">✦</span>
-    <span class="ghost-star small" style="top:85%; right:10%; color:#8A7A8E; opacity:0.14;">✦</span>
-    <span class="ghost-star" style="top:92%; left:28%; color:#A392A8; opacity:0.16;">✦</span>
-    <span class="ghost-star small" style="top:8%; left:28%; color:#8A7A8E; opacity:0.14;">✦</span>
-    <span class="ghost-star xsmall" style="top:16%; right:35%; color:#6B5A6E; opacity:0.12;">✦</span>
-    <span class="ghost-star" style="top:24%; left:38%; color:#A392A8; opacity:0.16;">✦</span>
-    <span class="ghost-star xsmall" style="top:32%; right:42%; color:#8A7A8E; opacity:0.12;">✦</span>
-    <span class="ghost-star small" style="top:40%; left:45%; color:#6B5A6E; opacity:0.14;">✦</span>
-    <span class="ghost-star" style="top:48%; right:38%; color:#A392A8; opacity:0.16;">✦</span>
-    <span class="ghost-star xsmall" style="top:54%; left:52%; color:#8A7A8E; opacity:0.12;">✦</span>
-    <span class="ghost-star large" style="top:62%; right:48%; color:#6B5A6E; opacity:0.18;">✦</span>
-    <span class="ghost-star small" style="top:68%; left:58%; color:#A392A8; opacity:0.14;">✦</span>
-    <span class="ghost-star xsmall" style="top:76%; right:55%; color:#8A7A8E; opacity:0.12;">✦</span>
-    <span class="ghost-star" style="top:82%; left:65%; color:#6B5A6E; opacity:0.18;">✦</span>
-    <span class="ghost-star small" style="top:90%; right:60%; color:#A392A8; opacity:0.14;">✦</span>
-    <span class="ghost-star xsmall" style="top:5%; left:55%; color:#8A7A8E; opacity:0.12;">✦</span>
-    <span class="ghost-star" style="top:14%; right:50%; color:#6B5A6E; opacity:0.18;">✦</span>
-    <span class="ghost-star xsmall" style="top:45%; left:70%; color:#A392A8; opacity:0.12;">✦</span>
-    <span class="ghost-star small" style="top:60%; right:70%; color:#8A7A8E; opacity:0.14;">✦</span>
-    <span class="ghost-star xsmall" style="top:75%; left:75%; color:#6B5A6E; opacity:0.12;">✦</span>
-    <!-- 小圆点星星（新增） -->
-    <span style="position:absolute;border-radius:50%;background:#6B5A6E;opacity:0.20;width:4px;height:4px;top:6%;left:25%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#8A7A8E;opacity:0.15;width:3px;height:3px;top:18%;right:30%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#6B5A6E;opacity:0.20;width:5px;height:5px;top:32%;left:50%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#8A7A8E;opacity:0.15;width:3px;height:3px;top:50%;left:15%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#6B5A6E;opacity:0.20;width:4px;height:4px;top:68%;right:20%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#8A7A8E;opacity:0.15;width:5px;height:5px;top:82%;left:35%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#6B5A6E;opacity:0.20;width:3px;height:3px;top:95%;right:45%;"></span>
+    <!-- 大星星：玫瑰红 + 香槟金 为主 -->
+    <span class="ghost-star xlarge" style="top:4%; left:8%; color:#C68A94; opacity:0.45;">✦</span>
+    <span class="ghost-star large" style="top:12%; right:15%; color:#D3B68A; opacity:0.40;">✦</span>
+    <span class="ghost-star xlarge" style="top:35%; left:18%; color:#C68A94; opacity:0.42;">✦</span>
+    <span class="ghost-star large" style="top:42%; right:8%; color:#8A9FB0; opacity:0.35;">✦</span>
+    <span class="ghost-star xlarge" style="top:63%; left:8%; color:#D3B68A; opacity:0.40;">✦</span>
+    <span class="ghost-star large" style="top:70%; right:25%; color:#C68A94; opacity:0.38;">✦</span>
+    <span class="ghost-star large" style="top:62%; right:48%; color:#D8ADAA; opacity:0.35;">✦</span>
+    <span class="ghost-star xlarge" style="top:92%; right:25%; color:#D3B68A; opacity:0.40;">✦</span>
+
+    <!-- 中等星星：雾蓝 + 脏粉 + 奶油白 -->
+    <span class="ghost-star" style="top:20%; left:5%; color:#8A9FB0; opacity:0.30;">✦</span>
+    <span class="ghost-star" style="top:50%; left:28%; color:#D8ADAA; opacity:0.30;">✦</span>
+    <span class="ghost-star" style="top:78%; left:18%; color:#C68A94; opacity:0.28;">✦</span>
+    <span class="ghost-star" style="top:24%; left:38%; color:#D3B68A; opacity:0.28;">✦</span>
+    <span class="ghost-star" style="top:48%; right:38%; color:#8A9FB0; opacity:0.28;">✦</span>
+    <span class="ghost-star" style="top:82%; left:65%; color:#D8ADAA; opacity:0.28;">✦</span>
+    <span class="ghost-star" style="top:14%; right:50%; color:#C68A94; opacity:0.28;">✦</span>
+    <span class="ghost-star" style="top:92%; left:28%; color:#F4F0E6; opacity:0.25;">✦</span>
+
+    <!-- 小星星：各种颜色混搭，低透明度像彩纸屑 -->
+    <span class="ghost-star small" style="top:28%; right:28%; color:#C68A94; opacity:0.22;">✦</span>
+    <span class="ghost-star small" style="top:56%; right:18%; color:#D3B68A; opacity:0.22;">✦</span>
+    <span class="ghost-star small" style="top:85%; right:10%; color:#8A9FB0; opacity:0.22;">✦</span>
+    <span class="ghost-star small" style="top:8%; left:28%; color:#D8ADAA; opacity:0.20;">✦</span>
+    <span class="ghost-star small" style="top:40%; left:45%; color:#C68A94; opacity:0.20;">✦</span>
+    <span class="ghost-star small" style="top:68%; left:58%; color:#D3B68A; opacity:0.20;">✦</span>
+    <span class="ghost-star small" style="top:90%; right:60%; color:#8A9FB0; opacity:0.20;">✦</span>
+    <span class="ghost-star small" style="top:60%; right:70%; color:#D8ADAA; opacity:0.20;">✦</span>
+
+    <!-- 极小的装饰星点（xsmall） -->
+    <span class="ghost-star xsmall" style="top:16%; right:35%; color:#C68A94; opacity:0.18;">✦</span>
+    <span class="ghost-star xsmall" style="top:32%; right:42%; color:#D3B68A; opacity:0.18;">✦</span>
+    <span class="ghost-star xsmall" style="top:54%; left:52%; color:#8A9FB0; opacity:0.18;">✦</span>
+    <span class="ghost-star xsmall" style="top:76%; right:55%; color:#D8ADAA; opacity:0.18;">✦</span>
+    <span class="ghost-star xsmall" style="top:5%; left:55%; color:#C68A94; opacity:0.18;">✦</span>
+    <span class="ghost-star xsmall" style="top:45%; left:70%; color:#D3B68A; opacity:0.18;">✦</span>
+    <span class="ghost-star xsmall" style="top:75%; left:75%; color:#8A9FB0; opacity:0.18;">✦</span>
+
+    <!-- 小圆点星星（彩色） -->
+    <span style="position:absolute;border-radius:50%;background:#C68A94;opacity:0.35;width:4px;height:4px;top:6%;left:25%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#D3B68A;opacity:0.30;width:3px;height:3px;top:18%;right:30%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#8A9FB0;opacity:0.35;width:5px;height:5px;top:32%;left:50%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#D8ADAA;opacity:0.30;width:3px;height:3px;top:50%;left:15%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#C68A94;opacity:0.35;width:4px;height:4px;top:68%;right:20%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#D3B68A;opacity:0.30;width:5px;height:5px;top:82%;left:35%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#8A9FB0;opacity:0.35;width:3px;height:3px;top:95%;right:45%;"></span>
   `;
 }
   var appsHtml = otherApps.map(function(a) {
