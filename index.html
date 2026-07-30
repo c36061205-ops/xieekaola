@@ -185,13 +185,26 @@
     width: 54px;
     height: 54px;
     border-radius: 16px;
-    background: #fff center/cover;
+    background: transparent;      /* 不用背景图了 */
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
     box-shadow: 0 3px 8px rgba(0,0,0,.15);
+    position: relative;           /* 让内部图片可定位 */
+    /* 去掉 overflow: hidden ← 关键，允许溢出 */
+    /* 去掉 box-shadow 也行，因为溢出后阴影会怪，见下方说明 */
 }
+
+.app-ic-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 54px;                  /* 所有图片统一显示宽度 */
+    height: auto;
+    pointer-events: none;
+}
+
 .app-nm {
     font-size: 11px;
     color: var(--text);
@@ -528,7 +541,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER='v729更新';
+const APP_VER='v730更新';
 // ===== 版本缓存控制（每次更新改 APP_VER 即可） =====
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
@@ -640,14 +653,14 @@ wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), ra
 {
   id: 'ghost_troupe',
   name: '🎪 幽灵戏班',
-  color: '#C68A94',
-  '--theme': '#C68A94',
-  '--bg': '#EDE8DC',
-  '--nav': '#F0EAE0',
-  '--card': '#F7F2EA',
-  '--text': '#4A4947',
-  '--sub': '#8A9FB0',
-  '--line': '#C8B4BE',
+  color: '#C68A94',           // 可保留不变，或改为 #A77BAB
+  '--theme': '#8AACB8',       // 原 #C68A94
+  '--bg': '#F5F0F5',          // 原 #EDE8DC
+  '--nav': '#FCF8FC',         // 原 #F0EAE0
+  '--card': '#FFFFFF',        // 原 #F7F2EA
+  '--text': '#3A2A3A',        // 原 #4A4947
+  '--sub': '#8A7A8A',         // 原 #8A9FB0
+  '--line': '#E5DCE5', 
 wallpaper: `
   linear-gradient(160deg, #FCF9F2 0%, #F6F3EA 50%, #F8F4EC 100%),
   linear-gradient(180deg, rgba(180,165,195,0.04) 0%, rgba(160,140,180,0.01) 100%),
@@ -725,19 +738,19 @@ orchard: {
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/22/90508b72d72612459f2ab7aae746bb23.png',
 },
 ghost_troupe: {
-  // 桌面应用图标（新）
-  wechat:   'https://s1.imagehub.cc/images/2026/07/29/28f7c4c0ed05d63ec814ad19869e1fbf.png',
+  // 桌面应用图标（已更新：微信/世界观/浮光/心迹）
+  wechat:   'https://s1.imagehub.cc/images/2026/07/30/30290f6c511be7b7c471f481bd8786a3.png',
   notes:    'https://s1.imagehub.cc/images/2026/07/29/9b08046fa24f979093f6785a5996a7bb.png',
   focus:    'https://s1.imagehub.cc/images/2026/07/29/7082d4f4303125814a0768b20a17a213.png',
   settings: 'https://s1.imagehub.cc/images/2026/07/29/d97234e8a651513a1ea084028dcad1ab.png',
   album:    'https://s1.imagehub.cc/images/2026/07/29/7ccac68b67cbfff22ed73bba45a1802c.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/07/29/ab03b87b94072e82d6e887690fd50bdc.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/07/30/8aaa721051366ea9a74e04ec4a37ea64.png',
   music:    'https://s1.imagehub.cc/images/2026/07/29/c03f6b7c1de14890a6c2574e7cbc046f.png',
   preset:   'https://s1.imagehub.cc/images/2026/07/29/8b02df8042c6964e02500b2cc40e3e71.png',
-  floating: 'https://s1.imagehub.cc/images/2026/07/29/32f5767d0ab51f8f920071367d6aae51.png',
+  floating: 'https://s1.imagehub.cc/images/2026/07/30/877dd0f64eacc04ae9af0ee99e235b59.png',
   shop:     'https://s1.imagehub.cc/images/2026/07/29/d4ba310fc86a9e91b94486cd6b27305c.png',
-  world:    'https://s1.imagehub.cc/images/2026/07/29/061ef8c1ddf7cf4430abcc0a89c782c2.png',
-  // 底栏不变（保持原样）
+  world:    'https://s1.imagehub.cc/images/2026/07/30/56d1d86b5117b3540b1bbfdd7aa94d40.png',
+  // 底栏不变
   tabChats:    'https://s1.imagehub.cc/images/2026/07/28/e1cbd76dd0d9f9679de7004fe9f939bb.png',
   tabContacts: 'https://s1.imagehub.cc/images/2026/07/28/6aee1c8d3b0ea46d734caceed9de6fa5.png',
   tabDiscover: 'https://s1.imagehub.cc/images/2026/07/28/936f595a38e796e74e60e8bb326900db.png',
@@ -817,6 +830,7 @@ function updateAllIcons() {
   if (tabMe) tabMe.src = icons.tabMe;
 }
 let DB=load();
+
 function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrate(JSON.parse(raw));}catch(e){}}return migrate({});}
 function migrate(d){
   if (d.coins === undefined || d.coins === null) d.coins = 100; // 仅新用户送100启动金
@@ -830,6 +844,8 @@ if (d.shopLastSent === undefined) d.shopLastSent = {};
 d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: '', lightModel: '' };
   // ===== 群聊新增：上下文条数 =====
   if(d.settings.groupCtxLimit===undefined)d.settings.groupCtxLimit='';
+  if (d.settings.imageModel === undefined) d.settings.imageModel = '';
+
   delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
     if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
   d.settings.onlineStyle=d.settings.onlineStyle||DEFAULT_ONLINE;
@@ -2205,6 +2221,7 @@ function render() {
 
   if (view.type === 'memo') return renderMemoMain();
   if (view.type === 'memoDetail') return renderMemoDetail(view.id);
+if (view.type === 'album') return renderAlbum();
 
   // ---- 🛍️ 购物（新增这一行） ----
   if (view.type === 'shop') return renderShop();
@@ -2331,57 +2348,59 @@ function renderHome() {
     </div>`;
   }
   
-// ---- 星星（幽灵戏班专属 · 马戏团彩色版 · 调深后） ----
+// ---- 星星（幽灵戏班 · 薄荷绿主调 · 彩色点缀 · 放大版） ----
 var starHtml = '';
 if (currentThemeId === 'ghost_troupe') {
   starHtml = `
-    <!-- 大星星：玫瑰红 + 香槟金 为主 -->
-    <span class="ghost-star xlarge" style="top:4%; left:8%; color:#C68A94; opacity:0.45;">✦</span>
-    <span class="ghost-star large" style="top:12%; right:15%; color:#D3B68A; opacity:0.40;">✦</span>
-    <span class="ghost-star xlarge" style="top:35%; left:18%; color:#C68A94; opacity:0.42;">✦</span>
-    <span class="ghost-star large" style="top:42%; right:8%; color:#8A9FB0; opacity:0.35;">✦</span>
-    <span class="ghost-star xlarge" style="top:63%; left:8%; color:#D3B68A; opacity:0.40;">✦</span>
-    <span class="ghost-star large" style="top:70%; right:25%; color:#C68A94; opacity:0.38;">✦</span>
-    <span class="ghost-star large" style="top:62%; right:48%; color:#D8ADAA; opacity:0.35;">✦</span>
-    <span class="ghost-star xlarge" style="top:92%; right:25%; color:#D3B68A; opacity:0.40;">✦</span>
+    <!-- 超大星星（主色薄荷绿 + 淡紫 + 香槟金） -->
+    <span class="ghost-star" style="top:3%; left:10%; font-size:60px; color:#8AAC9E; opacity:0.38;">✦</span>
+    <span class="ghost-star" style="top:15%; right:8%; font-size:50px; color:#B8A8C0; opacity:0.32;">✦</span>
+    <span class="ghost-star" style="top:30%; left:6%; font-size:55px; color:#C9B68A; opacity:0.30;">✦</span>
+    <span class="ghost-star" style="top:48%; right:5%; font-size:65px; color:#8AAC9E; opacity:0.35;">✦</span>
+    <span class="ghost-star" style="top:65%; left:8%; font-size:55px; color:#8A9FB0; opacity:0.32;">✦</span>
+    <span class="ghost-star" style="top:80%; right:10%; font-size:60px; color:#B8A8C0; opacity:0.30;">✦</span>
+    <span class="ghost-star" style="top:92%; left:15%; font-size:50px; color:#C9B68A; opacity:0.32;">✦</span>
 
-    <!-- 中等星星：雾蓝 + 脏粉 + 奶油白 -->
-    <span class="ghost-star" style="top:20%; left:5%; color:#8A9FB0; opacity:0.30;">✦</span>
-    <span class="ghost-star" style="top:50%; left:28%; color:#D8ADAA; opacity:0.30;">✦</span>
-    <span class="ghost-star" style="top:78%; left:18%; color:#C68A94; opacity:0.28;">✦</span>
-    <span class="ghost-star" style="top:24%; left:38%; color:#D3B68A; opacity:0.28;">✦</span>
-    <span class="ghost-star" style="top:48%; right:38%; color:#8A9FB0; opacity:0.28;">✦</span>
-    <span class="ghost-star" style="top:82%; left:65%; color:#D8ADAA; opacity:0.28;">✦</span>
-    <span class="ghost-star" style="top:14%; right:50%; color:#C68A94; opacity:0.28;">✦</span>
-    <span class="ghost-star" style="top:92%; left:28%; color:#F4F0E6; opacity:0.25;">✦</span>
+    <!-- 大星星 -->
+    <span class="ghost-star" style="top:8%; left:25%; font-size:38px; color:#8AAC9E; opacity:0.28;">✦</span>
+    <span class="ghost-star" style="top:20%; right:22%; font-size:40px; color:#D8ADAA; opacity:0.22;">✦</span>
+    <span class="ghost-star" style="top:38%; left:35%; font-size:42px; color:#8A9FB0; opacity:0.26;">✦</span>
+    <span class="ghost-star" style="top:55%; right:28%; font-size:38px; color:#B8A8C0; opacity:0.25;">✦</span>
+    <span class="ghost-star" style="top:72%; left:30%; font-size:40px; color:#8AAC9E; opacity:0.28;">✦</span>
+    <span class="ghost-star" style="top:88%; right:20%; font-size:38px; color:#C9B68A; opacity:0.25;">✦</span>
 
-    <!-- 小星星：各种颜色混搭，低透明度像彩纸屑 -->
-    <span class="ghost-star small" style="top:28%; right:28%; color:#C68A94; opacity:0.22;">✦</span>
-    <span class="ghost-star small" style="top:56%; right:18%; color:#D3B68A; opacity:0.22;">✦</span>
-    <span class="ghost-star small" style="top:85%; right:10%; color:#8A9FB0; opacity:0.22;">✦</span>
-    <span class="ghost-star small" style="top:8%; left:28%; color:#D8ADAA; opacity:0.20;">✦</span>
-    <span class="ghost-star small" style="top:40%; left:45%; color:#C68A94; opacity:0.20;">✦</span>
-    <span class="ghost-star small" style="top:68%; left:58%; color:#D3B68A; opacity:0.20;">✦</span>
-    <span class="ghost-star small" style="top:90%; right:60%; color:#8A9FB0; opacity:0.20;">✦</span>
-    <span class="ghost-star small" style="top:60%; right:70%; color:#D8ADAA; opacity:0.20;">✦</span>
+    <!-- 中等星星 -->
+    <span class="ghost-star" style="top:5%; left:45%; font-size:26px; color:#B8A8C0; opacity:0.22;">✦</span>
+    <span class="ghost-star" style="top:12%; right:40%; font-size:28px; color:#8AAC9E; opacity:0.22;">✦</span>
+    <span class="ghost-star" style="top:25%; left:55%; font-size:24px; color:#D8ADAA; opacity:0.18;">✦</span>
+    <span class="ghost-star" style="top:35%; right:50%; font-size:26px; color:#C9B68A; opacity:0.22;">✦</span>
+    <span class="ghost-star" style="top:45%; left:65%; font-size:28px; color:#8A9FB0; opacity:0.20;">✦</span>
+    <span class="ghost-star" style="top:58%; right:45%; font-size:24px; color:#8AAC9E; opacity:0.22;">✦</span>
+    <span class="ghost-star" style="top:68%; left:50%; font-size:26px; color:#B8A8C0; opacity:0.20;">✦</span>
+    <span class="ghost-star" style="top:78%; right:55%; font-size:28px; color:#C9B68A; opacity:0.20;">✦</span>
+    <span class="ghost-star" style="top:85%; left:60%; font-size:24px; color:#8AAC9E; opacity:0.22;">✦</span>
 
-    <!-- 极小的装饰星点（xsmall） -->
-    <span class="ghost-star xsmall" style="top:16%; right:35%; color:#C68A94; opacity:0.18;">✦</span>
-    <span class="ghost-star xsmall" style="top:32%; right:42%; color:#D3B68A; opacity:0.18;">✦</span>
-    <span class="ghost-star xsmall" style="top:54%; left:52%; color:#8A9FB0; opacity:0.18;">✦</span>
-    <span class="ghost-star xsmall" style="top:76%; right:55%; color:#D8ADAA; opacity:0.18;">✦</span>
-    <span class="ghost-star xsmall" style="top:5%; left:55%; color:#C68A94; opacity:0.18;">✦</span>
-    <span class="ghost-star xsmall" style="top:45%; left:70%; color:#D3B68A; opacity:0.18;">✦</span>
-    <span class="ghost-star xsmall" style="top:75%; left:75%; color:#8A9FB0; opacity:0.18;">✦</span>
+    <!-- 小星星 -->
+    <span class="ghost-star" style="top:2%; left:60%; font-size:16px; color:#E8DDD0; opacity:0.22;">✦</span>
+    <span class="ghost-star" style="top:10%; left:75%; font-size:14px; color:#8AAC9E; opacity:0.20;">✦</span>
+    <span class="ghost-star" style="top:18%; right:55%; font-size:15px; color:#8A9FB0; opacity:0.20;">✦</span>
+    <span class="ghost-star" style="top:28%; left:80%; font-size:14px; color:#B8A8C0; opacity:0.18;">✦</span>
+    <span class="ghost-star" style="top:42%; right:70%; font-size:16px; color:#D8ADAA; opacity:0.16;">✦</span>
+    <span class="ghost-star" style="top:52%; left:85%; font-size:14px; color:#C9B68A; opacity:0.20;">✦</span>
+    <span class="ghost-star" style="top:60%; right:65%; font-size:15px; color:#8AAC9E; opacity:0.18;">✦</span>
+    <span class="ghost-star" style="top:70%; left:75%; font-size:14px; color:#B8A8C0; opacity:0.18;">✦</span>
+    <span class="ghost-star" style="top:82%; right:75%; font-size:16px; color:#8A9FB0; opacity:0.18;">✦</span>
+    <span class="ghost-star" style="top:90%; left:85%; font-size:14px; color:#C9B68A; opacity:0.20;">✦</span>
 
-    <!-- 小圆点星星（彩色） -->
-    <span style="position:absolute;border-radius:50%;background:#C68A94;opacity:0.35;width:4px;height:4px;top:6%;left:25%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#D3B68A;opacity:0.30;width:3px;height:3px;top:18%;right:30%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#8A9FB0;opacity:0.35;width:5px;height:5px;top:32%;left:50%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#D8ADAA;opacity:0.30;width:3px;height:3px;top:50%;left:15%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#C68A94;opacity:0.35;width:4px;height:4px;top:68%;right:20%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#D3B68A;opacity:0.30;width:5px;height:5px;top:82%;left:35%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#8A9FB0;opacity:0.35;width:3px;height:3px;top:95%;right:45%;"></span>
+    <!-- 小圆点星星（放大） -->
+    <span style="position:absolute;border-radius:50%;background:#8AAC9E;opacity:0.32;width:6px;height:6px;top:4%;left:35%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#C9B68A;opacity:0.28;width:5px;height:5px;top:14%;right:30%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#8A9FB0;opacity:0.32;width:7px;height:7px;top:28%;left:50%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#B8A8C0;opacity:0.28;width:5px;height:5px;top:40%;right:15%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#8AAC9E;opacity:0.30;width:6px;height:6px;top:55%;left:20%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#D8ADAA;opacity:0.22;width:7px;height:7px;top:68%;right:35%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#C9B68A;opacity:0.30;width:5px;height:5px;top:78%;left:45%;"></span>
+    <span style="position:absolute;border-radius:50%;background:#8A9FB0;opacity:0.28;width:6px;height:6px;top:88%;right:50%;"></span>
   `;
 }
   var appsHtml = otherApps.map(function(a) {
@@ -3257,6 +3276,11 @@ if (id === 'shop') {
     view = { type: 'shop' };
     render();
     return;
+}
+if (id === 'album') {
+  view = { type: 'album' };
+  render();
+  return;
 }
 
   var a = DB.desktop.apps.find(function(x) { return x.id === id; });
@@ -5631,109 +5655,147 @@ function delContactById(id){
     render();
   }, {icon:'🗑️', title:'删除角色'});
 }
+function settingsCell(icon, title, sub, tab, color){
+  return `
+  <div onclick="view.tab='${tab}';render()"
+       style="margin:0 12px 10px;padding:12px 16px;background:var(--card,#fff);
+              border-radius:12px;display:flex;align-items:center;cursor:pointer;
+              box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+    <div style="width:30px;height:30px;border-radius:8px;margin-right:14px;
+                background:${color};display:flex;align-items:center;justify-content:center;
+                flex-shrink:0;">${icon}</div>
+    <div style="flex:1;">
+      <div style="font-size:15px;color:var(--text);">${title}</div>
+      <div style="font-size:12px;color:var(--sub);margin-top:2px;">${sub}</div>
+    </div>
+    <div style="color:var(--sub);font-size:18px;opacity:0.4;">›</div>
+  </div>`;
+}
+// ===== 设置页分类图标（白色细线）=====
+const ICO_MODEL = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>`;
+
+const ICO_THEME = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1-.3-.3-.4-.6-.4-1 0-.8.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-5-4.5-9-10-9z"/></svg>`;
+
+const ICO_STICKER = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`;
+
+const ICO_DATA = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`;
 
 function renderSettings(){
   showChrome(true,false);
   statusbar.classList.add('dark');
-  tbTitle.textContent='设置';
-  tbLeft.textContent='‹';
-  tbLeft.onclick=goHome;
-  tbRight.textContent='';
-  tbRight.onclick=null;
-  const s=DB.settings;
-  content.innerHTML=`
-    <div class="section-title">版本 ${APP_VER}｜AI 接口</div>
-    <div class="section">
-      <div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div>
-      <div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div>
-    </div>
-    <button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button>
-<div class="section">
-  <div class="row">
-    <label>主聊天模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">角色对话 · 深度推理</span></label>
-    <select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select>
-  </div>
-  <div class="row">
-    <label>辅助模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">润色 · 生成 · 推演</span></label>
-    <select id="auxModel"><option>${s.auxModel||'请先拉取'}</option></select>
-  </div>
-  <div class="row">
-    <label>轻量模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">高频后台 · 快速响应</span></label>
-    <select id="lightModel"><option>${s.lightModel||'请先拉取'}</option></select>
-  </div>
-</div>
-    <button class="btn" onclick="saveApi()">保存接口设置</button>
+  const s = DB.settings;
+  const tab = view.tab || '';        // 空 = 分类列表，其它 = 二级页
 
-<!-- ===== 主题皮肤（动态渲染） ===== -->
-<div class="section-title">✨ 主题皮肤（整体换肤）</div>
-<div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;touch-action:pan-y;contain:layout style;">
-  ${SKINS.map(skin => `
-    <div onclick="applySkin('${skin.id}');renderSettings()" 
-         style="
-           cursor:pointer;
-           border:2px solid ${skin['--theme']};
-           border-radius:12px;
-           padding:12px 8px;
-           text-align:center;
-           background:${skin['--theme']}18;
-           touch-action:manipulation;
-           will-change:transform;
-           user-select:none;
-           -webkit-touch-callout:none;
-           contain:content;
-           transition:transform 0.12s ease, box-shadow 0.12s ease;
-           box-shadow:0 1px 4px rgba(0,0,0,0.04);
-         "
-         onmousedown="this.style.transform='scale(0.96)';this.style.boxShadow='0 0 0 2px ${skin['--theme']}33';"
-         onmouseup="this.style.transform='scale(1)';this.style.boxShadow='0 1px 4px rgba(0,0,0,0.04)';"
-         onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='0 1px 4px rgba(0,0,0,0.04)';"
-         >
-      <!-- 色块预览：渐变背景 + 主题色圆角块 -->
-      <div style="
-        width:100%;
-        height:38px;
-        border-radius:8px;
-        background:${skin['--theme']};
-        margin-bottom:8px;
-        background-image: linear-gradient(135deg, ${skin['--theme']}cc, ${skin['--theme']});
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.06);
-      "></div>
-      <!-- 主题名称 + 小标签 -->
-      <div style="font-size:13px;font-weight:500;color:var(--text);letter-spacing:0.3px;">
-        ${skin.name}
-      </div>
-      <div style="font-size:10px;color:var(--sub);opacity:0.5;margin-top:2px;">
-        ${skin.id === currentThemeId ? '● 当前' : '点击切换'}
-      </div>
-    </div>
-  `).join('')}
-</div>
-    <div class="section-title">🖼️ 桌面壁纸</div>
-    <div class="field">
-      <div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div>
-      ${DB.desktop.wallpaper ? `
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:13px;" onclick="resetWallpaper()">🔄 恢复主题默认</button>
-        <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:13px;color:#e34;" onclick="clearWallpaper()">🗑️ 移除壁纸</button>
-      </div>
-      ` : ''}
-    </div>
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+  tbLeft.textContent = '‹';
 
-    <div class="section-title">😀 表情包仓库（AI靠"名字"识别使用）</div>
-<div style="padding:10px 16px;max-height:250px;overflow-y:auto;">
-  <div class="stgrid">${DB.stickers.map((st,i)=>`<div class="st"><span class="x" onclick="delSticker(${i})">×</span><img src="${st.img}"><div class="nm">${esc(st.name)}</div></div>`).join('')}</div>
-</div>
-    <button class="btn gray" onclick="addSticker()">＋ 添加表情</button>
-<div class="section-title">📦 数据管理</div>
-<div style="padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;">
-  <button class="btn" style="flex:1;min-width:100px;margin:0;" onclick="openExportModal()">📤 导出数据</button>
-  <button class="btn gray" style="flex:1;min-width:100px;margin:0;" onclick="importData()">📥 导入备份</button>
-</div>
-<div class="hint" style="padding:0 16px 8px;">导出时自由勾选要备份的内容；导入会覆盖备份中已有的模块，未勾选的模块原样保留。</div>
-    <div class="hint">建议定期导出，清缓存会丢数据。</div>
-    <div style="height:20px"></div>
-  `;
+  // ===== 分类列表（主页）=====
+  if(!tab){
+    tbTitle.textContent = '设置';
+    tbLeft.onclick = goHome;         // 列表页：返回桌面
+    content.innerHTML = `
+      <div style="height:10px"></div>
+${settingsCell(ICO_MODEL,'模型配置','API · 主/辅/轻量模型','model','#5b8def')}
+${settingsCell(ICO_THEME,'主题与外观','皮肤 · 桌面壁纸','theme','#e0679a')}
+${settingsCell(ICO_STICKER,'表情包仓库','管理 AI 可用的表情','sticker','#f0a63a')}
+${settingsCell(ICO_DATA,'数据管理','导入 · 导出','data','#3ac07a')}
+      <div class="hint" style="padding:12px 16px;">版本 ${APP_VER}</div>
+      <div style="height:20px"></div>
+    `;
+    return;
+  }
+
+  // 二级页统一：返回键回到分类列表
+  tbLeft.onclick = function(){ view.tab=''; render(); };
+
+  // ===== 模型配置 =====
+  if(tab==='model'){
+    tbTitle.textContent = '模型配置';
+    content.innerHTML = `
+      <div class="section-title">AI 接口</div>
+      <div class="section">
+        <div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div>
+        <div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div>
+      </div>
+      <button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button>
+      <div class="section">
+        <div class="row"><label>主聊天模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">角色对话 · 深度推理</span></label>
+          <select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select></div>
+        <div class="row"><label>辅助模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">润色 · 生成 · 推演</span></label>
+          <select id="auxModel"><option>${s.auxModel||'请先拉取'}</option></select></div>
+        <div class="row"><label>轻量模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">高频后台 · 快速响应</span></label>
+          <select id="lightModel"><option>${s.lightModel||'请先拉取'}</option></select></div>
+        <div class="row"><label>生图模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">朋友圈配图 · 角色随手拍</span></label>
+          <select id="imageModel"><option>${s.imageModel||'请先拉取'}</option></select></div>
+      </div>
+
+      <button class="btn" onclick="saveApi()">保存接口设置</button>
+      <div style="height:20px"></div>
+    `;
+    return;
+  }
+
+  // ===== 主题与外观 =====
+  if(tab==='theme'){
+    tbTitle.textContent = '主题与外观';
+    content.innerHTML = `
+      <div class="section-title">✨ 主题皮肤（整体换肤）</div>
+      <div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;touch-action:pan-y;contain:layout style;">
+        ${SKINS.map(skin => `
+          <div onclick="applySkin('${skin.id}');renderSettings()"
+               style="cursor:pointer;border:2px solid ${skin['--theme']};border-radius:12px;padding:12px 8px;text-align:center;background:${skin['--theme']}18;touch-action:manipulation;user-select:none;-webkit-touch-callout:none;contain:content;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="width:100%;height:38px;border-radius:8px;background:${skin['--theme']};margin-bottom:8px;background-image:linear-gradient(135deg,${skin['--theme']}cc,${skin['--theme']});box-shadow:inset 0 1px 0 rgba(255,255,255,0.15),0 2px 6px rgba(0,0,0,0.06);"></div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);letter-spacing:0.3px;">${skin.name}</div>
+            <div style="font-size:10px;color:var(--sub);opacity:0.5;margin-top:2px;">${skin.id === currentThemeId ? '● 当前' : '点击切换'}</div>
+          </div>`).join('')}
+      </div>
+      <div class="section-title">🖼️ 桌面壁纸</div>
+      <div class="field">
+        <div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div>
+        ${DB.desktop.wallpaper ? `
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:13px;" onclick="resetWallpaper()">🔄 恢复主题默认</button>
+          <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:13px;color:#e34;" onclick="clearWallpaper()">🗑️ 移除壁纸</button>
+        </div>` : ''}
+      </div>
+      <div style="height:20px"></div>
+    `;
+    return;
+  }
+
+  // ===== 表情包仓库 =====
+  if(tab==='sticker'){
+    tbTitle.textContent = '表情包仓库';
+    content.innerHTML = `
+      <div class="hint" style="padding:12px 16px 4px;">AI 靠"名字"识别并使用表情</div>
+      <div style="padding:10px 16px;">
+        <div class="stgrid">${DB.stickers.map((st,i)=>`<div class="st"><span class="x" onclick="delSticker(${i})">×</span><img src="${st.img}"><div class="nm">${esc(st.name)}</div></div>`).join('')}</div>
+      </div>
+      <button class="btn gray" onclick="addSticker()">＋ 添加表情</button>
+      <div style="height:20px"></div>
+    `;
+    return;
+  }
+
+  // ===== 数据管理 =====
+  if(tab==='data'){
+    tbTitle.textContent = '数据管理';
+    content.innerHTML = `
+      <div class="section-title">📦 数据管理</div>
+      <div style="padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn" style="flex:1;min-width:100px;margin:0;" onclick="openExportModal()">📤 导出数据</button>
+        <button class="btn gray" style="flex:1;min-width:100px;margin:0;" onclick="importData()">📥 导入备份</button>
+
+      </div>
+      <div class="hint" style="padding:0 16px 8px;">导出时自由勾选要备份的内容；导入会覆盖备份中已有的模块，未勾选的模块原样保留。</div>
+      <div class="hint" style="padding:0 16px 8px;">建议定期导出，清缓存会丢数据。</div>
+      <div style="height:20px"></div>
+    `;
+    return;
+  }
 }
+
 function setTheme(k){DB.settings.theme=k;applyTheme(k);save();render();}
 function pickWallpaper() {
   pickImage(function(d) {
@@ -6591,10 +6653,23 @@ function renderMoments(){
   html+=DB.moments.map((m,i)=>momentCard(m,i)).join('');
   html+=`<div style="height:20px"></div>`;
   content.innerHTML=html;
+    // 异步填充朋友圈里的 IndexedDB 图片
+  content.querySelectorAll('img[data-imgid]').forEach(function(img){
+    var id = img.getAttribute('data-imgid');
+    getImage(id).then(function(b64){
+      if(b64) img.src = b64;
+    });
+  });
+
 }
 function momentCard(m,i){
   const a=momentAuthor(m);
-  const imgs=(m.images||[]).map(src=>`<img src="${src}" style="width:33%;aspect-ratio:1;object-fit:cover;border-radius:4px;margin:2px">`).join('');
+  const imgs=(m.images||[]).map(function(src){
+    if(src && src.indexOf('img_')===0){
+      return `<img data-imgid="${src}" onclick="event.stopPropagation();viewBigImage('${src}')" style="width:33%;aspect-ratio:1;object-fit:cover;border-radius:4px;margin:2px;background:#eee;cursor:pointer">`;
+    }
+    return `<img src="${src}" style="width:33%;aspect-ratio:1;object-fit:cover;border-radius:4px;margin:2px">`;
+  }).join('');
   const likes=(m.likes||[]).map(id=>id==='me'?DB.me.name:((getC(id)||{}).nick||(getC(id)||{}).name||'')).filter(Boolean);
   const iLiked=(m.likes||[]).includes('me');
   var likeHtml = likes.length ? '<div style="background:var(--bg);padding:6px 10px;border-radius:6px;font-size:13px;color:var(--text)">❤️ ' + likes.join('，') + '</div>' : '';
@@ -6897,11 +6972,97 @@ async function aiPostMoment(cid, silent) {
       return;
     }
 
+    // ★★ 生成"随手拍"配图（AI自主决定拍什么）★★
+    var imgIds = [];
+    if (DB.settings.imageModel) {
+      try {
+        var who = c.nick || c.name;
+
+        // --- 收集情境 ---
+        // 世界观
+        var worldDesc = '';
+        if (c.worldId) {
+          var w = (DB.worlds || []).find(function(x){ return x.id === c.worldId; });
+          if (w) worldDesc = (w.name || '') + '：' + (w.desc || '');
+        }
+        // 当前行程
+        var cur = findCurrentScheduleItem(c);
+        var nowDoing = cur ? (cur.content || '') : '';
+        var nowPlace = cur ? (cur.location || '') : '';
+        // 最近聊天
+        var msgs = (DB.chats[cid] || []).filter(function(m){ return m.type==='text' && m.content && !m.recalled; });
+        var recentChat = msgs.length ? msgs.slice(-4).map(function(m){ return (m.role==='user'?'我':who)+'：'+m.content; }).join('；') : '';
+        // 角色人设
+        var persona = '';
+        try { persona = buildSystem(c); } catch(e){ persona = '角色：'+who; }
+
+        // --- 当前时段（跟随系统时间）---
+        var hh = new Date().getHours();
+        var timeCN =
+          hh < 5  ? '深夜（一片黑暗，只有灯光或月光）' :
+          hh < 8  ? '清晨（天刚蒙蒙亮，光线柔和）' :
+          hh < 11 ? '上午（明亮的日光）' :
+          hh < 14 ? '中午（强烈的日光）' :
+          hh < 17 ? '下午（偏暖的日光）' :
+          hh < 19 ? '傍晚（黄昏，橙色暮光）' :
+          hh < 23 ? '夜晚（天已经黑了，室内灯光或城市灯光）' :
+                    '深夜（一片黑暗，只有灯光）';
+        var timeEN =
+          hh < 5  ? 'deep night, dark, only artificial or moon light' :
+          hh < 8  ? 'early morning, soft dawn light' :
+          hh < 11 ? 'morning, bright daylight' :
+          hh < 14 ? 'noon, strong daylight' :
+          hh < 17 ? 'afternoon, warm daylight' :
+          hh < 19 ? 'dusk, orange sunset glow' :
+          hh < 23 ? 'night, dark sky, indoor or city lights' :
+                    'deep night, dark, only artificial light';
+
+        // --- 第一步：让文字AI以角色身份，想出"我会拍什么" ---
+        var askPrompt = persona +
+          '\n\n【任务】你（' + who + '）刚发了这条朋友圈："' + txt + '"。' +
+          '现在要配一张你随手拍的照片。请你结合自己的身份、性格、所处世界、此刻在做的事，' +
+          '想一个最符合"此刻的你会拍下来"的画面。' +
+          (worldDesc ? '\n【你所处的世界观】' + worldDesc : '') +
+          (nowPlace ? '\n【当前地点】' + nowPlace : '') +
+          (nowDoing ? '\n【此刻在做】' + nowDoing : '') +
+          '\n【现在的时间】' + hh + '点，属于' + timeCN + '，画面的光线和天色必须符合这个时间' +
+          (recentChat ? '\n【最近对话】' + recentChat : '') +
+          '\n\n【硬性要求】' +
+          '\n1. 只描述"画面里有什么"，是第一人称视角（你拿手机随手拍下眼前的东西）。' +
+          '\n2. 画面里绝对不能有人脸、不能自拍、不能出现完整的人。最多只能露出你自己的一只手（比如握着杯子、翻书、摸到的东西），不许两只手同时出现。' +
+          '\n3. 拍的应该是环境、物件、景色、食物、手边之物等，要符合你的身份和所在世界（比如钢琴家可能拍琴键，妖怪可能拍它眼中的奇异景象）。' +
+          '\n4. 光线和天色要符合上面给定的时间段（比如深夜就不能是大白天）。' +
+          '\n5. 只输出一句英文的画面描述（给AI绘图用），30词以内，不要解释、不要引号。';
+
+        var sceneDesc = await callAI([{role:'user', content: askPrompt}], DB.settings.lightModel || DB.settings.chatModel);
+        sceneDesc = (sceneDesc || '').replace(/["'\n]/g,' ').trim();
+
+        // --- 第二步：套上"随手拍风格铁律"，交给生图模型 ---
+        var imgPrompt =
+          sceneDesc +
+          '. Time of day: ' + timeEN + ', the lighting and sky must match this time. ' +
+          'A real photograph taken on a smartphone camera, authentic photo, ' +
+          'extremely ordinary and unremarkable phone snapshot: no clear subject, no sense of composition, ' +
+          'slight motion blur, uneven natural lighting with mild over/underexposure from sun or indoor light, ' +
+          'awkward angle, messy framing, deliberately plain and mundane, casual point-of-view, real life candid photo, ' +
+          'realistic textures, natural grain, shot on iPhone. ' +
+          'STRICT: no human face, no selfie, no full person; at most one single hand may appear (never two hands); ' +
+          'no text, no watermark, no border, no logo. ' +
+          'NOT 3D render, NOT CGI, NOT illustration, NOT painting, NOT cartoon, NOT anime, NOT digital art, no rendered look.';
+
+        var picId = await generateImage(imgPrompt, DB.settings.imageModel);
+        imgIds.push(picId);
+      } catch (e) {
+        console.log('朋友圈配图失败，发纯文字：', e.message);
+      }
+    }
+
+    // ★★ 核心：将 AI 生成的动态存入 DB.moments ★★
     DB.moments.unshift({
       id: 'p' + Date.now(),
       author: cid,
       text: txt,
-      images: [],
+      images: imgIds,
       time: Date.now(),
       likes: [],
       comments: [],
@@ -6929,6 +7090,19 @@ function cleanMomentText(t){
     .replace(/```/g,'')
     .trim();
 }
+function viewBigImage(id){
+  getImage(id).then(function(b64){
+    if(!b64) return;
+    var v = document.createElement('div');
+    v.id = 'bigimg';
+    v.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);'+
+      'display:flex;align-items:center;justify-content:center;';
+    v.onclick = function(){ v.remove(); };   // 点任意处关闭
+    v.innerHTML = '<img src="'+b64+'" style="max-width:100%;max-height:100%;object-fit:contain;">';
+    (phone || document.body).appendChild(v);
+  });
+}
+
 /* ===== 朋友圈：未读红点 & 后台守护 ===== */
 function markMomentUnread(n){DB.momentUnread=(DB.momentUnread||0)+(n||1);save();refreshMomentBadge();}
 function clearMomentUnread(){
@@ -10151,6 +10325,11 @@ async function fetchModels(){
 fillSelect('chatModel', list, DB.settings.chatModel);
 fillSelect('auxModel', list, DB.settings.auxModel);
 fillSelect('lightModel', list, DB.settings.lightModel);
+// 只筛选像生图的模型（关键词可自己加）
+var imgList = list.filter(function(id){
+  return /image|flux|dall|banana|grok.*image|sd|stable|draw|paint|midjourney|mj|imagen/i.test(id);
+});
+fillSelect('imageModel', imgList.length ? imgList : list, DB.settings.imageModel);
     // ===== 新增：保存模型列表到全局设置 =====
     DB.settings.availableModels = list;
     save();
@@ -10167,9 +10346,11 @@ function saveApi(){
   var cm = document.getElementById('chatModel').value;
   var am = document.getElementById('auxModel').value;
   var lm = document.getElementById('lightModel').value;
+  var im = document.getElementById('imageModel').value;
   if (cm && !cm.includes('请先')) DB.settings.chatModel = cm;
   if (am && !am.includes('请先')) DB.settings.auxModel = am;
   if (lm && !lm.includes('请先')) DB.settings.lightModel = lm;
+  if (im && !im.includes('请先')) DB.settings.imageModel = im;
   save();
   alert('已保存！');
 }
@@ -10571,5 +10752,261 @@ function stripStateTag(text) {
     // 把 <state>好感+1</state> 这种整段删掉
     return text.replace(/<state>[\s\S]*?<\/state>/g, '').trim();
 }
+
+// ===== 图片仓库（IndexedDB）带收藏 & 自动清理 =====
+const IMG_DB_NAME = 'myrp_images';
+const IMG_KEEP_DAYS = 7;              // 未收藏的图保留天数
+let _imgDB = null;
+
+function _openImgDB(){
+  return new Promise(function(resolve, reject){
+    if(_imgDB) return resolve(_imgDB);
+    const req = indexedDB.open(IMG_DB_NAME, 1);
+    req.onupgradeneeded = function(e){
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains('imgs')) db.createObjectStore('imgs');
+    };
+    req.onsuccess = function(e){ _imgDB = e.target.result; resolve(_imgDB); };
+    req.onerror = function(e){ reject(e); };
+  });
+}
+
+// 存图：传入 b64，返回图片 id（默认是"临时图"，7天后可能被清）
+async function saveImage(b64){
+  const db = await _openImgDB();
+  const id = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  const record = { b64: b64, createdAt: Date.now(), fav: false };
+  return new Promise(function(resolve, reject){
+    const tx = db.transaction('imgs','readwrite');
+    tx.objectStore('imgs').put(record, id);
+    tx.oncomplete = function(){ resolve(id); };
+    tx.onerror = function(e){ reject(e); };
+  });
+}
+
+// 取图：传入 id，返回可直接放进 <img src> 的 b64（取不到返回空）
+async function getImage(id){
+  const db = await _openImgDB();
+  return new Promise(function(resolve){
+    const tx = db.transaction('imgs','readonly');
+    const r = tx.objectStore('imgs').get(id);
+    r.onsuccess = function(){ resolve(r.result ? r.result.b64 : ''); };
+    r.onerror = function(){ resolve(''); };
+  });
+}
+
+// 收藏 / 取消收藏：fav 传 true 或 false
+async function favImage(id, fav){
+  const db = await _openImgDB();
+  return new Promise(function(resolve){
+    const tx = db.transaction('imgs','readwrite');
+    const store = tx.objectStore('imgs');
+    const r = store.get(id);
+    r.onsuccess = function(){
+      const rec = r.result; if(!rec) return resolve(false);
+      rec.fav = !!fav;
+      store.put(rec, id);
+      resolve(true);
+    };
+    r.onerror = function(){ resolve(false); };
+  });
+}
+
+// 手动删图
+async function deleteImage(id){
+  const db = await _openImgDB();
+  return new Promise(function(resolve){
+    const tx = db.transaction('imgs','readwrite');
+    tx.objectStore('imgs').delete(id);
+    tx.oncomplete = function(){ resolve(); };
+    tx.onerror = function(){ resolve(); };
+  });
+}
+
+// 自动清理：删掉"没收藏 且 超过 N 天"的图
+async function cleanupImages(){
+  const db = await _openImgDB();
+  const limit = Date.now() - IMG_KEEP_DAYS*24*60*60*1000;
+  const tx = db.transaction('imgs','readwrite');
+  const store = tx.objectStore('imgs');
+  store.openCursor().onsuccess = function(e){
+    const cur = e.target.result;
+    if(!cur) return;
+    const rec = cur.value;
+    if(!rec.fav && rec.createdAt < limit) store.delete(cur.key);  // 没收藏且过期→删
+    cur.continue();
+  };
+}
+
+// 列出图片（相册用）：可传 {favOnly:true} 只看收藏
+async function listImages(opts){
+  opts = opts || {};
+  const db = await _openImgDB();
+  return new Promise(function(resolve){
+    const tx = db.transaction('imgs','readonly');
+    const store = tx.objectStore('imgs');
+    const out = [];
+    const kr = store.getAllKeys();
+    kr.onsuccess = function(){
+      const keys = kr.result || [];
+      const vr = store.getAll();
+      vr.onsuccess = function(){
+        const vals = vr.result || [];
+        for(let i=0;i<keys.length;i++){
+          if(opts.favOnly && !vals[i].fav) continue;
+          out.push({ id:keys[i], createdAt:vals[i].createdAt, fav:vals[i].fav });
+        }
+        out.sort((a,b)=>b.createdAt-a.createdAt);  // 新的在前
+        resolve(out);
+      };
+    };
+  });
+}
+// 从 AI 的文字回复里，把 base64 图片抠出来（没有就返回空）
+function extractImage(text){
+  if(!text) return '';
+  // 匹配 data:image/xxx;base64,.... 这一整串
+  const m = text.match(/data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+/);
+  return m ? m[0] : '';
+}
+// 生成图片：传入提示词和模型，返回存好的图片 id
+async function generateImage(prompt, model){
+  const s = DB.settings;
+  if(!s.apiUrl || !s.apiKey) throw new Error('请先在设置里填写API');
+
+  // 复用聊天接口，让它画图
+  const reply = await callAI(
+    [{ role:'user', content: prompt }],
+    model || s.auxModel   // 用你选的生图模型
+  );
+
+  // 从回复里抠出 base64 图片
+  const b64 = extractImage(reply);
+  if(!b64) throw new Error('没生成出图片，换个提示词或模型试试');
+
+  // 存进 IndexedDB（临时图，7天内没收藏会被清）
+  const id = await saveImage(b64);
+  return id;
+}
+async function doGenerate(){
+  const prompt = document.getElementById('imgPrompt').value;  // 你的提示词输入框
+  const model  = document.getElementById('imgModel').value;   // 你的模型选择框
+  if(!prompt){ popTip('请先填提示词', {icon:'✏️'}); return; }
+
+  popLoading('正在生成…');
+  try{
+    const id = await generateImage(prompt, model);
+    const b64 = await getImage(id);   // 取出来显示
+    popClose();
+    // 显示生成结果 + 收藏按钮（示意）
+    showGeneratedResult(id, b64);
+  }catch(e){
+    popClose();
+    popTip('生成失败：' + e.message, {icon:'⚠️'});
+  }
+}
+function showGeneratedResult(id, b64){
+  popClose();
+  var p = document.createElement('div');
+  p.className = 'popup';
+  p.id = 'popup';
+  p.innerHTML = '<div class="popup-box">' +
+    '<div class="popup-title">生成完成 ✨</div>' +
+    '<img src="'+b64+'" style="width:100%;border-radius:8px;margin:8px 0;">' +
+    '<div class="popup-msg" style="font-size:12px;color:var(--sub)">未收藏的图片 '+IMG_KEEP_DAYS+' 天后会自动清理</div>' +
+    '<div class="popup-btns">' +
+      '<button class="popup-btn sub" onclick="popClose()">关闭</button>' +
+      '<button class="popup-btn main" onclick="favImage(\''+id+'\',true);popClose();popTip(\'已收藏，永久保存 ❤️\',{icon:\'❤️\'})">收藏</button>' +
+    '</div></div>';
+  phone.appendChild(p);
+}
+function renderAlbum(){
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = '相册';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = goHome;
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+
+  const favOnly = !!view.favOnly;   // 是否只看收藏
+
+  content.innerHTML = `
+    <div style="display:flex;gap:8px;padding:12px 16px;">
+      <button class="btn ${favOnly?'gray':''}" style="flex:1;margin:0;" onclick="view.favOnly=false;render()">全部</button>
+      <button class="btn ${favOnly?'':'gray'}" style="flex:1;margin:0;" onclick="view.favOnly=true;render()">❤️ 收藏</button>
+    </div>
+    <div id="albumGrid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 4px 20px;">
+      <div class="empty" style="grid-column:1/4;">加载中…</div>
+    </div>
+  `;
+
+  // 异步加载图片列表并填充
+  listImages({favOnly: favOnly}).then(function(items){
+    const grid = document.getElementById('albumGrid');
+    if(!grid) return;
+    if(!items.length){
+      grid.innerHTML = `<div class="empty" style="grid-column:1/4;">${favOnly?'还没有收藏的图片':'相册还是空的～'}</div>`;
+      return;
+    }
+    // 先画占位格子（带 data-imgid）
+    grid.innerHTML = items.map(function(it){
+      return `<div style="position:relative;aspect-ratio:1;background:#eee;border-radius:6px;overflow:hidden;cursor:pointer;" onclick="openPhoto('${it.id}')">
+        <img data-imgid="${it.id}" style="width:100%;height:100%;object-fit:cover;display:block;">
+        ${it.fav?'<span style="position:absolute;top:4px;right:4px;font-size:12px;">❤️</span>':''}
+      </div>`;
+    }).join('');
+    // 再异步把每张图填进去
+    items.forEach(function(it){
+      getImage(it.id).then(function(b64){
+        const img = grid.querySelector('img[data-imgid="'+it.id+'"]');
+        if(img && b64) img.src = b64;
+      });
+    });
+  });
+}
+
+// 点开单张图片：放大 + 收藏/删除
+function openPhoto(id){
+  getImage(id).then(function(b64){
+    listImages().then(function(items){
+      const it = items.find(x=>x.id===id) || {fav:false};
+      var p = document.createElement('div');
+      p.className='popup'; p.id='popup';
+      p.innerHTML = '<div class="popup-box">'+
+        '<img src="'+b64+'" style="width:100%;border-radius:8px;margin-bottom:10px">'+
+        '<div class="popup-btns">'+
+          '<button class="popup-btn sub" style="color:#e34" onclick="delPhoto(\''+id+'\')">删除</button>'+
+          '<button class="popup-btn main" onclick="togglePhotoFav(\''+id+'\','+(!it.fav)+')">'+(it.fav?'取消收藏':'❤️ 收藏')+'</button>'+
+        '</div>'+
+        '<button class="popup-btn sub" style="width:100%;margin-top:8px" onclick="popClose()">关闭</button>'+
+        '</div>';
+      phone.appendChild(p);
+    });
+  });
+}
+
+// 收藏/取消
+function togglePhotoFav(id, fav){
+  favImage(id, fav).then(function(){
+    popClose();
+    popTip(fav?'已收藏，永久保存 ❤️':'已取消收藏', {icon: fav?'❤️':'🤍'});
+    if(view.type==='album') render();
+  });
+}
+
+// 删除
+function delPhoto(id){
+  popConfirm('确定删除这张图片？删除后无法恢复。', function(){
+    deleteImage(id).then(function(){
+      popTip('已删除', {icon:'🗑️'});
+      if(view.type==='album') render();
+    });
+  }, {icon:'🗑️', title:'删除图片'});
+}
+setTimeout(function(){ 
+  try { cleanupImages(); } catch(e) { console.log('清理跳过', e); }
+}, 3000);
+
 </script>
 </html>
