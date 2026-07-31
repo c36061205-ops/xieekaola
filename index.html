@@ -494,6 +494,28 @@ textarea {
   align-content: start;
   padding: 0 4px;
 }
+/* ===== 咪思异想主题专用样式 ===== */
+#phone[data-theme="misi"] .clock-starry .ring {
+  opacity: var(--ring-opacity, 0.4);
+}
+
+/* 聊天气泡 —— AI 保留边框，用户去掉边框 + 用柔和红 */
+#phone[data-theme="misi"] .msg:not(.me) .mbody {
+  background: #FFFFFF;
+  border: 1px solid #1A1A1A;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.04);
+  color: var(--text);
+}
+
+#phone[data-theme="misi"] .msg.me .mbody {
+  background: var(--theme);   /* 跟随主题色 #A84848 或你自定义的柔和红 */
+  color: #FFFFFF;
+  border: none;               /* 去掉边框 */
+}
+
+#phone[data-theme="misi"] .tab.active .ic img {
+  filter: none;
+}
 </style>
 </head>
 <body>
@@ -541,7 +563,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER='v730更新';
+const APP_VER='v731更新';
 // ===== 版本缓存控制（每次更新改 APP_VER 即可） =====
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
@@ -668,6 +690,20 @@ wallpaper: `
   radial-gradient(circle at 80% 60%, rgba(160,140,180,0.04) 0%, transparent 45%)
 `
   },
+{
+  id: 'misi',
+  name: '🐱 咪思异想',
+  color: '#A84848',
+  '--theme': '#A84848',
+  '--bg': '#FCFCFC',
+  '--nav': '#FFFFFF',
+  '--card': '#FFFFFF',
+  '--text': '#1A1A1A',
+  '--sub': '#8A8A8A',
+  '--line': '#1A1A1A',
+  '--ring-opacity': '0.4',
+  wallpaper: 'radial-gradient(circle at 6% 10%, rgba(168,72,72,0.45) 0, transparent 6px), radial-gradient(circle at 4% 13%, rgba(168,72,72,0.55) 0, transparent 2px), radial-gradient(circle at 8% 8%, rgba(168,72,72,0.35) 0, transparent 1px), radial-gradient(circle at 92% 25%, rgba(168,72,72,0.5) 0, transparent 9px), radial-gradient(circle at 88% 28%, rgba(168,72,72,0.4) 0, transparent 3px), radial-gradient(circle at 95% 22%, rgba(168,72,72,0.3) 0, transparent 1px), radial-gradient(circle at 28% 42%, rgba(168,72,72,0.45) 0, transparent 5px), radial-gradient(circle at 30% 45%, rgba(168,72,72,0.35) 0, transparent 1.5px), radial-gradient(circle at 68% 52%, rgba(168,72,72,0.5) 0, transparent 11px), radial-gradient(circle at 64% 56%, rgba(168,72,72,0.4) 0, transparent 2.5px), radial-gradient(circle at 72% 49%, rgba(168,72,72,0.3) 0, transparent 1.5px), radial-gradient(circle at 18% 72%, rgba(168,72,72,0.45) 0, transparent 7px), radial-gradient(circle at 14% 76%, rgba(168,72,72,0.35) 0, transparent 2px), radial-gradient(circle at 50% 85%, rgba(168,72,72,0.5) 0, transparent 13px), radial-gradient(circle at 46% 89%, rgba(168,72,72,0.4) 0, transparent 3px), radial-gradient(circle at 54% 82%, rgba(168,72,72,0.35) 0, transparent 2px), radial-gradient(circle at 82% 78%, rgba(168,72,72,0.4) 0, transparent 5px), radial-gradient(circle at 85% 81%, rgba(168,72,72,0.3) 0, transparent 1px), radial-gradient(circle at 20% 35%, rgba(168,72,72,0.25) 0, transparent 4px), radial-gradient(circle at 62% 14%, rgba(168,72,72,0.45) 0, transparent 8px), radial-gradient(circle at 38% 62%, rgba(168,72,72,0.3) 0, transparent 2px), #FCFCFC'
+}
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -737,6 +773,7 @@ orchard: {
   tabMe:       'https://s1.imagehub.cc/images/2026/07/22/881c5b2e97cc7febac866c7af070943b.png',
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/22/90508b72d72612459f2ab7aae746bb23.png',
 },
+// 🎪 幽灵戏班
 ghost_troupe: {
   // 桌面应用图标（已更新：微信/世界观/浮光/心迹）
   wechat:   'https://s1.imagehub.cc/images/2026/07/30/30290f6c511be7b7c471f481bd8786a3.png',
@@ -745,11 +782,11 @@ ghost_troupe: {
   settings: 'https://s1.imagehub.cc/images/2026/07/29/d97234e8a651513a1ea084028dcad1ab.png',
   album:    'https://s1.imagehub.cc/images/2026/07/29/7ccac68b67cbfff22ed73bba45a1802c.png',
   hearts:   'https://s1.imagehub.cc/images/2026/07/30/8aaa721051366ea9a74e04ec4a37ea64.png',
-  music:    'https://s1.imagehub.cc/images/2026/07/29/c03f6b7c1de14890a6c2574e7cbc046f.png',
+  music:    'https://s1.imagehub.cc/images/2026/07/31/c984b4cff21a2c7b8c8df6b1c93b3661.png',
   preset:   'https://s1.imagehub.cc/images/2026/07/29/8b02df8042c6964e02500b2cc40e3e71.png',
   floating: 'https://s1.imagehub.cc/images/2026/07/30/877dd0f64eacc04ae9af0ee99e235b59.png',
   shop:     'https://s1.imagehub.cc/images/2026/07/29/d4ba310fc86a9e91b94486cd6b27305c.png',
-  world:    'https://s1.imagehub.cc/images/2026/07/30/56d1d86b5117b3540b1bbfdd7aa94d40.png',
+  world:    'https://s1.imagehub.cc/images/2026/07/31/2987e8ecc8a74c1be69809301d5ca7d5.png',
   // 底栏不变
   tabChats:    'https://s1.imagehub.cc/images/2026/07/28/e1cbd76dd0d9f9679de7004fe9f939bb.png',
   tabContacts: 'https://s1.imagehub.cc/images/2026/07/28/6aee1c8d3b0ea46d734caceed9de6fa5.png',
@@ -757,6 +794,25 @@ ghost_troupe: {
   tabMe:       'https://s1.imagehub.cc/images/2026/07/28/5ebba54a6c31da793c1d7cabb4ac6197.png',
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/28/ae1610619ea654132eaa7f3c46dd2cd0.png',
 },
+// 🐱 咪思异想
+misi: {
+  wechat:   'https://s1.imagehub.cc/images/2026/07/31/0df8e0c4d100fd108c7e3c285b46c85b.png',
+  notes:    'https://s1.imagehub.cc/images/2026/07/31/4d26f89157b8d4a9668fd350b09d814f.png',
+  focus:    'https://s1.imagehub.cc/images/2026/07/31/e21f0dd654b51d79f4d939352392baa1.png',
+  settings: 'https://s1.imagehub.cc/images/2026/07/31/9f9263740707084341a78cd9201ff837.png',
+  album:    'https://s1.imagehub.cc/images/2026/07/31/07060de517f1bcfc80b6189bb8f29dd3.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/07/31/6190f29d818235f700abe8900f12ac68.png',
+  music:    'https://s1.imagehub.cc/images/2026/07/31/e2df08a1894b2cf38f8f4c1aad7c6803.png',
+  preset:   'https://s1.imagehub.cc/images/2026/07/31/4f18cffd3a48fc4e5866ee08f2dc171d.png',
+  floating: 'https://s1.imagehub.cc/images/2026/07/31/739b42addb1ce9fbab45e2cb9b7c5674.png',
+  shop:     'https://s1.imagehub.cc/images/2026/07/31/d5b89d12b8843416569c67dadec9d39e.png',
+  world:    'https://s1.imagehub.cc/images/2026/07/31/bd90c5058c93a4b905a6e7ffcee621c1.png',
+  tabChats:    'https://s1.imagehub.cc/images/2026/07/31/6717e993d85f59cc08f230cb3c03d7b0.png',
+  tabContacts: 'https://s1.imagehub.cc/images/2026/07/31/455aef8d60176a4abbc26c68cf1bab57.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/07/31/322286b7d5ee05f19eed740e02edc151.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/07/31/2dd7ec9732f79de88b95b1ebc87109ed.png',
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/07/31/2dc0511a3559b69fba801f127e5db701.png'
+}
 };
 // =====================================
 function applySkin(id) {
@@ -781,9 +837,12 @@ function applySkin(id) {
 
   save();
   updateAllIcons();
+  // 给 #phone 加一个 data-theme 属性，方便 CSS 针对不同主题写样式
+var phone = document.getElementById('phone');
+if (phone) phone.dataset.theme = id;
 
   // ===== 主题适配（浅色/深色） =====
-var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe');
+var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi');
 if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
   root.style.setProperty('--clock-sub-opacity', '1');
@@ -882,7 +941,10 @@ d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: ''
         c.worldId = existed.id;
       } else {
         var newId = 'w_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-        d.worlds = d.worlds || [];
+  d.worlds = d.worlds || [];
+  if (d.floating === undefined) d.floating = {};
+  if (d.floatingUnread === undefined) d.floatingUnread = 0;
+
         d.worlds.push({ id: newId, name: worldName, icon: '🌍', desc: c.worldview });
         c.worldId = newId;
       }
@@ -2277,7 +2339,7 @@ function renderHome() {
   }
   
   var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
-    <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);opacity:var(--deco-opacity, 0.2);mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
+<div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);opacity:var(--ring-opacity, 0.2);mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
     <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%) rotate(70deg);border:1px solid var(--theme);opacity:var(--deco-opacity, 0.12);mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);-webkit-mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);"></div>
     <span style="position:absolute;top:6%;left:48%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.5);pointer-events:none;z-index:1;"></span>
     <span style="position:absolute;top:38%;right:8%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.4);pointer-events:none;z-index:1;"></span>
@@ -2404,7 +2466,13 @@ if (currentThemeId === 'ghost_troupe') {
   `;
 }
   var appsHtml = otherApps.map(function(a) {
-    var badge = a.id === 'wechat' ? '<span id="wxDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>' : '';
+    var badge = '';
+    if (a.id === 'wechat') {
+      badge = '<span id="wxDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>';
+    } else if (a.id === 'floating') {
+      badge = '<span id="floatingDeskBadge" style="display:none;position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;font-weight:600;line-height:18px;text-align:center;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:9;box-sizing:border-box;" onclick="event.stopPropagation()"></span>';
+    }
+
     var iconUrl = a.icon || icons[a.id] || null;
     var style = 'position:relative;';
     if (iconUrl) {
@@ -2431,6 +2499,7 @@ d.innerHTML = `
   phone.appendChild(d);
   tick();
   refreshChatBadges();
+  refreshFloatingBadge();
   renderWeatherWidget();
   bindWeatherWidgetEvents();
   autoCheckWeatherUpdate();
@@ -3821,28 +3890,77 @@ async function triggerAIComment(postId) {
 
   var world = (DB.worlds || []).find(function(w) { return w.id === _floatingWorldId; });
   if (!world) return;
-var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+  var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
   if (!model) return;
 
-  var prompt = '【场景】有人在「' + world.name + '」发了一条帖子，用户评论了它。请你以路人身份回一条评论。\n\n' +
-    '【帖子】\n' + p.content + '\n\n【要求】简短10~25字，接住情绪，像真人说话，直接输出内容';
+  // 取用户刚发的最后一条评论作为上下文
+  var myName = (DB.me && DB.me.name) ? DB.me.name : '我';
+  var myLastComment = '';
+  for (var i = (p.comments || []).length - 1; i >= 0; i--) {
+    if (p.comments[i].author === myName) { myLastComment = p.comments[i].text; break; }
+  }
+
+  // 选回复者：绑定本世界观的角色优先（60%概率），否则用路人
+  var boundChars = (DB.contacts || []).filter(function(c) {
+    return c.worldId === _floatingWorldId && c.activity !== '关' && !c._draft;
+  });
+  var replier = null;
+  if (boundChars.length && Math.random() < 0.6) {
+    replier = boundChars[Math.floor(Math.random() * boundChars.length)];
+  }
+
+  var messages, replierName;
+  if (replier) {
+    replierName = replier.nick || replier.name;
+    var sys;
+    try { sys = buildSystem(replier); }
+    catch (e) { sys = '你扮演「' + replierName + '」，完全代入其性格与说话口吻。'; }
+    var task = '【场景：浮光社区】有人在「' + world.name + '」发了一条帖子，' + myName + '在评论区说了话。请你以「' + replierName + '」的身份，用你的人设和说话风格回一条评论。\n\n' +
+      '【帖子】' + p.content + '\n\n' +
+      (myLastComment ? '【' + myName + '刚说】' + myLastComment + '\n\n' : '') +
+      '【要求】简短10~25字，接住话头、别答非所问，像真人评论区聊天，直接输出内容，不要引号、不要旁白。';
+    messages = [
+      { role: 'system', content: sys },
+      { role: 'user', content: task }
+    ];
+  } else {
+    var _nickPool = ['夜色温柔','路过的猫','07号观察员','晚风','匿名旅人','街角咖啡','沉默的鱼','雾里看花','一只柠檬','深夜不睡','旧巷微光','随风','看客甲','南方以南','银河碎片','橙子汽水','屋顶的猫','失眠患者','薄荷味','无名氏'];
+    replierName = _nickPool[Math.floor(Math.random() * _nickPool.length)];
+
+    var prompt = '【场景】有人在「' + world.name + '」发了一条帖子，' + myName + '评论了它。请你以路人身份回一条评论。\n\n' +
+      '【帖子】\n' + p.content + '\n\n' +
+      (myLastComment ? '【' + myName + '刚说】' + myLastComment + '\n\n' : '') +
+      '【要求】简短10~25字，接住情绪，像真人说话，直接输出内容';
+    messages = [{ role: 'user', content: prompt }];
+  }
 
   try {
-    var out = await callAI([{ role: 'user', content: prompt }], model);
+    var out = await callAI(messages, model);
     out = out.replace(/["「」“”]/g, '').trim();
     if (out && out.length > 2) {
+      posts = getFloatingCache(_floatingWorldId);
+      p = posts.find(function(x) { return x.id === postId; });
+      if (!p) return;
       if (!p.comments) p.comments = [];
       if (p.comments.length >= 5) p.comments.shift();
       var newComment = {
         id: 'c_ai_' + Date.now(),
-        author: '路人',
+        author: replierName,
         text: out,
-        time: Date.now()
+        time: Date.now(),
+        replyTo: myName
       };
       p.comments.push(newComment);
       saveFloatingCache(_floatingWorldId, posts);
-      // 局部插入 AI 评论
-      insertComment(postId, newComment);
+
+      // 用户还在浮光页面 → 直接显示；否则红点+1提醒
+      if (view && view.type === 'floating') {
+        insertComment(postId, newComment);
+      } else {
+        DB.floatingUnread = (DB.floatingUnread || 0) + 1;
+        save();
+        refreshFloatingBadge();
+      }
     }
   } catch (e) {
     console.warn('AI评论彩蛋失败:', e);
@@ -3886,10 +4004,12 @@ function insertComment(postId, comment) {
   wrap.classList.add('show');
   // 创建评论元素
   var cmtDiv = document.createElement('div');
-  cmtDiv.className = 'floating-comment';
+  var _myName = (DB.me && DB.me.name) ? DB.me.name : '我';
+  cmtDiv.className = (comment.author === _myName) ? 'floating-comment mine' : 'floating-comment';
   var now = new Date();
   var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-  cmtDiv.innerHTML = '<span class="floating-cauthor">' + esc(comment.author) + '</span>' +
+  var replyHint = comment.replyTo ? '<span style="color:var(--sub);opacity:0.7;"> 回复 ' + esc(comment.replyTo) + '</span>' : '';
+  cmtDiv.innerHTML = '<span class="floating-cauthor">' + esc(comment.author) + '</span>' + replyHint + '：' +
                      esc(comment.text) + '<span class="floating-ctime">' + timeStr + '</span>';
   // 插入到输入框之前
   var inputRow = wrap.querySelector('.floating-comment-input');
@@ -3965,10 +4085,13 @@ function buildFloatingCard(p) {
   var commentCount = (p.comments || []).length;
 
   var commentsHtml = '';
+  var _myName = (DB.me && DB.me.name) ? DB.me.name : '我';
   (p.comments || []).forEach(function(c) {
     var ct = new Date(c.time);
     var ctime = String(ct.getHours()).padStart(2, '0') + ':' + String(ct.getMinutes()).padStart(2, '0');
-    commentsHtml += '<div class="floating-comment"><span class="floating-cauthor">' + esc(c.author) + '</span>' +
+    var mineCls = (c.author === _myName) ? ' mine' : '';
+    var replyHint = c.replyTo ? '<span style="color:var(--sub);opacity:0.7;"> 回复 ' + esc(c.replyTo) + '</span>' : '';
+    commentsHtml += '<div class="floating-comment' + mineCls + '"><span class="floating-cauthor">' + esc(c.author) + '</span>' + replyHint + '：' +
       esc(c.text) + '<span class="floating-ctime">' + ctime + '</span></div>';
   });
 
@@ -4006,6 +4129,9 @@ function buildFloatingCard(p) {
 }
 // ----- 9. 主渲染函数（带启动动画控制）-----
 function renderFloating() {
+  DB.floatingUnread = 0;
+  save();
+  refreshFloatingBadge();
   var homeEl = document.getElementById('home');
   if (homeEl) homeEl.remove();
   content.style.display = 'block';
@@ -4084,10 +4210,12 @@ function renderFloating() {
       '.floating-god.show{display:block;}' +
       '.floating-god-label{font-size:10px;color:var(--theme);font-weight:600;letter-spacing:1.5px;margin-bottom:2px;opacity:0.65;text-transform:uppercase;}' +
       '.floating-god-text{font-size:13px;color:var(--text);opacity:0.8;line-height:1.6;font-style:italic;font-weight:350;}' +
-      '.floating-comments-wrap{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:none;width:100%;box-sizing:border-box;overflow:hidden;}' +
+      '.floating-comments-wrap{margin-top:14px;padding-top:6px;display:none;width:100%;box-sizing:border-box;overflow:hidden;}' +
       '.floating-comments-wrap.show{display:block;}' +
-      '.floating-comment{font-size:13px;color:var(--text);padding:4px 0 4px 2px;border-bottom:1px solid var(--line);line-height:1.5;opacity:0.85;word-break:break-word;}' +
-      '.floating-comment:last-of-type{border-bottom:none;}' +
+
+      '.floating-comment{font-size:13px;color:var(--text);padding:7px 12px;margin-bottom:6px;border-radius:12px;background:rgba(255,255,255,0.03);line-height:1.6;word-break:break-word;}' +
+      '.floating-comment.mine{background:color-mix(in srgb,var(--theme) 12%,transparent);}' +
+      '.floating-comment:last-of-type{margin-bottom:0;}' +
       '.floating-cauthor{color:var(--theme);font-weight:500;margin-right:4px;opacity:0.9;}' +
       '.floating-ctime{font-size:10px;color:var(--sub);opacity:0.4;margin-left:6px;}' +
       '.floating-comment-input{display:flex;gap:6px;margin-top:10px;width:100%;box-sizing:border-box;overflow:hidden;}' +
@@ -4288,7 +4416,8 @@ function floatingComment(postId) {
     var wrap = card.querySelector('.floating-comments-wrap');
     if (wrap) {
       var newCmt = document.createElement('div');
-      newCmt.className = 'floating-comment';
+      newCmt.className = 'floating-comment mine';
+
       var now = new Date();
       var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
       newCmt.innerHTML = '<span class="floating-cauthor">' + esc(myName) + '</span>' + esc(text) + '<span class="floating-ctime">' + timeStr + '</span>';
@@ -4303,11 +4432,10 @@ function floatingComment(postId) {
     }
   }
 
-  // AI 评论彩蛋
-  if (!p._aiCommentTriggered && Math.random() < 0.30) {
-    p._aiCommentTriggered = true;
-    saveFloatingCache(_floatingWorldId, posts);
-    triggerAIComment(postId);
+  // AI 评论：每次评论独立判定，约55%概率收到回复（延迟3~10秒，更像真人）
+  if (Math.random() < 0.55) {
+    var delay = 3000 + Math.random() * 7000;
+    setTimeout(function() { triggerAIComment(postId); }, delay);
   }
 }
 window.floatingComment = floatingComment;
@@ -5655,6 +5783,23 @@ function delContactById(id){
     render();
   }, {icon:'🗑️', title:'删除角色'});
 }
+
+async function _doTestGreet(cid){
+  var c = getC(cid);
+  if(!c) return;
+  // 临时把该角色限额设成"每条都发"，保证一定出图
+  var oldQuota = getImgQuota(cid);
+  setImgQuota(cid, 'every');
+  alert('开始强制打招呼「'+(c.nick||c.name)+'」，请稍候（生图较慢）…');
+  try{
+    await doAutoGreet(c, '夜晚');   // 直接调，绕过时段检查
+  }catch(e){
+    alert('出错：'+e.message);
+  }
+  // 恢复原来的限额设置
+  setImgQuota(cid, oldQuota);
+}
+
 function settingsCell(icon, title, sub, tab, color){
   return `
   <div onclick="view.tab='${tab}';render()"
@@ -5731,6 +5876,8 @@ ${settingsCell(ICO_DATA,'数据管理','导入 · 导出','data','#3ac07a')}
       </div>
 
       <button class="btn" onclick="saveApi()">保存接口设置</button>
+	  <button class="btn" onclick="openImgQuota()">🖼️ 生图限额管理</button>
+
       <div style="height:20px"></div>
     `;
     return;
@@ -6974,7 +7121,8 @@ async function aiPostMoment(cid, silent) {
 
     // ★★ 生成"随手拍"配图（AI自主决定拍什么）★★
     var imgIds = [];
-    if (DB.settings.imageModel) {
+    if (DB.settings.imageModel && canSendImage(cid)) {
+
       try {
         var who = c.nick || c.name;
 
@@ -7050,8 +7198,12 @@ async function aiPostMoment(cid, silent) {
           'no text, no watermark, no border, no logo. ' +
           'NOT 3D render, NOT CGI, NOT illustration, NOT painting, NOT cartoon, NOT anime, NOT digital art, no rendered look.';
 
-        var picId = await generateImage(imgPrompt, DB.settings.imageModel);
+// ✅ 正确写法（加上 c.id）
+var picId = await generateImage(imgPrompt, DB.settings.imageModel, c.id);
         imgIds.push(picId);
+		        imgIds.push(picId);
+        recordImageSent(cid);   // ← 新增：计入今日额度
+
       } catch (e) {
         console.log('朋友圈配图失败，发纯文字：', e.message);
       }
@@ -7090,17 +7242,18 @@ function cleanMomentText(t){
     .replace(/```/g,'')
     .trim();
 }
-function viewBigImage(id){
-  getImage(id).then(function(b64){
+function viewBigImage(idOrB64){
+  var show = function(b64){
     if(!b64) return;
-    var v = document.createElement('div');
-    v.id = 'bigimg';
-    v.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);'+
-      'display:flex;align-items:center;justify-content:center;';
-    v.onclick = function(){ v.remove(); };   // 点任意处关闭
-    v.innerHTML = '<img src="'+b64+'" style="max-width:100%;max-height:100%;object-fit:contain;">';
-    (phone || document.body).appendChild(v);
-  });
+    var v=document.createElement('div');
+    v.id='bigimg';
+    v.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;';
+    v.onclick=function(){ v.remove(); };
+    v.innerHTML='<img src="'+b64+'" style="max-width:100%;max-height:100%;object-fit:contain;">';
+    (phone||document.body).appendChild(v);
+  };
+  if(idOrB64 && idOrB64.indexOf('img_')===0){ getImage(idOrB64).then(show); }
+  else { show(idOrB64); }
 }
 
 /* ===== 朋友圈：未读红点 & 后台守护 ===== */
@@ -7126,6 +7279,15 @@ setInterval(function(){if(document.hidden)return;if(view.type==='charEdit')retur
 /* ===== 未读徽章系统 ===== */
 function markChatUnread(id,n){const c=getC(id);if(!c)return;c.unread=(c.unread||0)+(n||1);save();refreshChatBadges();}
 function chatUnreadTotal(){return DB.contacts.reduce((s,c)=>s+(c.unread||0),0);}
+function refreshFloatingBadge(){
+  var un = DB.floatingUnread || 0;
+  var b = document.getElementById('floatingDeskBadge');
+  if(b){
+    b.style.display = un > 0 ? 'inline-flex' : 'none';
+    b.textContent = un > 99 ? '99+' : un;
+  }
+}
+
 function refreshChatBadges(){
   const total=chatUnreadTotal();
   const badge=document.getElementById('wxDeskBadge');
@@ -7344,6 +7506,21 @@ case 'sticker': {
 	  }
 
     if (cnt === 0) return;
+    // ★★ 打招呼随手拍（30%概率 + 限额控制）★★
+    if (canSendImage(c.id) && Math.random() < 0.4) {
+      try {
+        var moodText = parts.filter(function(p){return p.type==='text';}).map(function(p){return p.content;}).join(' ');
+        var picId = await makeSnapshot(c.id, moodText);
+        if (picId) {
+          var imgMsg = { id:newId(), role:'assistant', type:'image', content:picId, time:Date.now() };
+          DB.chats[c.id].push(imgMsg);
+          recordImageSent(c.id);
+          cnt++;
+          if (view.type==='chat' && view.id===c.id) { appendBubble(c, imgMsg); fillChatImages(); }
+          else markChatUnread(c.id, 1);
+        }
+      } catch(e){ console.warn('打招呼配图失败', e); }
+    }
 
     // ===== 7. 更新界面 / 未读 =====
     c.inChatList = true;
@@ -8514,7 +8691,14 @@ try { s += getC2CContextFor(c.id); } catch(e) {}
 }
 function toApiMsg(m){
   if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};
-  if(m.type==='image')return{role:m.role,content:[{type:'text',text:'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};
+  if(m.type==='image'){
+    // 现在图片存的是 IndexedDB 的 id，不能当图片URL发给模型；转成文字占位
+    var _isId = m.content && m.content.indexOf('img_')===0;
+    if(_isId) return {role:m.role, content: (m.role==='user'?'（对方发来一张图片）':'（你发了一张图片）')};
+    // 老式 base64 图片仍走多模态"看图"格式
+    return {role:m.role, content:[{type:'text',text:'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};
+  }
+
   if(m.type==='transfer')return{role:m.role,content:`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};
   if(m.type==='redpacket')return{role:m.role,content:`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};
   if(m.type==='voice')return{role:m.role,content:`（语音消息）${m.content}`};
@@ -8554,7 +8738,10 @@ function findSticker(name) {
 function bubble(c,m){if(m.type==='system'){return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';}
 const me=m.role==='user';const av=me?DB.me.avatar:c.avatar;const nm=me?((DB.me.name||'我')[0]):((c.name||'?')[0]);let body;
 if(m.recalled){const who=me?'你':(c.nick||c.name);body=`<div class="mbody" style="background:transparent;box-shadow:none;color:var(--sub);font-size:13px;border:1px dashed var(--line)">${who} 撤回了一条消息 ${m.recalledContent?`<span style="color:var(--theme);cursor:pointer" onclick="peekRecall('${m.id}')">${m.reveal?'· '+esc(m.recalledContent):(me?'· 查看':'· 偷看(5💗)')}</span>`:''}</div>`;}
-else if(m.type==='image')body=`<div class="mbody" style="padding:3px;background:${me?'var(--theme)':'var(--card)'}"><img src="${m.content}" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>`;
+else if(m.type==='image'){
+    var _isId = m.content && m.content.indexOf('img_')===0;
+    body=`<div class="mbody" style="padding:3px;background:${me?'var(--theme)':'var(--card)'}"><img ${_isId?`data-imgid="${m.content}"`:`src="${m.content}"`} onclick="viewBigImage('${m.content}')" style="max-width:160px;max-height:220px;border-radius:5px;display:block;background:#eee;cursor:pointer"></div>`;
+  }
 else if(m.type==='transfer'){var statusText='';if(m.status==='accepted')statusText='✅ 已接收';else if(m.status==='refunded')statusText='⏳ 已退回';else statusText='待处理';body='<div class="transfer-card" data-mid="'+m.id+'" style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530;"><div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="color:#F99530;font-size:22px;font-weight:bold;">¥</span></div><div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:500;">¥ '+esc(String(m.amount))+'</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px;">'+(m.content?esc(m.content):'转账')+'</div></div></div><div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px;display:flex;justify-content:space-between;"><span>微信转账</span><span>'+statusText+'</span></div></div>';}
 else if(m.type==='redpacket')body=`<div style="width:220px;background:#fff;border-radius:10px;overflow:hidden"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#e05a49"><div style="width:36px;height:36px;background:#fbe0a6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px">🧧</div><div style="flex:1"><div style="color:#fff;font-size:14px">${esc(m.content)||'恭喜发财'}</div><div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:2px">¥${esc(String(m.amount))}</div></div></div><div style="background:#f2c879;color:#8a4b00;font-size:11px;padding:6px 12px">微信红包</div></div>`;
 else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body=`<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">${dur}″</span></div><div class="voice-text">${esc(m.content)}</div></div>`;}
@@ -8673,6 +8860,7 @@ function renderChat(keepScroll) {
 // ===== 7. 心声气泡（已改用全局弹窗，此处不再生成） =====
 // 删除旧的常驻气泡，改为在页面渲染完成后通过 showHeartBubbleDirect 触发弹窗
   content.innerHTML = html;
+  fillChatImages();   // ← 新增：异步填充聊天里的图片
 
   // ===== 8. 绑定消息左滑 =====
   document.querySelectorAll('#content .msg').forEach(function(el) {
@@ -9953,7 +10141,8 @@ addCoins(_reward);
     reduceTension(c);
     // ---- 12. 紧张度回落 ----
     reduceTension(c);
-
+    // ★★ 聊天随手拍：文字发完后，后台悄悄配图（不阻塞）★★
+    triggerChatSnapshot(c, parts);
   } catch (e) {
     alert('回复失败：' + e.message);
   }
@@ -10309,7 +10498,48 @@ async function triggerC2CInteractions(moment){
 }
 
 /* ===== API / 备份 ===== */
-async function callAI(messages,model){const s=DB.settings;if(!s.apiUrl||!s.apiKey)throw new Error('请先在设置里填写API');const res=await fetch(s.apiUrl+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.apiKey},body:JSON.stringify({model:model||s.chatModel,messages})});if(!res.ok)throw new Error('HTTP '+res.status);const d=await res.json();return d.choices[0].message.content;}
+async function callAI(messages, model, _retry){
+  const s = DB.settings;
+  if(!s.apiUrl || !s.apiKey) throw new Error('请先在设置里填写API');
+  _retry = _retry || 0;
+
+  try{
+    const res = await fetch(s.apiUrl + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + s.apiKey
+      },
+      body: JSON.stringify({ model: model || s.chatModel, messages })
+    });
+
+    if(!res.ok){
+      // 把服务器返回的具体错误也读出来，方便看原因
+      var errText = '';
+      try { errText = await res.text(); } catch(e){}
+      // 5xx（服务器抽风）或 429（限流）→ 自动重试，最多3次
+      if((res.status >= 500 || res.status === 429) && _retry < 2){
+        await sleep(1500 * (_retry + 1));   // 等一下再重试（越试越久）
+        return callAI(messages, model, _retry + 1);
+      }
+      throw new Error('HTTP ' + res.status + (errText ? '：' + errText.slice(0,300) : ''));
+    }
+
+    const d = await res.json();
+    if(!d.choices || !d.choices[0]){
+      throw new Error('返回格式异常：' + JSON.stringify(d).slice(0,300));
+    }
+    return d.choices[0].message.content;
+
+  }catch(e){
+    // 网络层面的错误（断网、超时等）也重试
+    if(_retry < 2 && /fetch|network|timeout|Failed/i.test(e.message||'')){
+      await sleep(1500 * (_retry + 1));
+      return callAI(messages, model, _retry + 1);
+    }
+    throw e;
+  }
+}
 async function genWorld(){const c=getC(editingId);const btn=document.getElementById('genWorldBtn');const model=DB.settings.auxModel||DB.settings.chatModel;if(!model){alert('请先在设置里选择模型');return;}btn.textContent='生成中…';btn.disabled=true;try{const txt=await callAI([{role:'user',content:`为角色扮演生成简洁世界观。类型：「${c.worldType||'现代都市'}」，角色：${c.pKeywords||c.name}。250字内含地点时代氛围关键设定，直接输出正文。`}],model);c.worldview=txt;save();render();}catch(e){alert('生成失败：'+e.message);btn.textContent='🌍 AI 生成/补全世界观';btn.disabled=false;}}
 function addContact(){const id='c'+Date.now();const c=blankChar(id);c._draft=true;DB.contacts.push(c);DB.chats[id]=[];save();editContact(id,'contacts');}
 async function fetchModels(){
@@ -10770,12 +11000,29 @@ function _openImgDB(){
     req.onerror = function(e){ reject(e); };
   });
 }
-
-// 存图：传入 b64，返回图片 id（默认是"临时图"，7天后可能被清）
-async function saveImage(b64){
+// ===== 如果其他地方需要 deleteImage，保留这个（但 delPhoto 不再使用它） =====
+function deleteImage(id) {
+  return new Promise(function(resolve, reject) {
+    _openImgDB()
+      .then(function(db) {
+        var tx = db.transaction('imgs', 'readwrite');
+        var req = tx.objectStore('imgs').delete(id);
+        req.onsuccess = function() { resolve(); };
+        req.onerror = function(e) { reject(e.target.error); };
+      })
+      .catch(function(e) { reject(e); });
+  });
+}
+// 存图：传入 b64 和可选的 roleId（图片属于哪个角色），返回图片 id
+async function saveImage(b64, roleId){
   const db = await _openImgDB();
   const id = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
-  const record = { b64: b64, createdAt: Date.now(), fav: false };
+  const record = { 
+    b64: b64, 
+    createdAt: Date.now(), 
+    fav: false,
+    roleId: roleId || null   // 新增字段：关联角色ID
+  };
   return new Promise(function(resolve, reject){
     const tx = db.transaction('imgs','readwrite');
     tx.objectStore('imgs').put(record, id);
@@ -10783,7 +11030,6 @@ async function saveImage(b64){
     tx.onerror = function(e){ reject(e); };
   });
 }
-
 // 取图：传入 id，返回可直接放进 <img src> 的 b64（取不到返回空）
 async function getImage(id){
   const db = await _openImgDB();
@@ -10854,9 +11100,14 @@ async function listImages(opts){
         const vals = vr.result || [];
         for(let i=0;i<keys.length;i++){
           if(opts.favOnly && !vals[i].fav) continue;
-          out.push({ id:keys[i], createdAt:vals[i].createdAt, fav:vals[i].fav });
+          out.push({ 
+            id: keys[i], 
+            createdAt: vals[i].createdAt, 
+            fav: vals[i].fav,
+            roleId: vals[i].roleId || null   // ← 新增
+          });
         }
-        out.sort((a,b)=>b.createdAt-a.createdAt);  // 新的在前
+        out.sort((a,b)=>b.createdAt-a.createdAt);
         resolve(out);
       };
     };
@@ -10869,42 +11120,216 @@ function extractImage(text){
   const m = text.match(/data:image\/[a-zA-Z]+;base64,[A-Za-z0-9+/=]+/);
   return m ? m[0] : '';
 }
-// 生成图片：传入提示词和模型，返回存好的图片 id
-async function generateImage(prompt, model){
+// ===== 生图限额管理 =====
+function _todayStr(){
+  var d=new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+// 取某角色的限额设置（'every'/'2'/'3'/'0'），默认 '2'
+function getImgQuota(cid){
+  DB.imgQuota = DB.imgQuota || {};
+  return DB.imgQuota[cid] || '2';
+}
+// 设置限额
+function setImgQuota(cid, val){
+  DB.imgQuota = DB.imgQuota || {};
+  DB.imgQuota[cid] = val;
+  save();
+}
+// 判断现在还能不能给这个角色发图
+function canSendImage(cid){
+  var q = getImgQuota(cid);
+  if(q === '0') return false;      // 不发
+  if(q === 'every') return true;   // 每条都发
+  // 数字限额：看今天发了几张
+  DB.imgUsage = DB.imgUsage || {date:'', counts:{}};
+  if(DB.imgUsage.date !== _todayStr()){   // 跨天了，清零
+    DB.imgUsage = {date:_todayStr(), counts:{}};
+  }
+  var used = DB.imgUsage.counts[cid] || 0;
+  return used < parseInt(q);
+}
+// 记录发了一张图（发成功后调用）
+function recordImageSent(cid){
+  DB.imgUsage = DB.imgUsage || {date:'', counts:{}};
+  if(DB.imgUsage.date !== _todayStr()) DB.imgUsage = {date:_todayStr(), counts:{}};
+  DB.imgUsage.counts[cid] = (DB.imgUsage.counts[cid] || 0) + 1;
+  save();
+}
+function openImgQuota(){
+  var chars = DB.contacts || [];
+  var opts = [
+    {v:'every', t:'每条都发（测试）'},
+    {v:'2', t:'一天最多2次'},
+    {v:'3', t:'一天最多3次'},
+    {v:'0', t:'不发'}
+  ];
+  var today = _todayStr();
+  var usage = (DB.imgUsage && DB.imgUsage.date===today) ? DB.imgUsage.counts : {};
+
+  var rows = chars.map(function(c){
+    var cur = getImgQuota(c.id);
+    var used = usage[c.id] || 0;
+    var sel = opts.map(function(o){
+      return '<option value="'+o.v+'"'+(o.v===cur?' selected':'')+'>'+o.t+'</option>';
+    }).join('');
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)">'+
+      '<div class="avatar" style="width:36px;height:36px;flex-shrink:0;'+(c.avatar?"background-image:url('"+c.avatar+"')":"")+'">'+(c.avatar?'':((c.nick||c.name||'?')[0]))+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:14px;color:var(--text)">'+esc(c.nick||c.name)+'</div>'+
+      '<div style="font-size:11px;color:var(--sub)">今日已发 '+used+' 张</div></div>'+
+      '<select onchange="setImgQuota(\''+c.id+'\',this.value)" style="border:1px solid var(--line);border-radius:8px;padding:6px;background:var(--bg);color:var(--text);font-size:13px">'+sel+'</select>'+
+      '</div>';
+  }).join('');
+
+  var m = document.createElement('div');
+  m.className='modal'; m.id='modal';
+  m.innerHTML = '<div class="sheet-box" style="max-height:70vh;overflow-y:auto">'+
+    '<div style="font-weight:600;font-size:16px;margin-bottom:4px">生图限额管理</div>'+
+    '<div style="font-size:12px;color:var(--sub);margin-bottom:10px">控制每个角色每天主动发图的次数，次数每天0点自动重置</div>'+
+    (rows || '<div class="empty">还没有角色</div>')+
+    '<button class="btn gray" style="margin-top:12px" onclick="closeModal()">完成</button>'+
+    '</div>';
+  m.onclick=function(e){ if(e.target===m) closeModal(); };
+  phone.appendChild(m);
+}
+function fillChatImages(){
+  document.querySelectorAll('#content img[data-imgid]').forEach(function(img){
+    if(img.src) return;
+    var id=img.getAttribute('data-imgid');
+    getImage(id).then(function(b64){ if(b64) img.src=b64; });
+  });
+}
+
+// 生成图片：传入提示词、模型、所属角色ID（可选）
+async function generateImage(prompt, model, roleId){
   const s = DB.settings;
   if(!s.apiUrl || !s.apiKey) throw new Error('请先在设置里填写API');
 
   // 复用聊天接口，让它画图
   const reply = await callAI(
     [{ role:'user', content: prompt }],
-    model || s.auxModel   // 用你选的生图模型
+    model || s.auxModel
   );
 
-  // 从回复里抠出 base64 图片
   const b64 = extractImage(reply);
   if(!b64) throw new Error('没生成出图片，换个提示词或模型试试');
 
-  // 存进 IndexedDB（临时图，7天内没收藏会被清）
-  const id = await saveImage(b64);
+  // 存进 IndexedDB，同时记录属于哪个角色
+  const id = await saveImage(b64, roleId);
   return id;
 }
 async function doGenerate(){
-  const prompt = document.getElementById('imgPrompt').value;  // 你的提示词输入框
-  const model  = document.getElementById('imgModel').value;   // 你的模型选择框
+  const prompt = document.getElementById('imgPrompt').value;
+  const model  = document.getElementById('imgModel').value;
   if(!prompt){ popTip('请先填提示词', {icon:'✏️'}); return; }
+
+  // ★ 新增：尝试获取当前聊天角色 ID
+  let roleId = null;
+  if (view && view.type === 'chat' && view.id) {
+    roleId = view.id;
+  }
 
   popLoading('正在生成…');
   try{
-    const id = await generateImage(prompt, model);
-    const b64 = await getImage(id);   // 取出来显示
+    // ★ 修改：传入第三个参数 roleId
+    const id = await generateImage(prompt, model, roleId);
+    const b64 = await getImage(id);
     popClose();
-    // 显示生成结果 + 收藏按钮（示意）
     showGeneratedResult(id, b64);
   }catch(e){
     popClose();
     popTip('生成失败：' + e.message, {icon:'⚠️'});
   }
 }
+// ===== 公共：生成一张"随手拍"，返回图片id（失败返回null）=====
+async function makeSnapshot(cid, moodText){
+  var c = getC(cid);
+  if(!c || !DB.settings.imageModel) return null;
+  var who = c.nick || c.name;
+
+  // 世界观
+  var worldDesc = '';
+  if(c.worldId){ var w=(DB.worlds||[]).find(function(x){return x.id===c.worldId;}); if(w) worldDesc=(w.name||'')+'：'+(w.desc||''); }
+  // 行程
+  var cur = findCurrentScheduleItem(c);
+  var nowDoing = cur ? (cur.content||'') : '';
+  var nowPlace = cur ? (cur.location||'') : '';
+  // 最近聊天
+  var msgs = (DB.chats[cid]||[]).filter(function(m){return m.type==='text'&&m.content&&!m.recalled;});
+  var recentChat = msgs.length ? msgs.slice(-4).map(function(m){return (m.role==='user'?'我':who)+'：'+m.content;}).join('；') : '';
+  // 人设
+  var persona=''; try{ persona=buildSystem(c); }catch(e){ persona='角色：'+who; }
+  // 时段
+  var hh=new Date().getHours();
+  var timeCN = hh<5?'深夜（一片黑暗，只有灯光或月光）':hh<8?'清晨（天刚蒙蒙亮，光线柔和）':hh<11?'上午（明亮的日光）':hh<14?'中午（强烈的日光）':hh<17?'下午（偏暖的日光）':hh<19?'傍晚（黄昏，橙色暮光）':hh<23?'夜晚（天已经黑了，室内灯光或城市灯光）':'深夜（一片黑暗，只有灯光）';
+  var timeEN = hh<5?'deep night, dark, only artificial or moon light':hh<8?'early morning, soft dawn light':hh<11?'morning, bright daylight':hh<14?'noon, strong daylight':hh<17?'afternoon, warm daylight':hh<19?'dusk, orange sunset glow':hh<23?'night, dark sky, indoor or city lights':'deep night, dark, only artificial light';
+
+  var askPrompt = persona +
+    '\n\n【任务】你（' + who + '）此刻想随手拍一张照片。' +
+    (moodText ? '当前的情境/心情是："' + moodText + '"。' : '') +
+    '请结合你的身份、性格、所处世界、此刻在做的事，想一个最符合"此刻的你会拍下来"的画面。' +
+    (worldDesc ? '\n【你所处的世界观】' + worldDesc : '') +
+    (nowPlace ? '\n【当前地点】' + nowPlace : '') +
+    (nowDoing ? '\n【此刻在做】' + nowDoing : '') +
+    '\n【现在的时间】' + hh + '点，属于' + timeCN + '，画面的光线和天色必须符合这个时间' +
+    (recentChat ? '\n【最近对话】' + recentChat : '') +
+    '\n\n【硬性要求】' +
+    '\n1. 只描述"画面里有什么"，第一人称视角（你拿手机随手拍下眼前的东西）。' +
+    '\n2. 绝对不能有人脸、不能自拍、不能出现完整的人。最多只能露出你自己的一只手（如握杯子、翻书），不许两只手同时出现。' +
+    '\n3. 拍环境、物件、景色、食物、手边之物，要符合你的身份和所在世界。' +
+    '\n4. 光线天色要符合上面给定的时间段。' +
+    '\n5. 只输出一句英文画面描述（给绘图AI用），30词以内，不要解释、不要引号。';
+
+  var sceneDesc = await callAI([{role:'user', content:askPrompt}], DB.settings.lightModel||DB.settings.chatModel);
+  sceneDesc = (sceneDesc||'').replace(/["'\n]/g,' ').trim();
+  if(!sceneDesc) return null;
+
+  var imgPrompt = sceneDesc +
+    '. Time of day: ' + timeEN + ', the lighting and sky must match this time. ' +
+    'A real photograph taken on a smartphone camera, authentic photo, ' +
+    'extremely ordinary unremarkable phone snapshot: no clear subject, no composition, slight motion blur, ' +
+    'uneven natural lighting with mild over/underexposure, awkward angle, messy framing, deliberately plain and mundane, ' +
+    'casual point-of-view, real life candid photo, realistic textures, natural grain, shot on iPhone. ' +
+    'STRICT: no human face, no selfie, no full person; at most one single hand (never two hands); ' +
+    'no text, no watermark, no border, no logo. ' +
+    'NOT 3D render, NOT CGI, NOT illustration, NOT painting, NOT cartoon, NOT anime, NOT digital art, no rendered look.';
+
+  return await generateImage(imgPrompt, DB.settings.imageModel, cid);
+
+}
+// ===== 聊天随手拍：文字秒回后，后台悄悄配图（不阻塞用户）=====
+function triggerChatSnapshot(c, parts){
+  if(!c || c.mode !== 'online') return;      // 只在线上聊天发，线下小说模式不发
+  if(!DB.settings.imageModel) return;
+  if(!canSendImage(c.id)) return;            // 限额检查
+  if(Math.random() >= 1) return;          // 概率：25%（测试时改成 >= 1 表示必发）
+
+  var moodText = (parts||[]).filter(function(p){return p.type==='text';})
+                            .map(function(p){return p.content;}).join(' ');
+  var cid = c.id;
+
+  // ★ 后台异步执行，不 await，不拖慢文字回复 ★
+  (async function(){
+    try{
+      var picId = await makeSnapshot(cid, moodText);
+      if(!picId) return;
+      var imgMsg = { id:newId(), role:'assistant', type:'image', content:picId, time:Date.now() };
+      DB.chats[cid] = DB.chats[cid] || [];
+      DB.chats[cid].push(imgMsg);
+      recordImageSent(cid);
+      save();
+      // 生成好时，用户如果还在这个聊天 → 当场补一张；已离开 → 标未读红点
+      if(view.type==='chat' && view.id===cid){
+        appendBubble(getC(cid), imgMsg);
+        fillChatImages();
+        scrollBottom();
+      } else {
+        markChatUnread(cid, 1);
+      }
+    }catch(e){ console.warn('聊天配图失败', e); }
+  })();
+}
+
 function showGeneratedResult(id, b64){
   popClose();
   var p = document.createElement('div');
@@ -10920,52 +11345,390 @@ function showGeneratedResult(id, b64){
     '</div></div>';
   phone.appendChild(p);
 }
-function renderAlbum(){
+// ===== 删除图片（自包含） =====
+function delPhoto(id) {
+  if (!id) {
+    console.error('删除失败：id 为空');
+    popTip('图片ID无效', {icon:'⚠️'});
+    return;
+  }
+  popConfirm('确定删除这张图片？删除后无法恢复。', function(){
+    _openImgDB()
+      .then(function(db) {
+        var tx = db.transaction('imgs', 'readwrite');
+        var req = tx.objectStore('imgs').delete(id);
+        req.onsuccess = function() {
+          popTip('已删除', {icon:'🗑️'});
+          if (view.type === 'album') render();
+        };
+        req.onerror = function(e) {
+          console.error('删除请求失败:', e);
+          popTip('删除失败', {icon:'⚠️'});
+        };
+      })
+      .catch(function(e) {
+        console.error('打开数据库失败:', e);
+        popTip('数据库打开失败', {icon:'⚠️'});
+      });
+  }, {icon:'🗑️', title:'删除图片'});
+}
+function renderAlbum() {
   showChrome(true, false);
   statusbar.classList.add('dark');
-  tbTitle.textContent = '相册';
+  tbTitle.textContent = '📸 相册';
   tbLeft.textContent = '‹';
   tbLeft.onclick = goHome;
   tbRight.textContent = '';
   tbRight.onclick = null;
 
-  const favOnly = !!view.favOnly;   // 是否只看收藏
+  const favOnly = !!view.favOnly;
 
-  content.innerHTML = `
-    <div style="display:flex;gap:8px;padding:12px 16px;">
-      <button class="btn ${favOnly?'gray':''}" style="flex:1;margin:0;" onclick="view.favOnly=false;render()">全部</button>
-      <button class="btn ${favOnly?'':'gray'}" style="flex:1;margin:0;" onclick="view.favOnly=true;render()">❤️ 收藏</button>
-    </div>
-    <div id="albumGrid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:0 4px 20px;">
-      <div class="empty" style="grid-column:1/4;">加载中…</div>
-    </div>
-  `;
+  // 注入相册样式（只注入一次）
+  if (!document.getElementById('albumStyle')) {
+    var style = document.createElement('style');
+    style.id = 'albumStyle';
+    style.textContent = `
+      .album-header {
+        display:flex;
+        gap:8px;
+        padding:12px 16px 10px;
+        border-bottom:1px solid var(--line);
+        background:var(--bg);
+        position:sticky;
+        top:0;
+        z-index:10;
+      }
+      .album-header .tab-btn {
+        flex:1;
+        padding:8px 0;
+        border:none;
+        border-radius:20px;
+        font-size:13px;
+        font-weight:500;
+        cursor:pointer;
+        transition:all 0.25s;
+        background:transparent;
+        color:var(--sub);
+        -webkit-tap-highlight-color:transparent;
+      }
+      .album-header .tab-btn.active {
+        background:var(--theme);
+        color:#fff;
+        box-shadow:0 2px 12px rgba(179,74,106,0.3);
+      }
+      .album-header .tab-btn:active {
+        transform:scale(0.94);
+      }
+      .album-stats {
+        display:flex;
+        justify-content:space-between;
+        padding:10px 16px 6px;
+        font-size:12px;
+        color:var(--sub);
+        opacity:0.7;
+      }
+      .album-grid {
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:8px;
+        padding:8px 12px 20px;
+      }
+      .photo-card {
+        position:relative;
+        border-radius:12px;
+        overflow:hidden;
+        background:var(--card);
+        aspect-ratio:1;
+        cursor:pointer;
+        transition:transform 0.15s ease;
+        box-shadow:0 2px 8px rgba(0,0,0,0.2);
+        -webkit-tap-highlight-color:transparent;
+      }
+      .photo-card:active {
+        transform:scale(0.94);
+      }
+      .photo-card img {
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+      }
+      .photo-meta {
+        position:absolute;
+        bottom:0;
+        left:0;
+        right:0;
+        padding:6px 8px 5px;
+        background:linear-gradient(transparent 0%, rgba(0,0,0,0.75) 100%);
+        backdrop-filter:blur(4px);
+        -webkit-backdrop-filter:blur(4px);
+        display:flex;
+        align-items:center;
+        gap:6px;
+        min-height:28px;
+      }
+      .photo-avatar {
+        width:18px;
+        height:18px;
+        border-radius:50%;
+        flex-shrink:0;
+        background:var(--theme);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:8px;
+        font-weight:600;
+        color:#fff;
+        background-size:cover;
+        background-position:center;
+      }
+      .photo-role {
+        font-size:11px;
+        font-weight:500;
+        color:#fff;
+        text-shadow:0 1px 3px rgba(0,0,0,0.7);
+        flex:1;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        min-width:0;
+      }
+      .photo-time {
+        font-size:9px;
+        color:rgba(255,255,255,0.55);
+        flex-shrink:0;
+        font-weight:300;
+      }
+      .photo-delete-btn {
+        font-size:13px;
+        color:rgba(255,255,255,0.5);
+        flex-shrink:0;
+        cursor:pointer;
+        padding:2px 4px;
+        border-radius:4px;
+        transition:0.2s;
+        -webkit-tap-highlight-color:transparent;
+        line-height:1;
+      }
+      .photo-delete-btn:active {
+        color:#ff4444;
+        transform:scale(1.2);
+        background:rgba(255,0,0,0.15);
+      }
+      .photo-fav-badge {
+        position:absolute;
+        top:5px;
+        right:5px;
+        font-size:13px;
+        text-shadow:0 1px 6px rgba(0,0,0,0.6);
+        pointer-events:none;
+        z-index:2;
+      }
+      .photo-fav-badge::before {
+        content:'';
+        position:absolute;
+        inset:-4px;
+        border-radius:50%;
+        background:rgba(0,0,0,0.3);
+        z-index:-1;
+        backdrop-filter:blur(2px);
+        -webkit-backdrop-filter:blur(2px);
+      }
+      .album-empty {
+        grid-column:1 / -1;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        padding:60px 20px;
+        color:var(--sub);
+        text-align:center;
+      }
+      .album-empty .icon {
+        font-size:48px;
+        margin-bottom:12px;
+        opacity:0.4;
+      }
+      .album-empty .title {
+        font-size:16px;
+        font-weight:500;
+        color:var(--text);
+        margin-bottom:4px;
+      }
+      .album-empty .desc {
+        font-size:13px;
+        opacity:0.55;
+        line-height:1.7;
+      }
+      .photo-viewer {
+        position:fixed;
+        inset:0;
+        z-index:99999;
+        background:rgba(0,0,0,0.93);
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        padding:16px;
+        animation:fadeIn 0.25s ease;
+      }
+      .photo-viewer .close-btn {
+        position:absolute;
+        top:12px;
+        right:16px;
+        font-size:28px;
+        color:rgba(255,255,255,0.5);
+        cursor:pointer;
+        padding:4px 12px;
+        border-radius:50%;
+        transition:0.2s;
+        background:rgba(0,0,0,0.3);
+        line-height:1;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .photo-viewer .close-btn:active {
+        color:#fff;
+        transform:scale(0.9);
+      }
+      .photo-viewer img {
+        max-width:100%;
+        max-height:70vh;
+        object-fit:contain;
+        border-radius:8px;
+        box-shadow:0 8px 40px rgba(0,0,0,0.5);
+      }
+      .photo-viewer .viewer-footer {
+        margin-top:16px;
+        background:rgba(0,0,0,0.5);
+        backdrop-filter:blur(8px);
+        -webkit-backdrop-filter:blur(8px);
+        padding:8px 16px;
+        border-radius:20px;
+        display:flex;
+        align-items:center;
+        gap:12px;
+        font-size:13px;
+        color:#fff;
+        flex-wrap:wrap;
+        justify-content:center;
+      }
+      .photo-viewer .viewer-footer .role {
+        font-weight:500;
+        color:var(--theme);
+      }
+      .photo-viewer .viewer-footer .time {
+        opacity:0.5;
+        font-size:12px;
+      }
+      .photo-viewer .viewer-footer .viewer-action {
+        cursor:pointer;
+        padding:4px 10px;
+        border-radius:16px;
+        transition:0.2s;
+        font-size:14px;
+        -webkit-tap-highlight-color:transparent;
+        background:rgba(255,255,255,0.06);
+      }
+      .photo-viewer .viewer-footer .viewer-action:active {
+        transform:scale(0.9);
+        background:rgba(255,255,255,0.15);
+      }
+      .photo-viewer .viewer-footer .viewer-action.danger:active {
+        background:rgba(255,0,0,0.2);
+      }
+      @keyframes fadeIn {
+        from { opacity:0; }
+        to { opacity:1; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
-  // 异步加载图片列表并填充
-  listImages({favOnly: favOnly}).then(function(items){
-    const grid = document.getElementById('albumGrid');
-    if(!grid) return;
-    if(!items.length){
-      grid.innerHTML = `<div class="empty" style="grid-column:1/4;">${favOnly?'还没有收藏的图片':'相册还是空的～'}</div>`;
-      return;
+  // ---- 渲染内容 ----
+  listImages({favOnly: favOnly}).then(function(items) {
+    var total = items.length;
+    var favCount = items.filter(function(it) { return it.fav; }).length;
+
+    var html = '';
+    html += '<div class="album-header">';
+    html += '<button class="tab-btn ' + (favOnly ? '' : 'active') + '" data-tab="all" onclick="view.favOnly=false;render()">全部</button>';
+    html += '<button class="tab-btn ' + (favOnly ? 'active' : '') + '" data-tab="fav" onclick="view.favOnly=true;render()">❤️ 收藏</button>';
+    html += '</div>';
+
+    html += '<div class="album-stats">';
+    html += '<span>共 ' + total + ' 张照片</span>';
+    html += '<span>❤️ ' + favCount + ' 张已收藏</span>';
+    html += '</div>';
+
+    html += '<div class="album-grid" id="albumGrid">';
+
+    if (!items.length) {
+      html += '<div class="album-empty">';
+      html += '<div class="icon">🖼️</div>';
+      html += '<div class="title">' + (favOnly ? '还没有收藏的图片' : '相册还是空的') + '</div>';
+      html += '<div class="desc">' + (favOnly ? '去「全部」里找找喜欢的图片收藏吧' : '去「浮光」或「朋友圈」<br>让角色生成一些照片吧') + '</div>';
+      html += '</div>';
+    } else {
+      items.forEach(function(it) {
+        var roleName = it.roleName || '';
+        var avatar = '';
+
+        // 尝试通过 roleId 获取最新角色信息
+        if (it.roleId) {
+          var c = getC(it.roleId);
+          if (c) {
+            roleName = c.nick || c.name || roleName;
+            avatar = c.avatar || avatar;
+          }
+        }
+
+        // ★ 关键：如果角色名为空或"未知"，显示 📷
+        var displayName = (roleName && roleName.trim() && roleName !== '未知') ? roleName : '📷';
+
+        var timeStr = '';
+        if (it.createdAt) {
+          var d = new Date(it.createdAt);
+          var now = new Date();
+          var diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+          if (diff === 0) timeStr = '今天';
+          else if (diff === 1) timeStr = '昨天';
+          else if (diff < 7) timeStr = diff + '天前';
+          else timeStr = (d.getMonth()+1) + '月' + d.getDate() + '日';
+        }
+
+        var avatarStyle = avatar ? 'background-image:url(' + avatar + ')' : '';
+        var initial = (displayName !== '📷' && displayName !== '未知') ? displayName[0] : '📷';
+
+        html += '<div class="photo-card" data-imgid="' + it.id + '" onclick="openPhotoViewer(\'' + it.id + '\')">';
+        html += '<img data-imgid="' + it.id + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
+        html += '<div class="photo-meta">';
+        html += '<span class="photo-avatar" style="' + avatarStyle + '">' + (avatar ? '' : initial) + '</span>';
+        html += '<span class="photo-role">' + esc(displayName) + '</span>';
+        html += '<span class="photo-time">' + timeStr + '</span>';
+        // ★ 新增：删除按钮
+        html += '<span class="photo-delete-btn" onclick="event.stopPropagation();delPhoto(\'' + it.id + '\')">🗑️</span>';
+        html += '</div>';
+        if (it.fav) {
+          html += '<span class="photo-fav-badge">❤️</span>';
+        }
+        html += '</div>';
+      });
     }
-    // 先画占位格子（带 data-imgid）
-    grid.innerHTML = items.map(function(it){
-      return `<div style="position:relative;aspect-ratio:1;background:#eee;border-radius:6px;overflow:hidden;cursor:pointer;" onclick="openPhoto('${it.id}')">
-        <img data-imgid="${it.id}" style="width:100%;height:100%;object-fit:cover;display:block;">
-        ${it.fav?'<span style="position:absolute;top:4px;right:4px;font-size:12px;">❤️</span>':''}
-      </div>`;
-    }).join('');
-    // 再异步把每张图填进去
-    items.forEach(function(it){
-      getImage(it.id).then(function(b64){
-        const img = grid.querySelector('img[data-imgid="'+it.id+'"]');
-        if(img && b64) img.src = b64;
+
+    html += '</div>';
+    content.innerHTML = html;
+
+    // 异步加载图片
+    items.forEach(function(it) {
+      getImage(it.id).then(function(b64) {
+        if (b64) {
+          var img = content.querySelector('img[data-imgid="' + it.id + '"]');
+          if (img) img.src = b64;
+        }
       });
     });
   });
 }
-
 // 点开单张图片：放大 + 收藏/删除
 function openPhoto(id){
   getImage(id).then(function(b64){
@@ -10995,15 +11758,6 @@ function togglePhotoFav(id, fav){
   });
 }
 
-// 删除
-function delPhoto(id){
-  popConfirm('确定删除这张图片？删除后无法恢复。', function(){
-    deleteImage(id).then(function(){
-      popTip('已删除', {icon:'🗑️'});
-      if(view.type==='album') render();
-    });
-  }, {icon:'🗑️', title:'删除图片'});
-}
 setTimeout(function(){ 
   try { cleanupImages(); } catch(e) { console.log('清理跳过', e); }
 }, 3000);
