@@ -537,13 +537,13 @@ margin-bottom:4px;}
   align-content: start;
   padding: 0 4px;
 }
-/* ===== 纪念日小组件 · 实色版 ===== */
+/* ===== 纪念日小组件 · 方案B ===== */
 .anniv-widget {
   position: relative;
   border: 1.5px solid var(--line);
   border-radius: 24px;
   background: transparent;
-  padding: 16px 16px 14px;
+  padding: 18px 18px 16px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -554,7 +554,7 @@ margin-bottom:4px;}
   grid-column: 3 / span 2;
   grid-row: 3 / span 2;
   border-radius: 24px;
-  padding: 16px 16px 14px;
+  padding: 18px 18px 16px;
   background: transparent;
   border: 1.5px solid var(--line);
   display: flex;
@@ -571,7 +571,7 @@ margin-bottom:4px;}
   transition: transform 0.12s ease;
 }
 
-/* ---- 星点装饰 · 实色 ---- */
+/* ---- 星点装饰（保留，但删掉所有opacity） ---- */
 .anniv-widget .star {
   position: absolute;
   color: var(--theme);
@@ -584,7 +584,6 @@ margin-bottom:4px;}
 .anniv-widget .star:nth-child(4) { bottom: 24%; right: 8%; font-size: 7px; }
 .anniv-widget .star:nth-child(5) { top: 44%; left: 88%; font-size: 6px; }
 
-/* 右上角双星 */
 .anniv-widget .corner-stars {
   position: absolute;
   top: 10px;
@@ -597,7 +596,7 @@ margin-bottom:4px;}
 
 /* ---- 上半：置顶纪念日 ---- */
 .anniv-widget .anniv-top {
-  padding-bottom: 10px;
+  padding-bottom: 12px;
   border-bottom: 0.5px solid var(--line);
   flex-shrink: 0;
   position: relative;
@@ -605,35 +604,35 @@ margin-bottom:4px;}
 }
 .anniv-widget .anniv-title {
   font-size: 12px;
+  font-weight: 500;
   color: var(--sub);
   display: flex;
   align-items: center;
   gap: 5px;
-  font-weight: 400;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
 }
 .anniv-widget .anniv-title .icon {
   font-size: 12px;
 }
 .anniv-widget .anniv-days {
-  font-size: 28px;
-  font-weight: 200;
+  font-size: 32px;
+  font-weight: 700;
   color: var(--text);
   line-height: 1.1;
-  margin-top: 2px;
   display: flex;
   align-items: baseline;
   gap: 4px;
   font-variant-numeric: tabular-nums;
 }
 .anniv-widget .anniv-days small {
-  font-size: 12px;
+  font-size: 15px;
+  font-weight: 400;
   color: var(--sub);
-  font-weight: 300;
-  margin-left: 2px;
+  margin-left: 4px;
 }
 
-/* 呼吸点 · 实色无透明度 */
+/* 呼吸点（保留，去掉透明度，改用实色+缩放） */
 .breath-dot {
   display: inline-block;
   width: 5px;
@@ -653,83 +652,48 @@ margin-bottom:4px;}
 /* ---- 下半：日程列表 ---- */
 .anniv-widget .anniv-events {
   flex: 1;
-  margin-top: 10px;
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
   overflow: hidden;
   position: relative;
   z-index: 1;
-  min-height: 34px;
+  min-height: 38px;
 }
 .anniv-widget .anniv-event {
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 400;
   color: var(--text);
   display: flex;
-  gap: 6px;
   align-items: baseline;
-  padding: 2px 0;
+  gap: 8px;
+  padding: 1px 0;
 }
 .anniv-widget .anniv-event .ev-date {
+  font-size: 14px;
+  font-weight: 700;
   color: var(--theme);
   flex-shrink: 0;
-  font-size: 10px;
-  font-weight: 500;
-  min-width: 30px;
+  min-width: 42px;
   font-variant-numeric: tabular-nums;
 }
 .anniv-widget .anniv-event .ev-bullet {
   color: var(--sub);
-  font-size: 8px;
+  font-size: 10px;
   flex-shrink: 0;
+  opacity: 0.4;
 }
 .anniv-widget .anniv-event .ev-text {
-  font-weight: 350;
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: 0.2px;
 }
 .anniv-widget .anniv-empty {
-  font-size: 11px;
-  color: var(--sub);
-  margin-top: 2px;
-  font-weight: 300;
-  letter-spacing: 0.3px;
-}
-.anniv-widget.widget-2x2 {
-  grid-column: 3 / span 2;   /* 第3列开始，占2列 */
-  grid-row: 3 / span 2;      /* 第3行开始，占2行 */
-  /* ↓ 下面全部保持不变 ↓ */
-  border-radius: 24px;
-  padding: 16px;
-  box-sizing: border-box;
-  background: transparent;
-  border: 1.5px solid var(--line);
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  overflow: hidden;
-  min-height: 0;
-}
-/* 上半：置顶纪念日 */
-.anniv-widget .anniv-top {
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
-}
-.anniv-widget .anniv-title {
   font-size: 13px;
+  font-weight: 400;
   color: var(--sub);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.anniv-widget .anniv-days {
-  font-size: 30px;
-  font-weight: 200;
-  color: var(--text);
-  line-height: 1.1;
   margin-top: 2px;
 }
 .anniv-widget .anniv-days small {
@@ -2827,6 +2791,13 @@ function sameYMD(dateStr, y, m, d){
 // ===== 主渲染：月历 + 两个列表 =====
 function renderAnnivApp(){
   cleanExpiredEvents();
+  
+  // ★ 防御：如果 _annivYM 不存在或无效，自动初始化
+  if (!window._annivYM || window._annivYM.y === undefined || window._annivYM.m === undefined) {
+    var n = new Date();
+    window._annivYM = { y: n.getFullYear(), m: n.getMonth() };
+  }
+  
   var ym = window._annivYM, y = ym.y, m = ym.m;
 
   var html = '';
@@ -2859,7 +2830,7 @@ function renderAnnivApp(){
         '</div>';
     }).join('');
   } else html += '<div class="av-empty">还没有纪念日，点右上角 ＋ 添加</div>';
-
+  
   // 日程列表
   html += '<div class="av-section">日程安排</div>';
   var elist = (DB.events||[]).slice().sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
@@ -2877,7 +2848,6 @@ function renderAnnivApp(){
   html += '<div style="height:30px"></div>';
   content.innerHTML = html;
 }
-
 // 生成日历格子
 function annivCells(y, m){
   var first = new Date(y, m, 1).getDay();
