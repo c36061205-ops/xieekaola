@@ -2704,43 +2704,79 @@ function cleanExpiredEvents(){
   });
 }
 
-function annivWidgetHtml(){
+// ===== 补全缺失的函数 =====
+function fmtEventDate(dateStr) {
+  if (!dateStr) return '日期待定';
+  var diff = daysBetween(dateStr) * -1; // 未来为正
+  if (diff === 0) return '今天';
+  if (diff === 1) return '明天';
+  if (diff === 2) return '后天';
+  var d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return (d.getMonth() + 1) + '月' + d.getDate() + '日';
+}
+
+// ===== 重写 annivWidgetHtml（全保护版本） =====
+function annivWidgetHtml() {
   cleanExpiredEvents();
 
+  // 确保 DB.events 存在
+  if (!DB.events) DB.events = [];
+
+  // ---- 上半：纪念日 ----
   var list = DB.anniversaries || [];
-  var pin = list.find(function(a){ return a.pinned; }) || list[0];
+  var pin = null;
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].pinned) { pin = list[i]; break; }
+  }
+  if (!pin && list.length > 0) pin = list[0];
+
   var topHtml = '';
-  if(pin){
+  if (pin) {
     var days = daysBetween(pin.date);
-    var label = pin.type === '生日' ? '距离生日' : '已经';
     var showDays = days;
-    if(pin.type === '生日'){
+    if (pin.type === '生日') {
       var next = nextBirthday(pin.date);
       showDays = daysBetween(next) * -1;
-      label = '距离生日还有';
     }
-    topHtml =
-      '<div class="anniv-top">' +
-        '<div class="anniv-title"><span class="icon">❤️</span> ' + esc(pin.title) + '</div>' +
-        '<div class="anniv-days">' + Math.abs(showDays) + '<small>天</small><span class="breath-dot"></span></div>' +
+    topHtml = '<div class="anniv-top">' +
+      '<div class="anniv-title"><span class="icon">❤️</span> ' + esc(pin.title || '纪念日') + '</div>' +
+      '<div class="anniv-days">' + Math.abs(showDays) + '<small>天</small><span class="breath-dot"></span></div>' +
       '</div>';
   } else {
     topHtml = '<div class="anniv-top"><div class="anniv-title">📅 纪念日</div>' +
-              '<div class="anniv-empty">还没有纪念日</div></div>';
+      '<div class="anniv-empty">还没有纪念日</div></div>';
   }
 
-  var events = (DB.events || []).slice().sort(function(a,b){
-    return new Date(a.date) - new Date(b.date);
+  // ---- 下半：日程列表（最多2条） ----
+  var events = DB.events.slice().sort(function(a, b) {
+    var da = new Date(a.date || '2000-01-01');
+    var db = new Date(b.date || '2000-01-01');
+    return da - db;
   }).slice(0, 2);
-  var evHtml = events.length
-    ? events.map(function(e){
-        return '<div class="anniv-event">' +
-               '<span class="ev-date">' + fmtEventDate(e.date) + '</span>' +
-               '<span class="ev-bullet">•</span>' +
-               '<span class="ev-text">' + esc(e.title) + '</span></div>';
-      }).join('')
-    : '<div class="anniv-empty">暂无日程安排</div>';
 
+  var evHtml = '';
+  if (events.length > 0) {
+    var items = [];
+    for (var j = 0; j < events.length; j++) {
+      var e = events[j];
+      var dateStr = e.date || '';
+      var titleStr = e.title || '未命名日程';
+      var dateDisplay = fmtEventDate(dateStr);
+      items.push(
+        '<div class="anniv-event">' +
+          '<span class="ev-date">' + esc(dateDisplay) + '</span>' +
+          '<span class="ev-bullet">•</span>' +
+          '<span class="ev-text">' + esc(titleStr) + '</span>' +
+        '</div>'
+      );
+    }
+    evHtml = items.join('');
+  } else {
+    evHtml = '<div class="anniv-empty">暂无日程安排</div>';
+  }
+
+  // ---- 组装 ----
   return '<div class="anniv-widget widget-2x2" onclick="openAnniversary()">' +
     '<span class="star">✦</span>' +
     '<span class="star">✦</span>' +
