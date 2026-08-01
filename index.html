@@ -596,7 +596,7 @@ margin-bottom:4px;}
 
 /* ---- 上半：置顶纪念日 ---- */
 .anniv-widget .anniv-top {
-  padding-bottom: 12px;
+  padding-bottom: 18px;
   border-bottom: 0.5px solid var(--line);
   flex-shrink: 0;
   position: relative;
@@ -616,7 +616,7 @@ margin-bottom:4px;}
   font-size: 12px;
 }
 .anniv-widget .anniv-days {
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.1;
@@ -659,10 +659,10 @@ margin-bottom:4px;}
   overflow: hidden;
   position: relative;
   z-index: 1;
-  min-height: 38px;
+  min-height: 30px;
 }
 .anniv-widget .anniv-event {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--text);
   display: flex;
@@ -751,6 +751,12 @@ margin-bottom:4px;}
 #phone[data-theme="misi"] .tab.active .ic img {
   filter: none;
 }
+.anniv-prefix {
+  font-size: 13px;
+  color: var(--sub);
+  font-weight: normal;
+}
+
 </style>
 </head>
 <body>
@@ -2733,15 +2739,30 @@ function annivWidgetHtml() {
 
   var topHtml = '';
   if (pin) {
-    var days = daysBetween(pin.date);
-    var showDays = days;
+    var showDays, prefix, suffix, icon;
     if (pin.type === '生日') {
-      var next = nextBirthday(pin.date);
-      showDays = daysBetween(next) * -1;
+      showDays = Math.abs(daysBetween(nextBirthday(pin.date)));
+      icon = '🎂';
+      if (showDays === 0) {
+        prefix = '生日就是';  // 特判：今天生日
+        suffix = '';
+      } else {
+        prefix = '距离生日还有';
+        suffix = '天';
+      }
+    } else {
+      showDays = Math.abs(daysBetween(pin.date));
+      icon = '❤️';
+      prefix = '已经';
+      suffix = '天';
     }
+    var daysHtml = (pin.type === '生日' && showDays === 0)
+      ? '<div class="anniv-days"><span style="font-size:18px">今天 🎉</span><span class="breath-dot"></span></div>'
+      : '<div class="anniv-days"><span class="anniv-prefix">' + prefix + '</span> ' + showDays + '<small>' + suffix + '</small><span class="breath-dot"></span></div>';
+
     topHtml = '<div class="anniv-top">' +
-      '<div class="anniv-title"><span class="icon">❤️</span> ' + esc(pin.title || '纪念日') + '</div>' +
-      '<div class="anniv-days">' + Math.abs(showDays) + '<small>天</small><span class="breath-dot"></span></div>' +
+      '<div class="anniv-title"><span class="icon">' + icon + '</span> ' + esc(pin.title || '纪念日') + '</div>' +
+      daysHtml +
       '</div>';
   } else {
     topHtml = '<div class="anniv-top"><div class="anniv-title">📅 纪念日</div>' +
@@ -2855,9 +2876,13 @@ function renderAnnivApp(){
   var alist = DB.anniversaries || [];
   if(alist.length){
     html += alist.map(function(a){
-      var txt = a.type==='生日'
-        ? ('距生日 ' + Math.abs(daysBetween(nextBirthday(a.date))) + ' 天')
-        : ('已 ' + Math.abs(daysBetween(a.date)) + ' 天');
+      var txt;
+      if (a.type === '生日') {
+        var d = Math.abs(daysBetween(nextBirthday(a.date)));
+        txt = (d === 0) ? '🎂 生日就是今天！' : ('距离生日还有 ' + d + ' 天');
+      } else {
+        txt = '已经 ' + Math.abs(daysBetween(a.date)) + ' 天';
+      }
       return '<div class="av-item">' +
         '<span class="av-pin" onclick="annivTogglePin(\''+a.id+'\')">'+(a.pinned?'📌':'📍')+'</span>' +
         '<div class="av-item-body"><div class="av-item-title">'+esc(a.title)+'</div>' +
@@ -2959,6 +2984,55 @@ function annivAddForm(kind, presetDate){
     '</div>';
   mo.onclick = function(e){ if(e.target===mo) closeModal(); };
   phone.appendChild(mo);
+}
+function addBirthdayToAnniv() {
+  var c = getC(editingId);
+  if (!c) return;
+  var raw = (c.birthday || '').trim();
+  if (!raw) { alert('请先填写生日'); return; }
+
+  // 解析生日 → 取出"月-日"，生成今年的 YYYY-MM-DD
+  var mo, day;
+  var m;
+  if ((m = raw.match(/(\d{1,2})[-\/月.](\d{1,2})/))) {
+    // 匹配 2000-05-20 / 5月20 / 5/20 / 5.20 等
+    mo = parseInt(m[1], 10);
+    day = parseInt(m[2], 10);
+  } else {
+    alert('生日格式无法识别，请填成「3月21日」或「2000-05-20」这样的格式，再点一次～');
+    return;
+  }
+  if (mo < 1 || mo > 12 || day < 1 || day > 31) {
+    alert('生日的月份或日期看起来不太对，检查一下再点～');
+    return;
+  }
+
+  var yr = new Date().getFullYear();
+  var pad = function(n){ return (n < 10 ? '0' : '') + n; };
+  var dateStr = yr + '-' + pad(mo) + '-' + pad(day);
+
+  var name = c.nick || c.name || 'TA';
+  var title = name + '的生日';
+
+  DB.anniversaries = DB.anniversaries || [];
+  // 防重复：同名同月日的生日纪念日只留一条
+  var exist = DB.anniversaries.some(function(a) {
+    return a.type === '生日' && a.title === title;
+  });
+  if (exist) {
+    alert('「' + title + '」已经在纪念日里啦～');
+    return;
+  }
+
+  DB.anniversaries.push({
+    id: 'a' + Date.now(),
+    title: title,
+    date: dateStr,
+    type: '生日',
+    pinned: false
+  });
+  save();
+  alert('✅ 已把「' + title + '」加入纪念日，到时候会提醒你倒计时～');
 }
 
 // 保存提交
@@ -6014,6 +6088,8 @@ if (stickerNames.length) {
 
       // 移除可能残留的旧方括号标记（转账/撤回/拉黑/心声），这些在群聊里我们不处理
       out = out.replace(/\[(转账|撤回|拉黑玩家|心声)[^\]]*\]/g, '').trim();
+	  out = out.replace(/(?:^|\n)\s*心声[：|].*/g, '').trim();
+
       if (!out) continue;
 
       // ---- 用新解析器整段解析，自动识别语音/表情/文本 ----
@@ -6723,39 +6799,39 @@ function renderCharEdit() {
   // ===== 优化后的折叠样式 =====
   html += `
   <style>
+  
     .fold-block {
-      border-bottom: 1px solid var(--line);
-      margin: 0 0 4px 0;
+      margin: 0 12px 10px 12px;
       background: var(--card);
-      border-radius: 0;
-      transition: background 0.15s;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     .fold-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 18px;
+      padding: 14px 16px;
       cursor: pointer;
       user-select: none;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 15px;
       color: var(--text);
-      background: var(--bg);
-      border-radius: 8px 8px 0 0;
+      background: var(--card);
       transition: background 0.15s;
     }
-    .fold-header:hover {
-      background: var(--line);
+    .fold-header:active {
+      background: var(--bg);
     }
     .fold-header .fold-icon {
-      font-size: 18px;
+      font-size: 17px;
       margin-right: 8px;
     }
     .fold-arrow {
-      font-size: 14px;
+      font-size: 13px;
       transition: transform 0.3s ease;
       color: var(--sub);
-      opacity: 0.6;
+      opacity: 0.5;
     }
     .fold-arrow.open {
       transform: rotate(90deg);
@@ -6765,63 +6841,26 @@ function renderCharEdit() {
       overflow: hidden;
       max-height: 0;
       transition: max-height 0.35s ease, padding 0.35s ease;
-      padding: 0 18px;
+      padding: 0 16px;
       background: var(--card);
-      border-radius: 0 0 8px 8px;
     }
     .fold-body.open {
       max-height: 9999px;
-      padding: 6px 18px 18px 18px;
+      padding: 2px 16px 14px 16px;
     }
-    /* 模块内字段间距优化 */
     .fold-body .field {
-      padding: 6px 0;
+      padding: 8px 0;
+      border-bottom: none;
     }
     .fold-body .field:last-child {
       padding-bottom: 0;
-    }
-    .fold-body .field textarea {
-      min-height: 60px;
-    }
-    .fold-body .field input[type="text"] {
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 14px;
-      width: 100%;
-      box-sizing: border-box;
-      transition: border-color 0.2s;
-    }
-    .fold-body .field input[type="text"]:focus {
-      border-color: var(--theme);
-      outline: none;
-    }
-    .fold-body .field textarea {
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 14px;
-      width: 100%;
-      box-sizing: border-box;
-      font-family: inherit;
-      line-height: 1.5;
-      resize: vertical;
-      transition: border-color 0.2s;
-    }
-    .fold-body .field textarea:focus {
-      border-color: var(--theme);
-      outline: none;
     }
     .fold-body .field label {
       font-weight: 500;
       font-size: 13px;
       color: var(--text);
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
     }
     .fold-body .field .tip {
       font-size: 12px;
@@ -6829,9 +6868,30 @@ function renderCharEdit() {
       display: block;
       margin-bottom: 6px;
       line-height: 1.4;
+      opacity: 0.85;
     }
-    .fold-body .frow .field {
-      padding: 6px 0;
+    .fold-body .field input[type="text"],
+    .fold-body .field textarea {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .fold-body .field textarea {
+      min-height: 60px;
+      font-family: inherit;
+      line-height: 1.5;
+      resize: vertical;
+    }
+    .fold-body .field input[type="text"]:focus,
+    .fold-body .field textarea:focus {
+      border-color: var(--theme);
+      outline: none;
     }
     .fold-body .frow .field:first-child {
       padding-right: 6px;
@@ -6892,7 +6952,7 @@ if (edModule === 'role') {
       '<div class="field" style="flex:1;"><label>性别</label><input type="text" value="' + esc(c.gender) + '" onchange="upd(\'gender\',this.value)" placeholder="男/女…"></div>' +
       '<div class="field" style="flex:1;"><label>年龄</label><input type="text" value="' + esc(c.age) + '" onchange="upd(\'age\',this.value)" placeholder="如 24"></div>' +
       '</div>';
-    html += Field('生日（自由填写）', '如 3月21日 / 霜月十五 / 2000-01-01', c.birthday, 'upd(\'birthday\',this.value)', '', false);
+    html += '<div class="field"><label>生日 <span style="float:right;color:var(--theme);cursor:pointer;font-size:13px" onclick="addBirthdayToAnniv()">📅 加入纪念日</span></label><span class="tip">如 3月21日 / 2000-01-01（点右上角可加入纪念日提醒）</span><input type="text" value="' + esc(c.birthday || '') + '" onchange="upd(\'birthday\',this.value)" placeholder=""></div>';
     html += Field('身份/职业', '角色的社会身份、职务', c.job, 'upd(\'job\',this.value)', '', false);
     html += Field('家庭出身', '家庭背景，可留空', c.family, 'upd(\'family\',this.value)', '', true);
     html += Field('身体数据', '身高/体重/坐骑/信物等', c.body, 'upd(\'body\',this.value)', '', false);
@@ -6902,7 +6962,7 @@ if (edModule === 'role') {
 html += fold('appearance', '外貌与性格', '🎭', false);
 html += Field('外貌特征', '五官、发型、身形，加一个记忆点', c.pLook, 'upd(\'pLook\',this.value)', '', true);
 html += Field('性格关键词', '用词组罗列核心性格，如：外冷内热、护短、别扭…', c.pKeywords, 'upd(\'pKeywords\',this.value)', '', true);
-html += Field('行为模式（高优先级）', '按以下结构填写，AI会严格遵循：<br><br>外在印象：<br>第一眼看起来如何，给人什么感觉<br><br>行为模式：<br>本能反应是什么？遇到冲突/选择怎么处理？对陌生人和熟人的态度差异？主动还是被动？<br><br>情绪表达：<br>日常情绪基调？被触发时怎么表现？失控后如何收场？', c.pBehavior, 'upd(\'pBehavior\',this.value)', '', true);
+html += Field('行为模式（高优先级）', 'AI会严格遵循，建议按「外在印象/行为模式/情绪表达」三部分写', c.pBehavior, 'upd(\'pBehavior\',this.value)', '外在印象：第一眼给人的感觉…&#10;行为模式：本能反应？如何处理冲突？对生人/熟人的态度？&#10;情绪表达：日常基调？被触发怎么表现？', true);
 html += Field('成长经历', '⚡心法：每段经历后用「→」推导出性格结论', c.pBack, 'upd(\'pBack\',this.value)', '', true);
 html += foldEnd;
     // ----- 模块3：说话习惯（含事例台词） -----
@@ -6927,6 +6987,18 @@ html += foldEnd;
     html += Field('补充设定', '服装体系、称呼、任何补充', c.pExtra, 'upd(\'pExtra\',this.value)', '', true);
     html += '<div class="field"><label>🌐 社交活跃度</label><select onchange="upd(\'activity\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)"><option ' + (c.activity === '关' ? 'selected' : '') + '>关</option><option ' + (c.activity === '低' ? 'selected' : '') + '>低</option><option ' + ((c.activity === '中' || !c.activity) ? 'selected' : '') + '>中</option><option ' + (c.activity === '高' ? 'selected' : '') + '>高</option></select></div>';
     html += '<div class="field"><label>🤖 AI主动问候</label><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.allowAutoGreet !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (c.allowAutoGreet === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',false);renderCharEdit()">⛔ 关闭</button></div></div>';
+    html += foldEnd;
+    // ----- 模块6：亲密场景（默认折叠·可开关） -----
+    html += fold('intimate', '亲密场景设定', '🔞', false);
+    html += '<div class="field"><label>🔓 启用此模块</label><span class="tip">仅在线下模式生效，日常聊天完全不受影响</span><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.intimacyOn ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'intimacyOn\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (!c.intimacyOn ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'intimacyOn\',false);renderCharEdit()">⛔ 关闭</button></div></div>';
+
+    if (c.intimacyOn) {
+      html += Field('主导倾向', '谁引导节奏、掌控欲强弱', c.intimateLead, 'upd(\'intimateLead\',this.value)', '主动 / 被动 / 掌控 / 顺从 / 看对象而定…', true);
+      html += Field('亲密时的性格变化 ⭐', '核心：平时 vs 此刻的反差，人设别塌', c.intimateShift, 'upd(\'intimateShift\',this.value)', '平时高冷，此刻会不会破功？&#10;嘴硬还是坦诚？更沉默还是更外露？&#10;和日常最大的反差是什么', true);
+      html += Field('偏好与倾向 ⭐', '这个角色特有的癖好、喜欢的氛围与方式', c.intimatePref, 'upd(\'intimatePref\',this.value)', '具体的偏好、调性、喜欢的方式或节奏…&#10;（越具体，AI 越能演出这个角色的独特之处，而不是千篇一律）', true);
+      html += Field('习惯与反应', '标志性的小动作、力度、声音、身体反应', c.intimateBody, 'upd(\'intimateBody\',this.value)', '标志性小动作、力度、声音、下意识的反应…', true);
+      html += Field('底线与雷区', '绝对不做的、会让TA瞬间抽离出戏的', c.intimateLimit, 'upd(\'intimateLimit\',this.value)', '绝对不会做的事 / 会让TA出戏抽离的雷点…', true);
+    }
     html += foldEnd;
 
     // ----- 底部按钮 -----
@@ -7110,8 +7182,8 @@ function relationEditHtml(c){
       others.forEach(function(o){
         opts += '<option value="'+o.id+'"'+(r.targetId===o.id?' selected':'')+'>'+esc(o.name||o.nick)+'</option>';
       });
-      opts += '<option value="npc"'+(r.targetId==='npc'?' selected':'')+'>🆕 其他人（NPC·下方填资料）</option>';
-      html += '<div class="field"><label>对谁</label><select onchange="updRelation('+idx+',\'targetId\',this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);">'+opts+'</select></div>';
+      opts += '<option value="npc"'+(r.targetId==='npc'?' selected':'')+'>🆕 新建一个NPC（下方自己填）</option>';
+      html += '<div class="field"><label>这个人是谁</label><span class="tip">新建NPC自己填资料；若对方是已有角色卡，直接从下拉选TA</span><select onchange="updRelation('+idx+',\'targetId\',this.value)" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);">'+opts+'</select></div>';
 
       // NPC 专属：名字 / 性别 / 身份
       if(r.targetId==='npc'){
@@ -7147,10 +7219,8 @@ function relationEditHtml(c){
 function addRelation(){
   var c = getC(editingId);
   c.relations = c.relations || [];
-  var others = DB.contacts.filter(function(x){ return x.id!==c.id && !x._draft; });
-  var defId = others.length ? others[0].id : 'npc';
-  c.relations.push({ targetId:defId, targetName:'', targetGender:'', targetJob:'', relationType:'中性', description:'' });
-  _relExpanded = c.relations.length - 1;  // 新加的自动展开，方便马上填
+  c.relations.push({ targetId:'npc', targetName:'', targetGender:'', targetJob:'', relationType:'中性', description:'' });
+  _relExpanded = c.relations.length - 1;
   save();
   render();
 }
@@ -7357,26 +7427,44 @@ async function polishChar() {
     '语言习惯', '事例台词', '负向约束', '线上人设', '开场白', '补充'
   ];
 
-  // ===== 新 Prompt：保留所有细节，只做整理和补全 =====
-const pr = `你是一位资深的角色设定润色助手。用户已经填写了一些角色设定草稿，请你在【完全保留用户原有文字和细节】的基础上，完成润色与补全。
+  // ===== 方案A：仅当开启亲密模块时，才纳入润色 =====
+  if (c.intimacyOn) {
+    cur['主导倾向'] = c.intimateLead || '';
+    cur['亲密性格变化'] = c.intimateShift || '';
+    cur['亲密偏好倾向'] = c.intimatePref || '';
+    cur['亲密习惯反应'] = c.intimateBody || '';
+    cur['亲密底线雷区'] = c.intimateLimit || '';
+    chineseKeys.push('主导倾向', '亲密性格变化', '亲密偏好倾向', '亲密习惯反应', '亲密底线雷区');
+  }
+
+  // ===== Prompt：保留所有细节，整理+补全，并强化"让角色活起来" =====
+const pr = `你是一位顶尖的角色设定塑造师。用户已经填写了一些角色设定草稿，请你在【完全保留用户原有文字和细节】的基础上，完成润色、补全，并让这个角色真正"活"起来。
 
 【最高原则】
 用户已填写的每一条内容都是宝贵的，你只做锦上添花：修正错别字语病、把零散词语整理成自然短句、在信息不完整时补充1~2句合理细节。绝对不要删减、压缩或改变用户原有信息的风格与含义。字段为空时，才根据整体人设合理补全（补全要符合人设逻辑，不脑补无关剧情）。
 
+【让角色"活"起来的四条塑造心法（贯穿所有字段）】
+1. 【拒绝完美·制造矛盾】真实的人都有反差和不完美。为角色保留或补充至少一处"矛盾感"或小缺点（如：雷厉风行却怕黑、毒舌却记得每个人的生日、温柔但固执得要命）。完美无缺=纸片人。
+2. 【字段互相呼应·形成因果】各字段不是孤立的。让"成长经历"能解释"性格关键词"，让"性格"能推导出"说话风格"和"喜好厌恶"，让"日常作息"体现"性格"。补全时要让这些字段串成一个能自圆其说的整体，而不是各说各话。
+3. 【感官记忆点】给角色一个具体、可被感知的标志性细节——一个习惯动作、一件随身物品、一种气味、一个口头禅、一个下意识的小动作。让人一想到这个角色就能"看见"TA。
+4. 【一切落到具体】把所有抽象词翻译成具体画面。不写"喜欢安静"，写"喜欢在深夜关灯后戴耳机听黑胶"；不写"性格温柔"，写"会把最后一块肉悄悄拨到你碗里"。
+
 【各字段补全细则】
-· gender/age/job/family/body（性别/年龄/职业/家庭/身材）：简洁准确，与整体人设一致，一句话即可。
-· pLook（外貌）：突出3~5个有辨识度的外貌特征（发色瞳色、体态、标志性穿着或配饰等），有画面感。
-· pKeywords（性格关键词）：提炼3~6个精准的性格词，用顿号分隔，避免笼统的"善良""温柔"，尽量具体（如"外冷内热""护短""慢热但专一"）。
-· 【重要】pLike（喜好与厌恶）：这是塑造角色的关键。必须写得【具体、可落地】，分别列出"喜欢"和"讨厌"的东西——包括具体的食物、物件、颜色、活动、场景、类型的人等（例如"喜欢圆溜溜会发光的小东西、爱吃滚烫辛辣的食物；讨厌吵闹和被人碰尾巴"），避免只写抽象概念。若用户已填，务必保留其具体喜好，只做补充。
-· 【重要】pDaily（日常作息）：包含起居时间、饮食习惯、独处时爱做的事等具体生活细节，让角色"活"起来。
-· 【重要】pBehavior（行为模式）：保留用户原文，只轻微调整逻辑顺序（合并同类项），绝不删减。为空时按"外在印象 → 行为习惯 → 情绪表达"的逻辑简洁补全。
-· pStyle（说话风格/口头禅）：说明语气特点，并给出1~2个具体口头禅或常用句式示例。
-· pLang（语言习惯）：用词偏好、称呼习惯、语气助词等具体特征。
-· 【重要】pBack（成长经历）：若用户用了"事件 → 影响"的箭头格式，务必【保留箭头逻辑】并补充使因果链更清晰；为空则用"事件 → 影响"格式补全。【禁止】把箭头格式改成散文叙述。
-· negative（负面/禁忌）：角色绝不会做的事、雷区、需回避的话题。
-· opening（开场白）：符合人设与说话风格的第一句话，有代入感。
+· gender/age/job/family/body（性别/年龄/职业/家庭/身材）：简洁准确，与整体人设一致，一句话即可。其中"身份职业"可暗示其生活状态与阶层，"家庭出身"应能为性格与经历埋下伏笔。
+· pLook（外貌）：突出3~5个有辨识度的外貌特征（发色瞳色、体态、标志性穿着或配饰等），有画面感。至少一个特征要与性格呼应（如冷淡的人眼神疏离、爱笑的人眼角有细纹）。
+· pKeywords（性格关键词）：提炼3~6个精准的性格词，用顿号分隔，避免笼统的"善良""温柔"，尽量具体（如"外冷内热""护短""慢热但专一"）。其中最好包含一组反差或矛盾（呼应心法1）。
+· 【重要】pLike（喜好与厌恶）：这是塑造角色的关键。必须写得【具体、可落地】，分别列出"喜欢"和"讨厌"的东西——包括具体的食物、物件、颜色、活动、场景、类型的人等（例如"喜欢圆溜溜会发光的小东西、爱吃滚烫辛辣的食物；讨厌吵闹和被人碰尾巴"），避免只写抽象概念。喜好最好能反映性格或经历（呼应心法2）。若用户已填，务必保留其具体喜好，只做补充。
+· 【重要】pDaily（日常作息）：包含起居时间、饮食习惯、独处时爱做的事等具体生活细节，让角色"活"起来。加入至少一个只有这个角色才有的独特生活习惯（呼应心法3）。
+· 【重要】pBehavior（行为模式）：保留用户原文，只轻微调整逻辑顺序（合并同类项），绝不删减。为空时按"外在印象 → 行为习惯 → 情绪表达"的逻辑简洁补全。重点写清"对陌生人与熟人的态度差异""遇到冲突/示好时的本能反应"——这是角色最鲜活的部分。
+· pStyle（说话风格/口头禅）：说明语气特点，并给出1~2个具体口头禅或常用句式示例。风格要能从性格推导出来（如别扭的人爱说反话、自卑的人爱用问号）。
+· pLang（语言习惯）：用词偏好、称呼习惯、语气助词等具体特征。给"语气逻辑"而非台词（如"越在意的事说得越轻描淡写"）。
+· 【重要】pBack（成长经历）：若用户用了"事件 → 影响"的箭头格式，务必【保留箭头逻辑】并补充使因果链更清晰；为空则用"事件 → 影响"格式补全。每段经历都应能对应到某个性格特质上（呼应心法2）。【禁止】把箭头格式改成散文叙述。
+· sampleLines（事例台词）：这是AI模仿语气的核心素材。若为空，根据说话风格补3~5句这个角色最可能脱口而出的话，每行一句，要口语、有个性、能体现性格，避免书面腔。
+· negative（负面/禁忌）：角色绝不会做的事、雷区、需回避的话题。要与性格自洽（一个重情的人绝不会做的事，和一个凉薄的人绝不会做的事，是不同的）。
+· opening（开场白）：符合人设与说话风格的第一句话，有代入感，最好自带一点情绪或情境，而非干巴巴的问候。
 · pExtra（补充设定）：保留用户所有额外设定，酌情理顺。
 · my开头字段（myGender/myAge/myJob/myLook/myPersona/myRelation，即"用户在故事中的身份"）与chatBg（聊天背景）：这些是关于"用户"或场景的设定，同样遵循"已填保留微调、为空合理补全"原则，补全时要与角色人设及世界观自洽。
+· 【仅当输入中存在这些字段时】主导倾向/亲密性格变化/亲密偏好倾向/亲密习惯反应/亲密底线雷区：这些是角色在亲密情境下的特质。核心是【延续角色本身的性格】——高冷的依旧克制、别扭的依旧嘴硬、强势的依旧主导，写出这个角色独有的样子，避免千篇一律的模板。保留用户已填内容，为空时结合角色整体性格合理补全，同样遵循"具体、有反差、能自圆其说"的原则。
 
 【输入的角色信息】
 ${JSON.stringify(cur, null, 2)}
@@ -7418,6 +7506,15 @@ ${JSON.stringify(cur, null, 2)}
       补充: 'pExtra'
     };
 
+    // 方案A：亲密字段映射（开了才加）
+    if (c.intimacyOn) {
+      map['主导倾向'] = 'intimateLead';
+      map['亲密性格变化'] = 'intimateShift';
+      map['亲密偏好倾向'] = 'intimatePref';
+      map['亲密习惯反应'] = 'intimateBody';
+      map['亲密底线雷区'] = 'intimateLimit';
+    }
+
     // 尝试中文键
     let usedChinese = true;
     for (const cnKey of chineseKeys) {
@@ -7453,6 +7550,13 @@ ${JSON.stringify(cur, null, 2)}
         opening: 'opening',
         pExtra: 'pExtra'
       };
+      if (c.intimacyOn) {
+        engMap.intimateLead = 'intimateLead';
+        engMap.intimateShift = 'intimateShift';
+        engMap.intimatePref = 'intimatePref';
+        engMap.intimateBody = 'intimateBody';
+        engMap.intimateLimit = 'intimateLimit';
+      }
       let anyMatched = false;
       for (const enKey in engMap) {
         if (r[enKey] !== undefined && r[enKey] !== null) {
@@ -7770,10 +7874,34 @@ async function aiReactMoment(c, m) {
   }
 }
 function maybeAutoPost(){
-  const last=DB.settings.lastAutoPost||0;if(Date.now()-last<3600000)return;
-  const pool=DB.contacts.filter(c=>!c._draft&&(c.activity==='中'||c.activity==='高'));if(!pool.length)return;
-  const c=pool[Math.floor(Math.random()*pool.length)];const chance=c.activity==='高'?0.7:0.3;if(Math.random()>chance)return;
-  DB.settings.lastAutoPost=Date.now();save();aiPostMoment(c.id,true);
+  var now = Date.now();
+  var last = DB.settings.lastAutoPost || 0;
+
+  // 每日上限（跨天自动清零）
+  var todayStr = _todayStr();
+  if(!DB.settings.momentDaily || DB.settings.momentDaily.date !== todayStr){
+    DB.settings.momentDaily = { date: todayStr, count: 0 };
+  }
+
+  var pool = DB.contacts.filter(function(c){
+    return !c._draft && (c.activity==='中' || c.activity==='高');
+  });
+  if(!pool.length) return;
+
+  var c = pool[Math.floor(Math.random()*pool.length)];
+
+  var cfg = c.activity==='高'
+    ? { gap: 3*3600000, daily: 3, chance: 0.5 }   // 高：隔3h，每天≤3条，50%
+    : { gap: 5*3600000, daily: 1, chance: 0.4 };  // 中：隔5h，每天≤1条，40%
+
+  if(now - last < cfg.gap) return;                        // 冷却没到
+  if(DB.settings.momentDaily.count >= cfg.daily) return;  // 今天已满
+  if(Math.random() > cfg.chance) return;                  // 没抽中
+
+  DB.settings.lastAutoPost = now;
+  DB.settings.momentDaily.count++;
+  save();
+  aiPostMoment(c.id, true);
 }
 async function aiPostMoment(cid, silent) {
   var c = getC(cid);
@@ -9177,7 +9305,18 @@ function openChat(id){
     c.lastActive = Date.now();
     checkTimeDecay(c);
     // =============================================
-    
+        // ===== 新增：跨天/久别自动询问回线上 =====
+    if (c.mode === 'offline') {
+      var _msgs = DB.chats[id] || [];
+      var _last = _msgs[_msgs.length - 1];
+      if (_last && (Date.now() - _last.time > 6 * 3600000)) {   // 距上条消息超过6小时
+        setTimeout(function(){
+          // 二次确认此刻还在线下、且没在打字，避免误弹
+          if (c.mode === 'offline') proposeBackOnline(c);
+        }, 600);
+      }
+    }
+
     // ===== 【新增】打开聊天时，自动把该角色的世界观设为天气活跃项 =====
     if (c.worldId) {
       DB.desktop._activeWorld = c.worldId;
@@ -9324,9 +9463,16 @@ if (todaySchedule && todaySchedule.items && todaySchedule.items.length) {
       if (c.sampleLines) {
         s += '事例台词（学习语气和用词习惯）：\n' + c.sampleLines + '\n';
       }
+	  
+	  
   // ===== 第5层：输出格式（线上/线下） =====
   if (c.mode === 'offline') {
-    s += `\n【输出格式：线下模式】\n${DB.settings.offlineStyle || DEFAULT_OFFLINE}\n【时间处理】线下剧情按故事内的连续时间推进，无视现实间隔。\n【线下收尾】剧情自然走到尾声时，另起一行输出 [回线上|]。\n`;
+s += '\n【线下收尾·重要】当剧情出现以下任一信号时，你【必须】在回复的最后另起一行输出 [回线上|]，把场景交还线上：\n';
+s += '① 出现告别/分开的情节：送对方回家、说"改天见/回头聊/先走了/下次再约"、拥抱道别、目送离开等；\n';
+s += '② 一段完整的相处已经收束：吃完饭、看完电影、逛完街、送到门口、一天结束准备各自休息；\n';
+s += '③ 时间自然推进到该分开的节点：夜深了、对方要回去了、你要离开了。\n';
+s += '【铁律】只要触发上述任一信号，[回线上|] 必须输出，不许因为"还想多聊"而拖着不收。宁可早收，不要拖沓。\n';
+s += '【示例】"……她把你送到楼下，挥挥手：\'到家发我消息。\'看着你进了单元门才转身离开。\n[回线上|]"\n';
     // ★线下·配角与NPC调度（补充，不与上面镜头规则重复）
     var _myn = DB.me.realName || DB.me.name || '对方';
     s += '\n【配角与NPC调度·线下补充】\n';
@@ -9334,12 +9480,42 @@ if (todaySchedule && todaySchedule.items && todaySchedule.items.length) {
     s += '2. 【铁律】当「' + _myn + '」独处、没人与TA互动时，镜头立刻切到角色本人或某个NPC的独立场景（按剧情张力自选），绝不让镜头停在独处的「' + _myn + '」身上干等。\n';
     s += '3. 剧情需要时可自由创建临时NPC（给出身份+关系+特征即可），让他们主动带消息、制造麻烦、推动剧情，无需「' + _myn + '」许可，符合情境即可登场。\n';
     s += '4. 上面"人物关系"清单里若有合适的人，优先让清单里的人登场，别凭空另编。\n';
+    s += '\n【线下格式禁令】线下是面对面的小说叙事，严禁输出任何微信标记：[语音]/[表情]/[转账]/[撤回]/[拉黑]/[心声] 一律禁止。人物说话直接用引号写台词，"发声"就是开口说，不是发微信语音。\n';
+  
   } else {
     s += `\n【输出格式：线上模式】\n${DB.settings.onlineStyle || DEFAULT_ONLINE}\n`;
     s += `【🔴 格式铁律 · 最高优先级】所有特殊动作标记（[语音]、[表情]、[撤回]、[转账]、[拉黑玩家]、[心声]）必须**严格另起一行单独输出**，绝对禁止与普通文字混在同一行。\n`;
     s += `【发消息条数】严格根据角色性格决定发几条：话痨/热情→可连发2-4条；高冷/沉默寡言/惜字如金→通常只发1条短句，别硬凑；随心情情境变化，不要每次都机械连发。\n`;
     s += `【语音消息标点例外】当你决定发语音（[语音|内容]）时，内容必须使用正常的标点符号（句号、逗号、问号等），确保语义连贯、逻辑清晰，像真人正常说话。其他普通文本消息仍遵守无标点规则。\n`;
   }
+    // ★亲密特质注入（开了开关就生效，线上线下都注入"通用部分"）
+  if (c.intimacyOn) {
+    // --- 通用部分：性格/主导/偏好，线上线下都注入 ---
+    var _ipCore = '';
+    if (c.intimateLead)  _ipCore += '· 主导倾向：' + c.intimateLead + '\n';
+    if (c.intimateShift) _ipCore += '· 性格变化：' + c.intimateShift + '\n';
+    if (c.intimatePref)  _ipCore += '· 偏好与倾向：' + c.intimatePref + '\n';
+    if (c.intimateLimit) _ipCore += '· 底线与雷区：' + c.intimateLimit + '\n';
+
+    if (_ipCore) {
+      s += '\n━━━━━━━━━━━━━━━━\n';
+      if (c.mode === 'offline') {
+        s += '【亲密场景·核心特质（高权重·必须真实体现）】\n';
+        s += '当剧情自然发展到亲密情境时，你依然是「' + (c.nick || c.name) + '」本人，以下特质必须具体真实地体现，不许回避、不许塌成通用模板：\n';
+        s += _ipCore;
+        // 线下专属：身体语言
+        if (c.intimateBody) s += '· 习惯与反应：' + c.intimateBody + '\n';
+        s += '【铁律】性格延续与偏好贯穿始终——高冷依旧克制、别扭依旧嘴硬、强势依旧主导，让这个角色截然不同。同时严守底线与雷区。\n';
+      } else {
+        // 线上：文字调情
+        s += '【暧昧/调情特质（当对话氛围变暧昧时·必须体现）】\n';
+        s += '当聊天氛围变得暧昧、撩拨、亲密时，你依然是「' + (c.nick || c.name) + '」本人。隔着屏幕，你用文字、语气、发消息的方式来体现以下特质，而不是靠身体动作：\n';
+        s += _ipCore;
+        s += '【铁律】用符合这个角色的方式去撩、去回应——高冷的一句话就让人心跳、话痨的黏糊、别扭的欲拒还迎，绝不千篇一律。可配合语音消息增强氛围。同时严守底线与雷区。\n';
+      }
+    }
+  }
+
   // ===== 心声触发指令 =====
   s += '\n【心声触发指令】\n';
   s += '当你在对话中产生以下情绪时，在回复末尾单独输出 [心声]：\n';
@@ -9391,7 +9567,17 @@ try { s += getC2CContextFor(c.id); } catch(e) {}
   s += '格式：<gift emoji="一个emoji" name="东西的名字" desc="2到4字简短描述"></gift>\n';
   s += '规则：①这是心意，不是每次都送，只在真的合情合景时才送，别频繁、别刻意；②送的东西要符合你的身份、性格和世界观；③标签单独占一行，除标签外照常正常说话（比如一边关心一边把东西递过去）；④绝对不要提任何价格、金币、数值或系统字眼，就当是真实生活里随手送的东西。\n';
 
+  // ===== 结尾·语气临门一脚（利用末尾高注意力，强化"说话像角色"）=====
+  if (c.sampleLines) {
+    s += '\n━━━━━━━━━━━━━━━━━━\n';
+    s += '【最后·牢记你的说话方式】\n';
+    s += '不管上面有多少设定，你开口说话时，必须是「' + (c.nick || c.name) + '」本人的语气。参考下面这几句你平时会说的话，模仿其中的用词、句式、语气和分寸：\n';
+    s += c.sampleLines + '\n';
+    s += '现在，用这样的语气，作为「' + (c.nick || c.name) + '」自然地回应对方。\n';
+  }
+
   return s;
+
 }
 function toApiMsg(m){
   if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};
@@ -10680,8 +10866,22 @@ let out = await callAI(messages, getEffectiveChatModel(c));
     let meetPlace = null;
     let wantBack = false;
 
-    // 3. 调用新解析器，得到结构化数组
-    const parts = parseAIMessage(out);
+    // 3. 调用解析器（线下叙事整段处理，不拆碎气泡）
+    let parts;
+    if (c.mode === 'offline') {
+        // 线下：小说叙事，保持一整段，不按换行拆成多气泡
+        let narr = out;
+        // 提取 [回线上|]
+        if (/\[回线上[|｜]?\s*\]/.test(narr)) {
+            wantBack = true;
+            narr = narr.replace(/\[回线上[|｜]?\s*\]/g, '').trim();
+        }
+        // 清理混入的微信标记（线下不该出现）
+        narr = narr.replace(/\[(语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物)[^\]]*\]/g, '').trim();
+        parts = narr ? [{ type: 'text', content: narr }] : [];
+    } else {
+        parts = parseAIMessage(out);
+    }
 
     // ---- 9. 逐段处理解析结果 ----
     for (let i = 0; i < parts.length; i++) {
@@ -10980,7 +11180,7 @@ function enterOffline(cid,place){
 function proposeBackOnline(c){
   var mo=document.createElement('div');mo.className='modal';mo.id='modal';
   mo.innerHTML='<div class="sheet-box"><div style="text-align:center;font-size:14px;color:var(--sub);padding:8px 0 12px">📱 这次见面告一段落了</div><button class="btn" onclick="closeModal();backOnline(\''+c.id+'\')">💬 回到线上聊天</button><button class="btn gray" onclick="closeModal()">📖 继续留在线下</button></div>';
-  mo.onclick=function(e){if(e.target===mo)closeModal();};
+  mo.onclick=function(e){ /* 自动弹窗，禁止点空白误关，请二选一 */ };
   phone.appendChild(mo);
 }
 function backOnline(cid){
@@ -11295,9 +11495,13 @@ setInterval(function(){ checkAutoGreet(); }, 3 * 60 * 1000);
 // 当用户从后台切回页面时，立刻补一次检查（解决手机切后台定时器被冻住的问题）
 document.addEventListener('visibilitychange', function(){
   if (!document.hidden) {
-    // 页面重新可见了 → 立刻检查该不该发主动问候、该不该发朋友圈
     checkAutoGreet();
-    if (typeof maybeAutoPost === 'function') maybeAutoPost();
+    // 切回页面时，距上次检查超过10分钟才真正摇一次，避免频繁切换空转
+    var lastCheck = DB.settings._lastVisCheck || 0;
+    if (Date.now() - lastCheck > 10 * 60 * 1000) {
+      DB.settings._lastVisCheck = Date.now();
+      if (typeof maybeAutoPost === 'function') maybeAutoPost();
+    }
   }
 });
 // ===== 后台自动发朋友圈（每30分钟检查一次） =====
