@@ -312,6 +312,51 @@ textarea {
   --sub: #A084A0;
   --line: #3D2F4A;
 }
+.av-monthbar{display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 0;}
+.av-monthtitle{font-size:17px;font-weight:600;color:var(--text);}
+.av-nav{font-size:22px;color:var(--theme);cursor:pointer;padding:0 10px;}
+.av-grid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  grid-auto-rows:40px;      /* ← 新增这行！强制每行都是 40px */
+  gap:2px;
+  padding:0 10px;
+}
+.av-week{
+  margin-bottom:0;      /* 原来是 4px，改成 0 */
+}
+.av-wk{
+  text-align:center;
+  font-size:11px;
+  color:var(--sub);
+  padding:2px 0;        /* 原来是 4px，稍微收一点 */
+}
+margin-bottom:4px;}
+.av-wk{text-align:center;font-size:11px;color:var(--sub);padding:4px 0;}
+.av-cell{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  color:var(--text);
+  border-radius:10px;
+  cursor:pointer;
+}
+.av-cell.empty{cursor:default;}
+.av-cell.today{background:var(--theme);color:#fff;}
+.av-cell:active{background:rgba(150,150,150,0.15);}
+.av-dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--theme);}
+.av-cell.today .av-dot{background:#fff;}
+.av-section{font-size:13px;color:var(--sub);font-weight:600;padding:16px 16px 6px;}
+.av-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);}
+.av-item-body{flex:1;min-width:0;}
+.av-item-title{font-size:14px;color:var(--text);}
+.av-item-sub{font-size:11px;color:var(--sub);margin-top:2px;}
+.av-pin,.av-del{cursor:pointer;font-size:15px;flex-shrink:0;}
+.av-evdate{font-size:11px;color:var(--theme);flex-shrink:0;min-width:34px;text-align:center;}
+.av-empty{font-size:12px;color:var(--sub);opacity:0.6;padding:8px 16px;}
+
 /* ============================================================
    天气小组件：微光粒子动画
    ============================================================ */
@@ -378,21 +423,19 @@ textarea {
 .clock-starry .date {
     font-size: 12px;
     color: var(--sub);
-    opacity: var(--clock-sub-opacity, 0.7);  /* 这里改了 */
     white-space: nowrap;
 }
 .clock-starry .greet {
     font-size: 12px;
     color: var(--theme);
-    opacity: var(--clock-theme-opacity, 0.45); /* 这里改了 */
     letter-spacing: 2px;
     white-space: nowrap;
     font-weight: 300;
 }
 /* ----- 2×2 大组件（毛玻璃 → 透明）----- */
 .clock-starry.widget-2x2 {
-    grid-column: span 2;
-    grid-row: span 2;
+    grid-column: 1 / span 2;
+    grid-row: 1 / span 2;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -494,6 +537,234 @@ textarea {
   align-content: start;
   padding: 0 4px;
 }
+/* ===== 纪念日小组件 · 实色版 ===== */
+.anniv-widget {
+  position: relative;
+  border: 1.5px solid var(--line);
+  border-radius: 24px;
+  background: transparent;
+  padding: 16px 16px 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  min-height: 0;
+}
+.anniv-widget.widget-2x2 {
+  grid-column: 3 / span 2;
+  grid-row: 3 / span 2;
+  border-radius: 24px;
+  padding: 16px 16px 14px;
+  background: transparent;
+  border: 1.5px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  overflow: hidden;
+  min-height: 0;
+}
+.anniv-widget.widget-2x2:hover {
+  border-color: var(--theme);
+}
+.anniv-widget.widget-2x2:active {
+  transform: scale(0.98);
+  transition: transform 0.12s ease;
+}
+
+/* ---- 星点装饰 · 实色 ---- */
+.anniv-widget .star {
+  position: absolute;
+  color: var(--theme);
+  pointer-events: none;
+  font-size: 8px;
+}
+.anniv-widget .star:nth-child(1) { top: 10%; left: 6%; font-size: 7px; }
+.anniv-widget .star:nth-child(2) { top: 8%; right: 16%; font-size: 10px; }
+.anniv-widget .star:nth-child(3) { bottom: 16%; left: 10%; font-size: 9px; }
+.anniv-widget .star:nth-child(4) { bottom: 24%; right: 8%; font-size: 7px; }
+.anniv-widget .star:nth-child(5) { top: 44%; left: 88%; font-size: 6px; }
+
+/* 右上角双星 */
+.anniv-widget .corner-stars {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 7px;
+  letter-spacing: 3px;
+  color: var(--theme);
+  pointer-events: none;
+}
+
+/* ---- 上半：置顶纪念日 ---- */
+.anniv-widget .anniv-top {
+  padding-bottom: 10px;
+  border-bottom: 0.5px solid var(--line);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.anniv-widget .anniv-title {
+  font-size: 12px;
+  color: var(--sub);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+.anniv-widget .anniv-title .icon {
+  font-size: 12px;
+}
+.anniv-widget .anniv-days {
+  font-size: 28px;
+  font-weight: 200;
+  color: var(--text);
+  line-height: 1.1;
+  margin-top: 2px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.anniv-widget .anniv-days small {
+  font-size: 12px;
+  color: var(--sub);
+  font-weight: 300;
+  margin-left: 2px;
+}
+
+/* 呼吸点 · 实色无透明度 */
+.breath-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--theme);
+  margin-left: 5px;
+  animation: breathe 2.8s ease-in-out infinite;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px var(--bg);
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(0.7); }
+  50% { transform: scale(1.2); }
+}
+
+/* ---- 下半：日程列表 ---- */
+.anniv-widget .anniv-events {
+  flex: 1;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  min-height: 34px;
+}
+.anniv-widget .anniv-event {
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  padding: 2px 0;
+}
+.anniv-widget .anniv-event .ev-date {
+  color: var(--theme);
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 500;
+  min-width: 30px;
+  font-variant-numeric: tabular-nums;
+}
+.anniv-widget .anniv-event .ev-bullet {
+  color: var(--sub);
+  font-size: 8px;
+  flex-shrink: 0;
+}
+.anniv-widget .anniv-event .ev-text {
+  font-weight: 350;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+}
+.anniv-widget .anniv-empty {
+  font-size: 11px;
+  color: var(--sub);
+  margin-top: 2px;
+  font-weight: 300;
+  letter-spacing: 0.3px;
+}
+.anniv-widget.widget-2x2 {
+  grid-column: 3 / span 2;   /* 第3列开始，占2列 */
+  grid-row: 3 / span 2;      /* 第3行开始，占2行 */
+  /* ↓ 下面全部保持不变 ↓ */
+  border-radius: 24px;
+  padding: 16px;
+  box-sizing: border-box;
+  background: transparent;
+  border: 1.5px solid var(--line);
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  overflow: hidden;
+  min-height: 0;
+}
+/* 上半：置顶纪念日 */
+.anniv-widget .anniv-top {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.anniv-widget .anniv-title {
+  font-size: 13px;
+  color: var(--sub);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.anniv-widget .anniv-days {
+  font-size: 30px;
+  font-weight: 200;
+  color: var(--text);
+  line-height: 1.1;
+  margin-top: 2px;
+}
+.anniv-widget .anniv-days small {
+  font-size: 13px;
+  color: var(--sub);
+  margin-left: 3px;
+}
+/* 下半：日程列表 */
+.anniv-widget .anniv-events {
+  flex: 1;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow: hidden;
+}
+.anniv-widget .anniv-event {
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.anniv-widget .anniv-event .ev-date {
+  color: var(--theme);
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.anniv-widget .anniv-empty {
+  font-size: 11px;
+  color: var(--sub);
+  opacity: 0.6;
+  margin-top: 6px;
+}
+
 /* ===== 咪思异想主题专用样式 ===== */
 #phone[data-theme="misi"] .clock-starry .ring {
   opacity: var(--ring-opacity, 0.4);
@@ -699,10 +970,10 @@ wallpaper: `
   '--nav': '#FFFFFF',
   '--card': '#FFFFFF',
   '--text': '#1A1A1A',
-  '--sub': '#8A8A8A',
+  '--sub': '#4A4A4A',
   '--line': '#1A1A1A',
-  '--ring-opacity': '0.4',
-  wallpaper: 'radial-gradient(circle at 6% 10%, rgba(168,72,72,0.45) 0, transparent 6px), radial-gradient(circle at 4% 13%, rgba(168,72,72,0.55) 0, transparent 2px), radial-gradient(circle at 8% 8%, rgba(168,72,72,0.35) 0, transparent 1px), radial-gradient(circle at 92% 25%, rgba(168,72,72,0.5) 0, transparent 9px), radial-gradient(circle at 88% 28%, rgba(168,72,72,0.4) 0, transparent 3px), radial-gradient(circle at 95% 22%, rgba(168,72,72,0.3) 0, transparent 1px), radial-gradient(circle at 28% 42%, rgba(168,72,72,0.45) 0, transparent 5px), radial-gradient(circle at 30% 45%, rgba(168,72,72,0.35) 0, transparent 1.5px), radial-gradient(circle at 68% 52%, rgba(168,72,72,0.5) 0, transparent 11px), radial-gradient(circle at 64% 56%, rgba(168,72,72,0.4) 0, transparent 2.5px), radial-gradient(circle at 72% 49%, rgba(168,72,72,0.3) 0, transparent 1.5px), radial-gradient(circle at 18% 72%, rgba(168,72,72,0.45) 0, transparent 7px), radial-gradient(circle at 14% 76%, rgba(168,72,72,0.35) 0, transparent 2px), radial-gradient(circle at 50% 85%, rgba(168,72,72,0.5) 0, transparent 13px), radial-gradient(circle at 46% 89%, rgba(168,72,72,0.4) 0, transparent 3px), radial-gradient(circle at 54% 82%, rgba(168,72,72,0.35) 0, transparent 2px), radial-gradient(circle at 82% 78%, rgba(168,72,72,0.4) 0, transparent 5px), radial-gradient(circle at 85% 81%, rgba(168,72,72,0.3) 0, transparent 1px), radial-gradient(circle at 20% 35%, rgba(168,72,72,0.25) 0, transparent 4px), radial-gradient(circle at 62% 14%, rgba(168,72,72,0.45) 0, transparent 8px), radial-gradient(circle at 38% 62%, rgba(168,72,72,0.3) 0, transparent 2px), #FCFCFC'
+  '--ring-opacity': '0.8',
+wallpaper: 'radial-gradient(circle at 6% 10%, rgba(168,72,72,0.85) 0, transparent 6px), radial-gradient(circle at 4% 13%, rgba(168,72,72,0.9) 0, transparent 2px), radial-gradient(circle at 8% 8%, rgba(168,72,72,0.75) 0, transparent 1px), radial-gradient(circle at 92% 25%, rgba(168,72,72,0.85) 0, transparent 9px), radial-gradient(circle at 88% 28%, rgba(168,72,72,0.8) 0, transparent 3px), radial-gradient(circle at 95% 22%, rgba(168,72,72,0.7) 0, transparent 1px), radial-gradient(circle at 28% 42%, rgba(168,72,72,0.85) 0, transparent 5px), radial-gradient(circle at 30% 45%, rgba(168,72,72,0.75) 0, transparent 1.5px), radial-gradient(circle at 68% 52%, rgba(168,72,72,0.85) 0, transparent 11px), radial-gradient(circle at 64% 56%, rgba(168,72,72,0.8) 0, transparent 2.5px), radial-gradient(circle at 72% 49%, rgba(168,72,72,0.7) 0, transparent 1.5px), radial-gradient(circle at 18% 72%, rgba(168,72,72,0.85) 0, transparent 7px), radial-gradient(circle at 14% 76%, rgba(168,72,72,0.75) 0, transparent 2px), radial-gradient(circle at 50% 85%, rgba(168,72,72,0.85) 0, transparent 13px), radial-gradient(circle at 46% 89%, rgba(168,72,72,0.8) 0, transparent 3px), radial-gradient(circle at 54% 82%, rgba(168,72,72,0.75) 0, transparent 2px), radial-gradient(circle at 82% 78%, rgba(168,72,72,0.8) 0, transparent 5px), radial-gradient(circle at 85% 81%, rgba(168,72,72,0.7) 0, transparent 1px), radial-gradient(circle at 20% 35%, rgba(168,72,72,0.65) 0, transparent 4px), radial-gradient(circle at 62% 14%, rgba(168,72,72,0.85) 0, transparent 8px), radial-gradient(circle at 38% 62%, rgba(168,72,72,0.7) 0, transparent 2px), #FCFCFC'
 }
 ];
 // ========== 主题图标集 ==========
@@ -821,7 +1092,7 @@ function applySkin(id) {
   var root = document.documentElement;
 
   // 2. 批量应用 CSS 变量
-  var cssVars = ['--theme', '--bg', '--nav', '--card', '--text', '--sub', '--line'];
+  var cssVars = ['--theme', '--bg', '--nav', '--card', '--text', '--sub', '--line', '--ring-opacity'];
   cssVars.forEach(function(key) {
     root.style.setProperty(key, skin[key]);
   });
@@ -845,9 +1116,6 @@ if (phone) phone.dataset.theme = id;
 var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi');
 if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
-  root.style.setProperty('--clock-sub-opacity', '1');
-  root.style.setProperty('--clock-theme-opacity', '1');
-  root.style.setProperty('--deco-opacity', '0.55');
   root.style.setProperty('--clock-sub-color', 'var(--sub)');
   
   // ★ 关键：浅色主题下，让星星和问候语使用深色（sub），不再用淡粉色/淡紫色
@@ -857,12 +1125,9 @@ if (isLight) {
   
 } else {
   root.style.setProperty('--app-text-shadow', '0 1px 4px rgba(0,0,0,0.5)');
-  root.style.setProperty('--clock-sub-opacity', '0.7');
-  root.style.setProperty('--clock-theme-opacity', '0.45');
-  root.style.setProperty('--deco-opacity', '0.35');
   root.style.setProperty('--clock-sub-color', 'var(--sub)');
   root.style.setProperty('--clock-theme-color', 'var(--theme)');
-  root.style.setProperty('--star-opacity', '0.4');
+
 }
   // 5. 刷新当前页面
   if (view.type === 'home') {
@@ -1966,33 +2231,28 @@ function collectExtraContextForChar(c) {
 }
 
 // ===== 每日自动记忆生成（仅调用辅助模型） =====
-async function generateMemoryForChar(c) {
+async function generateMemoryForChar(c, mode = 'auto') {
   var model = DB.settings.auxModel || DB.settings.chatModel;
   if (!model) return false;
 
   var arr = DB.chats[c.id] || [];
-  var today = new Date();
-  var todayStr = today.toISOString().slice(0, 10);
-  var todays = arr.filter(function(m) {
-    var t = new Date(m.time || 0);
-    return t.toISOString().slice(0, 10) === todayStr;
-  });
-  if (todays.length < 2) return false;
+  var extraContext = collectExtraContextForChar(c);
+  var extraBlock = extraContext ? '\n\n【今日群聊/朋友圈参考（仅作背景补充）】\n' + extraContext + '\n' : '';
 
-  try {
+  // ========== 自动模式：仅总结今天（原有逻辑，完全不变） ==========
+  if (mode === 'auto') {
+    var today = new Date();
+    var todayStr = today.toISOString().slice(0, 10);
+    var todays = arr.filter(function(m) {
+      var t = new Date(m.time || 0);
+      return t.toISOString().slice(0, 10) === todayStr;
+    });
+    if (todays.length < 2) return false;
+
     var convo = todays.map(function(m) {
       var who = (m.role === 'assistant') ? (c.name || c.nick) : (DB.me.name || '我');
       return who + '：' + (lastText(m) || '');
     }).join('\n');
-
-    // 【新增1】收集今天群聊/朋友圈里与TA相关的片段
-    var extraContext = collectExtraContextForChar(c);
-    var extraBlock = '';
-    if (extraContext) {
-      extraBlock = '\n\n【今日群聊/朋友圈参考（仅筛选出与「' + (c.name || c.nick) + '」直接相关的片段，作背景补充）】\n' +
-        extraContext +
-        '\n（注意：以上是群聊和朋友圈的公开内容，属于背景信息，不要把它们当成TA与用户之间的私聊事件或私下约定；只有当它们明显影响到TA与用户的关系时，才酌情参考。）';
-    }
 
     var favNow = (c.status && c.status.好感度 != null) ? c.status.好感度 : 50;
     var relNow = (c.status && c.status.当前关系) ? c.status.当前关系 : '初次见面';
@@ -2005,7 +2265,7 @@ async function generateMemoryForChar(c) {
     if (world) known += '世界观设定：' + world.name + '——' + world.desc + '\n';
     if (!known) known = '（无特别设定）';
 
-    var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.name || c.nick) + '」和「' + (DB.me.name || '我') + '」今天的聊天记录，完成两个任务。\n\n' +
+    var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.name || c.nick) + '」和「' + (DB.me.name || '我') + '」**今天**的聊天记录，完成两个任务。\n\n' +
       '【任务一：提炼记忆】提炼出 1~3 条值得长期记住的记忆，每条附带优先级（priority）：\n' +
       '- core（核心）：涉及关系本质、身份定义、无法改变的事实（例如：确立了关系、坦白身世、重要承诺）\n' +
       '- important（重要）：重要共同经历、情感转折、影响关系的关键对话\n' +
@@ -2017,55 +2277,219 @@ async function generateMemoryForChar(c) {
       '结合今天的聊天内容、以及下面的参考信息，给出一个最贴合此刻剧情的「关系称谓」：\n' +
       '- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
       '- 目前的关系称谓：' + relNow + '\n' +
-      '要求：\n' +
-      '① 关系称谓要有故事感、贴合剧情，而不是干巴巴的档位词。例如：热恋期的恋人 / 闹别扭的恋人 / 刚确立的暧昧 / 无话不谈的挚友 / 渐行渐远的旧识 / 已分手的前任 / 形同陌路 等。\n' +
-      '② 若今天发生了明确的重大剧情转折（表白、在一起、分手、绝交、和好），关系称谓要据此突变（如分手就写"前任"而非降级为"朋友"）。\n' +
-      '③ 若只是日常聊天、没有重大转折，就在原有关系称谓基础上微调或保持，不要仅凭好感度小幅波动就升降关系。\n' +
-      '④ 好感度只作参考：高好感支撑亲密称谓，好感很低或刚吵架可体现疏离，但最终以剧情为准。\n' +
-      '⑤ 关系称谓控制在 10 字以内。\n\n' +
-      '【输出格式】只输出一个 JSON 对象，不要任何其他文字：\n' +
-      '{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓"}\n\n' +
-      '聊天记录：\n' + convo + extraBlock;   // 【新增2】把背景补充拼在最后
+      '要求：①关系称谓要有故事感、贴合剧情，而不是干巴巴的档位词 ②若今天发生了明确的重大剧情转折，关系称谓要据此突变 ③若只是日常聊天，就在原有基础上微调或保持 ④控制在 10 字以内。\n\n' +
+'【任务三：提取约定日程】\n' +
+'如果聊天中出现了明确的、约定好的未来安排（比如"明天一起吃饭""周末去看电影""下周三见面"等），' +
+'请把它提取成日程。要求：\n' +
+'- 只提取有明确时间指向的约定，模糊的（如"改天""有空"）不要提取；\n' +
+'- 今天的日期是 ' + _todayStr() + '（周' + '日一二三四五六'[new Date().getDay()] + '），请据此把"明天""周末""下周三"等换算成具体日期 YYYY-MM-DD；\n' +
+'- 每条约定给一个简短标题（10字内），比如"和用户看电影"；\n' +
+'- 如果没有任何明确约定，events 就返回空数组 []。\n\n' +
+'【输出格式】只输出一个 JSON 对象，不要任何其他文字：\n' +
+'{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓","events":[{"date":"YYYY-MM-DD","title":"简短标题"}]}\n\n' +
+      '聊天记录：\n' + convo + extraBlock;
 
-    var out = await callAI([{ role: 'user', content: prompt }], model);
-    out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
-    var match = out.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('AI 返回格式不正确');
-    var data = JSON.parse(match[0]);
+    try {
+      var out = await callAI([{ role: 'user', content: prompt }], model);
+      out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
+      var match = out.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('AI 返回格式不正确');
+      var data = JSON.parse(match[0]);
 
-    var items = Array.isArray(data.memories) ? data.memories : [];
+      var items = Array.isArray(data.memories) ? data.memories : [];
+      if (data.relation && typeof data.relation === 'string' && data.relation.trim()) {
+        if (!c.status) c.status = {};
+        c.status.当前关系 = data.relation.trim();
+      }
 
-    if (data.relation && typeof data.relation === 'string' && data.relation.trim()) {
-      if (!c.status) c.status = {};
-      c.status.当前关系 = data.relation.trim();
+      var anyAdded = false;
+      items.forEach(function(item) {
+        if (!item.content || !item.priority) return;
+        var exists = (c.memories || []).some(function(m) {
+          return m.content === item.content;
+        });
+        if (exists) return;
+        if (!c.memories) c.memories = [];
+        c.memories.push({
+          id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          time: Date.now(),
+          content: item.content,
+          type: 'auto',
+          priority: item.priority,
+          edited: false
+        });
+        if (!c.chapters) c.chapters = [];
+        var dateStr = new Date().toISOString().slice(0, 10);
+        c.chapters.push({ date: dateStr, content: '[记忆] ' + item.content });
+        anyAdded = true;
+      });
+
+      // ===== 新增：把 AI 提取的约定写进日程 =====
+      var eventAdded = false;
+      try {
+        if (data && Array.isArray(data.events)) {
+          DB.events = DB.events || [];
+          data.events.forEach(function(ev){
+            if (!ev || !ev.date || !ev.title) return;
+            if (!/^\d{4}-\d{1,2}-\d{1,2}$/.test(ev.date)) return;   // 校验日期格式
+            var dup = DB.events.some(function(e){ return e.date===ev.date && e.title===ev.title; });
+            if (dup) return;                                          // 去重
+            DB.events.push({
+              id: 'e' + Date.now() + Math.random().toString(36).slice(2,5),
+              title: String(ev.title).slice(0, 20),
+              date: ev.date,
+              from: 'ai',
+              createdAt: Date.now()
+            });
+            eventAdded = true;
+          });
+        }
+      } catch(e) { console.warn('提取约定日程失败', e); }
+
+      if (anyAdded || eventAdded || (data.relation && data.relation.trim())) {
+        save();
+        return true;
+      }
+      return false;
+    } catch(e) {
+      console.error('自动生成记忆失败：', e);
+      return false;
+    }
+  }
+
+  // ========== 手动模式：总结“从上一次生成至今”的所有新内容 ==========
+  if (mode === 'manual') {
+    // 1. 获取上次记忆的时间戳
+    var lastMemTime = 0;
+    if (c.memories && c.memories.length) {
+      var sorted = c.memories.slice().sort(function(a, b) { return b.time - a.time; });
+      lastMemTime = sorted[0].time || 0;
     }
 
-    var anyAdded = false;
-    items.forEach(function(item) {
-      if (!item.content || !item.priority) return;
-      var exists = (c.memories || []).some(function(m) {
-        return m.content === item.content;
-      });
-      if (exists) return;
-      if (!c.memories) c.memories = [];
-      c.memories.push({
-        id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-        time: Date.now(),
-        content: item.content,
-        type: 'auto',
-        priority: item.priority,
-        edited: false
-      });
-      if (!c.chapters) c.chapters = [];
-      c.chapters.push({ date: todayStr, content: '[记忆] ' + item.content });
-      anyAdded = true;
-    });
+    // 2. 过滤出“上次记忆之后”的新消息
+    var recentMsgs = [];
+    if (lastMemTime > 0) {
+      recentMsgs = arr.filter(function(m) { return m.time > lastMemTime; });
+    } else {
+      // 从未总结过：取最近 50 条（避免一次太多导致模型超长）
+      recentMsgs = arr.slice(-50);
+    }
 
-    if (anyAdded || (data.relation && data.relation.trim())) save();
-    return anyAdded || !!(data.relation && data.relation.trim());
-  } catch (e) {
-    console.error('生成记忆失败（' + (c.nick || c.name) + '）：', e);
-    return false;
+    // 3. 检查是否有新内容（至少 2 条）
+    if (recentMsgs.length < 2) {
+      popTip('自从上次总结后还没有新的聊天记录呢，再聊几句再生成吧～', { icon: '💬', title: '没有新内容' });
+      return false;
+    }
+
+    // 4. 构建对话文本
+    var convo = recentMsgs.map(function(m) {
+      var who = (m.role === 'assistant') ? (c.name || c.nick) : (DB.me.name || '我');
+      return who + '：' + (lastText(m) || '');
+    }).join('\n');
+
+    // 5. 构建人设背景（复用自动模式的代码）
+    var favNow = (c.status && c.status.好感度 != null) ? c.status.好感度 : 50;
+    var relNow = (c.status && c.status.当前关系) ? c.status.当前关系 : '初次见面';
+    var known = '';
+    if (c.job) known += '身份/职业：' + c.job + '\n';
+    if (c.pLook) known += '外貌特征：' + c.pLook + '\n';
+    if (c.pKeywords) known += '性格：' + c.pKeywords + '\n';
+    if (c.pBack) known += '背景经历：' + c.pBack + '\n';
+    var world = (DB.worlds||[]).find(function(w){ return w.id===c.worldId; });
+    if (world) known += '世界观设定：' + world.name + '——' + world.desc + '\n';
+    if (!known) known = '（无特别设定）';
+
+    // 6. 提示词：把“今天”改成“自上次总结以来”
+    var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.name || c.nick) + '」和「' + (DB.me.name || '我') + '」**自上次总结以来**的聊天记录（可能跨越数天），完成两个任务。\n\n' +
+      '【任务一：提炼记忆】提炼出 1~3 条值得长期记住的记忆，每条附带优先级（priority）：\n' +
+      '- core（核心）：涉及关系本质、身份定义、无法改变的事实（例如：确立了关系、坦白身世、重要承诺）\n' +
+      '- important（重要）：重要共同经历、情感转折、影响关系的关键对话\n' +
+      '- temp（临时）：日常琐事、短期状态、可随时间淡化的小事\n' +
+      '【重要·区分已知设定与新事件】下面是这个角色的既定设定（属于已知背景，不是近期发生的事）：\n' + known + '\n' +
+      '提炼记忆时，绝对不要把上述既定设定当成新记忆记录——凡是属于角色本身固有属性（种族、外貌、身份、身世、性格等设定里已写明的内容），都不是新记忆，一律不记。只记录聊天中【新发生的事、新的情感变化、新的约定或承诺、关系的新进展、双方之间的互动细节】。\n' +
+      '视角要求：用第三人称描述，将对方称为「用户」，不要用「我」指代用户。例如：用户和XX一起去了海边。\n\n' +
+      '【任务二：判定当前关系】\n' +
+      '结合近期的聊天内容、以及下面的参考信息，给出一个最贴合此刻剧情的「关系称谓」：\n' +
+      '- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
+      '- 目前的关系称谓：' + relNow + '\n' +
+      '要求：①关系称谓要有故事感、贴合剧情，而不是干巴巴的档位词 ②若近期发生了明确的重大剧情转折，关系称谓要据此突变 ③若只是日常聊天，就在原有基础上微调或保持 ④控制在 10 字以内。\n\n' +
+      '【任务三：提取约定日程】\n' +
+      '如果聊天中出现了明确的、约定好的未来安排（比如"明天一起吃饭""周末去看电影""下周三见面"等），' +
+      '请把它提取成日程。要求：\n' +
+      '- 只提取有明确时间指向的约定，模糊的（如"改天""有空"）不要提取；\n' +
+      '- 今天的日期是 ' + _todayStr() + '（周' + '日一二三四五六'[new Date().getDay()] + '），请据此把"明天""周末""下周三"等换算成具体日期 YYYY-MM-DD；\n' +
+      '- 每条约定给一个简短标题（10字内），比如"和用户看电影"；\n' +
+      '- 如果没有任何明确约定，events 就返回空数组 []。\n\n' +
+      '【输出格式】只输出一个 JSON 对象，不要任何其他文字：\n' +
+      '{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓","events":[{"date":"YYYY-MM-DD","title":"简短标题"}]}\n\n' +
+      '聊天记录：\n' + convo + extraBlock;
+
+    try {
+      var out = await callAI([{ role: 'user', content: prompt }], model);
+      out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
+      var match = out.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('AI 返回格式不正确');
+      var data = JSON.parse(match[0]);
+
+      var items = Array.isArray(data.memories) ? data.memories : [];
+      if (data.relation && typeof data.relation === 'string' && data.relation.trim()) {
+        if (!c.status) c.status = {};
+        c.status.当前关系 = data.relation.trim();
+      }
+
+      var anyAdded = false;
+      items.forEach(function(item) {
+        if (!item.content || !item.priority) return;
+        var exists = (c.memories || []).some(function(m) {
+          return m.content === item.content;
+        });
+        if (exists) return;
+        if (!c.memories) c.memories = [];
+        c.memories.push({
+          id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          time: Date.now(),
+          content: item.content,
+          type: 'manual',
+          priority: item.priority,
+          edited: false
+        });
+        if (!c.chapters) c.chapters = [];
+        var dateStr = new Date().toISOString().slice(0, 10);
+        c.chapters.push({ date: dateStr, content: '[记忆] ' + item.content });
+        anyAdded = true;
+      });
+      // 把 AI 提取的约定写进日程
+      var eventAdded = false;
+      try {
+        if (data && Array.isArray(data.events)) {
+          DB.events = DB.events || [];
+          data.events.forEach(function(ev){
+            if (!ev || !ev.date || !ev.title) return;
+            if (!/^\d{4}-\d{1,2}-\d{1,2}$/.test(ev.date)) return;
+            var dup = DB.events.some(function(e){ return e.date===ev.date && e.title===ev.title; });
+            if (dup) return;
+            DB.events.push({
+              id: 'e' + Date.now() + Math.random().toString(36).slice(2,5),
+              title: String(ev.title).slice(0, 20),
+              date: ev.date,
+              from: 'ai',
+              createdAt: Date.now()
+            });
+            eventAdded = true;
+          });
+        }
+      } catch(e) { console.warn('提取约定日程失败', e); }
+
+      if (anyAdded || eventAdded || (data.relation && data.relation.trim())) {
+        save();
+        return true;
+      }
+      return false;
+    } catch(e) {
+      console.error('手动生成记忆失败：', e);
+      popTip('生成失败：' + e.message, { icon: '⚠️', title: '出错了' });
+      return false;
+    }
   }
 }
 async function autoGenerateDailyMemories() {
@@ -2296,12 +2720,292 @@ if (view.type === 'album') return renderAlbum();
   applyPhoneScale();
 }
 function showChrome(t,b){topbar.style.display=t?'flex':'none';tabbar.style.display=b?'flex':'none';}
+// 计算两个日期相差的天数（今天减去某日期）
+function daysBetween(dateStr){
+  var target = new Date(dateStr);
+  var now = new Date();
+  // 抹掉时分秒，只比日期
+  target.setHours(0,0,0,0);
+  now.setHours(0,0,0,0);
+  return Math.round((now - target) / (24*3600*1000));
+}
+
+// 清理过期日程（事件日期过后再留 3 天就删）
+function cleanExpiredEvents(){
+  var now = new Date(); now.setHours(0,0,0,0);
+  var keepDays = 3;
+  DB.events = (DB.events || []).filter(function(e){
+    var d = new Date(e.date); d.setHours(0,0,0,0);
+    return (now - d) / (24*3600*1000) < keepDays;
+  });
+}
+
+function annivWidgetHtml(){
+  cleanExpiredEvents();
+
+  var list = DB.anniversaries || [];
+  var pin = list.find(function(a){ return a.pinned; }) || list[0];
+  var topHtml = '';
+  if(pin){
+    var days = daysBetween(pin.date);
+    var label = pin.type === '生日' ? '距离生日' : '已经';
+    var showDays = days;
+    if(pin.type === '生日'){
+      var next = nextBirthday(pin.date);
+      showDays = daysBetween(next) * -1;
+      label = '距离生日还有';
+    }
+    topHtml =
+      '<div class="anniv-top">' +
+        '<div class="anniv-title"><span class="icon">❤️</span> ' + esc(pin.title) + '</div>' +
+        '<div class="anniv-days">' + Math.abs(showDays) + '<small>天</small><span class="breath-dot"></span></div>' +
+      '</div>';
+  } else {
+    topHtml = '<div class="anniv-top"><div class="anniv-title">📅 纪念日</div>' +
+              '<div class="anniv-empty">还没有纪念日</div></div>';
+  }
+
+  var events = (DB.events || []).slice().sort(function(a,b){
+    return new Date(a.date) - new Date(b.date);
+  }).slice(0, 2);
+  var evHtml = events.length
+    ? events.map(function(e){
+        return '<div class="anniv-event">' +
+               '<span class="ev-date">' + fmtEventDate(e.date) + '</span>' +
+               '<span class="ev-bullet">•</span>' +
+               '<span class="ev-text">' + esc(e.title) + '</span></div>';
+      }).join('')
+    : '<div class="anniv-empty">暂无日程安排</div>';
+
+  return '<div class="anniv-widget widget-2x2" onclick="openAnniversary()">' +
+    '<span class="star">✦</span>' +
+    '<span class="star">✦</span>' +
+    '<span class="star">✦</span>' +
+    '<span class="star">✦</span>' +
+    '<span class="star">✦</span>' +
+    '<span class="corner-stars">✦ ✦</span>' +
+    topHtml +
+    '<div class="anniv-events">' + evHtml + '</div>' +
+  '</div>';
+}
+// 算下一个生日（生日专用）
+function nextBirthday(dateStr){
+  var d = new Date(dateStr);
+  var now = new Date();
+  var next = new Date(now.getFullYear(), d.getMonth(), d.getDate());
+  if(next < now) next.setFullYear(now.getFullYear()+1);
+  return next;
+}
+
+function openAnniversary(){
+  var home = document.getElementById('home');
+  if(home) home.style.display = 'none';   // 盖住桌面
+  content.style.display = '';
+  content.style.backgroundImage = '';
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = '📅 纪念日';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = goHome;
+  tbRight.textContent = '＋';
+  tbRight.onclick = annivAddMenu;
+  // 默认显示当前月（今天是 2026-08）
+  if(!window._annivYM){
+    var n = new Date();
+    window._annivYM = { y:n.getFullYear(), m:n.getMonth() };
+  }
+  renderAnnivApp();
+}
+// 补零
+function _pad(n){ return n<10 ? '0'+n : ''+n; }
+// 判断某个日期字符串是不是等于 y年 m月(0起) d日
+function sameYMD(dateStr, y, m, d){
+  var p = dateStr.split('-');
+  return parseInt(p[0])===y && parseInt(p[1])===m+1 && parseInt(p[2])===d;
+}
+
+// ===== 主渲染：月历 + 两个列表 =====
+function renderAnnivApp(){
+  cleanExpiredEvents();
+  var ym = window._annivYM, y = ym.y, m = ym.m;
+
+  var html = '';
+  // 月份切换栏
+  html += '<div class="av-monthbar">' +
+    '<span class="av-nav" onclick="annivChangeMonth(-1)">‹</span>' +
+    '<span class="av-monthtitle">' + y + '年' + (m+1) + '月</span>' +
+    '<span class="av-nav" onclick="annivChangeMonth(1)">›</span>' +
+    '</div>';
+  // 星期表头
+  html += '<div class="av-grid av-week">';
+  ['日','一','二','三','四','五','六'].forEach(function(w){ html += '<div class="av-wk">'+w+'</div>'; });
+  html += '</div>';
+  // 日期格子
+  html += '<div class="av-grid">' + annivCells(y, m) + '</div>';
+
+  // 纪念日列表
+  html += '<div class="av-section">纪念日</div>';
+  var alist = DB.anniversaries || [];
+  if(alist.length){
+    html += alist.map(function(a){
+      var txt = a.type==='生日'
+        ? ('距生日 ' + Math.abs(daysBetween(nextBirthday(a.date))) + ' 天')
+        : ('已 ' + Math.abs(daysBetween(a.date)) + ' 天');
+      return '<div class="av-item">' +
+        '<span class="av-pin" onclick="annivTogglePin(\''+a.id+'\')">'+(a.pinned?'📌':'📍')+'</span>' +
+        '<div class="av-item-body"><div class="av-item-title">'+esc(a.title)+'</div>' +
+        '<div class="av-item-sub">'+a.date+' · '+txt+'</div></div>' +
+        '<span class="av-del" onclick="annivDelete(\'anniv\',\''+a.id+'\')">🗑️</span>' +
+        '</div>';
+    }).join('');
+  } else html += '<div class="av-empty">还没有纪念日，点右上角 ＋ 添加</div>';
+
+  // 日程列表
+  html += '<div class="av-section">日程安排</div>';
+  var elist = (DB.events||[]).slice().sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+  if(elist.length){
+    html += elist.map(function(e){
+      return '<div class="av-item">' +
+        '<span class="av-evdate">'+fmtEventDate(e.date)+'</span>' +
+        '<div class="av-item-body"><div class="av-item-title">'+esc(e.title)+'</div>' +
+        '<div class="av-item-sub">'+e.date+(e.from==='ai'?' · 来自记忆':'')+'</div></div>' +
+        '<span class="av-del" onclick="annivDelete(\'event\',\''+e.id+'\')">🗑️</span>' +
+        '</div>';
+    }).join('');
+  } else html += '<div class="av-empty">暂无日程</div>';
+
+  html += '<div style="height:30px"></div>';
+  content.innerHTML = html;
+}
+
+// 生成日历格子
+function annivCells(y, m){
+  var first = new Date(y, m, 1).getDay();
+  var days = new Date(y, m+1, 0).getDate();
+  var n = new Date();
+  var todayS = n.getFullYear()+'-'+n.getMonth()+'-'+n.getDate();
+  var out = '';
+  for(var i=0;i<first;i++) out += '<div class="av-cell empty"></div>';
+  for(var d=1;d<=days;d++){
+    var hasEvent = (DB.events||[]).some(function(e){ return sameYMD(e.date,y,m,d); });
+    var hasAnniv = (DB.anniversaries||[]).some(function(a){
+      var ad = new Date(a.date);
+      if(a.type==='生日') return ad.getMonth()===m && ad.getDate()===d;
+      return sameYMD(a.date,y,m,d);
+    });
+    var isToday = (y+'-'+m+'-'+d)===todayS;
+    var dot = (hasEvent||hasAnniv) ? '<span class="av-dot"></span>' : '';
+    var ds = y+'-'+_pad(m+1)+'-'+_pad(d);
+    out += '<div class="av-cell'+(isToday?' today':'')+'" onclick="annivDayClick(\''+ds+'\')">'+d+dot+'</div>';
+  }
+  return out;
+}
+
+// 切换月份
+function annivChangeMonth(delta){
+  var ym = window._annivYM, m = ym.m + delta, y = ym.y;
+  if(m<0){ m=11; y--; }
+  if(m>11){ m=0; y++; }
+  window._annivYM = { y:y, m:m };
+  renderAnnivApp();
+}
+
+// 点某一天 → 直接在那天加个日程
+function annivDayClick(ds){ annivAddForm('event', ds); }
+
+// 添加菜单
+function annivAddMenu(){
+  var mo = document.createElement('div');
+  mo.className='modal'; mo.id='modal';
+  mo.innerHTML = '<div class="modal-box">' +
+    '<h3 style="text-align:center;font-weight:600;margin-bottom:12px">添加</h3>' +
+    '<button class="btn" onclick="closeModal();annivAddForm(\'anniv\')">❤️ 添加纪念日</button>' +
+    '<button class="btn gray" onclick="closeModal();annivAddForm(\'event\')">📅 添加日程</button>' +
+    '<button class="btn gray" style="margin-top:0" onclick="closeModal()">取消</button>' +
+    '</div>';
+  mo.onclick = function(e){ if(e.target===mo) closeModal(); };
+  phone.appendChild(mo);
+}
+
+// 添加表单
+function annivAddForm(kind, presetDate){
+  var t = new Date();
+  var def = presetDate || (t.getFullYear()+'-'+_pad(t.getMonth()+1)+'-'+_pad(t.getDate()));
+  var inStyle = 'width:100%;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:15px;background:var(--bg);color:var(--text);box-sizing:border-box;margin-bottom:10px;';
+  var extra = '';
+  if(kind==='anniv'){
+    extra = '<select id="avType" style="'+inStyle+'">' +
+      '<option value="累计">累计天数（如：在一起多久）</option>' +
+      '<option value="生日">生日（每年提醒）</option>' +
+      '</select>' +
+      '<label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text);margin-bottom:10px;">' +
+      '<input type="checkbox" id="avPin"> 置顶到桌面小组件</label>';
+  }
+  var mo = document.createElement('div');
+  mo.className='modal'; mo.id='modal';
+  mo.innerHTML = '<div class="modal-box">' +
+    '<h3 style="text-align:center;font-weight:600;margin-bottom:12px">'+(kind==='anniv'?'添加纪念日':'添加日程')+'</h3>' +
+    '<input id="avTitle" placeholder="'+(kind==='anniv'?'比如：和小明认识':'比如：和他喝咖啡')+'" style="'+inStyle+'">' +
+    '<input id="avDate" type="date" value="'+def+'" style="'+inStyle+'">' +
+    extra +
+    '<button class="btn" onclick="annivSubmit(\''+kind+'\')">保存</button>' +
+    '<button class="btn gray" style="margin-top:0" onclick="closeModal()">取消</button>' +
+    '</div>';
+  mo.onclick = function(e){ if(e.target===mo) closeModal(); };
+  phone.appendChild(mo);
+}
+
+// 保存提交
+function annivSubmit(kind){
+  var title = (document.getElementById('avTitle').value||'').trim();
+  var date = document.getElementById('avDate').value;
+  if(!title || !date){ alert('请填写标题和日期'); return; }
+  if(kind==='anniv'){
+    var type = document.getElementById('avType').value;
+    var pin = document.getElementById('avPin').checked;
+    DB.anniversaries = DB.anniversaries || [];
+    if(pin) DB.anniversaries.forEach(function(a){ a.pinned=false; }); // 置顶唯一
+    DB.anniversaries.push({ id:'a'+Date.now(), title:title, date:date, type:type, pinned:pin });
+  } else {
+    DB.events = DB.events || [];
+    DB.events.push({ id:'e'+Date.now(), title:title, date:date, from:'manual', createdAt:Date.now() });
+  }
+  save(); closeModal(); renderAnnivApp();
+}
+
+// 切换置顶（置顶唯一）
+function annivTogglePin(id){
+  DB.anniversaries = DB.anniversaries || [];
+  var target = DB.anniversaries.find(function(a){ return a.id===id; });
+  if(!target) return;
+  var willPin = !target.pinned;
+  DB.anniversaries.forEach(function(a){ a.pinned=false; });
+  target.pinned = willPin;
+  save(); renderAnnivApp();
+}
+
+// 删除
+function annivDelete(kind, id){
+  popConfirm('确定删除？删除后无法恢复。', function(){
+    if(kind==='anniv') DB.anniversaries = (DB.anniversaries||[]).filter(function(a){ return a.id!==id; });
+    else DB.events = (DB.events||[]).filter(function(e){ return e.id!==id; });
+    save();
+    renderAnnivApp();
+  }, {icon:'🗑️', title:'删除'});
+}
 
 function renderHome() {
+DB.anniversaries = DB.anniversaries || [
+  { id:'a1', title:'和小明认识', date:'2024-01-01', type:'累计', pinned:true }
+];
+DB.events = DB.events || [
+  { id:'e1', title:'和他喝咖啡', date:'2026-08-02', from:'ai', createdAt:Date.now() }
+];
+
   var oldHome = document.getElementById('home');
   if (oldHome) oldHome.remove();
   showChrome(false, false);
-  statusbar.classList.remove('dark');
+  statusbar.classList.add('dark');
   content.style.display = 'none';
   
   const d = document.createElement('div');
@@ -2339,8 +3043,8 @@ function renderHome() {
   }
   
   var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
-<div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);opacity:var(--ring-opacity, 0.2);mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
-    <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%) rotate(70deg);border:1px solid var(--theme);opacity:var(--deco-opacity, 0.12);mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);-webkit-mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);"></div>
+<div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);border:1.5px solid var(--theme);mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);-webkit-mask-image:conic-gradient(from 10deg, black 0%, black 50%, transparent 50%, transparent 100%);"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:50%;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%) rotate(70deg);border:1px solid var(--theme);mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);-webkit-mask-image:conic-gradient(from 170deg, black 0%, black 40%, transparent 40%, transparent 100%);"></div>
     <span style="position:absolute;top:6%;left:48%;width:5px;height:5px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.5);pointer-events:none;z-index:1;"></span>
     <span style="position:absolute;top:38%;right:8%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.4);pointer-events:none;z-index:1;"></span>
     <span style="position:absolute;bottom:20%;left:12%;width:4px;height:4px;border-radius:50%;background:var(--theme);opacity:var(--deco-opacity, 0.35);pointer-events:none;z-index:1;"></span>
@@ -2361,10 +3065,10 @@ function renderHome() {
   if (weatherApp) {
     weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:24px;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:120px;background:transparent !important;border:1.5px solid var(--line);box-shadow:none;">
       <style>
-        @keyframes floatDot {
-          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.25; }
-          50% { transform: translateY(-8px) scale(1.4); opacity: 0.7; }
-        }
+@keyframes floatDot {
+  0%, 100% { transform: translateY(0px) scale(1); opacity: 1; }
+  50% { transform: translateY(-8px) scale(1.2); opacity: 1; }
+}
         @keyframes twinkleStar {
           0%, 100% { opacity: 0.2; transform: scale(1); }
           50% { opacity: 0.8; transform: scale(1.2); }
@@ -2490,10 +3194,11 @@ d.innerHTML = `
     ${weatherHtml}
   </div>
   ${starHtml}
-  <div id="appgrid">
-    ${clockHtml}
-    ${appsHtml}
-  </div>
+<div id="appgrid">
+  ${clockHtml}
+  ${annivWidgetHtml()}
+  ${appsHtml}
+</div>
 `;
   
   phone.appendChild(d);
@@ -2573,15 +3278,7 @@ function renderWeatherWidget() {
   // ===== 判断当前主题是否为浅色 =====
   var currentSkin = DB.settings.skin || 'fusion';
 var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || currentSkin === 'ghost_troupe');
-  
-  // 根据主题调整透明度系数
-  var opacityMap = {
-    detail: isLight ? 0.75 : 0.35,
-    update: isLight ? 0.65 : 0.3,
-    name:   isLight ? 0.75 : 0.4,
-    desc:   isLight ? 0.9 : 0.7
-  };
-  
+    
   // 图标
   if (iconEl) iconEl.textContent = w.weather.icon || '🌤';
   
@@ -2599,7 +3296,7 @@ var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || curre
   if (descEl) {
     var d = w.weather.desc || '天气宜人';
     descEl.textContent = '「' + d + '」';
-    descEl.style.opacity = opacityMap.desc;
+    descEl.style.opacity = 1;
   }
   
   if (detailEl) {
@@ -2607,7 +3304,7 @@ var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || curre
     if (detail.trim()) {
       detailEl.textContent = detail;
       detailEl.style.display = 'block';
-      detailEl.style.opacity = opacityMap.detail;
+      detailEl.style.opacity = 1;
     } else {
       detailEl.textContent = ' ';
       detailEl.style.display = 'block';
@@ -2617,7 +3314,7 @@ var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || curre
   
   if (nameEl) {
     nameEl.textContent = (w.id === '_placeholder') ? '未关联' : (w.name || '未命名');
-    nameEl.style.opacity = opacityMap.name;
+    nameEl.style.opacity = 1;
   }
   
   if (timeEl && w.weather.updatedAt) {
@@ -2629,7 +3326,7 @@ var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || curre
     else if (mins > 0) timeText = mins + '分钟前';
     else timeText = '刚刚';
     timeEl.textContent = '更新 ' + timeText;
-    timeEl.style.opacity = opacityMap.update;
+    timeEl.style.opacity = 1;
   }
   
   if (dotsEl) {
@@ -7201,7 +7898,6 @@ async function aiPostMoment(cid, silent) {
 // ✅ 正确写法（加上 c.id）
 var picId = await generateImage(imgPrompt, DB.settings.imageModel, c.id);
         imgIds.push(picId);
-		        imgIds.push(picId);
         recordImageSent(cid);   // ← 新增：计入今日额度
 
       } catch (e) {
@@ -7507,7 +8203,7 @@ case 'sticker': {
 
     if (cnt === 0) return;
     // ★★ 打招呼随手拍（30%概率 + 限额控制）★★
-    if (canSendImage(c.id) && Math.random() < 0.4) {
+    if (canSendImage(c.id) && Math.random() < 0.15) {
       try {
         var moodText = parts.filter(function(p){return p.type==='text';}).map(function(p){return p.content;}).join(' ');
         var picId = await makeSnapshot(c.id, moodText);
@@ -8444,13 +9140,15 @@ async function generateMemo(cid) {
 
   try {
     // 直接复用自动版的核心逻辑（真名优先 + 同时更新关系 + 统一prompt）
-    var ok = await generateMemoryForChar(c);
+    var ok = await generateMemoryForChar(c, 'manual');
     renderMemoDetail(c.id);
-    if (ok) {
-      popTip('记忆已更新，关系也同步啦', { icon: '✅', title: '生成完成' });
-    } else {
-      popTip('今天没提炼出新记忆', { icon: 'ℹ️', title: '完成' });
-    }
+if (ok) {
+  popTip('记忆已更新，关系也同步啦', { icon: '✅', title: '生成完成' });
+} else {
+  // 注意：此时如果没有新内容，函数内部已经弹过 "没有新内容" 的提示了
+  // 这里作为兜底，只在不明确的情况下显示
+  popTip('没有生成新的记忆，可能是没有新内容或 API 返回为空', { icon: 'ℹ️', title: '完成' });
+}
   } catch (e) {
     popTip(e.message || '生成失败', { icon: '⚠️', title: '生成失败' });
   } finally {
@@ -11195,8 +11893,23 @@ function openImgQuota(){
 function fillChatImages(){
   document.querySelectorAll('#content img[data-imgid]').forEach(function(img){
     if(img.src) return;
-    var id=img.getAttribute('data-imgid');
-    getImage(id).then(function(b64){ if(b64) img.src=b64; });
+    var id = img.getAttribute('data-imgid');
+    getImage(id).then(function(b64){
+      if(!b64) return;
+
+      // 关键：先判断"设置图片之前"用户是不是贴在底部
+      // 容差 60px：只要接近底部就算"在底部"
+      var wasAtBottom = content.scrollHeight - content.scrollTop - content.clientHeight < 60;
+
+      // onload：图片真正显示、撑开高度后触发
+      img.onload = function(){
+        if(wasAtBottom){
+          content.scrollTop = content.scrollHeight;  // 图片撑高后，补滚到底
+        }
+      };
+
+      img.src = b64;  // 赋值放在 onload 绑定之后
+    });
   });
 }
 
@@ -11302,7 +12015,7 @@ function triggerChatSnapshot(c, parts){
   if(!c || c.mode !== 'online') return;      // 只在线上聊天发，线下小说模式不发
   if(!DB.settings.imageModel) return;
   if(!canSendImage(c.id)) return;            // 限额检查
-  if(Math.random() >= 1) return;          // 概率：25%（测试时改成 >= 1 表示必发）
+  if(Math.random() >= 0.25) return;
 
   var moodText = (parts||[]).filter(function(p){return p.type==='text';})
                             .map(function(p){return p.content;}).join(' ');
@@ -11699,7 +12412,7 @@ function renderAlbum() {
         var avatarStyle = avatar ? 'background-image:url(' + avatar + ')' : '';
         var initial = (displayName !== '📷' && displayName !== '未知') ? displayName[0] : '📷';
 
-        html += '<div class="photo-card" data-imgid="' + it.id + '" onclick="openPhotoViewer(\'' + it.id + '\')">';
+        html += '<div class="photo-card" data-imgid="' + it.id + '" onclick="openPhoto(\'' + it.id + '\')">';
         html += '<img data-imgid="' + it.id + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
         html += '<div class="photo-meta">';
         html += '<span class="photo-avatar" style="' + avatarStyle + '">' + (avatar ? '' : initial) + '</span>';
