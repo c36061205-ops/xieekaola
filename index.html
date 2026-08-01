@@ -804,7 +804,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER='v801';
+const APP_VER='v0801';
 // ===== 版本缓存控制（每次更新改 APP_VER 即可） =====
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
@@ -6558,6 +6558,8 @@ function delContactById(id){
     }
     DB.contacts=DB.contacts.filter(c=>c.id!==id);
     delete DB.chats[id];
+	if(DB.imgQuota)  delete DB.imgQuota[id];
+if(DB.imgUsage && DB.imgUsage.counts) delete DB.imgUsage.counts[id];
     save();
     render();
   }, {icon:'🗑️', title:'删除角色'});
@@ -10415,14 +10417,14 @@ function reduceTension(c) {
 }
 
 function applyState(c, text) {
-  var m = text.match(/<state>([\s\S]*?)<\/state>/);
-  if (m) {
+  var re = /<state>([\s\S]*?)<\/state>/g, m;
+  while (m = re.exec(text)) {
     m[1].split(/[,，]/).forEach(function(p) {
       p = p.trim();
       var x;
       if (x = p.match(/好感\s*([+\-]?\d+)/)) {
         c.status.好感度 = clamp(c.status.好感度 + +x[1]);
-		syncClinginess(c);
+        syncClinginess(c);
       } else if (x = p.match(/信任\s*([+\-]?\d+)/)) {
         c.status.信任度 = clamp(c.status.信任度 + +x[1]);
       } else if (x = p.match(/紧张\s*([+\-]?\d+)/)) {
@@ -10431,8 +10433,8 @@ function applyState(c, text) {
         c.status.当前关系 = x[1].trim();
       }
     });
-    text = text.replace(m[0], '').trim();
   }
+  text = text.replace(/<state>[\s\S]*?<\/state>/g, '').trim();
   // 紧张度自然回落：每次AI回复后调用，每30分钟最多降1点
 
   // 清除可能残留的旧式心声标记（心声:1 / 心声：内容 等），交给 aiReply 统一处理
@@ -10856,8 +10858,7 @@ let out = await callAI(messages, getEffectiveChatModel(c));
     out = applyState(c, out);
 
     // ---- 8. 解析 AI 回复 (使用新解析器) ----
-    // 1. 先处理 <state> 标签（因为它不是消息内容，是元数据）
-    out = applyState(c, out);
+    // 1. <state> 标签已在上面处理过，这里不再重复调用
 
     // 2. 检测纯文本指令 [见面|地点] 和 [回线上|]
     // 注意：这些指令通常夹杂在文本中，我们需要在解析前或解析后处理。
@@ -12065,7 +12066,7 @@ function recordImageSent(cid){
   save();
 }
 function openImgQuota(){
-  var chars = DB.contacts || [];
+  var chars = (DB.contacts || []).filter(function(c){ return !c._draft; });
   var opts = [
     {v:'every', t:'每条都发（测试）'},
     {v:'2', t:'一天最多2次'},
@@ -12221,17 +12222,21 @@ async function makeSnapshot(cid, moodText){
 
 }
 // ===== 聊天随手拍：文字秒回后，后台悄悄配图（不阻塞用户）=====
+var _snapLock = {};
+
 function triggerChatSnapshot(c, parts){
-  if(!c || c.mode !== 'online') return;      // 只在线上聊天发，线下小说模式不发
+  if(!c || c.mode !== 'online') return;
   if(!DB.settings.imageModel) return;
-  if(!canSendImage(c.id)) return;            // 限额检查
+  if(!canSendImage(c.id)) return;
+  if(_snapLock[c.id]) return;
   if(Math.random() >= 0.25) return;
 
   var moodText = (parts||[]).filter(function(p){return p.type==='text';})
                             .map(function(p){return p.content;}).join(' ');
+  moodText = stripStateTag(moodText);
   var cid = c.id;
 
-  // ★ 后台异步执行，不 await，不拖慢文字回复 ★
+  _snapLock[cid] = true;
   (async function(){
     try{
       var picId = await makeSnapshot(cid, moodText);
@@ -12241,7 +12246,6 @@ function triggerChatSnapshot(c, parts){
       DB.chats[cid].push(imgMsg);
       recordImageSent(cid);
       save();
-      // 生成好时，用户如果还在这个聊天 → 当场补一张；已离开 → 标未读红点
       if(view.type==='chat' && view.id===cid){
         appendBubble(getC(cid), imgMsg);
         fillChatImages();
@@ -12250,6 +12254,7 @@ function triggerChatSnapshot(c, parts){
         markChatUnread(cid, 1);
       }
     }catch(e){ console.warn('聊天配图失败', e); }
+    finally{ _snapLock[cid] = false; }
   })();
 }
 
