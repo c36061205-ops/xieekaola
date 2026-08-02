@@ -7012,7 +7012,11 @@ html += foldEnd;
     } else {
       html += '<button class="btn" onclick="leaveEdit()">✅ 完成 / 保存</button>';
     }
-	html += '<button class="btn gray" onclick="userBlockChar(\'' + c.id + '\')" style="margin-top:6px;">🔇 拉黑此角色</button>';
+if (c.isBlockedByUser) {
+  html += '<button class="btn gray" onclick="userUnblockChar(\'' + c.id + '\')" style="margin-top:6px;">🔓 解除拉黑</button>';
+} else {
+  html += '<button class="btn gray" onclick="userBlockChar(\'' + c.id + '\')" style="margin-top:6px;">🔇 拉黑此角色</button>';
+}
     html += '</div>';
 
   } else if (edModule === 'me') {
@@ -8153,7 +8157,7 @@ async function checkAutoGreet() {
     checkTimeDecay(c);
 
     // ===== 保留原有：被角色拉黑，跳过主动问候 =====
-    if (c.isBlockedByChar) continue;
+    if (c.isBlockedByChar || c.isBlockedByUser) continue;
 
     // ===== 保留原有：基本过滤条件 =====
     if (c._draft || !c.inChatList || c.activity === '关' || c.allowAutoGreet === false) continue;
@@ -8203,7 +8207,7 @@ async function checkAutoGreet() {
 }
 async function doAutoGreet(c, slot) {
   // ===== 1. 前置检查 =====
-  if (c.isBlockedByChar) return;
+  if (c.isBlockedByChar || c.isBlockedByUser) return;
   const model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
   if (!model) {
     console.warn('自动问候：没有可用模型，跳过');
@@ -9823,6 +9827,12 @@ function renderChat(keepScroll) {
       '<button class="cbtn send" style="padding:4px 12px;height:28px;font-size:12px;" onclick="unblockChar(\'' + c.id + '\')">💗 立即解锁</button>' +
       '</div>';
   }
+  else if (c.isBlockedByUser) {
+    bannerHtml = '<div style="padding:6px 12px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text);flex-wrap:wrap;gap:6px;">' +
+      '<span>🚫 你已拉黑 ' + (c.nick || c.name) + '，TA 看得到但无法回复你</span>' +
+      '<button class="cbtn send" style="padding:4px 12px;height:28px;font-size:12px;" onclick="userUnblockChar(\'' + c.id + '\')">解除拉黑</button>' +
+      '</div>';
+  }
 
   var inputHtml = '<div id="inputRow">' +
     '<span class="cbtn plus" onclick="togglePanel()">＋</span>' +
@@ -10335,14 +10345,16 @@ function openMsgMenu(id, isMe){
     } else {
       btns += '<div style="text-align:center;color:var(--sub);font-size:13px;padding:6px 0;border-bottom:1px solid var(--line);">已超过5分钟，无法撤回</div>';
     }
-    btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\', true)">🗑️ 单条删除</button>';
+    btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\', true)">🗑️ 删除本条</button>';
+    btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\')">🧹 删除此条及以后</button>';
   } else {
     btns += '<button class="btn" onclick="closeModal();regenMsg(\'' + id + '\')">🔄 让TA重新回复</button>';
     // ★ 新增：编辑按钮（仅纯文本且未撤回）
     if (m.type === 'text' && !m.recalled) {
         btns += '<button class="btn" onclick="closeModal();editMessage(\'' + id + '\')">✏️ 编辑</button>';
     }
-    btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\', true)">🗑️ 单条删除</button>';
+    btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\', true)">🗑️ 删除本条</button>';
+    btns += '<button class="btn gray" onclick="closeModal();delMsg(\'' + id + '\')">🧹 删除此条及以后</button>';
   }
   
   var mo = document.createElement('div');
@@ -10767,6 +10779,17 @@ async function aiReply(nudge) {
   if (replying) return;
 
   const c = getC(view.id);
+    // 新增：用户拉黑了对方 → 对方无法回复
+  if (c && c.isBlockedByUser) {
+    popTip('你已拉黑对方，TA 无法回复你。', {icon:'🚫', title:'已拉黑'});
+    return;
+  }
+  // 建议顺带：对方拉黑了你 → 也无法回复
+  if (c && c.isBlockedByChar) {
+    popTip('对方已拉黑你，暂时无法回复。', {icon:'🔇', title:'被拉黑'});
+    return;
+  }
+
 if (!getEffectiveChatModel(c)) {
     alert('请先在 设置 里拉取并选择模型（或为此角色选择模型）');
     return;
@@ -10854,8 +10877,11 @@ if (!getEffectiveChatModel(c)) {
     if (nudge) messages.push({ role: 'user', content: nudge });
 
     // ---- 7. 调用 AI ----
+console.log('准备调用 callAI，消息条数：', messages.length);   // 新增
 let out = await callAI(messages, getEffectiveChatModel(c));
-    out = applyState(c, out);
+console.log('callAI 返回内容：', out);   // 新增
+out = applyState(c, out);
+
 
     // ---- 8. 解析 AI 回复 (使用新解析器) ----
     // 1. <state> 标签已在上面处理过，这里不再重复调用
@@ -11049,16 +11075,18 @@ addCoins(_reward);
     // ★★ 聊天随手拍：文字发完后，后台悄悄配图（不阻塞）★★
     triggerChatSnapshot(c, parts);
   } catch (e) {
-    alert('回复失败：' + e.message);
+    console.error('aiReply 出错：', e);   // 新增：把错误打到控制台
+    alert('回复失败：' + (e && e.message ? e.message : e));
+  } finally {
+    // ---- 13. 恢复 UI（finally 保证：无论成功、报错、还是卡住返回，都会执行）----
+    tbTitle.textContent = c.nick || c.name;
+    replying = false;
+    const b2 = document.getElementById('actBtn');
+    if (b2) b2.disabled = false;
+    updateActBtn();
   }
-
-  // ---- 13. 恢复 UI ----
-  tbTitle.textContent = c.nick || c.name;
-  replying = false;
-  const b2 = document.getElementById('actBtn');
-  if (b2) b2.disabled = false;
-  updateActBtn();
 }
+
 function closeTransferModal() {
   var el = document.getElementById('transferModal');
   if (el) el.remove();
@@ -11135,7 +11163,7 @@ function userBlockChar(id) {
   var c = getC(id);
   if (!c) return;
   if (c.isBlockedByUser) {
-    popTip('如需解除请到编辑页操作。', {icon:'🚫', title:'已拉黑 '+(c.nick||c.name)});
+    popTip('可在聊天顶部或编辑页解除。', {icon:'🚫', title:'已拉黑 '+(c.nick||c.name)});
     return;
   }
   popConfirm('拉黑后 TA 不会主动找你，聊天框会显示提示。', function(){
@@ -11146,6 +11174,23 @@ function userBlockChar(id) {
     popTip('已拉黑 '+(c.nick||c.name), {icon:'🚫', title:'完成'});
   }, {icon:'🚫', title:'确定拉黑 '+(c.nick||c.name)+'？'});
 }
+function userUnblockChar(id) {
+  var c = getC(id);
+  if (!c || !c.isBlockedByUser) return;
+  popConfirm('解除对 ' + (c.nick || c.name) + ' 的拉黑？解除后可以正常收发消息。', function(){
+    c.isBlockedByUser = false;
+    c.blockedByUserAt = 0;
+    save();
+    // 根据当前所在页面刷新
+    if (view.type === 'chat' && view.id === id) {
+      renderChat();
+    } else {
+      renderCharEdit();
+    }
+    popTip('已解除拉黑', {icon:'🔓', title:'完成'});
+  }, {icon:'🔓', title:'解除拉黑'});
+}
+
 function proposeMeet(c,place){
   var where=place?('（'+place+'）'):'';
   var mo=document.createElement('div');mo.className='modal';mo.id='modal';
