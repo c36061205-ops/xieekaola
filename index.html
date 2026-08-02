@@ -9553,8 +9553,10 @@ s += '【示例】"……她把你送到楼下，挥挥手：\'到家发我消�
   s += `这条规则始终有效，即使你没提钱、即使你觉得不需要，也必须输出其中一个标记。\n`;
 
   // ===== 关系变化状态 + 可选标记 =====
-  s += `\n【必须遵守】回复最末尾另起一行输出关系变化，严格格式：<state>好感±N,信任±N,紧张±N,关系:文字</state>（无变化填0）。\n`;
-  s += `【可选标记】如果你内心有强烈想说但没说出口的话，在 state 里加上 心声:1（有一点）或 心声:2（非常强烈），系统会检测到并在聊天界面显示提示。`;
+  if (c.mode === 'online') {
+    s += `\n【必须遵守】回复最末尾另起一行输出关系变化，严格格式：<state>好感±N,信任±N,紧张±N,关系:文字</state>（无变化填0）。\n`;
+    s += `【可选标记】如果你内心有强烈想说但没说出口的话，在 state 里加上 心声:1（有一点）或 心声:2（非常强烈），系统会检测到并在聊天界面显示提示。`;
+  }
 
   // ===== 特殊消息格式保留指令（不可覆盖，放最后再次强化） =====
   s += `\n【特殊消息格式保留指令·不可覆盖】\n`;
@@ -10879,7 +10881,6 @@ if (!getEffectiveChatModel(c)) {
     // ---- 7. 调用 AI ----
 console.log('准备调用 callAI，消息条数：', messages.length);   // 新增
 let out = await callAI(messages, getEffectiveChatModel(c));
-alert('【诊断·AI返回】' + JSON.stringify(out).slice(0, 300));   // ← 临时诊断
 
 console.log('callAI 返回内容：', out);   // 新增
 out = applyState(c, out);
@@ -10906,12 +10907,12 @@ out = applyState(c, out);
             narr = narr.replace(/\[回线上[|｜]?\s*\]/g, '').trim();
         }
         // 清理混入的微信标记（线下不该出现）
-        narr = narr.replace(/\[(语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物)[^\]]*\]/g, '').trim();
-        parts = narr ? [{ type: 'text', content: narr }] : [];
-    } else {
-        parts = parseAIMessage(out);
-    }
+ narr = narr.replace(/<state>[\s\S]*?<\/state>/g, '').trim();   // 新增：清 state（连带心声）
+    narr = narr.replace(/心声\s*[:：]\s*\d+/g, '').trim();   // 新增：清冒号格式的心声
 
+    narr = narr.replace(/\[(语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物)[^\]]*\]/g, '').trim();
+    parts = narr ? [{ type: 'text', content: narr }] : [];
+}
     // ---- 9. 逐段处理解析结果 ----
     for (let i = 0; i < parts.length; i++) {
         const part = parts[i];
