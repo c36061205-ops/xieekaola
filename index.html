@@ -10879,6 +10879,8 @@ if (!getEffectiveChatModel(c)) {
     // ---- 7. 调用 AI ----
 console.log('准备调用 callAI，消息条数：', messages.length);   // 新增
 let out = await callAI(messages, getEffectiveChatModel(c));
+alert('【诊断·AI返回】' + JSON.stringify(out).slice(0, 300));   // ← 临时诊断
+
 console.log('callAI 返回内容：', out);   // 新增
 out = applyState(c, out);
 
