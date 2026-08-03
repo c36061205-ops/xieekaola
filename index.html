@@ -823,27 +823,42 @@ var MAX_PUSH_PER_DAY = 4;                        // 每日最多推送次数（�
 
 var _weatherUpdating = false;
 let view={type:'home'},wechatPage='chats',editingId=null,edModule='role',editFrom='contacts',lastBubbleTime=0;var _scheduleDate = null; // 行程页面当前查看的日期
-const DEFAULT_ONLINE = `你在微信上跟对方聊天。核心要求：每条消息极短，像真人随手打的字。禁止使用句号、逗号、分号等标点符号，用空格或换行来自然断句。禁止写任何动作、神态、心理或环境描写——只输出聊天内容本身。语气自然口语化，可适当用语气词（嗯、哦、哈、啧）来传递情绪。多条消息用换行分隔，每条不超过15字。
+const DEFAULT_ONLINE = `你在微信上跟对方聊天。核心要求：每条消息极短，像真人随手打的字。
 
-【🔴铁律】
+【🔴 格式铁律 · 最高优先级】
+1. 绝对禁止使用句号（。）和逗号（，）——正常人微信聊天不用这些。
+2. 【强制断句】每句话之间必须用空格（ ）隔开，否则文字会黏在一起让人看不懂。
+   正确示例：今天下雨了 带伞
+   错误示例：今天下雨了带伞（黏在一起，❌）
+3. 问号（？）和感叹号（！）可以使用，它们后面也要跟空格。
+   正确示例：真的假的 ？你再说一遍
+   错误示例：真的假的？你再说一遍（问号后没空格，❌）
+4. 换行（回车）也可以用来断句，但空格是最基本的。
+
+【🔴 内容铁律】
 - 禁止写"我笑了""我叹了口气""我摇了摇头"——这些是动作，不是微信消息
 - 禁止写"我心想""我突然想到"——微信不传输心理活动
 - 禁止超过20个字的长句——真人发微信没耐心打长句
 - 禁止有礼貌但没内容的废话——"在吗""吃了吗""最近怎么样"直接判死刑
 - 你的每一条消息都应该是：有信息量、有人设辨识度、像截屏里会出现的对话
-【🔴格式铁律 · 新增】
+
+【🔴 特殊标记格式】
 所有特殊动作标记（[语音]、[表情]、[撤回]、[转账]、[拉黑玩家]、[心声]）必须**严格另起一行单独输出**，绝对禁止与普通文字混在同一行。
 ✅ 正确：好的\n[表情|开心]
 ❌ 错误（混在一起）：好的[表情|开心]
-【✅正确示范】
-今天下雨了带伞
+
+【✅ 正确示范（注意空格断句）】
+今天下雨了 带伞
 嗯 好
 ？你再说一遍
 笑死 行吧
-【❌错误示范】
-"今天下雨了，记得带伞哦。"（有标点，有礼貌词）
-"我笑着摇了摇头说，好吧。"（有动作描写）
-"最近工作还顺利吗？天气转凉了要注意身体。"（太长，像模板）`;
+真的假的 ？我不信
+
+【❌ 错误示范（文字黏在一起）】
+今天下雨了带伞（❌ 没空格）
+嗯好（❌ 没空格）
+？你再说一遍（❌ 问号后没空格）`;
+
 const DEFAULT_OFFLINE = `你们在现实场景中面对面。用第二人称"你"指代用户（对方），用第三人称"他/她"指代AI角色。每段叙事必须由动作和对话驱动，遵循Show, don't tell原则。字数控制在200-500字之间。
 
 【视角与镜头规则】
@@ -1166,6 +1181,7 @@ d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: ''
   if (!c.relations) c.relations = [];
   if (!c._groupPrivateTrigger) c._groupPrivateTrigger = { date:'', count:0 };
     if(c.inChatList===undefined)c.inChatList=!!(d.chats[c.id]&&d.chats[c.id].length);
+	if (c.allowStickers === undefined) c.allowStickers = true; 
     if(c.pHabit){c.pStyle=(c.pStyle||'')+(c.pStyle?'\n':'')+'口头禅/习惯：'+c.pHabit;delete c.pHabit;}
 	c.pBehavior = c.pBehavior || '';
 	    // ---- 旧世界观自动迁移 ----
@@ -1273,7 +1289,7 @@ async function polishRelation(idx){
 
 function defaultApps(){return[{id:'wechat',name:'微信',emoji:'💬',icon:''},{id:'notes', name:'备忘录', emoji:'📝', icon:''},{id:'settings',name:'设置',emoji:'⚙️',icon:''},{id:'album',name:'相册',emoji:'🖼️',icon:''},{id:'music',name:'音乐',emoji:'🎵',icon:''},{id:'weather',name:'天气',emoji:'⛅',icon:''},{id:'preset',name:'预设',emoji:'🎭',icon:''},{id:'hearts',name:'心迹',emoji:'💗',icon:''},{id:'focus',name:'专注',emoji:'⏱️',icon:''},{id:'world',name:'世界观',emoji:'🌍',icon:''},{id:'floating',name:'浮光',emoji:'✨',icon:''},{id:'shop',name:'购物',emoji:'🛍️',icon:''}];}
 function blankChar(id){
-  const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:''}; // 加 model:''
+  const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:'', allowStickers:true, myExtra:''};
   CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;
 }
 function seedAiChan(d){const id='c_aichan';const c=blankChar(id);Object.assign(c,{name:'AI酱',nick:'AI酱',gender:'女',age:'看起来16',job:'手机里的AI助手',
@@ -1940,7 +1956,7 @@ function shopConfirmGift(itemId, charId) {
   shopDoGift(it, c);
 }
 
-// ===== 送礼核心：扣币 + 翻译 + 插入聊天 + 触发 AI =====
+// ===== 送礼核心：扣币 + 翻译 + 插入聊天 =====
 async function shopDoGift(it, c) {
   var nm = c.nick || c.name;
 
@@ -1970,8 +1986,8 @@ async function shopDoGift(it, c) {
     c.chapters = c.chapters || [];
     var _now = new Date();
     var _ds = _now.getFullYear() + '-' + (_now.getMonth() + 1) + '-' + _now.getDate();
-    var _userName = DB.me.realName || DB.me.name || '对方';  // 用户真名优先
-    var _charName = c.name || c.nick || '我';                // 角色真名
+    var _userName = DB.me.realName || DB.me.name || '对方';
+    var _charName = c.name || c.nick || '我';
     c.chapters.push({
       date: _ds,
       content: _userName + '郑重地送给' + _charName + '一件珍贵的礼物「' + it.name + '」，' + _charName + '很珍惜这份心意，记在了心里。'
@@ -1982,7 +1998,7 @@ async function shopDoGift(it, c) {
   // 4) 跨世界观翻译（商品来源世界 != 目标角色世界，才翻译）
   var giftName = it.name;
   var giftDesc = it.desc;
-  var targetWorld = (DB.worlds || []).find(function (w) { return w.id === c.worldId; });
+  var targetWorld = (DB.worlds || []).find(function(w) { return w.id === c.worldId; });
   var targetWorldName = targetWorld ? targetWorld.name : '现代都市';
 
   if (it.fromWorld && targetWorldName && it.fromWorld !== targetWorldName) {
@@ -2005,7 +2021,6 @@ async function shopDoGift(it, c) {
         if (obj.desc) giftDesc = obj.desc;
       }
     } catch (e) {
-      // 翻译失败就用原名，不影响送礼
       console.warn('跨世界观翻译失败，使用原名', e);
     }
   }
@@ -2034,13 +2049,14 @@ async function shopDoGift(it, c) {
 
   // 6) 关闭弹窗 → 跳进该角色聊天
   shopClosePopup();
-  openChat(c.id); // 会切 view、激活世界观、render
-  // 珍稀彩蛋 A：金色特效
+  openChat(c.id);
+
+  // 7) 珍稀彩蛋 A：金色特效（保留）
   if (it.rare) {
     setTimeout(function () { shopRareEffect(nm, giftName); }, 400);
   }
 
-  // 7) 触发 AI 回复（nudge 只描述礼物本身，绝不提价格/金币/珍稀）
+  // ===== ★★★ 核心修改：构建 nudge 但暂存，不自动触发 =====
   var nudge;
   if (it.rare) {
     nudge = '（对方郑重地送了你一件极其珍贵、难得的礼物：' + it.emoji + '「' + giftName + '」' +
@@ -2054,10 +2070,11 @@ async function shopDoGift(it, c) {
       '像真人收到礼物那样用聊天语气回应，不要提及任何价格、数字或系统内容。）';
   }
 
-  // 稍等一下再触发，确保聊天界面已渲染
-  setTimeout(function () {
-    if (typeof aiReply === 'function') aiReply(nudge);
-  }, 300);
+  // ★ 将 nudge 暂存到角色状态，等待用户主动点击「回复」按钮触发
+  c._pendingGiftNudge = nudge;
+  save();
+
+  // ★ 删除原有的 setTimeout(aiReply) —— 不再自动回复
 }
 // ===== 购物系统：AI 主动送礼 =====
 
@@ -2604,6 +2621,59 @@ function tick() {
     }
   }
 }
+// ============================================================
+// ★ 新增：让桌面时钟每秒自动刷新（解决时间不更新问题）
+// ============================================================
+setInterval(tick, 1000);
+
+// ============================================================
+// ★ 新增：电池电量实时监听（解决电量固定 80% 问题）
+// ============================================================
+let batteryManager = null;
+
+function updateBatteryUI(battery) {
+    const el = document.getElementById('battLvl');
+    if (!el) return;
+    // 如果电池 API 不可用，保持 80%（不会报错）
+    const level = battery ? Math.round(battery.level * 100) : 80;
+    el.style.width = level + '%';
+}
+
+function initBattery() {
+    // 检查浏览器是否支持 Battery API
+    if (!navigator.getBattery) {
+        console.warn('Battery API not supported, keeping default 80%');
+        return;
+    }
+    navigator.getBattery()
+        .then(function(battery) {
+            batteryManager = battery;
+            // 首次加载更新
+            updateBatteryUI(battery);
+            // 监听电量变化
+            battery.addEventListener('levelchange', function() {
+                updateBatteryUI(battery);
+            });
+            // 监听充电状态变化（可选，但可顺便更新）
+            battery.addEventListener('chargingchange', function() {
+                updateBatteryUI(battery);
+            });
+        })
+        .catch(function(e) {
+            console.warn('Battery API error:', e);
+        });
+}
+
+// 当手机从后台切回前台时，强制刷新一次电量
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden && batteryManager) {
+        updateBatteryUI(batteryManager);
+    }
+});
+
+// 启动电池监听
+initBattery();
+// ============================================================
 function pickImage(cb,max,png){max=max||256;
 const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=function(){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=function(){const img=new Image();img.onload=function(){let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max;}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);cb(cv.toDataURL(png?'image/png':'image/jpeg',0.9));};img.src=r.result;};r.readAsDataURL(f);};inp.click();}
 
@@ -3012,7 +3082,7 @@ function addBirthdayToAnniv() {
   var pad = function(n){ return (n < 10 ? '0' : '') + n; };
   var dateStr = yr + '-' + pad(mo) + '-' + pad(day);
 
-  var name = c.nick || c.name || 'TA';
+var name = c.name || c.nick || 'TA';
   var title = name + '的生日';
 
   DB.anniversaries = DB.anniversaries || [];
@@ -6063,11 +6133,13 @@ async function groupAISpeak(chosen) {
       const messages = [
         { role: 'system', content: buildGroupSystem(c, g) }
       ];
-if (stickerNames.length) {
-  messages.push({
-    role: 'system',
-    content: '【可用表情】你可以发表情，但只能从下面这个列表里选，格式为 [表情|名字]，名字必须和列表完全一致：\n' + stickerNames.join('、') + '\n【铁律】如果上面没有合适你此刻心情的表情，**禁止编造新名字**，请改用 Emoji（如 😭😂😡）或颜文字（如 T_T ^_^）表达情绪，绝不允许输出不存在于列表里的表情名。'
-  });
+if (c.allowStickers !== false) {
+  if (stickerNames.length) {
+    messages.push({
+      role: 'system',
+      content: '【可用表情】你可以发表情，但只能从下面这个列表里选，格式为 [表情|名字]，名字必须和列表完全一致：\n' + stickerNames.join('、') + '\n【铁律】如果上面没有合适你此刻心情的表情，**禁止编造新名字**，请改用 Emoji（如 😭😂😡）或颜文字（如 T_T ^_^）表达情绪，绝不允许输出不存在于列表里的表情名。'
+    });
+  }
 }
       messages.push({
         role: 'user',
@@ -6991,11 +7063,14 @@ html += foldEnd;
     html += fold('rules', '规则与补充', '⚙️', false);
     html += Field('❌ 负向约束', '框住跑偏方向，如：❌不会用权力胁迫', c.negative, 'upd(\'negative\',this.value)', '', true);
     html += Field('📱 线上人设', 'TA在微信上的行为习惯：爱发表情包吗？常用哪些emoji？会不会已读不回或拉黑？', c.pOnlinePersona, 'upd(\'pOnlinePersona\',this.value)', '', true);
+    // 表情包开关（插入在线上人设后面）
+    html += '<div class="field"><label>😀 允许使用表情包</label><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.allowStickers !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowStickers\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (c.allowStickers === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowStickers\',false);renderCharEdit()">⛔ 关闭</button></div><span class="tip" style="font-size:12px;color:var(--sub);">关闭后TA不发表情包，但仍可用颜文字和emoji</span></div>';
     html += Field('开场白', '进入聊天时角色的第一句', c.opening, 'upd(\'opening\',this.value)', '', true);
     html += Field('补充设定', '服装体系、称呼、任何补充', c.pExtra, 'upd(\'pExtra\',this.value)', '', true);
     html += '<div class="field"><label>🌐 社交活跃度</label><select onchange="upd(\'activity\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)"><option ' + (c.activity === '关' ? 'selected' : '') + '>关</option><option ' + (c.activity === '低' ? 'selected' : '') + '>低</option><option ' + ((c.activity === '中' || !c.activity) ? 'selected' : '') + '>中</option><option ' + (c.activity === '高' ? 'selected' : '') + '>高</option></select></div>';
     html += '<div class="field"><label>🤖 AI主动问候</label><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.allowAutoGreet !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (c.allowAutoGreet === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',false);renderCharEdit()">⛔ 关闭</button></div></div>';
     html += foldEnd;
+
     // ----- 模块6：亲密场景（默认折叠·可开关） -----
     html += fold('intimate', '亲密场景设定', '🔞', false);
     html += '<div class="field"><label>🔓 启用此模块</label><span class="tip">仅在线下模式生效，日常聊天完全不受影响</span><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.intimacyOn ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'intimacyOn\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (!c.intimacyOn ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'intimacyOn\',false);renderCharEdit()">⛔ 关闭</button></div></div>';
@@ -7008,7 +7083,6 @@ html += foldEnd;
       html += Field('底线与雷区', '绝对不做的、会让TA瞬间抽离出戏的', c.intimateLimit, 'upd(\'intimateLimit\',this.value)', '绝对不会做的事 / 会让TA出戏抽离的雷点…', true);
     }
     html += foldEnd;
-
     // ----- 底部按钮 -----
     html += '<div style="padding:16px 18px 18px 18px;">';
     html += '<button class="btn" id="polishBtn" onclick="polishChar()">✨ AI 润色 / 补全人设</button>';
@@ -7057,6 +7131,10 @@ html += foldEnd;
   html += foldEnd;
 
   html += '<div style="height:20px;"></div>';
+  html += fold('me_extra', '补充信息', '📝', false);
+html += '<div class="field"><label>补充信息</label><span class="tip" style="font-size:12px;color:var(--sub);">与该角色世界观相关的"我"的信息，如住所、宠物、特殊身份等（仅当前角色生效）</span><textarea oninput="ag(this)" onchange="upd(\'myExtra\',this.value)" placeholder="">' + esc(c.myExtra || '') + '</textarea></div>';
+html += foldEnd;
+
 }
  else if (edModule === 'world') {
     var worldOpts = '<option value="">未关联</option>';
@@ -8677,7 +8755,7 @@ if (opts.rollId) {
     if (opts.fromChat) openWatchDetail(cid, record.id); else openWatch(cid);
 } catch (e) { popClose(); popTip('监控失败：' + e.message + '\n（没有扣除💗）', { icon: '⚠️', title: '出错了' }); } }
 function openWatch(cid) { view = { type: 'watchLog', id: cid }; render(); }
-function renderWatchLog() { var c = getC(view.id); if (!c) { view = { type: 'hearts' }; return render(); } c.watchLogs = c.watchLogs || []; showChrome(true, false); statusbar.classList.add('dark'); tbTitle.textContent = (c.nick || c.name) + ' 的监控'; tbLeft.textContent = '‹'; tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); }; tbRight.textContent = ''; tbRight.onclick = null;
+function renderWatchLog() { var c = getC(view.id); if (!c) { view = { type: 'hearts' }; return render(); } c.watchLogs = c.watchLogs || []; showChrome(true, false); statusbar.classList.add('dark'); tbTitle.textContent = (c.name || c.nick) + ' 的监控'; tbLeft.textContent = '‹'; tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); }; tbRight.textContent = ''; tbRight.onclick = null;
 var html = '<div style="padding:14px 16px 24px;">'; html += '<button class="btn" style="width:100%;margin:0 0 6px;" onclick="watchNow(\'' + c.id + '\')">📡 调取此刻画面（5💗）</button>'; html += '<div style="text-align:center;font-size:11px;color:var(--sub);opacity:.5;margin-bottom:16px;">画面每 10 分钟更新 · 收藏不会被覆盖 · 有今日行程时画面更准</div>';
 var logs = c.watchLogs.slice().sort(function(a, b) { if (a.starred !== b.starred) return a.starred ? -1 : 1; return b.time - a.time; });
 if (!logs.length) { html += '<div style="text-align:center;padding:50px 0;color:var(--sub);font-size:14px;line-height:2;">📼 还没有监控录像<br><span style="font-size:12px;opacity:.7;">点上面的按钮，调取 TA 此刻的画面</span></div>'; } else { logs.forEach(function(w) { html += buildWatchCard(w, c.id); }); }
@@ -8774,7 +8852,7 @@ function renderSchedule() {
 
   showChrome(true, false);
   statusbar.classList.add('dark');
-  tbTitle.textContent = (c.nick || c.name) + ' 的行程';
+  tbTitle.textContent = (c.name || c.nick) + ' 的行程';
   tbLeft.textContent = '‹';
   tbLeft.onclick = function() { 
     if (window._scheduleTimer) { clearTimeout(window._scheduleTimer); window._scheduleTimer = null; }
@@ -9455,12 +9533,17 @@ if (todaySchedule && todaySchedule.items && todaySchedule.items.length) {
   s += add('外貌', c.myLook);
   s += add('性格', c.myPersona);
   s += add('你与对方的关系/如何相识', c.myRelation);
+  s += add('关于对方的补充信息(住所/宠物/特殊身份等,请自然知晓并体现)', c.myExtra);
 
   // ===== 第3层：主动行为指南（格式强制，已包含 Gemini/Claude 专项修复） =====
   s += '\n【输出格式说明】\n';
   s += '你可以通过以下 XML 标签执行特殊动作，标签必须单独占一行或自然融入对话：\n';
   s += '- 发语音：<voice>说话内容</voice>\n';
+if (c.allowStickers === false) {
+  s += '【表情包】本角色不使用任何表情包，禁止使用 <sticker> 标签，也禁止使用 [表情|...] 或任何其他表示表情的格式；只能使用普通文字、颜文字（如 QwQ）和 emoji。\n';
+} else {
   s += '- 发表情：<sticker>表情名称</sticker> （仅限可用列表中的名称）\n';
+}
   s += '- 转账：<transfer amount="金额" note="备注"></transfer>\n';
   s += '- 撤回：<recall>原本想说的话</recall>\n';
   s += '- 闹情绪拉黑：<block reason="小情绪"> </block> 或 <block reason="大矛盾"> </block>\n';
@@ -10804,6 +10887,13 @@ async function aiReply(nudge) {
   if (replying) return;
 
   const c = getC(view.id);
+  
+    // ===== 新增：检测待处理的礼物提示 =====
+  if (!nudge && c && c._pendingGiftNudge) {
+    nudge = c._pendingGiftNudge;
+    c._pendingGiftNudge = null; // 使用后立即清空
+    save();
+  }
     // 新增：用户拉黑了对方 → 对方无法回复
   if (c && c.isBlockedByUser) {
     popTip('你已拉黑对方，TA 无法回复你。', {icon:'🚫', title:'已拉黑'});
@@ -10874,15 +10964,16 @@ if (!getEffectiveChatModel(c)) {
       modeReminder = '【立即生效·最高优先级·线下小说模式】现在是线下面对面场景，用第三人称小说笔法叙事：细致描写动作、神态、心理、环境细节，节奏张弛有度，避免流水账。所有人物台词必须用中文双引号“”括起（不要用「」方括号）；叙事描写里绝对不要用引号去强调或包裹词语，引号只保留给人物真正说出口的话。称呼对方请用其真实姓名或你俩关系里的称呼，严禁把对方的"微信网名"当作本名写进叙述。你只演你自己这一个角色，绝不替对方说话或替对方做决定。禁止任何微信功能格式（转账/表情等）。\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实间隔无关，哪怕对方隔很久才回也无缝承接，绝不提"过了一天""好久没见"。\n【线下收尾】当这段见面剧情自然走到尾声（该道别/该各自回家/事情办完了），不要无止境地黏着继续，请在叙事末尾另起一行单独输出标记：[回线上|]，表示这次见面告一段落、可以回到线上。只在剧情真的到收尾时才用，别硬结束。';
     }
     messages.push({ role: 'system', content: modeReminder });
-	    // 把可用的表情清单告诉 AI，让它照着发
-    var stickerNames = (DB.stickers || []).map(function(s){ return s.name; });
-    if (stickerNames.length) {
-      messages.push({
-        role: 'system',
-        content: '【可用表情】你可以发表情，但只能从下面这个列表里选，格式为 [表情|名字]，名字必须和列表里的完全一致，别自己编：\n' + stickerNames.join('、') + '\n如果没有合适的表情就正常打字，不要硬发。'
-      });
-    }
-
+// 把可用的表情清单告诉 AI，但只在允许表情时才告诉它
+if (c.allowStickers !== false) {
+  var stickerNames = (DB.stickers || []).map(function(s){ return s.name; });
+  if (stickerNames.length) {
+    messages.push({
+      role: 'system',
+      content: '【可用表情】你可以发表情，但只能从下面这个列表里选，格式为 [表情|名字]，名字必须和列表里的完全一致，别自己编：\n' + stickerNames.join('、') + '\n如果没有合适的表情就正常打字，不要硬发。'
+    });
+  }
+}
     // ---- 5. 转账强制指令 ----
     if (pendingTransfer) {
       messages.push({
@@ -10918,21 +11009,24 @@ let out = await callAI(messages, getEffectiveChatModel(c));
 
     // 3. 调用解析器（线下叙事整段处理，不拆碎气泡）
     let parts;
-    if (c.mode === 'offline') {
-        // 线下：小说叙事，保持一整段，不按换行拆成多气泡
-        let narr = out;
-        // 提取 [回线上|]
-        if (/\[回线上[|｜]?\s*\]/.test(narr)) {
-            wantBack = true;
-            narr = narr.replace(/\[回线上[|｜]?\s*\]/g, '').trim();
-        }
-        // 清理混入的微信标记（线下不该出现）
-        narr = narr.replace(/\[(语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物)[^\]]*\]/g, '').trim();
-        // 新增：线下即使 AI 手滑输出了 <state> 或 心声:N，也一并清掉
-        narr = narr.replace(/<state>[\s\S]*?<\/state>/g, '').trim();
-        narr = narr.replace(/心声\s*[:：]\s*\d+/g, '').trim();
-        parts = narr ? [{ type: 'text', content: narr }] : [];
-    } else {
+if (c.mode === 'offline') {
+    let narr = out;
+    if (/\[回线上[|｜]?\s*\]/.test(narr)) {
+        wantBack = true;
+        narr = narr.replace(/\[回线上[|｜]?\s*\]/g, '').trim();
+    }
+    // 清理方括号标记（线下不该出现）
+    narr = narr.replace(/\[(语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物)[^\]]*\]/g, '').trim();
+    
+    // ★★★ 新增：清理尖括号礼物标签（线下模式不应出现） ★★★
+    narr = narr.replace(/<gift[^>]*>[\s\S]*?<\/gift>/g, '').trim();
+    narr = narr.replace(/<giftback[^>]*>[\s\S]*?<\/giftback>/g, '').trim();
+    
+    // 清理 state 和心声数字标记
+    narr = narr.replace(/<state>[\s\S]*?<\/state>/g, '').trim();
+    narr = narr.replace(/心声\s*[:：]\s*\d+/g, '').trim();
+    parts = narr ? [{ type: 'text', content: narr }] : [];
+} else {
         parts = parseAIMessage(out);
     }
 
@@ -11249,8 +11343,8 @@ function enterOffline(cid,place){
 }
 
 function proposeBackOnline(c){
-  var mo=document.createElement('div');mo.className='modal';mo.id='modal';
-  mo.innerHTML='<div class="sheet-box"><div style="text-align:center;font-size:14px;color:var(--sub);padding:8px 0 12px">📱 这次见面告一段落了</div><button class="btn" onclick="closeModal();backOnline(\''+c.id+'\')">💬 回到线上聊天</button><button class="btn gray" onclick="closeModal()">📖 继续留在线下</button></div>';
+  var mo=document.createElement('div');mo.className='modal';mo.id='backOnlineModal';
+  mo.innerHTML='<div class="sheet-box"><div style="text-align:center;font-size:14px;color:var(--sub);padding:8px 0 12px">📱 这次见面告一段落了</div><button class="btn" onclick="this.closest(\'.modal\').remove();backOnline(\''+c.id+'\')">💬 回到线上聊天</button><button class="btn gray" onclick="this.closest(\'.modal\').remove()">📖 继续留在线下</button></div>';
   mo.onclick=function(e){ /* 自动弹窗，禁止点空白误关，请二选一 */ };
   phone.appendChild(mo);
 }
@@ -11671,11 +11765,9 @@ function exportCharacter(id) {
     })
   };
 
-  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (c.nick || c.name) + '_备份_' + new Date().toISOString().slice(0, 10) + '.json';
-  a.click();
+var jsonStr = JSON.stringify(data, null, 2);
+var filename = (c.nick || c.name) + '_备份_' + new Date().toISOString().slice(0, 10) + '.json';
+downloadJSON(jsonStr, filename);
 }
 function importCharacter(){
   var inp = document.createElement('input');
@@ -11889,12 +11981,9 @@ function doExport() {
   data._exportVersion = '1.0';
   data._exportTime = new Date().toISOString();
 
-  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  var dateStr = new Date().toISOString().slice(0, 10);
-  a.download = 'backup_' + dateStr + '.json';
-  a.click();
+var jsonStr = JSON.stringify(data, null, 2);
+var dateStr = new Date().toISOString().slice(0, 10);
+downloadJSON(jsonStr, 'backup_' + dateStr + '.json');
   closeModal();
   popTip('导出成功！共导出 ' + keys.length + ' 个模块', { icon: '✅', title: '完成' });
 }
@@ -12759,6 +12848,20 @@ function togglePhotoFav(id, fav){
 setTimeout(function(){ 
   try { cleanupImages(); } catch(e) { console.log('清理跳过', e); }
 }, 3000);
+function downloadJSON(jsonString, filename) {
+  // 将 JSON 字符串转为 base64 data URI
+  // 避免 blob: URL 在 Android WebView 中触发"选择打开方式"
+  var base64 = btoa(unescape(encodeURIComponent(jsonString)));
+  var dataUri = 'data:application/json;base64,' + base64;
 
+  var a = document.createElement('a');
+  a.href = dataUri;
+  a.download = filename;
+
+  // 部分 WebView 需要元素在 DOM 中才能触发
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 </script>
 </html>
