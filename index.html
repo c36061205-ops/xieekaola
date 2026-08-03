@@ -12849,16 +12849,29 @@ setTimeout(function(){
   try { cleanupImages(); } catch(e) { console.log('清理跳过', e); }
 }, 3000);
 function downloadJSON(jsonString, filename) {
-  // 将 JSON 字符串转为 base64 data URI
-  // 避免 blob: URL 在 Android WebView 中触发"选择打开方式"
+  // 构造要分享的文件
+  var file = new File([jsonString], filename, { type: 'application/json' });
+
+  // 优先用 Web Share API（Median/Android 原生分享菜单）
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({
+      files: [file],
+      title: filename
+    }).catch(function(err) {
+      // 用户取消分享不报错，其他错误才提示
+      if (err.name !== 'AbortError') {
+        alert('分享失败：' + err.message);
+      }
+    });
+    return;
+  }
+
+  // 降级：data URI 下载（浏览器端）
   var base64 = btoa(unescape(encodeURIComponent(jsonString)));
   var dataUri = 'data:application/json;base64,' + base64;
-
   var a = document.createElement('a');
   a.href = dataUri;
   a.download = filename;
-
-  // 部分 WebView 需要元素在 DOM 中才能触发
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
