@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>麦克风测试 · 优化版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #1a1a1e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            height: 100dvh;
+            margin: 0;
+            padding: 16px;
+            color: #eee;
+        }
+        #app {
+            width: 100%;
+            max-width: 400px;
+            background: #252529;
+            border-radius: 24px;
+            padding: 24px 20px 32px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        h1 {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .sub {
+            font-size: 13px;
+            color: #888;
+            text-align: center;
+            line-height: 1.5;
+            margin-top: -8px;
+        }
+        .status-badge {
+            font-size: 13px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            background: #2a2a30;
+            color: #aaa;
+            transition: 0.3s;
+        }
+        .status-badge.active {
+            background: #1a4a2a;
+            color: #66bb7a;
+        }
+        .status-badge.error {
+            background: #4a1a1a;
+            color: #ef6b6b;
+        }
+
+        .big-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: #2c2c32;
+            color: #fff;
+            font-size: 48px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .big-btn:active {
+            transform: scale(0.92);
+        }
+        .big-btn.listening {
+            background: #2d7a4a;
+            box-shadow: 0 0 40px rgba(45, 122, 74, 0.4);
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+        .big-btn.error {
+            background: #7a2d2d;
+            box-shadow: 0 0 40px rgba(122, 45, 45, 0.4);
+            cursor: not-allowed;
+        }
+        .big-btn.pending {
+            background: #4a4a2a;
+            box-shadow: 0 0 20px rgba(200, 180, 50, 0.2);
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(45, 122, 74, 0.3); }
+            50% { box-shadow: 0 0 60px rgba(45, 122, 74, 0.7); }
+        }
+
+        .log-box {
+            width: 100%;
+            background: #1a1a1e;
+            border-radius: 12px;
+            padding: 14px 16px;
+            min-height: 180px;
+            max-height: 280px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.8;
+            font-family: "SF Mono", "Menlo", monospace;
+            border: 1px solid #333;
+            color: #ccc;
+        }
+        .log-box::-webkit-scrollbar { width: 4px; }
+        .log-box::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+
+        .log-item { padding: 2px 0; border-bottom: 1px solid #2a2a2e; }
+        .log-item:last-child { border-bottom: none; }
+        .log-item .time { color: #666; font-size: 11px; margin-right: 8px; }
+        .log-item .tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 0 6px;
+            border-radius: 4px;
+            margin-right: 6px;
+            font-weight: 600;
+        }
+        .tag.info { background: #2a4a6a; color: #8ab4f8; }
+        .tag.ok { background: #1a4a2a; color: #66bb7a; }
+        .tag.err { background: #5a2a2a; color: #ef6b6b; }
+        .tag.final { background: #3a4a1a; color: #c8d87a; }
+        .tag.interim { background: #3a3a4a; color: #a0a0c8; }
+        .tag.sys { background: #3a3a3a; color: #888; }
+
+        .clear-btn {
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+        .clear-btn:active { background: rgba(255,255,255,0.05); }
+
+        .footer {
+            font-size: 11px;
+            color: #555;
+            text-align: center;
+            margin-top: 4px;
+        }
+        .flex-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .perm-hint {
+            font-size: 12px;
+            color: #888;
+            background: #2a2a30;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <h1>🎤 麦克风测试</h1>
+    <div class="sub">长按说话 · 松开识别</div>
+
+    <!-- 状态指示器 -->
+    <span class="status-badge" id="permBadge">⏳ 准备中...</span>
+
+    <!-- 大按钮 -->
+    <button class="big-btn" id="micBtn">🎙️</button>
+
+    <div class="flex-row">
+        <span style="font-size:12px;color:#666;">📋 实时日志</span>
+        <button class="clear-btn" onclick="clearLog()">清空</button>
+    </div>
+    <div class="log-box" id="logBox">
+        <div class="log-item"><span class="time">系统</span><span class="tag sys">⏳</span> 正在请求麦克风权限...</div>
+    </div>
+
+    <div class="footer">continuous: true · 只问一次权限</div>
+</div>
+
+<script>
+    // ============================================================
+    // 优化版测试：①预先请求权限 ②continuous持续监听 ③防止断句
+    // ============================================================
+
+    const micBtn = document.getElementById('micBtn');
+    const logBox = document.getElementById('logBox');
+    const permBadge = document.getElementById('permBadge');
+
+    // ---------- 工具 ----------
+    function addLog(tag, msg, tagClass = 'info') {
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        const now = new Date();
+        const time = String(now.getHours()).padStart(2, '0') + ':' +
+                     String(now.getMinutes()).padStart(2, '0') + ':' +
+                     String(now.getSeconds()).padStart(2, '0');
+        div.innerHTML = `<span class="time">${time}</span><span class="tag ${tagClass}">${tag}</span>${msg}`;
+        logBox.appendChild(div);
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function clearLog() {
+        logBox.innerHTML = '';
+        addLog('⏳', '日志已清空', 'sys');
+    }
+
+    // ---------- 1. 预先请求权限（只问一次） ----------
+    let permissionGranted = false;
+
+    async function requestMicrophonePermission() {
+        try {
+            addLog('📱', '正在请求麦克风权限...', 'info');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // 拿到流后立即停止轨道（只是用来拿权限，不保留音频）
+            stream.getTracks().forEach(track => track.stop());
+
+            permissionGranted = true;
+            permBadge.textContent = '✅ 麦克风已授权';
+            permBadge.className = 'status-badge active';
+            micBtn.classList.remove('pending', 'error');
+            addLog('✅', '麦克风权限已获得（后续不再弹窗）', 'ok');
+            return true;
+        } catch (err) {
+            console.error(err);
+            let msg = err.message;
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                msg = '❌ 用户拒绝或系统禁止麦克风权限！请到系统设置开启。';
+                permBadge.textContent = '🚫 权限被拒';
+                permBadge.className = 'status-badge error';
+                micBtn.classList.add('error');
+            } else {
+                msg = '❌ 获取麦克风失败: ' + err.message;
+                permBadge.textContent = '⚠️ 获取失败';
+                permBadge.className = 'status-badge error';
+                micBtn.classList.add('error');
+            }
+            addLog('❌', msg, 'err');
+            permissionGranted = false;
+            return false;
+        }
+    }
+
+    // 页面加载立即申请权限（只执行一次）
+    requestMicrophonePermission();
+
+    // ---------- 2. 语音识别（continuous: true） ----------
+    let recognition = null;
+    let isListening = false;
+    let finalTranscript = ''; // 累积最终文本
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    function startListening() {
+        if (isListening) return;
+        if (!permissionGranted) {
+            addLog('⚠️', '请先授权麦克风再试', 'err');
+            // 尝试重新申请
+            requestMicrophonePermission();
+            return;
+        }
+        if (!SpeechRecognition) {
+            addLog('❌', '浏览器不支持 SpeechRecognition', 'err');
+            return;
+        }
+
+        try {
+            finalTranscript = '';
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN';
+            recognition.continuous = true;        // ★ 关键：持续监听，不分段
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function() {
+                isListening = true;
+                micBtn.classList.add('listening');
+                addLog('🎤', '开始录音（连续模式）…', 'info');
+            };
+
+            recognition.onend = function() {
+                isListening = false;
+                micBtn.classList.remove('listening');
+                // 如果有最终累积文本，在这里输出
+                if (finalTranscript.trim()) {
+                    addLog('✅', '完整结果: ' + finalTranscript.trim(), 'final');
+                } else {
+                    addLog('⏹️', '录音结束（没有说话或识别为空）', 'sys');
+                }
+                // 重置
+                finalTranscript = '';
+                recognition = null;
+            };
+
+            recognition.onresult = function(event) {
+                let interim = '';
+                let final = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    const text = result[0].transcript;
+                    if (result.isFinal) {
+                        final += text;
+                    } else {
+                        interim += text;
+                    }
+                }
+
+                // 实时显示中间结果（不断追加，不分段）
+                if (interim) {
+                    addLog('📝', '识别中: ' + interim, 'interim');
+                }
+
+                // 收集最终文本（continuous模式下，最终结果会随着语段一块一块出来）
+                // 我们把所有最终片段累加起来
+                if (final) {
+                    finalTranscript += final;
+                    // 但不在这里输出最终，等onend时一次性输出完整的。
+                    // 如果中间想显示累积，可以加一行，但为了日志清晰，我们只记录中间。
+                }
+            };
+
+            recognition.onerror = function(event) {
+                let msg = '';
+                if (event.error === 'not-allowed') {
+                    msg = '❌ 权限被再次拒绝，请检查系统设置';
+                    permissionGranted = false;
+                    permBadge.textContent = '🚫 权限被拒';
+                    permBadge.className = 'status-badge error';
+                } else if (event.error === 'no-speech') {
+                    msg = '🔇 没检测到语音，请对着麦克风说话';
+                } else {
+                    msg = '⚠️ 错误: ' + event.error;
+                }
+                addLog('⚠️', msg, 'err');
+                // 停止
+                if (recognition) {
+                    try { recognition.abort(); } catch (e) {}
+                }
+                isListening = false;
+                micBtn.classList.remove('listening');
+                recognition = null;
+            };
+
+            recognition.start();
+
+        } catch (e) {
+            addLog('❌', '启动失败: ' + e.message, 'err');
+            isListening = false;
+            micBtn.classList.remove('listening');
+            recognition = null;
+        }
+    }
+
+    // ---------- 3. 长按交互 ----------
+    let holdTimer = null;
+
+    micBtn.addEventListener('pointerdown', function(e) {
+        e.preventDefault();
+        if (!permissionGranted) {
+            addLog('⚠️', '请先点击页面授权，或等待权限获取成功', 'err');
+            requestMicrophonePermission();
+            return;
+        }
+        if (isListening) return;
+
+        // 延迟启动（防止短按误触）
+        holdTimer = setTimeout(() => {
+            startListening();
+            if (navigator.vibrate) navigator.vibrate(10);
+        }, 300);
+    });
+
+    micBtn.addEventListener('pointerup', function(e) {
+        e.preventDefault();
+        if (holdTimer) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+        }
+        // 如果正在听，松开停止
+        if (isListening && recognition) {
+            try {
+                recognition.stop(); // stop会触发onend，然后输出累积的finalTranscript
+            } catch (e) {}
+        }
+    });
+
+    micBtn.addEventListener('pointerleave', function() {
+        // 手指滑出按钮：取消长按 + 停止录音
+        if (holdTimer) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+        }
+        if (isListening && recognition) {
+            try {
+                recognition.stop();
+            } catch (e) {}
+        }
+    });
+
+    // ---------- 4. 初始化提示 ----------
+    addLog('💡', '页面加载即自动请求权限（只问一次）', 'sys');
+    addLog('💡', '长按按钮(>300ms)开始连续录音，松开即停止', 'sys');
+    addLog('💡', 'continuous模式：你一口气说多长都合并成一条', 'sys');
+</script>
+</body>
+</html>
