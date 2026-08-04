@@ -338,18 +338,19 @@
                 }
             };
 
-            recognition.onerror = function(event) {
-                let msg = '';
-                if (event.error === 'not-allowed') {
-                    msg = '❌ 权限被再次拒绝，请检查系统设置';
-                    permissionGranted = false;
-                    permBadge.textContent = '🚫 权限被拒';
-                    permBadge.className = 'status-badge error';
-                } else if (event.error === 'no-speech') {
-                    msg = '🔇 没检测到语音，请对着麦克风说话';
-                } else {
-                    msg = '⚠️ 错误: ' + event.error;
-                }
+recognition.onerror = function(event) {
+    let msg = '';
+    if (event.error === 'not-allowed') {
+        msg = '❌ 权限被拒绝';
+    } else if (event.error === 'no-speech') {
+        msg = '🔇 没有检测到语音';
+    } else if (event.error === 'audio-capture') {
+        msg = '❌ 无法访问麦克风硬件';
+    } else if (event.error === 'network') {
+        msg = '🌐 网络错误（可能需要 VPN）';
+    } else {
+        msg = '⚠️ 错误类型: ' + event.error + '，详情: ' + (event.message || '无');
+    }
                 addLog('⚠️', msg, 'err');
                 // 停止
                 if (recognition) {
