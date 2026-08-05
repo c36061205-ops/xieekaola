@@ -804,11 +804,11 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER='v0804';
-// ===== 版本缓存控制（每次更新改 APP_VER 即可） =====
+const APP_VER = 'v0805';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
+  localStorage.setItem('preset_reset_ver', APP_VER); // 新增：记录需要重置的目标版本
   window.location.reload(true);
 }
 const DB_KEY='myrp_data_v1';const phone=document.getElementById('phone');
@@ -1188,8 +1188,9 @@ d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: ''
 
   delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
     if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
-  d.settings.onlineStyle=d.settings.onlineStyle||DEFAULT_ONLINE;
-  d.settings.offlineStyle=d.settings.offlineStyle||DEFAULT_OFFLINE;
+const _needReset = localStorage.getItem('preset_reset_ver') === APP_VER;
+if (_needReset || !d.settings.onlineStyle) d.settings.onlineStyle = DEFAULT_ONLINE;
+if (_needReset || !d.settings.offlineStyle) d.settings.offlineStyle = DEFAULT_OFFLINE;
   d.contacts=d.contacts||[];d.chats=d.chats||{};d.moments=d.moments||[];d.stickers=d.stickers||[];
   // ===== 群聊新增：群聊数组 =====
   d.groups=d.groups||[];
@@ -1250,7 +1251,20 @@ d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: ''
     if(c.activity===undefined)c.activity='中';if (c.clinginess === undefined) c.clinginess = 50;if(c.allowAutoGreet===undefined)c.allowAutoGreet=true;
     if(c.hearts===undefined)c.hearts=10;if(c.heartsTotal===undefined)c.heartsTotal=10;c.heartLog=c.heartLog||[];c.heartMile=c.heartMile||{};
   });
-  if(!d.contacts.find(c=>c.id==='c_aichan'))seedAiChan(d);
+const _aiChan = d.contacts.find(c => c.id === 'c_aichan');
+if (!_aiChan) {
+  seedAiChan(d);
+} else if (_needReset) {
+  const _tmp = { contacts: [], chats: d.chats };
+  seedAiChan(_tmp);
+  const _newData = _tmp.contacts[0];
+  // 保留这些字段不覆盖（用户的互动数据）
+  const _KEEP = ['status', 'hearts', 'heartsTotal', 'heartLog', 'heartMile',
+                 'lastActive', '_lastDecayCheck', 'memories', 'schedules',
+                 'chapters', 'inChatList', 'isBlockedByChar', 'blockedByCharAt'];
+  _KEEP.forEach(k => { _newData[k] = _aiChan[k]; });
+  Object.assign(_aiChan, _newData);
+}
 if (d.desktop && d.desktop.apps) {
   d.desktop.apps = d.desktop.apps.filter(function(a) {
     // 如果有多个备忘录类应用，只保留 id 为 'notes' 的那个
@@ -1260,7 +1274,8 @@ if (d.desktop && d.desktop.apps) {
     return true;
   });
 }
-  return d;
+if (_needReset) localStorage.removeItem('preset_reset_ver');
+return d;
 }
 // ==================== 社会关系·AI润色 ====================
 async function polishRelation(idx){
@@ -1459,7 +1474,7 @@ async function shopGenerate() {
     '你是一个商店的选品官。请根据下面这个"世界观设定"，生成一批适合在这个世界里售卖的商品。\n\n' +
     '【世界观】' + worldDesc + '\n\n' +
     '【要求】\n' +
-    '1. 生成 16 到 20 件商品，数量要充足。\n' +
+    '1. 基础商品生成 16 到 20 件，覆盖各品类。若有角色信息，则在此基础上【额外】为每个角色各追加 1~2 件，总数可以超过 20 件。\n' +
     '2. 尽量覆盖这些品类，每个品类争取有 2~3 件，各品类定位如下：\n' +
     '   ·美食：偏【外卖/餐厅现做】的热乎成品餐食（如一碗牛肉面、一份炸鸡、一笼小笼包），不是超市的包装食材或生鲜。\n' +
     '   ·饮品：偏【现做现调】的成品饮料（如现煮咖啡、手打柠檬茶、热可可），可直接饮用。\n' +
@@ -1470,17 +1485,25 @@ async function shopGenerate() {
     '   ·生活：日用小物、家居、香氛、治愈系小东西等提升生活幸福感的物件。\n' +
     '   ·奇物：脑洞新奇、带点神秘或趣味的东西，尤其适合非现代世界观（如会发光的石头、装着回忆的瓶子）。\n' +
     '3. 其中要有 1 到 2 件是"珍稀商品"（rare=true）。\n' +
-	(charHints ? ('★特别加分项：这个世界里有以下角色，请专门生成 1~3 件"特别适合送给他们、贴合他们喜好或习性"的商品（不要直接写该角色的名字，融进商品里即可）。角色信息如下：\n' + charHints + '\n（比如某角色爱吃某物就出对应吃食，喜欢某类东西就出对应小物）\n') : '') +
+	(charHints ? ('★额外追加：以下每个角色各追加 1~2 件专属商品，贴合其喜好或习性，这些商品不占基础商品名额。角色信息如下：\n' + charHints + '\n每件追加商品在 forChar 字段写上对应角色的名字（只写名字，不超过10字）；基础商品的 forChar 一律留空字符串。每个角色都必须有对应商品，不能遗漏。角色专属商品的价格档位要根据商品本身的性质决定，不要因为是角色喜欢的就自动拔高价格，一瓶酒就是日常价，不应该定到奢侈档。\n') : '') +
+	
     '4. 商品必须贴合世界观：现代都市就是正常商品；妖怪/仙侠世界带点奇异色彩；赛博/科幻世界带科技感。\n' +
     '★重要：以下这些商品店里已经有了，你生成的商品名和它们【不能重复、也不能是它们的变体】（比如已有"关东煮"，就不要再生成"深夜的关东煮"）：' +
     (typeof SHOP_FIXED_ITEMS !== 'undefined' ? SHOP_FIXED_ITEMS.map(function (x) { return x.name; }).join('、') : '') + '\n' +
     '5. 每件商品的品类标签(tag)从这些里选一个最贴切的：美食、饮品、服饰、珠宝、数码、周边、生活、奇物。\n' +
-    '6. 普通商品价格用金币，范围 5~60 的整数。珍稀商品价格 8~30 的整数。\n' +
+    '6. 商品价格分为以下档位，金币数量要严格按范围来：\n' +
+'   ·日常（大部分商品）：5~80，用金币。\n' +
+'   ·精品（生成 2~3 件）：200~800，用金币。适合有质感的服饰、珠宝、数码等。\n' +
+'   ·奢侈（生成 1~2 件）：1000~8000，用金币。适合名贵饰品、高端科技、稀有收藏等，要贴合世界观。\n' +
+'   ·传说（生成恰好 1 件）：10000~50000，用金币，rare=false，单独加一个字段 tier:"legend"。这件商品要是这个世界观里真正珍贵、独一无二的东西，不是普通商品的放大版。\n' +
+'   ·珍稀（1~2 件）：8~30，用心动值（currency:"heart"，rare=true），逻辑不变。\n' +
     '7. 每件商品配一个最贴切的 emoji（用常见通用的 emoji，别用太生僻的）。\n' +
     '8. 描述(desc)控制在 6 到 12 个字，要有画面感或情绪，别只写两个字那么干巴，也别写成长句。\n' +
     '9. 珍稀商品额外写一句 story（一句话的故事感描述，20字内）；非珍稀 story 留空字符串。\n\n' +
     '【只输出 JSON 数组，不要任何多余文字】格式如下：\n' +
-    '[{"name":"商品名","emoji":"🍵","desc":"香甜暖手的一杯","tag":"饮品","price":20,"rare":false,"story":""}]';
+'[{"name":"商品名","emoji":"🍵","desc":"香甜暖手的一杯","tag":"饮品","price":20,"rare":false,"tier":"normal","story":"","forChar":""}]\n' +
+'tier 字段只能是以下四个值之一：normal / premium / luxury / legend。\n' +
+'forChar 字段：若此商品特别适合某个角色，填该角色的名字；否则留空字符串。';
 
   var messages = [
     { role: 'system', content: '你只输出合法的 JSON 数组，不输出任何解释、不加代码块标记。' },
@@ -1493,31 +1516,36 @@ async function shopGenerate() {
 
   // 清洗数据 + 补默认值，防止 AI 漏字段
   var worldName = world ? world.name : '现代都市';
-  var items = arr.map(function(it, i) {
-    var rare = !!it.rare;
-    return {
-      id: 'sp_' + Date.now() + '_' + i,
-      name: (it.name || '神秘商品').toString().slice(0, 20),
-      emoji: (it.emoji || '🎁').toString().slice(0, 4),
-      desc: (it.desc || '').toString().slice(0, 40),
-      tag: (it.tag || '奇物').toString().slice(0, 6),
-      price: Math.max(1, parseInt(it.price) || 10),
-      rare: rare,
-      currency: rare ? 'heart' : 'coin', // 珍稀用心动值，普通用金币
-      story: (it.story || '').toString().slice(0, 40),
+var items = arr.map(function(it, i) {
+  var rare = !!it.rare;
+  var tier = (it.tier || 'normal').toString();
+  if (['normal','premium','luxury','legend'].indexOf(tier) === -1) tier = 'normal';
+  if (rare) tier = 'rare'; // 珍稀单独一档
+  return {
+    id: 'sp_' + Date.now() + '_' + i,
+    name: (it.name || '神秘商品').toString().slice(0, 20),
+    emoji: (it.emoji || '🎁').toString().slice(0, 4),
+    desc: (it.desc || '').toString().slice(0, 40),
+    tag: (it.tag || '奇物').toString().slice(0, 6),
+    price: Math.max(1, parseInt(it.price) || 10),
+    rare: rare,
+    tier: tier,
+    currency: rare ? 'heart' : 'coin',
+    story: (it.story || '').toString().slice(0, 40),
       fromWorld: worldName,
-      soldOut: false // 珍稀售罄标记
-    };
-  });
+      forChar: (it.forChar || '').toString().slice(0, 10),
+      soldOut: false
+	  };
+});
   // 合并固定商品（世界观通用）
-  var fixed = SHOP_FIXED_ITEMS.map(function (it, i) {
-    return {
-      id: 'spf_' + Date.now() + '_' + i,
-      name: it.name, emoji: it.emoji, desc: it.desc, tag: it.tag,
-      price: it.price, rare: false, currency: 'coin', story: '',
-      fromWorld: worldName, soldOut: false
-    };
-  });
+var fixed = SHOP_FIXED_ITEMS.map(function (it, i) {
+  return {
+    id: 'spf_' + Date.now() + '_' + i,
+    name: it.name, emoji: it.emoji, desc: it.desc, tag: it.tag,
+    price: it.price, rare: false, tier: 'normal', currency: 'coin', story: '',
+    fromWorld: worldName, forChar: '', soldOut: false
+	};
+});
   items = items.concat(fixed);
 
   // 按名字去重：完全同名、或"XX的关东煮"这类带"的"的形容词变体 → 判为重复；
@@ -1592,15 +1620,12 @@ async function renderShop() {
 
 // 真正画界面（生成好商品后调用，也用于切换分类时重画）
 function shopRenderView(items) {
-  // 顶部：标题 + 金币余额 + 刷新
   var html = '';
   html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)">';
-  // 左：返回 + 标题
   html += '<div style="display:flex;align-items:center;gap:10px">';
   html += '<span style="font-size:15px;color:var(--sub);cursor:pointer" onclick="view={type:\'home\'};render()">‹ 返回</span>';
   html += '<span style="font-size:18px;font-weight:600">🏪 商店</span>';
   html += '</div>';
-  // 右：金币 + 刷新
   html += '<div style="display:flex;align-items:center;gap:10px">';
   html += '<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);padding:4px 10px;border-radius:20px">';
   html += '<span>💎</span><span id="shopCoinBal" style="font-weight:600">' + (DB.coins || 0) + '</span>';
@@ -1609,7 +1634,6 @@ function shopRenderView(items) {
   html += '</div>';
   html += '</div>';
 
-  // 分类标签（从商品里自动提取）
   var tags = ['全部'];
   items.forEach(function(it) {
     if (tags.indexOf(it.tag) === -1) tags.push(it.tag);
@@ -1624,45 +1648,53 @@ function shopRenderView(items) {
   });
   html += '</div>';
 
-  // 二宫格商品卡片
   var showItems = items.filter(function(it) {
     return _shopActiveTag === '全部' || it.tag === _shopActiveTag;
   });
 
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 16px 24px">';
   showItems.forEach(function(it) {
-    var isSold = it.rare && it.soldOut;
-    var rareStyle = it.rare
-      ? 'border:1.5px solid #E6B422;box-shadow:0 0 8px rgba(230,180,34,0.3);'
+var isSold = it.rare && it.soldOut;
+var rareStyle = it.rare
+  ? 'border:1.5px solid #E6B422;box-shadow:0 0 8px rgba(230,180,34,0.3);'
+  : it.tier === 'legend'
+    ? 'border:1.5px solid #b06aff;box-shadow:0 0 10px rgba(176,106,255,0.35);'
+    : it.tier === 'luxury'
+      ? 'border:1.5px solid #c0392b;box-shadow:0 0 6px rgba(192,57,43,0.25);'
       : 'border:1px solid var(--line);';
-    html += '<div onclick="' + (isSold ? '' : 'shopOpenDetail(\'' + it.id + '\')') + '" style="position:relative;background:var(--card);border-radius:12px;padding:14px 12px;cursor:' + (isSold ? 'default' : 'pointer') + ';' + rareStyle + (isSold ? 'opacity:0.45;' : '') + '">';
-    html += '<div style="font-size:40px;text-align:center;line-height:1.2">' + esc(it.emoji) + '</div>';
-    html += '<div style="font-size:14px;font-weight:600;margin-top:8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.name) + '</div>';
-    html += '<div style="text-align:center;font-size:13px;color:var(--sub);margin-top:6px;line-height:1.5;padding:0 10px">' + esc(it.desc) + '<br><span style="opacity:0.7">· ' + esc(it.tag) + ' ·</span></div>';
-	
-    // 价格标签
-    html += '<div style="text-align:center;margin-top:8px"><span style="font-size:13px;font-weight:600;color:' + (it.currency === 'heart' ? '#e0507a' : 'var(--theme)') + '">' + (it.currency === 'heart' ? '❤️' : '💎') + ' ' + it.price + '</span></div>';
-    // 珍稀角标
+	  html += '<div onclick="' + (isSold ? '' : 'shopOpenDetail(\'' + it.id + '\')') + '" style="position:relative;background:var(--card);border-radius:12px;padding:10px 10px;cursor:' + (isSold ? 'default' : 'pointer') + ';' + rareStyle + (isSold ? 'opacity:0.45;' : '') + '">';
+    html += '<div style="font-size:32px;text-align:center;line-height:1.2">' + esc(it.emoji) + '</div>';
+    html += '<div style="font-size:13px;font-weight:600;margin-top:6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.name) + '</div>';
+    html += '<div style="text-align:left;font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;padding:0 4px">' + esc(it.desc) + '<br><span style="opacity:0.7;display:block;text-align:center">· ' + esc(it.tag) + ' ·</span></div>';
+
+    html += '<div style="text-align:center;margin-top:6px"><span style="font-size:13px;font-weight:600;color:' + (it.currency === 'heart' ? '#e0507a' : 'var(--theme)') + '">' + (it.currency === 'heart' ? '❤️' : '💎') + ' ' + it.price + '</span></div>';
+
     if (it.rare) {
       html += '<div style="position:absolute;right:6px;bottom:6px;background:#E6B422;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">珍稀</div>';
     }
-    // 随机生成商品角标（id 以 sp_ 开头的是 AI 随机款，spf_ 是固定款）
-    if (it.id && it.id.indexOf('sp_') === 0) {
-      html += '<div style="position:absolute;left:6px;top:6px;background:#4a9;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">新品</div>';
+    if (it.forChar) {
+      html += '<div style="position:absolute;right:6px;top:6px;background:linear-gradient(135deg,#ff6b8a,#e0507a);color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">💝 ' + esc(it.forChar) + '</div>';
     }
-
-    // 售罄遮罩
-    if (isSold) {
-      html += '<div style="position:absolute;top:8px;left:8px;background:#888;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">已售罄</div>';
+    if (it.forChar) {
+      html += '<div style="position:absolute;right:6px;top:6px;background:linear-gradient(135deg,#ff6b8a,#e0507a);color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">💝 ' + esc(it.forChar) + '</div>';
     }
+	
+if (isSold) {
+  html += '<div style="position:absolute;left:6px;top:6px;background:#888;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">已售罄</div>';
+} else if (it.tier === 'legend') {
+  html += '<div style="position:absolute;left:6px;top:6px;background:linear-gradient(90deg,#b06aff,#7c3aed);color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">传说</div>';
+} else if (it.tier === 'luxury') {
+  html += '<div style="position:absolute;left:6px;top:6px;background:#c0392b;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">奢侈</div>';
+} else if (it.id && it.id.indexOf('sp_') === 0) {
+  html += '<div style="position:absolute;left:6px;top:6px;background:#4a9;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px">新品</div>';
+}
     html += '</div>';
   });
   html += '</div>';
 
   content.innerHTML = html;
-    var _tb = document.getElementById('shopTagBar');
+  var _tb = document.getElementById('shopTagBar');
   if (_tb) _tb.scrollLeft = _shopTagScroll || 0;
-
 }
 
 async function shopForceRegen() {
@@ -1671,7 +1703,8 @@ async function shopForceRegen() {
   await renderShop();
 }
 // 珍稀送礼特效：金色爱心/星光飘落
-function shopRareEffect(charName, giftName) {
+function shopRareEffect(charName, giftName, tier) {
+  tier = tier || 'rare';
   var old = document.getElementById('shopRareFx');
   if (old) old.remove();
   var box = document.createElement('div');
@@ -1679,12 +1712,24 @@ function shopRareEffect(charName, giftName) {
   box.style.cssText = 'position:fixed;inset:0;z-index:99998;pointer-events:none;overflow:hidden;';
   // 中央提示
   var tip = document.createElement('div');
-  tip.style.cssText = 'position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#E6B422,#F5D76E);color:#fff;padding:14px 22px;border-radius:14px;font-size:15px;font-weight:600;text-align:center;box-shadow:0 4px 24px rgba(230,180,34,0.6);white-space:nowrap;animation:shopFxPop 0.5s ease;';
-  tip.innerHTML = '💝 你为 ' + esc(charName) + ' 送上了珍贵的心意<br><span style="font-size:12px;opacity:0.9">「' + esc(giftName) + '」</span>';
+var tipCfg = {
+  rare:    { bg: 'linear-gradient(135deg,#E6B422,#F5D76E)',   shadow: 'rgba(230,180,34,0.6)',  icon: '💝', text: '你为 ' + esc(charName) + ' 送上了珍贵的心意' },
+  luxury:  { bg: 'linear-gradient(135deg,#c0392b,#e74c3c)',   shadow: 'rgba(192,57,43,0.6)',   icon: '🎀', text: '你为 ' + esc(charName) + ' 献上了奢华的礼遇' },
+  legend:  { bg: 'linear-gradient(135deg,#7c3aed,#b06aff)',   shadow: 'rgba(176,106,255,0.7)', icon: '👑', text: '你为 ' + esc(charName) + ' 送出了传说级的珍宝' }
+};
+var cfg = tipCfg[tier] || tipCfg.rare;
+tip.style.cssText = 'position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);background:' + cfg.bg + ';color:#fff;padding:14px 22px;border-radius:14px;font-size:15px;font-weight:600;text-align:center;box-shadow:0 4px 24px ' + cfg.shadow + ';white-space:nowrap;animation:shopFxPop 0.5s ease;';
+tip.innerHTML = cfg.icon + ' ' + cfg.text + '<br><span style="font-size:12px;opacity:0.9">「' + esc(giftName) + '」</span>';
   box.appendChild(tip);
   // 飘落粒子
-  var syms = ['✨', '💛', '🌟', '💫', '⭐'];
-  for (var i = 0; i < 18; i++) {
+var symMap = {
+  rare:   ['✨', '💛', '🌟', '💫', '⭐'],
+  luxury: ['🎀', '🌹', '💎', '✨', '🔴'],
+  legend: ['💜', '🔮', '⚡', '🌌', '✨', '👑']
+};
+var syms = symMap[tier] || symMap.rare;
+var count = tier === 'legend' ? 26 : 18;
+for (var i = 0; i < count; i++) {
     var s = document.createElement('div');
     s.textContent = syms[Math.floor(Math.random() * syms.length)];
     var left = Math.random() * 100;
@@ -1900,7 +1945,9 @@ function shopOpenDetail(itemId) {
   if (it.rare && it.story) {
     h += '<div style="margin:14px 0;padding:12px;background:rgba(230,180,34,0.1);border:1px solid rgba(230,180,34,0.4);border-radius:10px;font-size:13px;color:#B8860B;line-height:1.6;font-style:italic">「' + esc(it.story) + '」</div>';
   }
-
+  if (it.forChar) {
+    h += '<div style="margin:10px 0 0;padding:8px 12px;background:rgba(224,80,122,0.08);border:1px solid rgba(224,80,122,0.3);border-radius:10px;font-size:12px;color:#e0507a;text-align:center">💝 ' + esc(it.forChar) + ' 应该会喜欢这个</div>';
+  }
   h += '<div style="text-align:center;margin:18px 0;font-size:22px;font-weight:700;color:' + (it.currency === 'heart' ? '#e0507a' : 'var(--theme)') + '">' +
     (it.currency === 'heart' ? '❤️ ' : '💎 ') + it.price + '</div>';
 
@@ -2075,33 +2122,48 @@ async function shopDoGift(it, c) {
     time: Date.now()
   };
   DB.chats[c.id] = DB.chats[c.id] || [];
-  DB.chats[c.id].push(msg);
-  c.inChatList = true;
-  save();
-
+DB.chats[c.id].push(msg);
+c._hasPendingGift = true;   // ← 新增：标记该角色有待处理的礼物
+c.inChatList = true;
+save();
   // 6) 关闭弹窗 → 跳进该角色聊天
   shopClosePopup();
   openChat(c.id);
 
   // 7) 珍稀彩蛋 A：金色特效（保留）
-  if (it.rare) {
-    setTimeout(function () { shopRareEffect(nm, giftName); }, 400);
-  }
-
+if (it.rare || it.tier === 'luxury' || it.tier === 'legend') {
+  var _tier = it.tier === 'legend' ? 'legend' : it.tier === 'luxury' ? 'luxury' : 'rare';
+  setTimeout(function () { shopRareEffect(nm, giftName, _tier); }, 400);
+}
   // ===== ★★★ 核心修改：构建 nudge 但暂存，不自动触发 =====
   var nudge;
-  if (it.rare) {
-    nudge = '（对方郑重地送了你一件极其珍贵、难得的礼物：' + it.emoji + '「' + giftName + '」' +
-      (giftDesc ? '，' + giftDesc : '') + '。这份心意分量很重、很走心。' +
-      '请你给出人设中最真挚、最动情的一次回应，可以是深深的触动、久久的怔忪、藏不住的欢喜或郑重的珍视——' +
-      '比平时更投入一些。像真人收到毕生难忘的礼物那样回应，绝不提及任何价格、数字或系统内容。）';
+if (it.tier === 'legend') {
+  nudge = '（对方送给你一件这个世界里极其珍贵、可能穷极一生都难以得到的东西：' + it.emoji + '「' + giftName + '」' +
+    (giftDesc ? '，' + giftDesc : '') + '。' +
+    '你被这份心意深深触动，在真情流露的回应里，自然地透露出一件你平时绝不会主动提起的事——' +
+    '可以是一段不想被人知道的过去，一个藏在心底的秘密，一个只有此刻才愿意说出口的真实想法。' +
+    '不要刻意宣告"我要告诉你一个秘密"，就是在感动中自然地说漏了嘴，或者鼓起勇气说了一句平时不会说的话。' +
+    '像真人在最动情的瞬间才会有的坦诚。绝不提及任何价格、数字或系统内容。）';
+} else if (it.rare) {
+  nudge = '（对方郑重地送了你一件极其珍贵、难得的礼物：' + it.emoji + '「' + giftName + '」' +
+    (giftDesc ? '，' + giftDesc : '') + '。这份心意分量很重、很走心。' +
+    '请你给出人设中最真挚、最动情的一次回应，可以是深深的触动、久久的怔忪、藏不住的欢喜或郑重的珍视——' +
+    '比平时更投入一些。像真人收到毕生难忘的礼物那样回应，绝不提及任何价格、数字或系统内容。）';
+} else {
+  var isWish = it.forChar && (it.forChar.indexOf(c.name) !== -1 || it.forChar.indexOf(c.nick) !== -1);
+  if (isWish) {
+    nudge = '（对方送来了一件非常对你胃口的东西：' + it.emoji + '「' + giftName + '」' +
+      (giftDesc ? '，' + giftDesc : '') + '。' +
+      '这件东西跟你的喜好、习惯或心意高度契合，你有点意外TA怎么这么了解你。' +
+      '请按照自己的人设，用比平时更真实、更有温度的方式回应，可以流露出意外、欣喜、或者一点点小小的感动。' +
+      '像真人收到意外惊喜那样，不要提及任何价格、数字或系统内容。）';
   } else {
     nudge = '（对方刚刚送了你一件礼物：' + it.emoji + '「' + giftName + '」' +
       (giftDesc ? '，' + giftDesc : '') + '。' +
       '请你完全按照自己的人设，自然地做出反应——可以欣然收下、害羞、感动、调侃，也可以按性格委婉推辞。' +
       '像真人收到礼物那样用聊天语气回应，不要提及任何价格、数字或系统内容。）';
   }
-
+}
   // ★ 将 nudge 暂存到角色状态，等待用户主动点击「回复」按钮触发
   c._pendingGiftNudge = nudge;
   save();
@@ -5784,7 +5846,7 @@ function groupBubble(m){
   var me=(m.role==='user');var c=(!me&&m.charId)?getC(m.charId):null;var av=me?DB.me.avatar:(c?c.avatar:'');var initial=me?((DB.me.name||'我')[0]):(c?((c.name||'?')[0]):'?');var senderName=me?'':(c?(c.nick||c.name):'未知');var body;
   if(m.type==='image'){body='<div class="mbody" style="display:inline-block;padding:3px;background:'+(me?'var(--theme)':'var(--card)')+'"><img src="'+m.content+'" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>';}
   else if(m.type==='sticker'){var s=DB.stickers.find(function(x){return x.name===m.content;});body=s?'<div style="display:inline-block;padding:0"><img src="'+s.img+'" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>':'<div class="mbody" style="display:inline-block;">[表情:'+esc(m.content)+']</div>';}
-  else if(m.type==='voice'){var dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));var expandedClass=m.voiceExpanded?'expanded':'';body='<div class="mbody voice-bubble '+expandedClass+'" style="cursor:pointer;display:inline-flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;text-align:left;'+(me?'background:var(--theme);color:#fff;':'')+'" onclick="toggleVoice(\''+m.id+'\')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">'+dur+'″</span></div><div class="voice-text">'+esc(m.content)+'</div></div>';}
+  else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body='<div class="mbody voice-bubble '+expandedClass+'" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice(\''+m.id+'\')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">'+dur+'″</span></div><div class="voice-text">'+esc(m.content)+'</div></div>';}
   else{var displayContent=m.editedContent||m.content;body='<div class="mbody" style="display:inline-block;max-width:100%;text-align:left;word-break:break-word;white-space:pre-wrap;">'+esc(displayContent)+'</div>';}
   var nameTag=(!me&&senderName)?'<div style="font-size:11px;color:var(--sub);line-height:1.2;margin:0 0 1px 2px;">'+esc(senderName)+'</div>':'';
   var avExtra=nameTag?'margin-top:15px;':'';
@@ -6323,8 +6385,12 @@ function pushGroupAIMsg(charId, content, type){
   var m = { id:newId(), role:'assistant', charId:charId, type:mtype, content:content, time:Date.now() };
   if(!DB.chats[g.id]) DB.chats[g.id]=[];
   DB.chats[g.id].push(m);
-  var pv = mtype==='voice' ? '[语音]' : content;
-  g.lastMsg = { text:pv, time:m.time, senderId:charId };
+var pv;
+if (mtype === 'sticker') { pv = '[表情]'; }
+else if (mtype === 'voice') { pv = '[语音]'; }
+else if (mtype === 'image') { pv = '[图片]'; }
+else { pv = content || '[消息]'; }
+g.lastMsg = { text:pv, time:m.time, senderId:charId };
   save();
   renderGroupChat(false);
 }
@@ -6432,7 +6498,7 @@ case 'sticker': {
           pushGroupAIMsg(c.id, content, msgType);
           // 模仿打字延迟（和原来一致）
           if (i < parts.length - 1) {
-            await sleep(400 + Math.min(content.length * 28, 1400));
+            await sleep(200 + Math.min(content.length * 10, 600));
           }
         }
       }
@@ -6444,7 +6510,7 @@ case 'sticker': {
 
       // 角色之间延迟
       if (k < chosen.length - 1) {
-        await sleep(500 + Math.random() * 500);
+        await sleep(300 + Math.random() * 200);
       }
     }
   } catch (e) {
@@ -6588,7 +6654,14 @@ async function triggerGroupPrivate(c){
     ];
 
     var out = await callAI(messages, getEffectiveChatModel(c));
-    out = (out||'').replace(/<state>[\s\S]*?<\/state>/gi,'').replace(/\[[^\]]*\]/g,'').trim();
+    out = (out||'')
+  .replace(/<state>[\s\S]*?<\/state>/gi, '')
+  .replace(/<inner>[\s\S]*?<\/inner>/gi, '')
+  .replace(/<心声>[\s\S]*?<\/心声>/gi, '')
+  .replace(/\[心声[^\]]*\]/g, '')
+  .replace(/(?:^|\n)\s*心声\s*[：:][^\n]*/g, '')
+  .replace(/\[[^\]]*\]/g, '')
+  .trim();
     if(!out) return;
 
     var lines = out.split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
@@ -10866,6 +10939,15 @@ if (heartMatch) {
  * 兼容旧格式 [xx|xx] 和新格式 <tag>xx</tag>，以及 AI 自创的各种变体
  * 并自动将多行纯文本拆分为多个消息气泡
  */
+ function cleanLeftoverTags(text) {
+    if (!text) return '';
+    var t = text;
+    t = t.replace(/<(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state)[^>]*>[\s\S]*?<\/\1>/g, '');
+    t = t.replace(/<\/?(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state)[^>]*>/g, '');
+    t = t.replace(/\[(?:语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物|见面|回线上)[^\]]*\]/g, '');
+    t = t.replace(/[（(]\s*(?:语音|表情|表情包|撤回|转账|心声|动作|神态|内心)[^）)]*[）)]/g, '');
+    return t;
+}
 function parseAIMessage(raw) {
     if (!raw) return [{ type: 'text', content: '' }];
 
@@ -10948,12 +11030,13 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
             if (plainText) {
                 // 按换行拆分
                 const lines = plainText.split(/\n+/).map(s => s.trim()).filter(Boolean);
-                lines.forEach(line => {
-                    // 但 line 可能还包含未转换的标记（如 [语音] 但未闭合），这里不再递归处理
-                    // 直接作为文本
-                    parts.push({ type: 'text', content: line });
+lines.forEach(line => {
+                    var cleaned = cleanLeftoverTags(line);
+                    if (cleaned.trim()) {
+                        parts.push({ type: 'text', content: cleaned.trim() });
+                    }
                 });
-            }
+				}
         }
 
         // 处理标签本身
@@ -11015,11 +11098,13 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
         const remaining = text.substring(lastIndex).trim();
         if (remaining) {
             const lines = remaining.split(/\n+/).map(s => s.trim()).filter(Boolean);
-            lines.forEach(line => {
-                // 防止行内还有未处理的标签（但我们已经全局替换过，基本不会）
-                parts.push({ type: 'text', content: line });
+lines.forEach(line => {
+                var cleaned = cleanLeftoverTags(line);
+                if (cleaned.trim()) {
+                    parts.push({ type: 'text', content: cleaned.trim() });
+                }
             });
-        }
+			}
     }
 
     // 兜底：如果什么都没解析出来，返回原文本（但也会按换行拆）
@@ -11282,8 +11367,22 @@ if (c.mode === 'offline') {
         wantBack = true;
         narr = narr.replace(/\[回线上[|｜]?\s*\]/g, '').trim();
     }
-    // 清理方括号标记（线下不该出现）
-    narr = narr.replace(/\[(语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物)[^\]]*\]/g, '').trim();
+// 清理方括号格式 [心声]、[语音] 等
+narr = narr.replace(/\[(语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物)[^\]]*\]/g, '').trim();
+
+// ★ 新增：清理尖括号心声标签（完整移除标签和内容）
+narr = narr.replace(/<inner[\s\S]*?>[\s\S]*?<\/inner>/g, '').trim();
+narr = narr.replace(/<心声[\s\S]*?>[\s\S]*?<\/心声>/g, '').trim();
+
+// ★ 新增：清理其他可能漏网的尖括号标签（voice/sticker等）
+narr = narr.replace(/<voice[\s\S]*?>[\s\S]*?<\/voice>/g, '').trim();
+narr = narr.replace(/<sticker[\s\S]*?>[\s\S]*?<\/sticker>/g, '').trim();
+narr = narr.replace(/<recall[\s\S]*?>[\s\S]*?<\/recall>/g, '').trim();
+narr = narr.replace(/<transfer[\s\S]*?><\/transfer>/g, '').trim();
+narr = narr.replace(/<block[\s\S]*?><\/block>/g, '').trim();
+
+// ★ 新增：清理没有闭合标签的残留（如 <inner> 单独出现）
+narr = narr.replace(/<\/?(?:inner|心声|voice|sticker|recall|transfer|block)[^>]*>/g, '').trim();
     
     // ★★★ 新增：清理尖括号礼物标签（线下模式不应出现） ★★★
     narr = narr.replace(/<gift[^>]*>[\s\S]*?<\/gift>/g, '').trim();
@@ -11465,13 +11564,36 @@ addCoins(_reward);
     console.error('aiReply 出错：', e);   // 新增：把错误打到控制台
     alert('回复失败：' + (e && e.message ? e.message : e));
   } finally {
-    // ---- 13. 恢复 UI（finally 保证：无论成功、报错、还是卡住返回，都会执行）----
+    // ===== 兜底：一次回复后，自动收下所有待处理的礼物卡片 =====
+    if (c && c._hasPendingGift) {
+        var msgs = DB.chats[c.id] || [];
+        var anyUpdated = false;
+        msgs.forEach(function(m) {
+            // 只要是用户送出的、状态为 'given' 的礼物卡片，全部标记为已接收
+            if (m.type === 'shop_item' && m.role === 'user' && m.giftStatus === 'given') {
+                m.giftStatus = 'ai_accepted';
+                anyUpdated = true;
+            }
+        });
+        if (anyUpdated) {
+            c._hasPendingGift = false;   // 清空标记
+            save();
+            // 用 keepScroll=true 刷新界面，不跳动
+            if (view.type === 'chat' && view.id === c.id) {
+                renderChat(true);
+            }
+        } else {
+            c._hasPendingGift = false;
+            save();
+        }
+    }
+
     tbTitle.textContent = c.nick || c.name;
     replying = false;
     const b2 = document.getElementById('actBtn');
     if (b2) b2.disabled = false;
     updateActBtn();
-  }
+}
 }
 function closeTransferModal() {
   var el = document.getElementById('transferModal');
