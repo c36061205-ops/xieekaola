@@ -1662,10 +1662,11 @@ var rareStyle = it.rare
     : it.tier === 'luxury'
       ? 'border:1.5px solid #c0392b;box-shadow:0 0 6px rgba(192,57,43,0.25);'
       : 'border:1px solid var(--line);';
-	  html += '<div onclick="' + (isSold ? '' : 'shopOpenDetail(\'' + it.id + '\')') + '" style="position:relative;background:var(--card);border-radius:12px;padding:10px 10px;cursor:' + (isSold ? 'default' : 'pointer') + ';' + rareStyle + (isSold ? 'opacity:0.45;' : '') + '">';
+	  html += '<div onclick="' + (isSold ? '' : 'shopOpenDetail(\'' + it.id + '\')') + '" style="position:relative;background:var(--card);border-radius:12px;padding:10px 10px;overflow:hidden;min-width:0;cursor:' + (isSold ? 'default' : 'pointer') + ';' + rareStyle + (isSold ? 'opacity:0.45;' : '') + '">';
     html += '<div style="font-size:32px;text-align:center;line-height:1.2">' + esc(it.emoji) + '</div>';
     html += '<div style="font-size:13px;font-weight:600;margin-top:6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.name) + '</div>';
-    html += '<div style="text-align:left;font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;padding:0 4px">' + esc(it.desc) + '<br><span style="opacity:0.7;display:block;text-align:center">· ' + esc(it.tag) + ' ·</span></div>';
+    html += '<div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;padding:0 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(it.desc) + '</div>' +
+        '<div style="opacity:0.7;font-size:12px;text-align:center;margin-top:2px;">· ' + esc(it.tag) + ' ·</div>';
 
     html += '<div style="text-align:center;margin-top:6px"><span style="font-size:13px;font-weight:600;color:' + (it.currency === 'heart' ? '#e0507a' : 'var(--theme)') + '">' + (it.currency === 'heart' ? '❤️' : '💎') + ' ' + it.price + '</span></div>';
 
@@ -5846,11 +5847,15 @@ function groupBubble(m){
   var me=(m.role==='user');var c=(!me&&m.charId)?getC(m.charId):null;var av=me?DB.me.avatar:(c?c.avatar:'');var initial=me?((DB.me.name||'我')[0]):(c?((c.name||'?')[0]):'?');var senderName=me?'':(c?(c.nick||c.name):'未知');var body;
   if(m.type==='image'){body='<div class="mbody" style="display:inline-block;padding:3px;background:'+(me?'var(--theme)':'var(--card)')+'"><img src="'+m.content+'" style="max-width:160px;max-height:220px;border-radius:5px;display:block"></div>';}
   else if(m.type==='sticker'){var s=DB.stickers.find(function(x){return x.name===m.content;});body=s?'<div style="display:inline-block;padding:0"><img src="'+s.img+'" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>':'<div class="mbody" style="display:inline-block;">[表情:'+esc(m.content)+']</div>';}
-  else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body='<div class="mbody voice-bubble '+expandedClass+'" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice(\''+m.id+'\')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">'+dur+'″</span></div><div class="voice-text">'+esc(m.content)+'</div></div>';}
+  else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body='<div class="mbody voice-bubble '+expandedClass+'" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice(\''+m.id+'\')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">'+dur+'″</span></div><div class="voice-text">'+renderVoiceContent(m.content)+'</div></div>';}
   else{var displayContent=m.editedContent||m.content;body='<div class="mbody" style="display:inline-block;max-width:100%;text-align:left;word-break:break-word;white-space:pre-wrap;">'+esc(displayContent)+'</div>';}
   var nameTag=(!me&&senderName)?'<div style="font-size:11px;color:var(--sub);line-height:1.2;margin:0 0 1px 2px;">'+esc(senderName)+'</div>':'';
   var avExtra=nameTag?'margin-top:15px;':'';
-  return '<div class="msg '+(me?'me':'')+'" data-mid="'+(m.id||'')+'"><div class="avatar" style="'+(av?"background-image:url('"+av+"');":'')+avExtra+'">'+(av?'':initial)+'</div><div class="msg-slide" style="max-width:70%;min-width:0;'+(me?'text-align:right;':'text-align:left;')+'">'+nameTag+body+'</div></div>';
+// 构造 slide 样式，语音消息不加 max-width 限制
+var slideStyle = 'min-width:0;' + (me ? 'text-align:right;' : 'text-align:left;');
+if (m.type !== 'voice') slideStyle += 'max-width:70%;';
+
+return '<div class="msg '+(me?'me':'')+'" data-mid="'+(m.id||'')+'"><div class="avatar" ...></div><div class="msg-slide" style="' + slideStyle + '">'+nameTag+body+'</div></div>';
 }
 
 // ==================== 群聊界面 ====================
@@ -8616,7 +8621,26 @@ async function doAutoGreet(c, slot) {
     // ===== 3. 构建历史 + 系统提示 =====
     const hist = (DB.chats[c.id] || []).slice(-10).map(toApiMsg);
     const messages = [
-      { role: 'system', content: buildSystem(c) },
+      { role: 'system', content: buildSystem(c, (function(){
+        var msgs = DB.chats[c.id] || [];
+        var lastMsg = msgs[msgs.length-1];
+        if(!lastMsg) return null;
+        if(Date.now() - lastMsg.time < 30*60*1000) return null;
+        var d = new Date(lastMsg.time);
+        var dh = d.getHours();
+        var dp = dh<6?'凌晨':dh<9?'清晨':dh<12?'上午':dh<14?'中午':dh<18?'下午':dh<23?'晚上':'深夜';
+        var nowD = new Date();
+        var diffDays = Math.floor((Date.now() - lastMsg.time)/86400000);
+        var timeStr = '';
+        if(d.toDateString()===nowD.toDateString()){
+          timeStr = '今天 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'（'+dp+'）';
+        } else if(diffDays===1){
+          timeStr = '昨天 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'（'+dp+'）';
+        } else {
+          timeStr = diffDays+'天前';
+        }
+        return '【时间提示】上一条消息发于'+timeStr+'。';
+      })()) },
       { role: 'system', content: '【立即生效·最高优先级】现在是微信线上打字聊天：只输出口语短句，句子要短，禁止括号里的动作/神态/心理描写，禁止旁白，禁止长段落。多句用换行分隔，且总共不超过2句。' },
       ...hist,
       { role: 'user', content: nudge + c2cHint }
@@ -9765,7 +9789,7 @@ function openChat(id){
   render();
 }
 function stickerNames(){return DB.stickers.map(s=>s.name).join('、')||'（暂无表情）';}
-function buildSystem(c){
+function buildSystem(c, gapInfo){
   const st = c.status;
   const net = DB.me.name;
   const real = DB.me.realName;
@@ -9808,6 +9832,7 @@ s += '【强制】除了上述标签，其余内容全部是正常聊天文本�
   // ===== 第2层：当前背景 =====
   s += `\n【当前背景】\n`;
   s += `现在是${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${wd} ${String(hh).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}（${period}）。请结合此刻时间与你的作息表现得像真实存在、能感知时间流逝的人。\n`;
+if(gapInfo){s+=gapInfo+'\n';}
   s += add('日常作息(据此安排行踪)', c.pDaily);
 
   var world = (DB.worlds || []).find(function(w) { return w.id === c.worldId; });
@@ -9923,7 +9948,8 @@ if (c.allowStickers === false) {
     s += `\n【输出格式：线上模式】\n${DB.settings.onlineStyle || DEFAULT_ONLINE}\n`;
     s += `【🔴 格式铁律 · 最高优先级】所有特殊动作标记（[语音]、[表情]、[撤回]、[转账]、[拉黑玩家]、[心声]）必须**严格另起一行单独输出**，绝对禁止与普通文字混在同一行。\n`;
     s += `【发消息条数】严格根据角色性格决定发几条：话痨/热情→可连发2-4条；高冷/沉默寡言/惜字如金→通常只发1条短句，别硬凑；随心情情境变化，不要每次都机械连发。\n`;
-    s += `【语音消息标点例外】当你决定发语音（[语音|内容]）时，内容必须使用正常的标点符号（句号、逗号、问号等），确保语义连贯、逻辑清晰，像真人正常说话。其他普通文本消息仍遵守无标点规则。\n`;
+    s += `【语音消息标点例外】当你决定发语音时，内容必须使用正常的标点符号（句号、逗号、问号等），确保语义连贯、逻辑清晰，像真人正常说话。其他普通文本消息仍遵守无标点规则。\n`;
+s += `【语音消息·环境音】发语音时，偶尔可以在台词中间用中文括号穿插环境音描述，增加临场感。示例：「我今天真的好累啊（躺到床上的声音，翻了翻身），不过想到你还在等我消息，还是想跟你说说话。」规则：①括号内只写声音或动作描述，不写心理活动；②穿插在台词中间，不单独成句；③大多数语音不加，偶尔出现即可。\n`;
   }
     // ★亲密特质注入（开了开关就生效，线上线下都注入"通用部分"）
   if (c.intimacyOn) {
@@ -10062,7 +10088,13 @@ function findSticker(name) {
   // 4. 实在找不到
   return null;
 }
-
+function renderVoiceContent(text) {
+  if (!text) return '';
+  return esc(text).replace(
+    /（([^）]+)）/g,
+    '<span style="font-style:italic;opacity:0.75;">$1</span>'
+  );
+}
 function bubble(c,m){if(m.type==='system'){return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';}
 const me=m.role==='user';const av=me?DB.me.avatar:c.avatar;const nm=me?((DB.me.name||'我')[0]):((c.name||'?')[0]);let body;
 if(m.recalled){const who=me?'你':(c.nick||c.name);body=`<div class="mbody" style="background:transparent;box-shadow:none;color:var(--sub);font-size:13px;border:1px dashed var(--line)">${who} 撤回了一条消息 ${m.recalledContent?`<span style="color:var(--theme);cursor:pointer" onclick="peekRecall('${m.id}')">${m.reveal?'· '+esc(m.recalledContent):(me?'· 查看':'· 偷看(5💗)')}</span>`:''}</div>`;}
@@ -10072,7 +10104,7 @@ else if(m.type==='image'){
   }
 else if(m.type==='transfer'){var statusText='';if(m.status==='accepted')statusText='✅ 已接收';else if(m.status==='refunded')statusText='⏳ 已退回';else statusText='待处理';body='<div class="transfer-card" data-mid="'+m.id+'" style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530;"><div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="color:#F99530;font-size:22px;font-weight:bold;">¥</span></div><div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:500;">¥ '+esc(String(m.amount))+'</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px;">'+(m.content?esc(m.content):'转账')+'</div></div></div><div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px;display:flex;justify-content:space-between;"><span>微信转账</span><span>'+statusText+'</span></div></div>';}
 else if(m.type==='redpacket')body=`<div style="width:220px;background:#fff;border-radius:10px;overflow:hidden"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#e05a49"><div style="width:36px;height:36px;background:#fbe0a6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px">🧧</div><div style="flex:1"><div style="color:#fff;font-size:14px">${esc(m.content)||'恭喜发财'}</div><div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:2px">¥${esc(String(m.amount))}</div></div></div><div style="background:#f2c879;color:#8a4b00;font-size:11px;padding:6px 12px">微信红包</div></div>`;
-else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body=`<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">${dur}″</span></div><div class="voice-text">${esc(m.content)}</div></div>`;}
+else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body=`<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">${dur}″</span></div><div class="voice-text">${renderVoiceContent(m.content)}</div></div>`;}
 else if(m.type==='sticker'){const s=DB.stickers.find(x=>x.name===m.content);body=s?`<div style="padding:0"><img src="${s.img}" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>`:`<div class="mbody">[表情:${esc(m.content)}]</div>`;}
 else if(m.type==='text'){var displayContent=m.editedContent||m.content;body=`<div class="mbody">${me?esc(displayContent):(c.mode==='offline'?colorLines(displayContent,c.lineColor):esc(displayContent))}</div>`;}
 else if (m.type === 'shop_item') {
@@ -11298,7 +11330,29 @@ if (!getEffectiveChatModel(c)) {
 
     // ---- 3. 构建消息体 ----
     const messages = [
-      { role: 'system', content: buildSystem(c) },
+      { role: 'system', content: buildSystem(c, (function(){
+        var msgs = DB.chats[c.id] || [];
+        var lastUser = null;
+        for(var i = msgs.length-1; i >= 0; i--){
+          if(msgs[i].role === 'user'){ lastUser = msgs[i]; break; }
+        }
+        if(!lastUser) return null;
+        if(Date.now() - lastUser.time < 60*60*1000) return null;
+        var d = new Date(lastUser.time);
+        var dh = d.getHours();
+        var dp = dh<6?'凌晨':dh<9?'清晨':dh<12?'上午':dh<14?'中午':dh<18?'下午':dh<23?'晚上':'深夜';
+        var nowD = new Date();
+        var diffDays = Math.floor((Date.now() - lastUser.time)/86400000);
+        var timeStr = '';
+        if(d.toDateString()===nowD.toDateString()){
+          timeStr = '今天 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'（'+dp+'）';
+        } else if(diffDays===1){
+          timeStr = '昨天 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'（'+dp+'）';
+        } else {
+          timeStr = diffDays+'天前';
+        }
+        return '【时间提示】对方上一条消息发于'+timeStr+'。';
+      })()) },
       ...hist
     ];
 
