@@ -269,16 +269,36 @@ textarea {
 .msg-act.del{background:#e34;}
 .mbody,.msg-slide img{user-select:none;-webkit-user-select:none;}
 .mbody{max-width:76%;padding:7px 10px;border-radius:6px;background:var(--card);color:var(--text);font-size:15px;line-height:1.5;word-break:break-word;white-space:pre-wrap;box-shadow:0 1px 1px rgba(0,0,0,.05);}  .msg.me .mbody{background:var(--theme);color:#fff;}
-  #chatBottom{flex-shrink:0;background:var(--nav);border-top:1px solid var(--line);}
-#inputRow{padding:8px 4px 16px 4px;display:flex;gap:6px;align-items:flex-end;}
-  #chatInput{flex:1;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:15px;font-family:inherit;resize:none;max-height:100px;outline:none;background:var(--card);color:var(--text);}
-  .cbtn{border:none;border-radius:8px;height:38px;font-size:14px;cursor:pointer;flex-shrink:0;padding:0 14px;}
-  .cbtn.plus{background:transparent;color:var(--text);font-size:26px;width:36px;padding:0;}
-  .cbtn.send{background:var(--theme);color:#fff;}.cbtn.reply{background:#ccc;color:#fff;}
-  #chatPanel{display:none;grid-template-columns:repeat(4,1fr);gap:16px;padding:18px 16px;background:var(--nav);}
-  #chatPanel.on{display:grid;}
-  .pnl{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:26px;cursor:pointer;}
-  .pnl span{font-size:12px;color:var(--sub);}
+#chatBottom{padding:10px 14px 24px 14px;box-sizing:border-box;}
+#bubbleRow{display:flex;gap:8px;margin-bottom:10px;}
+.bubble-btn{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 13px;font-size:13px;color:var(--text);cursor:pointer;white-space:nowrap;user-select:none;transition:opacity 0.15s;}
+.bubble-btn:active{opacity:0.6;}
+.bubble-btn svg{width:15px;height:15px;flex-shrink:0;}
+#inputRow{display:flex;gap:8px;align-items:center;}
+#chatInput{flex:1;border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:15px;font-family:inherit;resize:none;max-height:100px;outline:none;background:var(--card);color:var(--text);line-height:1.4;}
+#chatInput::placeholder{color:var(--sub);}
+#chatInput:focus{border-color:var(--theme);}
+.cbtn{border:none;border-radius:8px;height:38px;font-size:14px;cursor:pointer;flex-shrink:0;padding:0 14px;}
+.cbtn.send{background:var(--theme);color:#fff;}
+.plus-btn{width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:opacity 0.15s;}
+.plus-btn:active{opacity:0.6;}
+.plus-btn svg{width:18px;height:18px;}
+.voice-btn{width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:opacity 0.15s;}
+.voice-btn svg{width:17px;height:17px;position:relative;z-index:1;}
+.voice-btn::before{content:'';position:absolute;width:34px;height:34px;border-radius:50%;background:var(--theme);opacity:0;transform:scale(1);}
+.voice-btn.recording::before{animation:voicePulse 1s ease-out infinite;}
+.voice-btn.recording{border-color:var(--theme);}
+@keyframes voicePulse{0%{transform:scale(1);opacity:0.5;}100%{transform:scale(2.2);opacity:0;}}
+.reply-btn{width:34px;height:34px;border-radius:50%;background:var(--theme);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:opacity 0.15s,transform 0.1s;}
+.reply-btn:active{opacity:0.8;transform:scale(0.93);}
+.reply-btn svg{width:16px;height:16px;}
+#chatPanel{display:none;grid-template-columns:repeat(4,1fr);gap:16px;background:var(--nav);}
+#chatPanel.on{padding:16px 14px;border-top:1px solid var(--line);}
+#chatPanel.on{display:grid;}
+.pnl{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+.pnl-ico{width:48px;height:48px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
+.pnl-ico svg{width:24px;height:24px;}
+.pnl span{font-size:12px;color:var(--sub);}
   .modal{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:80;display:flex;align-items:flex-end;}
   .modal-box{background:var(--card);width:100%;max-height:80%;overflow-y:auto;border-radius:14px 14px 0 0;padding:14px;}
   .sheet-box{background:var(--card);width:100%;border-radius:14px 14px 0 0;padding:18px 16px;}
@@ -756,6 +776,40 @@ margin-bottom:4px;}
   color: var(--sub);
   font-weight: normal;
 }
+/* 录音悬浮提示 */
+#voiceRecOverlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);}
+#voiceRecOverlay .vrec-box{background:rgba(0,0,0,.75);border-radius:16px;padding:26px 34px;text-align:center;color:#fff;transition:.15s;}
+#voiceRecOverlay.cancel .vrec-box{background:rgba(200,40,60,.85);}
+#voiceRecOverlay .vrec-mic{font-size:46px;animation:vrecPulse 1s ease-in-out infinite;}
+#voiceRecOverlay .vrec-tip{margin-top:10px;font-size:13px;opacity:.9;}
+@keyframes vrecPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.voice-btn.recording{color:#4caf50;}
+
+/* 语音通话全屏 */
+#callScreen{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;
+  background:linear-gradient(180deg,#2b3a4a,#1c2530);color:#fff;padding:56px 24px 44px;box-sizing:border-box;}
+#callScreen .call-top{text-align:center;}
+#callScreen .call-avatar{width:88px;height:88px;border-radius:50%;margin:0 auto 16px;background-size:cover;background-position:center;
+  display:flex;align-items:center;justify-content:center;font-size:34px;background-color:#4a5a6a;}
+#callScreen .call-name{font-size:22px;font-weight:600;}
+#callScreen .call-status{font-size:13px;opacity:.7;margin-top:8px;}
+#callScreen .call-caption{flex:1;overflow-y:auto;margin:20px 0;font-size:15px;line-height:1.6;}
+#callScreen .call-caption .cap-user{opacity:.6;margin-bottom:8px;}
+#callScreen .call-caption .cap-ai{font-size:17px;}
+#callScreen .call-controls{display:flex;flex-direction:column;align-items:center;gap:22px;}
+#callScreen .call-talk-btn{width:100%;max-width:260px;padding:18px 0;text-align:center;border-radius:40px;
+  background:rgba(255,255,255,.15);font-size:16px;user-select:none;-webkit-user-select:none;touch-action:none;transition:.15s;}
+#callScreen .call-talk-btn.talking{background:#4caf50;transform:scale(1.03);}
+#callScreen .call-talk-btn.disabled{opacity:.4;pointer-events:none;}
+#callScreen .call-hangup{width:60px;height:60px;border-radius:50%;background:#e5384f;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* 通话记录卡片 */
+.calllog-card{cursor:pointer;min-width:160px;}
+.calllog-head{display:flex;align-items:center;gap:8px;font-size:14px;}
+.calllog-arrow{margin-left:auto;font-size:11px;opacity:.6;}
+.calllog-detail{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:13px;line-height:1.5;max-height:220px;overflow-y:auto;}
+.calllog-detail .ct-line{margin-bottom:6px;}
+.calllog-detail .ct-ai b{color:var(--theme);}
 
 </style>
 </head>
@@ -1185,6 +1239,7 @@ d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: ''
   // ===== 群聊新增：上下文条数 =====
   if(d.settings.groupCtxLimit===undefined)d.settings.groupCtxLimit='';
   if (d.settings.imageModel === undefined) d.settings.imageModel = '';
+if (d.settings.voiceModel === undefined) d.settings.voiceModel = '';
 
   delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
     if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
@@ -1769,9 +1824,10 @@ async function checkAutoGift() {
 
   for (var i = 0; i < DB.contacts.length; i++) {
     var c = DB.contacts[i];
-    if (c._draft || c.type === 'group') continue;
-    if (!c.inChatList) continue;
-    if (c.isBlockedByChar) continue;
+if (c._draft || c.type === 'group') continue;
+if (!c.inChatList) continue;
+if (c.isBlockedByChar) continue;
+if (c.allowAutoGreet === false) continue; // 关闭自动打招呼时，同步关闭自动送礼
     if ((c.status && c.status.好感度 || 0) < 60) continue; // 好感≥60
     if (!shopGiftCooldownOk(c)) continue;                   // 距上次≥7天
     if (shopGiftedToday(c)) continue;                       // 今天没送过
@@ -2365,12 +2421,12 @@ async function generateMemoryForChar(c, mode = 'auto') {
       '【重要·区分已知设定与新事件】下面是这个角色的既定设定（属于已知背景，不是今天发生的事）：\n' + known + '\n' +
       '提炼记忆时，绝对不要把上述既定设定当成新记忆记录——凡是属于角色本身固有属性（种族、外貌、身份、身世、性格等设定里已写明的内容），都不是新记忆，一律不记。只记录今天聊天中【新发生的事、新的情感变化、新的约定或承诺、关系的新进展、双方之间的互动细节】。\n' +
       '视角要求：用第三人称描述，将对方称为「用户」，不要用「我」指代用户。例如：用户和XX一起去了海边。\n\n' +
-      '【任务二：判定当前关系】\n' +
-      '结合今天的聊天内容、以及下面的参考信息，给出一个最贴合此刻剧情的「关系称谓」：\n' +
-      '- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
-      '- 目前的关系称谓：' + relNow + '\n' +
-      '要求：①关系称谓要有故事感、贴合剧情，而不是干巴巴的档位词 ②若今天发生了明确的重大剧情转折，关系称谓要据此突变 ③若只是日常聊天，就在原有基础上微调或保持 ④控制在 10 字以内。\n\n' +
-      
+'【任务二：判定当前关系】\n' +
+'结合今天的聊天内容、以及下面的参考信息，给出一个描述双方关系的称谓：\n' +
+'- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
+'- 目前的关系称谓：' + relNow + '\n' +
+'【参考词表】陌生人、普通朋友、好朋友、暧昧对象、喜欢的人、恋人、亲密恋人、异地恋人、青梅竹马、冷战中、破冰阶段、分手后、前任、单恋对象——你可以直接使用这些词，也可以在此基础上小幅调整（如"异地恋人"改成"网恋对象"），但禁止使用脱离日常语言的文学化表达。\n' +
+'要求：①用词必须是日常口语，普通人能一眼看懂 ②若今天发生了明确的关系转折，称谓据此更新 ③若只是日常聊天，保持原有称谓或仅做微调 ④控制在8字以内。\n\n' +      
       // ===================== 【任务三 · 全新强硬版】 =====================
       '【任务三：提取约定日程 · 绝对铁律】\n' +
       '如果聊天中出现了明确的、约定好的未来安排（例如“明天一起吃饭”“周末去看电影”“下周三见面”等），请提取成日程。\n' +
@@ -2469,6 +2525,138 @@ async function generateMemoryForChar(c, mode = 'auto') {
       return false;
     }
   }
+  // ========== 昨日自动模式 ==========
+  if (mode === 'yesterday') {
+    var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    var yesterdayMsgs = arr.filter(function(m) {
+      return new Date(m.time || 0).toISOString().slice(0, 10) === yesterday;
+    });
+    if (yesterdayMsgs.length < 2) return false;
+
+    var convo = yesterdayMsgs.map(function(m) {
+      var who = (m.role === 'assistant') ? (c.name || c.nick) : (DB.me.name || '我');
+      return who + '：' + (lastText(m) || '');
+    }).join('\n');
+
+    var favNow = (c.status && c.status.好感度 != null) ? c.status.好感度 : 50;
+    var relNow = (c.status && c.status.当前关系) ? c.status.当前关系 : '初次见面';
+    var known = '';
+    if (c.job) known += '身份/职业：' + c.job + '\n';
+    if (c.pLook) known += '外貌特征：' + c.pLook + '\n';
+    if (c.pKeywords) known += '性格：' + c.pKeywords + '\n';
+    if (c.pBack) known += '背景经历：' + c.pBack + '\n';
+    var world = (DB.worlds||[]).find(function(w){ return w.id===c.worldId; });
+    if (world) known += '世界观设定：' + world.name + '——' + world.desc + '\n';
+    if (!known) known = '（无特别设定）';
+
+    var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.name || c.nick) + '」和「' + (DB.me.name || '我') + '」**昨天**的聊天记录，完成两个任务。\n\n' +
+      '【任务一：提炼记忆】提炼出 1~3 条值得长期记住的记忆，每条附带优先级（priority）：\n' +
+      '- core（核心）：涉及关系本质、身份定义、无法改变的事实（例如：确立了关系、坦白身世、重要承诺）\n' +
+      '- important（重要）：重要共同经历、情感转折、影响关系的关键对话\n' +
+      '- temp（临时）：日常琐事、短期状态、可随时间淡化的小事\n' +
+      '【重要·区分已知设定与新事件】下面是这个角色的既定设定（属于已知背景，不是昨天发生的事）：\n' + known + '\n' +
+      '提炼记忆时，绝对不要把上述既定设定当成新记忆记录——凡是属于角色本身固有属性（种族、外貌、身份、身世、性格等设定里已写明的内容），都不是新记忆，一律不记。只记录昨天聊天中【新发生的事、新的情感变化、新的约定或承诺、关系的新进展、双方之间的互动细节】。\n' +
+      '视角要求：用第三人称描述，将对方称为「用户」，不要用「我」指代用户。例如：用户和XX一起去了海边。\n\n' +
+      '【任务二：判定当前关系】\n' +
+      '结合昨天的聊天内容、以及下面的参考信息，给出一个描述双方关系的称谓：\n' +
+      '- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
+      '- 目前的关系称谓：' + relNow + '\n' +
+      '【参考词表】陌生人、普通朋友、好朋友、暧昧对象、喜欢的人、恋人、亲密恋人、异地恋人、青梅竹马、冷战中、破冰阶段、分手后、前任、单恋对象——你可以直接使用这些词，也可以在此基础上小幅调整（如"异地恋人"改成"网恋对象"），但禁止使用脱离日常语言的文学化表达。\n' +
+      '要求：①用词必须是日常口语，普通人能一眼看懂 ②若昨天发生了明确的关系转折，称谓据此更新 ③若只是日常聊天，保持原有称谓或仅做微调 ④控制在8字以内。\n\n' +
+      '【任务三：提取约定日程 · 绝对铁律】\n' +
+      '如果聊天中出现了明确的、约定好的未来安排（例如"明天一起吃饭""周末去看电影""下周三见面"等），请提取成日程。\n' +
+      '\n' +
+      '【🔴 日期铁律（最高优先级 · 违规直接丢弃）】\n' +
+      '1. 当前的绝对日期是：' + todayStr + '（周' + weekdayStr + '）。\n' +
+      '2. 对话里的"明天"必须换算成 ' + tomorrowStr + '，"后天"必须换算成 ' + dayAfterStr + '。\n' +
+      '3. 对话里的"下周三""下周五"等，必须以 ' + todayStr + ' 为基准，推算出具体日期。\n' +
+      '4. ⛔ 绝对禁止在 date 字段里写"明天"、"后天"、"下周"、"改天"、"周末"等任何中文词。\n' +
+      '5. date 字段只允许输出 YYYY-MM-DD 格式。如果无法准确换算，宁可返回空数组 []，也不要乱填。\n' +
+      '\n' +
+      '【📝 标题铁律（日程写法 · 用户视角）】\n' +
+      '1. 标题是给用户看的日程备忘，必须省略主语"我"，以事件为中心。\n' +
+      '2. 格式：时间描述 + 和谁 + 做什么。\n' +
+      '✅ 正确示例：明天和A一起看电影、晚上和B去吃饭、周末C来家里\n' +
+      '❌ 错误示例：我和A明天去看电影、A来我家、和A约好（没有时间/事件模糊）\n' +
+      '\n' +
+      '【输出格式】只输出一个 JSON 对象，不要任何其他文字：\n' +
+      '{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓","events":[{"date":"YYYY-MM-DD","title":"明天和A一起看电影"}]}\n\n' +
+      '聊天记录：\n' + convo + extraBlock;
+
+    try {
+      var out = await callAI([{ role: 'user', content: prompt }], model);
+      out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
+      var match = out.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('AI 返回格式不正确');
+      var data = JSON.parse(match[0]);
+
+      var items = Array.isArray(data.memories) ? data.memories : [];
+      if (data.relation && typeof data.relation === 'string' && data.relation.trim()) {
+        if (!c.status) c.status = {};
+        c.status.当前关系 = data.relation.trim();
+      }
+
+      var anyAdded = false;
+      items.forEach(function(item) {
+        if (!item.content || !item.priority) return;
+        var exists = (c.memories || []).some(function(m) {
+          return m.content === item.content;
+        });
+        if (exists) return;
+        if (!c.memories) c.memories = [];
+        c.memories.push({
+          id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          time: Date.now(),
+          content: item.content,
+          type: 'auto',
+          priority: item.priority,
+          edited: false
+        });
+        if (!c.chapters) c.chapters = [];
+        var dateStr = new Date().toISOString().slice(0, 10);
+        c.chapters.push({ date: dateStr, content: '[记忆] ' + item.content });
+        anyAdded = true;
+      });
+
+      var eventAdded = false;
+      try {
+        if (data && Array.isArray(data.events)) {
+          DB.events = DB.events || [];
+          data.events.forEach(function(ev){
+            if (!ev || !ev.date || !ev.title) return;
+            if (!/^\d{4}-\d{1,2}-\d{1,2}$/.test(ev.date)) {
+              console.warn('⚠️ AI返回的日期格式不对，已丢弃：', ev.date);
+              return;
+            }
+            var d = new Date(ev.date);
+            if (isNaN(d.getTime())) {
+              console.warn('⚠️ AI返回的日期无效，已丢弃：', ev.date);
+              return;
+            }
+            var dup = DB.events.some(function(e){ return e.date===ev.date && e.title===ev.title; });
+            if (dup) return;
+            DB.events.push({
+              id: 'e' + Date.now() + Math.random().toString(36).slice(2,5),
+              title: String(ev.title).slice(0, 20),
+              date: ev.date,
+              from: 'ai',
+              createdAt: Date.now()
+            });
+            eventAdded = true;
+          });
+        }
+      } catch(e) { console.warn('昨日自动模式提取约定日程失败', e); }
+
+      if (anyAdded || eventAdded || (data.relation && data.relation.trim())) {
+        save();
+        return true;
+      }
+      return false;
+    } catch(e) {
+      console.error('昨日自动生成记忆失败：', e);
+      return false;
+    }
+  }
 
   // ========== 手动模式 ==========
   if (mode === 'manual') {
@@ -2514,12 +2702,12 @@ async function generateMemoryForChar(c, mode = 'auto') {
       '【重要·区分已知设定与新事件】下面是这个角色的既定设定（属于已知背景，不是近期发生的事）：\n' + known + '\n' +
       '提炼记忆时，绝对不要把上述既定设定当成新记忆记录——凡是属于角色本身固有属性（种族、外貌、身份、身世、性格等设定里已写明的内容），都不是新记忆，一律不记。只记录聊天中【新发生的事、新的情感变化、新的约定或承诺、关系的新进展、双方之间的互动细节】。\n' +
       '视角要求：用第三人称描述，将对方称为「用户」，不要用「我」指代用户。例如：用户和XX一起去了海边。\n\n' +
-      '【任务二：判定当前关系】\n' +
-      '结合近期的聊天内容、以及下面的参考信息，给出一个最贴合此刻剧情的「关系称谓」：\n' +
-      '- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
-      '- 目前的关系称谓：' + relNow + '\n' +
-      '要求：①关系称谓要有故事感、贴合剧情，而不是干巴巴的档位词 ②若近期发生了明确的重大剧情转折，关系称谓要据此突变 ③若只是日常聊天，就在原有基础上微调或保持 ④控制在 10 字以内。\n\n' +
-      
+'【任务二：判定当前关系】\n' +
+'结合近期的聊天内容、以及下面的参考信息，给出一个描述双方关系的称谓：\n' +
+'- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
+'- 目前的关系称谓：' + relNow + '\n' +
+'【参考词表】陌生人、普通朋友、好朋友、暧昧对象、喜欢的人、恋人、亲密恋人、异地恋人、青梅竹马、冷战中、破冰阶段、分手后、前任、单恋对象——你可以直接使用这些词，也可以在此基础上小幅调整（如"异地恋人"改成"网恋对象"），但禁止使用脱离日常语言的文学化表达。\n' +
+'要求：①用词必须是日常口语，普通人能一眼看懂 ②若近期发生了明确的关系转折，称谓据此更新 ③若只是日常聊天，保持原有称谓或仅做微调 ④控制在8字以内。\n\n' +      
       // ===================== 【任务三 · 全新强硬版（手动模式同款）】 =====================
       '【任务三：提取约定日程 · 绝对铁律】\n' +
       '如果聊天中出现了明确的、约定好的未来安排（例如“明天一起吃饭”“周末去看电影”“下周三见面”等），请提取成日程。\n' +
@@ -2620,40 +2808,46 @@ async function generateMemoryForChar(c, mode = 'auto') {
   }
 }
 async function autoGenerateDailyMemories() {
-  // 检查今天是否已经生成过
   var today = new Date().toISOString().slice(0, 10);
   if (DB.settings.lastDailyMemoryDate === today) return;
 
-  // 获取所有非草稿角色
-  var chars = DB.contacts.filter(function(c) { return !c._draft; });
-  if (!chars.length) return;
+  var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 
-  console.log('📒 开始每日自动生成记忆...');
+  var chars = DB.contacts.filter(function(c) { return !c._draft; });
+  if (!chars.length) {
+    DB.settings.lastDailyMemoryDate = today;
+    save();
+    return;
+  }
+
+  console.log('📒 开始自动生成昨日记忆...');
   var anyGenerated = false;
 
   for (var i = 0; i < chars.length; i++) {
     var c = chars[i];
-    var success = await generateMemoryForChar(c);
+    var arr = DB.chats[c.id] || [];
+    var yesterdayMsgs = arr.filter(function(m) {
+      return new Date(m.time || 0).toISOString().slice(0, 10) === yesterday;
+    });
+    if (yesterdayMsgs.length < 2) continue;
+
+    var success = await generateMemoryForChar(c, 'yesterday');
     if (success) anyGenerated = true;
-    // 每个角色之间间隔1秒，避免API限流
     await sleep(1000);
   }
 
-  // 记录今天已生成
   DB.settings.lastDailyMemoryDate = today;
   save();
 
   if (anyGenerated) {
-    console.log('✅ 每日记忆生成完成');
-    // 如果当前在备忘录或角色编辑页，刷新界面
+    console.log('✅ 昨日记忆生成完成');
     if (view.type === 'memo' || view.type === 'memoDetail' || view.type === 'charEdit') {
       render();
     }
   } else {
-    console.log('ℹ️ 今天没有需要生成记忆的角色');
+    console.log('ℹ️ 昨天没有需要生成记忆的角色');
   }
 }
-
 // ===== 触发自动生成（页面加载 & 切回前台） =====
 function triggerDailyMemoryCheck() {
   // 如果正在生成中，跳过
@@ -2868,6 +3062,7 @@ function render() {
   if (view.type === 'settings') return renderSettings();
   if (view.type === 'charEdit') return renderCharEdit();
   if (view.type === 'chat') return renderChat(false);
+    if (view.type === 'voiceCall') return renderVoiceCall();
 
   // ---- 群聊 ----
   if (view.type === 'groupList') return renderGroupList();
@@ -5622,7 +5817,17 @@ async function aiPolishWorld() {
 const wxT={chats:'微信',contacts:'通讯录',discover:'发现',me:'我'};
 function renderWechat(){showChrome(true,true);statusbar.classList.add('dark');tbTitle.textContent=wxT[wechatPage];tbLeft.textContent='‹';tbLeft.onclick=goHome;if(wechatPage==='contacts'){tbRight.textContent='＋';tbRight.onclick=addContact;}else{tbRight.textContent='';tbRight.onclick=null;}document.querySelectorAll('#tabbar .tab').forEach(t=>t.classList.toggle('active',t.dataset.page===wechatPage));if(wechatPage==='chats')renderChats();else if(wechatPage==='contacts')renderContacts();else if(wechatPage==='discover')renderDiscover();else renderWxMe();refreshMomentBadge();}
 function avatarHtml(c){const bg=c.avatar?`background-image:url('${c.avatar}')`:'';return `<div class="avatar" style="${bg}">${c.avatar?'':(c.name?c.name[0]:'?')}</div>`;}
-function lastText(m){if(!m)return'';if(m.recalled)return'[有一条消息被撤回]';if(m.type==='image')return'[图片]';if(m.type==='transfer')return'[转账]';if(m.type==='redpacket')return'[红包]';if(m.type==='voice')return'[语音]';if(m.type==='sticker')return'[表情]';return m.content;}
+function lastText(m){
+  if(!m)return'';
+  if(m.recalled)return'[有一条消息被撤回]';
+  if(m.type==='image')return'[图片]';
+  if(m.type==='transfer')return'[转账]';
+  if(m.type==='redpacket')return'[红包]';
+  if(m.type==='voice')return'[语音]';
+  if(m.type==='sticker')return'[表情]';
+  if(m.type==='shop_item')return'[礼物] '+(m.content||'');
+  return m.content;
+}
 function renderChats(){
   // 私聊条目
   var privateItems = DB.contacts.filter(function(c){ return !c._draft && c.inChatList; })
@@ -5933,16 +6138,30 @@ function renderGroupChat(keepScroll){
   // 底部输入栏（＋只留相册；无线上线下切换）
   var bar = document.createElement('div');
   bar.id = 'chatBottom';
-  bar.innerHTML =
-    '<div id="inputRow">'+
-      '<span class="cbtn plus" onclick="togglePanel()">＋</span>'+
-      '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onGroupInput(this)" onkeydown="onGroupKey(event)"></textarea>'+
-      '<span class="cbtn" onclick="openGroupStickerPicker()" style="font-size:30px;width:36px;padding:0;text-align:center;color:var(--text);flex-shrink:0;line-height:38px;cursor:pointer;">☺</span>'+
-      '<button class="cbtn reply" id="actBtn" onclick="groupActBtnClick()">▶ 回复</button>'+
-    '</div>'+
-    '<div id="chatPanel">'+
-      '<div class="pnl" onclick="groupSendImage()">🖼️<span>相册</span></div>'+
-    '</div>';
+bar.innerHTML =
+  '<div id="bubbleRow">' +
+    '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');groupSendImage()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
+      '相册' +
+    '</div>' +
+    '<div class="bubble-btn" onclick="openGroupStickerPicker()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="0.8" fill="currentColor"/><circle cx="15" cy="10" r="0.8" fill="currentColor"/></svg>' +
+      '表情' +
+    '</div>' +
+  '</div>' +
+  '<div id="inputRow">' +
+    '<div class="plus-btn" onclick="togglePanel()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
+    '</div>' +
+    '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onGroupInput(this)" onkeydown="onGroupKey(event)"></textarea>' +
+    '<div class="voice-btn" id="voiceMsgBtn">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
+    '</div>' +
+    '<button class="reply-btn" id="actBtn" onclick="groupActBtnClick()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
+    '</button>' +
+  '</div>' +
+  '<div id="chatPanel" style="display:none"></div>';
   phone.appendChild(bar);
   updateGroupActBtn();
 
@@ -7026,7 +7245,10 @@ ${settingsCell(ICO_DATA,'数据管理','导入 · 导出','data','#3ac07a')}
           <select id="lightModel"><option>${s.lightModel||'请先拉取'}</option></select></div>
         <div class="row"><label>生图模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">朋友圈配图 · 角色随手拍</span></label>
           <select id="imageModel"><option>${s.imageModel||'请先拉取'}</option></select></div>
-      </div>
+        <div class="row"><label>语音模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">语音转文字 · 通话听写</span></label>
+          <select id="voiceModel"><option>${s.voiceModel||'请先拉取'}</option></select></div>
+
+	  </div>
 
       <button class="btn" onclick="saveApi()">保存接口设置</button>
 	  <button class="btn" onclick="openImgQuota()">🖼️ 生图限额管理</button>
@@ -7678,17 +7900,6 @@ async function genMemory() {
     return;
   }
 
-  var arr = DB.chats[c.id] || [];
-  var todayStr = new Date().toISOString().slice(0, 10);
-  var todays = arr.filter(function(m) {
-    var t = new Date(m.time || 0);
-    return t.toISOString().slice(0, 10) === todayStr;
-  });
-  if (todays.length < 2) {
-    alert('今天聊得还不够多，再多聊几句再生成吧～');
-    return;
-  }
-
   var btn = document.getElementById('genMemBtn');
   if (btn) {
     btn.textContent = '⏳ 正在生成…';
@@ -7696,12 +7907,10 @@ async function genMemory() {
   }
 
   try {
-    var result = await generateMemoryForChar(c);
+    var result = await generateMemoryForChar(c, 'manual');
     if (result) {
-      popTip('今日记忆已生成/追加', { icon: '✅', title: '完成' });
+      popTip('记忆已生成/追加', { icon: '✅', title: '完成' });
       renderCharEdit();
-    } else {
-      alert('生成失败，可能今天没有实质内容或 API 出错。');
     }
   } catch (e) {
     alert('生成失败：' + e.message);
@@ -9712,29 +9921,15 @@ async function generateMemo(cid) {
   var model = DB.settings.auxModel || DB.settings.chatModel;
   if (!model) { alert('请先在设置里选择模型'); return; }
 
-  var arr = DB.chats[cid] || [];
-  var today = new Date();
-  var todayStr = today.toISOString().slice(0,10);
-  var todays = arr.filter(function(m) {
-    var t = new Date(m.time || 0);
-    return t.toISOString().slice(0,10) === todayStr;
-  });
-  if (todays.length < 2) { alert('今天聊得还不够多，再多聊几句再生成吧～'); return; }
-
   var btn = document.querySelector('#modal .btn') || document.querySelector('.btn[onclick*="generateMemo"]');
   if (btn) { btn.textContent = '⏳ 生成中…'; btn.disabled = true; }
 
   try {
-    // 直接复用自动版的核心逻辑（真名优先 + 同时更新关系 + 统一prompt）
     var ok = await generateMemoryForChar(c, 'manual');
     renderMemoDetail(c.id);
-if (ok) {
-  popTip('记忆已更新，关系也同步啦', { icon: '✅', title: '生成完成' });
-} else {
-  // 注意：此时如果没有新内容，函数内部已经弹过 "没有新内容" 的提示了
-  // 这里作为兜底，只在不明确的情况下显示
-  popTip('没有生成新的记忆，可能是没有新内容或 API 返回为空', { icon: 'ℹ️', title: '完成' });
-}
+    if (ok) {
+      popTip('记忆已更新，关系也同步啦', { icon: '✅', title: '生成完成' });
+    }
   } catch (e) {
     popTip(e.message || '生成失败', { icon: '⚠️', title: '生成失败' });
   } finally {
@@ -10105,6 +10300,22 @@ else if(m.type==='image'){
 else if(m.type==='transfer'){var statusText='';if(m.status==='accepted')statusText='✅ 已接收';else if(m.status==='refunded')statusText='⏳ 已退回';else statusText='待处理';body='<div class="transfer-card" data-mid="'+m.id+'" style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530;"><div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="color:#F99530;font-size:22px;font-weight:bold;">¥</span></div><div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:500;">¥ '+esc(String(m.amount))+'</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px;">'+(m.content?esc(m.content):'转账')+'</div></div></div><div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px;display:flex;justify-content:space-between;"><span>微信转账</span><span>'+statusText+'</span></div></div>';}
 else if(m.type==='redpacket')body=`<div style="width:220px;background:#fff;border-radius:10px;overflow:hidden"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#e05a49"><div style="width:36px;height:36px;background:#fbe0a6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px">🧧</div><div style="flex:1"><div style="color:#fff;font-size:14px">${esc(m.content)||'恭喜发财'}</div><div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:2px">¥${esc(String(m.amount))}</div></div></div><div style="background:#f2c879;color:#8a4b00;font-size:11px;padding:6px 12px">微信红包</div></div>`;
 else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body=`<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">${dur}″</span></div><div class="voice-text">${renderVoiceContent(m.content)}</div></div>`;}
+else if(m.type==='callLog'){
+  var _exp = !!m.callExpanded;
+  var _detail = '';
+  if(_exp && m.turns && m.turns.length){
+    _detail = '<div class="calllog-detail">' + m.turns.map(function(t){
+      var who = t.role==='user' ? (DB.me.name||'我') : (c.nick||c.name);
+      var cls = t.role==='user' ? 'ct-me' : 'ct-ai';
+      return '<div class="ct-line '+cls+'"><b>'+esc(who)+'：</b>'+esc(t.content)+'</div>';
+    }).join('') + '</div>';
+  }
+  body = '<div class="mbody calllog-card" onclick="toggleCallLog(\''+m.id+'\')">' +
+    '<div class="calllog-head"><span class="calllog-ico">📞</span><span>语音通话 '+esc(m.duration||'')+'</span><span class="calllog-arrow">'+(_exp?'▲':'▼')+'</span></div>' +
+    _detail +
+  '</div>';
+}
+
 else if(m.type==='sticker'){const s=DB.stickers.find(x=>x.name===m.content);body=s?`<div style="padding:0"><img src="${s.img}" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>`:`<div class="mbody">[表情:${esc(m.content)}]</div>`;}
 else if(m.type==='text'){var displayContent=m.editedContent||m.content;body=`<div class="mbody">${me?esc(displayContent):(c.mode==='offline'?colorLines(displayContent,c.lineColor):esc(displayContent))}</div>`;}
 else if (m.type === 'shop_item') {
@@ -10298,20 +10509,49 @@ function renderChat(keepScroll) {
       '</div>';
   }
 
-  var inputHtml = '<div id="inputRow">' +
-    '<span class="cbtn plus" onclick="togglePanel()">＋</span>' +
-    '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
-    '<span class="cbtn" onclick="openStickerPicker()" style="font-size:30px;width:36px;padding:0;text-align:center;color:var(--text);flex-shrink:0;line-height:38px;cursor:pointer;">☺</span>' +
-    '<button class="cbtn reply" id="actBtn" onclick="actBtnClick()">▶ 回复</button>' +
+var inputHtml = '<div id="bubbleRow">' +
+    '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendImage()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
+      '相册' +
     '</div>' +
+    '<div class="bubble-btn" onclick="openStickerPicker()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="0.8" fill="currentColor"/><circle cx="15" cy="10" r="0.8" fill="currentColor"/></svg>' +
+      '表情' +
+    '</div>' +
+    '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendTransfer()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><circle cx="12" cy="15" r="2"/></svg>' +
+      '转账' +
+    '</div>' +
+  '</div>' +
+  '<div id="inputRow">' +
+    '<div class="plus-btn" onclick="togglePanel()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
+    '</div>' +
+    '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
+    '<div class="voice-btn" id="voiceMsgBtn">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
+    '</div>' +
+    '<button class="reply-btn" id="actBtn" onclick="actBtnClick()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
+    '</button>' +
+  '</div>' +
   '<div id="chatPanel">' +
-    '<div class="pnl" onclick="sendImage()">🖼️<span>相册</span></div>' +
-    '<div class="pnl" onclick="sendTransfer()">💰<span>转账</span></div>' +
-    '<div class="pnl" onclick="togglePanel();watchNow(view.id,{fromChat:true})">📡<span>监控</span></div>' +
-    '<div class="pnl" onclick="togglePanel();window._scheduleFrom=\'chat\';openSchedule(view.id)">📅<span>行程</span></div>' +
-    '<div class="pnl" onclick="toggleMode()"><div id="modeIco">' + (c.mode === 'offline' ? '📖' : '💬') + '</div><span id="modeTxt">' + (c.mode === 'offline' ? '线下中' : '线上中') + '</span></div>' +
+    '<div class="pnl" onclick="togglePanel();watchNow(view.id,{fromChat:true})">' +
+      '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8M12 18v4"/></svg></div>' +
+      '<span>监控</span>' +
+    '</div>' +
+    '<div class="pnl" onclick="togglePanel();window._scheduleFrom=\'chat\';openSchedule(view.id)">' +
+      '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div>' +
+      '<span>行程</span>' +
+    '</div>' +
+    '<div class="pnl" onclick="toggleMode()">' +
+      '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg></div>' +
+      '<span id="modeTxt">' + (c.mode === 'offline' ? '线下中' : '线上中') + '</span>' +
+    '</div>' +
+	    '<div class="pnl" onclick="togglePanel();startVoiceCall(view.id)">' +
+      '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>' +
+      '<span>通话</span>' +
   '</div>';
-
   bar.innerHTML = bannerHtml + inputHtml;
   phone.appendChild(bar);
 
@@ -10580,11 +10820,10 @@ function askUnblock(){
 }
 
 function sendMsg(){const el=document.getElementById('chatInput');const t=el.value.trim();if(!t)return;el.value='';el.style.height='auto';updateActBtn();pushMy({type:'text',content:t});}
-function sendImage(){togglePanel();pickImage(d=>pushMy({type:'image',content:d}),800);}
+function sendImage(){const p=document.getElementById('chatPanel');if(p)p.classList.remove('on');pickImage(d=>pushMy({type:'image',content:d}),800);}
 function openInputSheet(title,fields,cb){closeModal();const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="sheet-box"><h3>${title}</h3>${fields.map((f,i)=>`<input id="sf_${i}" placeholder="${f.ph}" ${f.num?'inputmode="decimal"':''}>`).join('')}<button class="btn" style="width:100%;margin:4px 0 8px" onclick="submitSheet()">确定</button><button class="btn gray" style="width:100%;margin:0" onclick="closeModal()">取消</button></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);setTimeout(()=>{const el=document.getElementById('sf_0');if(el)el.focus();},50);window._sheetCb=cb;window._sheetN=fields.length;}
 function submitSheet(){const vals=[];for(let i=0;i<window._sheetN;i++)vals.push(document.getElementById('sf_'+i).value.trim());closeModal();window._sheetCb(vals);}
-function sendTransfer(){togglePanel();openInputSheet('转账',[{ph:'金额',num:true},{ph:'备注（可留空）'}],v=>{if(!v[0])return;var m = { type:'transfer', from:'user', amount: v[0], content: v[1] || '', status: 'pending' };
-pushMy(m);;});}
+function sendTransfer(){const p=document.getElementById('chatPanel');if(p)p.classList.remove('on');openInputSheet('转账',[{ph:'金额',num:true},{ph:'备注（可留空）'}],v=>{if(!v[0])return;var m={type:'transfer',from:'user',amount:v[0],content:v[1]||'',status:'pending'};pushMy(m);;});}
 function sendRedpacket(){alert('红包功能已下线，请使用转账～');}
 function sendVoice(){togglePanel();openInputSheet('发语音',[{ph:'输入语音内容'}],v=>{if(!v[0])return;pushMy({type:'voice',content:v[0]});});}
 function toggleVoice(id){
@@ -12034,6 +12273,361 @@ async function triggerC2CInteractions(moment){
     if(typeof renderMoments==='function') renderMoments();
   }catch(e){ console.error('c2c互动失败',e); }
 }
+/* ============================================================
+   🎤 语音功能引擎（v1）
+   录音 / WAV转换 / 转文字 / 流式回复 / 语音消息 / 语音通话
+   ============================================================ */
+
+var VOICE = { mediaRecorder:null, chunks:[], stream:null, recording:false, startTime:0 };
+
+/* ---------- 1. 录音 ---------- */
+async function voiceStartRecording(){
+  if (VOICE.recording) return false;
+  try{
+    var stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    VOICE.stream = stream; VOICE.chunks = [];
+    var mr = new MediaRecorder(stream);
+    VOICE.mediaRecorder = mr;
+    mr.ondataavailable = function(e){ if(e.data && e.data.size>0) VOICE.chunks.push(e.data); };
+    mr.start();
+    VOICE.recording = true; VOICE.startTime = Date.now();
+    return true;
+  }catch(e){
+    alert('无法录音：'+(e&&e.message?e.message:e)+'\n请检查麦克风权限，且页面必须在 https 或 localhost 打开（file:// 不行）。');
+    return false;
+  }
+}
+function voiceStopRecording(){
+  return new Promise(function(resolve){
+    if(!VOICE.recording || !VOICE.mediaRecorder){ resolve(null); return; }
+    var mr = VOICE.mediaRecorder;
+    mr.onstop = function(){
+      var blob = new Blob(VOICE.chunks, { type:'audio/webm' });
+      if(VOICE.stream) VOICE.stream.getTracks().forEach(function(t){ t.stop(); });
+      VOICE.recording=false; VOICE.mediaRecorder=null; VOICE.stream=null;
+      resolve(blob);
+    };
+    mr.stop();
+  });
+}
+function voiceCancelRecording(){
+  if(VOICE.mediaRecorder && VOICE.recording){ try{ VOICE.mediaRecorder.onstop=null; VOICE.mediaRecorder.stop(); }catch(e){} }
+  if(VOICE.stream) VOICE.stream.getTracks().forEach(function(t){ t.stop(); });
+  VOICE.recording=false; VOICE.mediaRecorder=null; VOICE.stream=null;
+}
+
+/* ---------- 2. webm → WAV(16k单声道) → base64 ---------- */
+async function voiceBlobToWavBase64(blob){
+  var arrayBuf = await blob.arrayBuffer();
+  var AudioCtx = window.AudioContext || window.webkitAudioContext;
+  var ctx = new AudioCtx();
+  var audioBuf = await ctx.decodeAudioData(arrayBuf);
+  ctx.close();
+  var targetRate = 16000;
+  var offline = new OfflineAudioContext(1, Math.ceil(audioBuf.duration*targetRate), targetRate);
+  var src = offline.createBufferSource();
+  src.buffer = audioBuf; src.connect(offline.destination); src.start(0);
+  var rendered = await offline.startRendering();
+  var samples = rendered.getChannelData(0);
+  return voiceArrayBufferToBase64(voiceEncodeWav(samples, targetRate));
+}
+function voiceEncodeWav(samples, sampleRate){
+  var buffer = new ArrayBuffer(44 + samples.length*2);
+  var view = new DataView(buffer);
+  function ws(o,s){ for(var i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); }
+  ws(0,'RIFF'); view.setUint32(4, 36+samples.length*2, true); ws(8,'WAVE');
+  ws(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,1,true);
+  view.setUint32(24,sampleRate,true); view.setUint32(28,sampleRate*2,true); view.setUint16(32,2,true); view.setUint16(34,16,true);
+  ws(36,'data'); view.setUint32(40, samples.length*2, true);
+  var off=44;
+  for(var i=0;i<samples.length;i++){ var s=Math.max(-1,Math.min(1,samples[i])); view.setInt16(off, s<0?s*0x8000:s*0x7FFF, true); off+=2; }
+  return buffer;
+}
+function voiceArrayBufferToBase64(buffer){
+  var bytes = new Uint8Array(buffer), binary='', chunk=0x8000;
+  for(var i=0;i<bytes.length;i+=chunk){ binary += String.fromCharCode.apply(null, bytes.subarray(i,i+chunk)); }
+  return btoa(binary);
+}
+
+/* ---------- 3. 音频转文字（Gemini，伪装成 image_url） ---------- */
+async function voiceTranscribe(wavBase64){
+  var s = DB.settings;
+  var model = s.voiceModel;
+  if(!model || model.includes('请先')) throw new Error('请先在设置里选择"语音模型"');
+  var messages = [{
+    role:'user',
+    content:[
+      { type:'text', text:'请把这段音频里的语音一字不差地转写成纯文字，只输出转写结果本身，不要加任何解释、引号或前后缀。听不清就输出空。' },
+      { type:'image_url', image_url:{ url:'data:audio/wav;base64,'+wavBase64 } }
+    ]
+  }];
+  var res = await fetch(s.apiUrl+'/chat/completions',{
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+s.apiKey },
+    body: JSON.stringify({ model:model, messages:messages })
+  });
+  if(!res.ok){ var t=''; try{t=await res.text();}catch(e){} throw new Error('转文字失败 HTTP '+res.status+(t?'：'+t.slice(0,200):'')); }
+  var d = await res.json();
+  if(!d.choices || !d.choices[0]) throw new Error('转文字返回异常');
+  return (d.choices[0].message.content||'').trim();
+}
+
+/* ---------- 4. 主模型流式调用 ---------- */
+async function callAIStream(messages, model, onDelta){
+  var s = DB.settings;
+  if(!s.apiUrl || !s.apiKey) throw new Error('请先在设置里填写API');
+  var res = await fetch(s.apiUrl+'/chat/completions',{
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+s.apiKey },
+    body: JSON.stringify({ model:model, messages:messages, stream:true })
+  });
+  if(!res.ok){ var t=''; try{t=await res.text();}catch(e){} throw new Error('HTTP '+res.status+(t?'：'+t.slice(0,200):'')); }
+  var reader = res.body.getReader(), decoder = new TextDecoder();
+  var full='', buffer='';
+  while(true){
+    var r = await reader.read();
+    if(r.done) break;
+    buffer += decoder.decode(r.value, { stream:true });
+    var lines = buffer.split('\n'); buffer = lines.pop();
+    for(var i=0;i<lines.length;i++){
+      var line = lines[i].trim();
+      if(!line || line.indexOf('data:')!==0) continue;
+      var data = line.slice(5).trim();
+      if(data==='[DONE]') continue;
+      try{
+        var j = JSON.parse(data);
+        var delta = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content;
+        if(delta){ full += delta; if(onDelta) onDelta(delta, full); }
+      }catch(e){}
+    }
+  }
+  return full;
+}
+
+/* ---------- 5. 语音消息（普通聊天里按住录音） ---------- */
+function initVoiceMessageButton(){
+  if(window._voiceMsgInited) return;
+  window._voiceMsgInited = true;
+  var holding=false, cancelled=false;
+
+  function onStart(e){
+    var btn = e.target && e.target.closest && e.target.closest('#voiceMsgBtn');
+    if(!btn) return;
+    e.preventDefault();
+    holding=true; cancelled=false;
+    voiceStartRecording().then(function(ok){
+      if(!ok){ holding=false; return; }
+      if(!holding){ voiceCancelRecording(); return; }
+      btn.classList.add('recording');
+      voiceShowRecordingOverlay();
+    });
+  }
+  function onMove(e){
+    if(!holding) return;
+    var t = e.touches ? e.touches[0] : e;
+    var ov = document.getElementById('voiceRecOverlay');
+    if(ov){
+      var tip = ov.querySelector('.vrec-tip');
+      if(t.clientY < window.innerHeight*0.55){ cancelled=true; if(tip) tip.textContent='松开手指 取消发送'; ov.classList.add('cancel'); }
+      else { cancelled=false; if(tip) tip.textContent='上滑取消'; ov.classList.remove('cancel'); }
+    }
+  }
+  async function onEnd(e){
+    if(!holding) return;
+    holding=false;
+    var btn = document.getElementById('voiceMsgBtn');
+    if(btn) btn.classList.remove('recording');
+    voiceHideRecordingOverlay();
+    if(cancelled){ voiceCancelRecording(); return; }
+    var blob = await voiceStopRecording();
+    if(!blob || blob.size<500) return;
+    voiceSendMessage(blob);
+  }
+
+  document.addEventListener('touchstart', onStart, { passive:false });
+  document.addEventListener('touchmove',  onMove,  { passive:false });
+  document.addEventListener('touchend',   onEnd,   { passive:false });
+  document.addEventListener('mousedown',  onStart);
+  document.addEventListener('mousemove',  onMove);
+  document.addEventListener('mouseup',    onEnd);
+}
+function voiceShowRecordingOverlay(){
+  if(document.getElementById('voiceRecOverlay')) return;
+  var ov = document.createElement('div');
+  ov.id='voiceRecOverlay';
+  ov.innerHTML='<div class="vrec-box"><div class="vrec-mic">🎤</div><div class="vrec-tip">上滑取消</div></div>';
+  document.body.appendChild(ov);
+}
+function voiceHideRecordingOverlay(){ var o=document.getElementById('voiceRecOverlay'); if(o) o.remove(); }
+
+async function voiceSendMessage(blob){
+  var c = getC(view.id);
+  if(!c) return;
+  var oldTitle = c.nick || c.name;
+  try{
+    tbTitle.textContent = '识别中…';
+    var b64 = await voiceBlobToWavBase64(blob);
+    var text = await voiceTranscribe(b64);
+    tbTitle.textContent = oldTitle;
+    if(!text){ alert('没听清，请重新录制'); return; }
+    pushMy({ type:'voice', content:text });   // 只存文字
+    aiReply();                                // 触发 AI 回复
+  }catch(e){
+    tbTitle.textContent = oldTitle;
+    alert('语音发送失败：'+(e&&e.message?e.message:e));
+  }
+}
+
+/* ---------- 6. 语音通话 ---------- */
+var VOICECALL = null;
+var _callTimerInt = null;
+
+function startVoiceCall(charId){
+  var c = getC(charId);
+  if(!c) return;
+  if(!DB.settings.voiceModel || DB.settings.voiceModel.includes('请先')){ alert('请先在 设置 → 模型配置 里选择"语音模型"'); return; }
+  if(!getEffectiveChatModel(c)){ alert('请先在 设置 里选择主聊天模型'); return; }
+  VOICECALL = { charId:charId, turns:[], startTime:Date.now(), aiReplying:false };
+  view = { type:'voiceCall', id:charId };
+  render();
+}
+function renderVoiceCall(){
+  var c = getC(view.id);
+  if(!c){ goWechat('chats'); return; }
+  showChrome(false,false);
+  statusbar.classList.add('dark');
+  content.style.display='block';
+  content.style.backgroundImage='';
+  var av = c.avatar ? "background-image:url('"+c.avatar+"')" : '';
+  content.innerHTML =
+    '<div id="callScreen">'+
+      '<div class="call-top">'+
+        '<div class="call-avatar" style="'+av+'">'+(c.avatar?'':(c.name||'?')[0])+'</div>'+
+        '<div class="call-name">'+esc(c.nick||c.name)+'</div>'+
+        '<div class="call-status" id="callStatus">通话中 <span id="callTimer">00:00</span></div>'+
+      '</div>'+
+      '<div class="call-caption" id="callCaption"><div class="call-caption-inner" id="callCaptionInner">按住下方按钮说话…</div></div>'+
+      '<div class="call-controls">'+
+        '<div class="call-talk-btn" id="callTalkBtn">按住 说话</div>'+
+        '<div class="call-hangup" id="callHangupBtn" onclick="endVoiceCall()">'+
+          '<svg viewBox="0 0 24 24" fill="#fff" width="30" height="30"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.956.956 0 0 1-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-1.78 1.78c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28a11.27 11.27 0 0 0-2.66-1.85.998.998 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  bindCallTalkButton();
+  startCallTimer();
+}
+function startCallTimer(){
+  stopCallTimer();
+  _callTimerInt = setInterval(function(){
+    if(!VOICECALL){ stopCallTimer(); return; }
+    var sec = Math.floor((Date.now()-VOICECALL.startTime)/1000);
+    var el = document.getElementById('callTimer');
+    if(el) el.textContent = String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+  },1000);
+}
+function stopCallTimer(){ if(_callTimerInt){ clearInterval(_callTimerInt); _callTimerInt=null; } }
+
+function bindCallTalkButton(){
+  var btn = document.getElementById('callTalkBtn');
+  if(!btn) return;
+  var holding=false;
+  async function start(e){
+    e.preventDefault();
+    if(VOICECALL && VOICECALL.aiReplying) return;
+    if(holding) return;
+    holding=true; btn.classList.add('talking'); btn.textContent='松开 发送';
+    var ok = await voiceStartRecording();
+    if(!ok || !holding){ holding=false; btn.classList.remove('talking'); btn.textContent='按住 说话'; voiceCancelRecording(); }
+  }
+  async function end(e){
+    if(!holding) return;
+    e.preventDefault();
+    holding=false; btn.classList.remove('talking'); btn.textContent='按住 说话';
+    var blob = await voiceStopRecording();
+    if(!blob || blob.size<500) return;
+    handleCallTurn(blob);
+  }
+  btn.addEventListener('touchstart', start, { passive:false });
+  btn.addEventListener('touchend',   end,   { passive:false });
+  btn.addEventListener('mousedown',  start);
+  btn.addEventListener('mouseup',    end);
+}
+async function handleCallTurn(blob){
+  var c = getC(VOICECALL.charId);
+  if(!c) return;
+  var cap = document.getElementById('callCaptionInner');
+  try{
+    if(cap) cap.textContent='识别中…';
+    var b64 = await voiceBlobToWavBase64(blob);
+    var userText = await voiceTranscribe(b64);
+    if(!userText){ if(cap) cap.textContent='没听清，请再说一次'; return; }
+    VOICECALL.turns.push({ role:'user', content:userText });
+    if(cap) cap.innerHTML='<div class="cap-user">你：'+esc(userText)+'</div><div class="cap-ai" id="capAi"></div>';
+
+    var messages = buildCallMessages(c);
+    VOICECALL.aiReplying=true;
+    var tb=document.getElementById('callTalkBtn'); if(tb) tb.classList.add('disabled');
+
+    var full = await callAIStream(messages, getEffectiveChatModel(c), function(delta, sofar){
+      var el = document.getElementById('capAi');
+      if(el){ el.textContent = (c.nick||c.name)+'：'+sofar; el.scrollIntoView({ block:'end' }); }
+    });
+    full = voiceCleanReply(full);
+    VOICECALL.turns.push({ role:'assistant', content:full });
+    var el2=document.getElementById('capAi'); if(el2) el2.textContent=(c.nick||c.name)+'：'+full;
+  }catch(e){
+    if(cap) cap.textContent='出错：'+(e&&e.message?e.message:e);
+  }finally{
+    VOICECALL.aiReplying=false;
+    var tb2=document.getElementById('callTalkBtn'); if(tb2) tb2.classList.remove('disabled');
+  }
+}
+function buildCallMessages(c){
+  var messages=[];
+  try{ messages.push({ role:'system', content: buildSystem(c, null) }); }
+  catch(e){ messages.push({ role:'system', content:'你在扮演 '+(c.nick||c.name) }); }
+  messages.push({ role:'system', content:'【语音通话模式·最高优先级】现在你和对方正在打语音电话。只输出你要说出口的话，像真人打电话一样自然、口语化、简短。严禁任何括号里的动作/神态/心理描写，严禁旁白，严禁任何微信功能格式（表情/转账/见面标记等）。一次只说一小段，等对方回应。' });
+  VOICECALL.turns.forEach(function(t){ messages.push({ role:t.role, content:t.content }); });
+  return messages;
+}
+function voiceCleanReply(text){
+  if(!text) return '';
+  text = text.replace(/\[[^\]]*\]/g,'');
+  text = text.replace(/<[^>]*>[\s\S]*?<\/[^>]*>/g,'');
+  text = text.replace(/<[^>]*>/g,'');
+  return text.trim();
+}
+function endVoiceCall(){
+  stopCallTimer();
+  var c = getC(VOICECALL ? VOICECALL.charId : null);
+  var turns = VOICECALL ? VOICECALL.turns : [];
+  var dur = VOICECALL ? Math.floor((Date.now()-VOICECALL.startTime)/1000) : 0;
+  voiceCancelRecording();
+  if(c && turns.length){
+    var mm=String(Math.floor(dur/60)).padStart(2,'0'), ss=String(dur%60).padStart(2,'0');
+    var logMsg = { id:newId(), role:'user', type:'callLog', duration:mm+':'+ss, turns:turns, callExpanded:false, content:'语音通话 '+mm+':'+ss, time:Date.now() };
+    DB.chats[c.id] = DB.chats[c.id] || [];
+    DB.chats[c.id].push(logMsg);
+    save();
+  }
+  var backId = VOICECALL ? VOICECALL.charId : (c && c.id);
+  VOICECALL = null;
+  if(backId){ view={ type:'chat', id:backId }; window._chatJustOpened=true; render(); }
+  else goWechat('chats');
+}
+function toggleCallLog(id){
+  var arr = DB.chats[view.id];
+  if(!arr) return;
+  var m = arr.find(function(x){ return x.id===id; });
+  if(!m) return;
+  m.callExpanded = !m.callExpanded;
+  save();
+  renderChat(true);
+}
+
+/* 页面加载后，初始化语音消息按钮（只执行一次） */
+initVoiceMessageButton();
 
 /* ===== API / 备份 ===== */
 async function callAI(messages, model, _retry){
@@ -12098,6 +12692,8 @@ var imgList = list.filter(function(id){
   return /image|flux|dall|banana|grok.*image|sd|stable|draw|paint|midjourney|mj|imagen/i.test(id);
 });
 fillSelect('imageModel', imgList.length ? imgList : list, DB.settings.imageModel);
+fillSelect('voiceModel', list, DB.settings.voiceModel);
+
     // ===== 新增：保存模型列表到全局设置 =====
     DB.settings.availableModels = list;
     save();
@@ -12115,6 +12711,9 @@ function saveApi(){
   var am = document.getElementById('auxModel').value;
   var lm = document.getElementById('lightModel').value;
   var im = document.getElementById('imageModel').value;
+    var vm = document.getElementById('voiceModel').value;
+  if (vm && !vm.includes('请先')) DB.settings.voiceModel = vm;
+
   if (cm && !cm.includes('请先')) DB.settings.chatModel = cm;
   if (am && !am.includes('请先')) DB.settings.auxModel = am;
   if (lm && !lm.includes('请先')) DB.settings.lightModel = lm;
