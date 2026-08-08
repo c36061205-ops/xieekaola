@@ -168,9 +168,13 @@
   display: block;
 }
 #chatBottom { 
-  padding: 10px 14px 24px 14px; 
-  box-sizing: border-box; 
-  background: var(--nav);      /* 新增这行，让它和聊天内容区分开 */
+    padding: 10px 14px 24px 14px; 
+    box-sizing: border-box; 
+    background: var(--nav);
+    border-top: 1px solid var(--line);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
 }
 #tabbar { height:68px; background:var(--nav); display:flex; border-top:1px solid var(--line); flex-shrink:0; padding:4px 4px 12px 4px; }
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;color:var(--sub);gap:3px;cursor:pointer;}
@@ -861,7 +865,21 @@ margin-bottom:4px;}
 #callView .msg-line.system{justify-content:center;color:var(--sub);font-size:11px;border-bottom:none;opacity:.7;}
 #callView .msg-line.ai.streaming .msg-text::after{content:'▌';animation:cvBlink .8s step-end infinite;color:var(--theme);}
 @keyframes cvBlink{0%,100%{opacity:1}50%{opacity:0}}
-#callView .cv-bubble{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#fff;background:var(--theme);padding:2px 12px 2px 10px;border-radius:14px;}
+/* 通话界面 - 用户语音气泡（参考私聊用户消息样式） */
+#callView .cv-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;           /* 与私聊 .mbody 的 font-size:15px 对齐 */
+    color: #fff;
+    background: var(--theme);
+    padding: 7px 10px;         /* 与私聊 .mbody 的 padding:7px 10px 完全一致 */
+    border-radius: 6px;        /* 与私聊 .mbody 的 border-radius:6px 一致 */
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05); /* 与私聊 .mbody 的 box-shadow 一致 */
+    max-width: 80%;
+    transition: background 0.2s ease;
+    line-height: 1.4;          /* 与私聊 .mbody 一致 */
+}
 #callView .cv-wave{display:flex;align-items:center;gap:2px;height:16px;}
 #callView .cv-wave span{width:2.5px;border-radius:2px;background:#fff;opacity:.7;}
 #callView .cv-wave span:nth-child(1){height:7px}
@@ -886,7 +904,40 @@ margin-bottom:4px;}
 
 /* ===== 通话记录卡片·紧凑 + 名字跟随主题且保证可见 ===== */
 /* 让通话卡片摆脱聊天气泡的大padding */
-.mbody.calllog-card{padding:8px 12px !important;background:var(--card) !important;border-radius:12px !important;max-width:240px;cursor:pointer;}
+.mbody.calllog-card {
+    padding: 10px 14px !important;
+    background: var(--card) !important;   /* 默认：AI侧/非me，用card色 */
+    border-radius: 12px !important;
+    max-width: 240px !important;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    transition: all 0.2s ease;
+}
+
+/* 用户侧（me）的通话记录卡片，恢复主题色 */
+.msg.me .mbody.calllog-card {
+    background: var(--theme) !important;
+    border-color: var(--theme) !important;
+}
+
+/* 用户侧卡片内的文字颜色适配 */
+.msg.me .calllog-head {
+    color: #fff;
+}
+.msg.me .calllog-arrow {
+    color: rgba(255,255,255,0.7);
+}
+.msg.me .calllog-detail {
+    border-top-color: rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.08);
+}
+.msg.me .calllog-detail .ct-line {
+    color: #fff !important;
+}
+.msg.me .calllog-detail .ct-line b {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+}
 .calllog-head{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text);}
 .calllog-head .calllog-arrow{margin-left:auto;font-size:11px;opacity:.6;}
 
@@ -10418,7 +10469,7 @@ else if(m.type==='image'){
   }
 else if(m.type==='transfer'){var statusText='';if(m.status==='accepted')statusText='✅ 已接收';else if(m.status==='refunded')statusText='⏳ 已退回';else statusText='待处理';body='<div class="transfer-card" data-mid="'+m.id+'" style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530;"><div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="color:#F99530;font-size:22px;font-weight:bold;">¥</span></div><div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:500;">¥ '+esc(String(m.amount))+'</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px;">'+(m.content?esc(m.content):'转账')+'</div></div></div><div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px;display:flex;justify-content:space-between;"><span>微信转账</span><span>'+statusText+'</span></div></div>';}
 else if(m.type==='redpacket')body=`<div style="width:220px;background:#fff;border-radius:10px;overflow:hidden"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#e05a49"><div style="width:36px;height:36px;background:#fbe0a6;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px">🧧</div><div style="flex:1"><div style="color:#fff;font-size:14px">${esc(m.content)||'恭喜发财'}</div><div style="color:rgba(255,255,255,.85);font-size:12px;margin-top:2px">¥${esc(String(m.amount))}</div></div></div><div style="background:#f2c879;color:#8a4b00;font-size:11px;padding:6px 12px">微信红包</div></div>`;
-else if(m.type==='voice'){const dur=Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)));const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body=`<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">${dur}″</span></div><div class="voice-text">${renderVoiceContent(m.content)}</div></div>`;}
+else if(m.type==='voice'){const dur=m._transcribing ? '···' : Math.max(1,Math.min(60,Math.round((m.content||'').length/2.2)))+'″';const isExpanded=!!m.voiceExpanded;const expandedClass=isExpanded?'expanded':'';body=`<div class="mbody voice-bubble ${expandedClass}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:8px 14px;min-width:120px;" onclick="toggleVoice('${m.id}')"><div class="voice-top"><span class="play-icon">▶</span><div class="wave-bars"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></div><span class="duration">${dur}</span></div><div class="voice-text">${renderVoiceContent(m.content)}</div></div>`;}
 else if(m.type==='callLog'){
   var _exp    = !!m.callExpanded;
   var _nameAI = c.nick || c.name || 'TA';
@@ -10437,7 +10488,6 @@ else if(m.type==='callLog'){
     _detail +
   '</div>';
 }
-
 else if(m.type==='sticker'){const s=DB.stickers.find(x=>x.name===m.content);body=s?`<div style="padding:0"><img src="${s.img}" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>`:`<div class="mbody">[表情:${esc(m.content)}]</div>`;}
 else if(m.type==='text'){var displayContent=m.editedContent||m.content;body=`<div class="mbody">${me?esc(displayContent):(c.mode==='offline'?colorLines(displayContent,c.lineColor):esc(displayContent))}</div>`;}
 else if (m.type === 'shop_item') {
@@ -12459,10 +12509,9 @@ function insertSystemMessageToTranscript(txt){
   if(!tr) return;
   var line = document.createElement('div');
   line.className = 'msg-line system';
-  line.textContent = txt;
+  line.innerHTML = txt;  // ← 改为 innerHTML，支持 SVG
   tr.appendChild(line); tr.scrollTop = tr.scrollHeight;
 }
-
 // ★ 接电话开场白（TA接起你电话说的第一句，按人设分）
 function getCallOpener(c){
   var p = ((c.personality||'')+(c.persona||'')+(c.tags||'')+(c.desc||'')+(c.summary||'')).toString();
@@ -12638,7 +12687,7 @@ function voiceShowRecordingOverlay(){
   if(document.getElementById('voiceRecOverlay')) return;
   var ov = document.createElement('div');
   ov.id='voiceRecOverlay';
-  ov.innerHTML='<div class="vrec-box"><div class="vrec-mic">🎤</div><div class="vrec-tip">上滑取消</div></div>';
+ov.innerHTML = '<div class="vrec-box"><div class="vrec-mic"><svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div class="vrec-tip">上滑取消</div></div>';
   document.body.appendChild(ov);
 }
 function voiceHideRecordingOverlay(){ var o=document.getElementById('voiceRecOverlay'); if(o) o.remove(); }
@@ -12707,7 +12756,7 @@ function renderVoiceCall(){
       '<div class="call-transcript" id="transcript"></div>'+
       '<div class="call-actions">'+
         '<button class="call-btn mic disabled" id="callTalkBtn" title="按住说话"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>'+
-        '<button class="call-btn hangup" onclick="endVoiceCall()"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>'+
+        '<button class="call-btn hangup" onclick="endVoiceCall(\'user\')"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button>'+
         '<button class="call-btn speaker active" title="扬声器"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>'+
       '</div>'+
       '<div class="call-hint" id="callHint">正在接通…</div>'+
@@ -12783,7 +12832,7 @@ async function handleCallTurn(blob, dur){
   var waveBars=''; for(var k=0;k<8;k++) waveBars+='<span></span>';
   var voiceLine = document.createElement('div');
   voiceLine.className='msg-line voice';
-  voiceLine.innerHTML='<span class="msg-label">我</span><span class="cv-bubble"><span class="cv-mic">🎤</span><span class="cv-wave">'+waveBars+'</span><span class="cv-dur">'+dur+'″</span></span>';
+voiceLine.innerHTML = '<span class="msg-label">我</span><span class="cv-bubble"><span class="cv-mic"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span><span class="cv-wave">'+waveBars+'</span><span class="cv-dur">'+dur+'″</span></span>';
   if(tr){ tr.appendChild(voiceLine); tr.scrollTop=tr.scrollHeight; }
   try{
     var b64 = await voiceBlobToWavBase64(blob);
@@ -12824,7 +12873,12 @@ async function handleCallTurn(blob, dur){
 
     if(wantHangup){
       setTimeout(function(){
-        if(VOICECALL){ insertSystemMessageToTranscript('对方已挂断'); setTimeout(function(){ if(VOICECALL) endVoiceCall(); }, 800); }
+        if(VOICECALL){ insertSystemMessageToTranscript(`
+  <svg viewBox="0 0 24 24" width="14" height="14" style="display:inline-block;vertical-align:middle;margin-right:4px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>
+  对方已挂断通话
+`); setTimeout(function(){ if(VOICECALL) endVoiceCall(); }, 800); }
       }, 1200);
     }
   }catch(e){
@@ -12860,23 +12914,34 @@ function voiceCleanReply(text){
   text = text.replace(/<[^>]*>/g,'');
   return text.trim();
 }
-function endVoiceCall(){
-  stopCallTimer();
-  var c = getC(VOICECALL ? VOICECALL.charId : null);
-  var turns = VOICECALL ? VOICECALL.turns : [];
-  var dur = VOICECALL ? Math.floor((Date.now()-VOICECALL.startTime)/1000) : 0;
-  voiceCancelRecording();
-  if(c && turns.length){
-    var mm=String(Math.floor(dur/60)).padStart(2,'0'), ss=String(dur%60).padStart(2,'0');
-    var logMsg = { id:newId(), role:'user', type:'callLog', duration:mm+':'+ss, turns:turns, callExpanded:false, content:'语音通话 '+mm+':'+ss, time:Date.now() };
-    DB.chats[c.id] = DB.chats[c.id] || [];
-    DB.chats[c.id].push(logMsg);
-    save();
-  }
-  var backId = VOICECALL ? VOICECALL.charId : (c && c.id);
-  VOICECALL = null;
-  if(backId){ view={ type:'chat', id:backId }; window._chatJustOpened=true; render(); }
-  else goWechat('chats');
+function endVoiceCall(who) {
+    who = who || 'user'; // 'user' 用户主动挂断，'assistant' AI主动挂断
+    stopCallTimer();
+    var c = getC(VOICECALL ? VOICECALL.charId : null);
+    var turns = VOICECALL ? VOICECALL.turns : [];
+    var dur = VOICECALL ? Math.floor((Date.now()-VOICECALL.startTime)/1000) : 0;
+    voiceCancelRecording();
+    if(c && turns.length){
+
+        // 2. 插入通话记录卡片
+        var mm = String(Math.floor(dur/60)).padStart(2,'0'), ss = String(dur%60).padStart(2,'0');
+        var logMsg = { 
+            id:newId(), 
+            role: who, 
+            type:'callLog', 
+            duration:mm+':'+ss, 
+            turns:turns, 
+            callExpanded:false, 
+            content:'语音通话 '+mm+':'+ss, 
+            time:Date.now() 
+        };
+        DB.chats[c.id].push(logMsg);
+        save();
+    }
+    var backId = VOICECALL ? VOICECALL.charId : (c && c.id);
+    VOICECALL = null;
+    if(backId){ view={ type:'chat', id:backId }; window._chatJustOpened=true; render(); }
+    else goWechat('chats');
 }
 function toggleCallLog(id){
   var arr = DB.chats[view.id];
