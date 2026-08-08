@@ -7755,7 +7755,7 @@ if (edModule === 'role') {
             modelOpts += '<option value="' + esc(m) + '" ' + sel + '>' + esc(m) + '</option>';
         });
     }
-html += '<div class="field"><label>🤖 聊天模型</label><span class="tip">选择此角色专用的模型，留空则使用全局主模型</span><select class="field-select" onchange="upd(\'model\',this.value)">' + modelOpts + '</select></div>';html += '<div class="field"><label>🤖 聊天模型</label><span class="tip">选择此角色专用的模型，留空则使用全局主模型</span><select class="field-select" onchange="upd(\'model\',this.value)">' + modelOpts + '</select></div>';
+html += '<div class="field"><label>🤖 聊天模型</label><span class="tip">选择此角色专用的模型，留空则使用全局主模型</span><select class="field-select" onchange="upd(\'model\',this.value)">' + modelOpts + '</select></div>';
     // =================================================
 
     html += Field('真名', '', c.name, 'upd(\'name\',this.value)', '姓名，可含由来/别称', false);
