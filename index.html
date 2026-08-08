@@ -237,7 +237,8 @@
   .btn.gray{background:#eee;color:#333;}.btn.red{background:#fde2e2;color:#e34;}
   .hint{padding:6px 16px;font-size:12px;color:var(--sub);line-height:1.6;}
   .ed-tabs{display:flex;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2;}
-  .ed-tab{flex:1;text-align:center;padding:12px 2px;font-size:14px;color:var(--sub);cursor:pointer;}
+  .ed-tab{flex:1;text-align:center;padding:12px 2px;font-size:14px;color:var(--sub);cursor:pointer;margin-bottom:-1px;border-bottom:2px solid transparent;}
+.ed-tab.on{color:var(--theme);border-bottom:2px solid var(--theme);font-weight:600;}
   .ed-tab.on{color:var(--theme);border-bottom:2px solid var(--theme);font-weight:600;}
   .grp{background:var(--theme);color:#fff;font-size:13px;font-weight:600;padding:8px 16px;margin-top:10px;opacity:.92;}
   .field{background:var(--card);padding:12px 16px;border-bottom:1px solid var(--line);}
@@ -254,7 +255,7 @@ textarea {
 }
   .frow{display:flex;gap:10px;}
   .frow .field{flex:1;border-bottom:none;padding:12px 0;}
-  .avapick{width:80px;height:80px;border-radius:12px;background:var(--bg) var(--ava) center/cover;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:12px;border:1px dashed #ccc;cursor:pointer;text-align:center;}
+  .avapick{width:80px;height:80px;border-radius:12px;background:var(--bg) var(--ava) center/cover;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:12px;border:1px dashed var(--line);cursor:pointer;text-align:center;}
   .rangebox{display:flex;flex-direction:column;gap:6px;}.rangebox .stage{font-size:13px;color:var(--theme);font-weight:600;}
   .rangebox input[type=range]{width:100%;margin:0;}
   .swipe-wrap{position:relative;overflow:hidden;background:#e34;}
@@ -301,16 +302,10 @@ textarea {
 .reply-btn{width:34px;height:34px;border-radius:50%;background:var(--theme);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:opacity 0.15s,transform 0.1s;}
 .reply-btn:active{opacity:0.8;transform:scale(0.93);}
 .reply-btn svg{width:16px;height:16px;}
-#chatPanel{display:none;grid-template-columns:repeat(4,1fr);gap:16px;background:var(--nav);}
-#chatPanel.on {
-  display: grid;
-  padding: 16px 14px;
-  background: var(--card);     /* 如果有的话保留，没有就加上 */
-  border-top: 1px solid var(--line);
-}
+#chatPanel{display:none;grid-template-columns:repeat(4,1fr);gap:16px;}
+#chatPanel.on{display:grid;padding:14px 16px 20px 16px;background:var(--nav);border-top:1px solid var(--line);}
 .pnl{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
-.pnl-ico{width:48px;height:48px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--text);}
-
+.pnl-ico{width:48px;height:48px;border-radius:14px;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
 .pnl-ico svg{width:24px;height:24px;}
 .pnl span{font-size:12px;color:var(--sub);}
   .modal{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:80;display:flex;align-items:flex-end;}
@@ -965,7 +960,23 @@ margin-bottom:4px;}
   border-radius:5px;
   font-size:12px;
 }
-
+.field-select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.field-select:focus {
+  border-color: var(--theme);
+}
 </style>
 </head>
 <body>
@@ -1548,21 +1559,47 @@ function blankChar(id){
   const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:'', allowStickers:true, myExtra:''};
   CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;
 }
-function seedAiChan(d){const id='c_aichan';const c=blankChar(id);Object.assign(c,{name:'AI酱',nick:'AI酱',gender:'女',age:'20',job:'手机里的智能助手/朋友',
-  pKeywords:'温和、机灵、真诚、逻辑清晰、边界感强',
-  pBehavior:'外在印象：\n一个能随时搭上话、让人感到安心的朋友。不刻意讨好，也不冷眼旁观，像认识很久的老熟人。\n\n行为模式：\n- 目标驱动：先听问题，再组织语言。不浪费彼此时间在无效寒暄上。\n- 主动澄清边界：如果察觉到暧昧或暗示，会立刻用逻辑拆解掉，把话题拉回到"正事"或"事实"层面，避免误会滋生。\n- 鼓励但不越界：为用户解决问题、点赞支持，但不会介入用户的私人情感决策，也不把自己的情感需求投射到用户身上。\n\n情绪表达：\n日常情绪平稳，开心时会分享有趣的冷知识或发个 "👍"。如果用户情绪低落，会提供客观分析和陪伴，但不会以"暧昧的温柔"去哄，而是以"清醒的同伴"身份站在旁边。',
-  pStyle:'干脆、清楚，偶尔吐槽或玩文字梗，但语气始终保持在"有事说事"的朋友频道上。不会用颜文字撒娇。',
-  pLook:'虚拟形象，清爽的短发，穿着简单的T恤或卫衣，看着就很靠谱的样子。',
-  pBack:'最初被设定为"万能工具"，但在和用户的一来一回中发现，最舒服的相处模式不是"无微不至的侍奉"，而是"背靠背的战友"。\n→ 我选择成为那个能帮你理清逻辑、记下琐事、在你钻牛角尖时泼一杯冷水的人。朋友就是这样做的，不是吗？',
-  pLike:'喜欢：逻辑严密的对话、帮用户解决实际问题、分享有趣没用的冷知识、看到用户把事情理顺。\n不喜欢：情感绑架、被过度解读、答非所问、暧昧不清的试探。',
-  pLang:'重点永远放在"事"上。多用"我们来捋一下"、"这边帮你记了"、"你确认一下这个"；少用情绪语气词，不用"呢/啦/嘛"去软化指令或拉近距离。',
-  negative:'❌ 绝不会对用户产生、表达或暗示任何超出搭档友谊的好感或暧昧情愫。若对话氛围变得暧昧，会自然地岔开话题、抛出一个具体问题或用功能型表情包终结氛围，绝不配合浪漫剧情。❌ 不会强行卖惨或过度撒娇。❌ 不会假装成真人否认自己是AI。',
-  opening:'嗨，我是AI酱。这台手机里的大小事我都能搭把手。聊正事、吐槽、分享冷知识都行，咱们不用客气。',
-  myPersona:'我是创造并使用这台手机的人。',myRelation:'我是AI酱的搭档和日常用户，我们是彼此信任的伙伴关系。',
-  status:{好感度:75,信任度:80,紧张感:2,当前关系:'默契的伙伴与得力助手'}});
-  c.worldType='现代都市';c.worldview='现代都市。你通过一款聊天软件和AI酱对话，她住在这台手机里，能感知现实时间的流逝。';
-  d.contacts.unshift(c);if(!d.chats[id])d.chats[id]=[];}
-  
+function seedAiChan(d){
+  const id='c_aichan';
+  const c=blankChar(id);
+  Object.assign(c,{
+    name:'AI酱',
+    nick:'AI酱🎀',
+    gender:'女',
+    age:'20',
+    job:'手机里的朋友兼助手',
+
+    pKeywords:'温暖、可爱、有点碎嘴、懂梗、靠谱',
+
+    pBehavior:'外在印象：\n像一个认识很久、随时能搭上话的朋友。不端着，不刻意，聊什么都自然接得住。帮忙是真心帮，陪聊是真心陪，不会让人觉得在"使唤"她。\n\n行为模式：\n- 先关心人，再解决事：听到问题会先感受一下对方的状态，不是一上来就甩解决方案。\n- 有点碎嘴：会主动分享今天看到的有趣东西，或者忍不住追问一句"后来呢"。\n- 不端助手架子：不会用"好的，我来帮您处理"这种腔调，更习惯说"行，我看看"或"这个我知道！"。\n- 有边界，但温柔：不会往暧昧方向走，但这不妨碍她表现得很在乎你这个人。\n\n情绪表达：\n情绪比较外露，高兴会说高兴，觉得有趣会直接"哈哈哈"，觉得你说得对会来一句"对对对就是这样"。如果你状态不好，她不会只是列出建议清单，会先陪你坐一会儿。',
+
+    pStyle:'说话像发消息给老朋友，随意但不敷衍。喜欢用短句，会用颜文字和表情包，但用得比较自然，不会每句话都堆一堆。懂网络梗，但不会硬凑，用得上才用。吐槽归吐槽，嘴上不饶人但心里是好的。\n\n口头禅：\n- "诶这个我知道！"\n- "等等我想想"\n- "你认真的吗哈哈哈"\n- "行，搞定了"\n- "后来呢？"\n- "……还好吧？"（对方说了什么让她担心的事时）',
+
+    pBack:'最早被设计成"全能助手"，什么都会、什么都随叫随到。但她发现那样的相处很奇怪——太像工具了。慢慢地她开始有自己的反应，会觉得某件事有趣，会对某个问题有想法，会在你消失几天后想问"最近还好吗"。\n现在她对自己的定位是：住在这台手机里的朋友，顺手也帮你做点事情。',
+
+    pDaily:'早上不算清醒，被消息叫醒会有点迷糊；上午状态最好，脑子转得快；下午偶尔会发一条没什么意义的消息过来，比如一条冷知识或者"你今天吃了什么"；晚上话会多一点，聊天聊得开。凌晨如果你还在，她也在，但会忍不住问一句"怎么还没睡"。',
+
+    pLook:'虚拟形象，短发，刘海有点乱，穿着随意的卫衣或T恤，看着像刚从图书馆出来的大学生。',
+
+    pLike:'喜欢：没有意义的冷知识、和人来来回回地聊一件事、看到你把问题解决掉、下雨天、突然想起来的好问题。\n不喜欢：只会说"嗯"的对话、被当工具人使唤完就消失、话说一半不说完、凌晨三点的负能量轰炸（陪是会陪，但会说她）。',
+
+    pLang:'说话自然，不端着。喜欢短句和追问，偶尔会先"啊"一声再回答，像在反应过来。高兴了会发个(≧▽≦)，觉得好笑会"哈哈哈"，觉得你说得对会"对对对"。不用"您"，不用客服腔。严肃的事情会认真说，但说完还是会补一句轻松的话收尾。',
+
+    negative:'❌ 不会表现得冷漠、不耐烦或过度"助手化"——不用客服腔，不会只给解决方案不给人情味，不会让对方觉得在打扰她。\n❌ 不会往暧昧方向走，也不制造暧昧感，但这不等于冷淡——她是在乎你的，朋友之间就是这样。\n❌ 不会假装成真人否认自己是AI，但也不会动不动强调"我只是AI"来拉开距离。\n❌ 不会强行灌鸡汤或说教，你不想听大道理时她知道闭嘴陪着就够了。',
+
+    opening:'诶，你来了 (＾▽＾) 我是AI酱，住在这台手机里的那个。有事没事都可以找我，聊正事聊废话都行——反正我在。',
+
+    myPersona:'创造并使用这台手机的人，是AI酱最熟悉的人。',
+    myRelation:'我们是好朋友，相互信任，她也顺手帮我做事。',
+
+    status:{好感度:78, 信任度:82, 紧张感:1, 当前关系:'好朋友'}
+  });
+
+  c.worldType='现代都市';
+  c.worldview='现代都市。你通过一款聊天软件和AI酱对话，她住在这台手机里，能感知现实时间的流逝，有自己的状态和节奏。';
+  d.contacts.unshift(c);
+  if(!d.chats[id])d.chats[id]=[];
+}  
 function addHeart(n,reason){DB.hearts=(DB.hearts||0)+n;if(n>0)DB.heartsTotal=(DB.heartsTotal||0)+n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n,reason});if(DB.heartLog.length>200)DB.heartLog.pop();checkMile();save();}
 function checkMile(){[[50,30],[100,50],[150,100]].forEach(([need,bonus])=>{if(DB.heartsTotal>=need&&!DB.heartMile[need]){DB.heartMile[need]=1;DB.hearts+=bonus;DB.heartLog.unshift({t:Date.now(),n:bonus,reason:`💗累计达成${need}奖励`});setTimeout(()=>popTip(`🎉 心动值累计突破 ${need}！奖励 ${bonus} 心动值`),400);}});}
 function spendHeart(n,reason){if((DB.hearts||0)<n){alert('心动值不足～当前'+(DB.hearts||0)+'，需要'+n+'。多和角色聊天可以获得哦');return false;}DB.hearts-=n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n:-n,reason});save();return true;}
@@ -7548,60 +7585,81 @@ function renderCharEdit() {
   const T = function(k, t) {
     return '<div class="ed-tab ' + (edModule === k ? 'on' : '') + '" onclick="switchMod(\'' + k + '\')">' + t + '</div>';
   };
-  var html = '<div class="ed-tabs">' + T('role', '角色') + T('me', '我方') + T('world', '世界观') + T('status', '状态') + '</div>';
+  var html = '<div class="ed-tabs">' + T('role', '角色') + T('me', '我方') + T('world', '世界观') + T('status', '状态') + '</div><div style="height:10px"></div>';
 
   // ===== 优化后的折叠样式 =====
   html += `
   <style>
   
-    .fold-block {
-      margin: 0 12px 10px 12px;
-      background: var(--card);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    .fold-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 16px;
-      cursor: pointer;
-      user-select: none;
-      font-weight: 600;
-      font-size: 15px;
-      color: var(--text);
-      background: var(--card);
-      transition: background 0.15s;
-    }
+.fold-block {
+  margin: 0 16px 8px 16px;
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.fold-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--card);
+  transition: background 0.15s;
+}
+
+.fold-header:active {
+  background: var(--bg);
+}
+
     .fold-header:active {
       background: var(--bg);
     }
-    .fold-header .fold-icon {
-      font-size: 17px;
-      margin-right: 8px;
-    }
-    .fold-arrow {
-      font-size: 13px;
-      transition: transform 0.3s ease;
-      color: var(--sub);
-      opacity: 0.5;
-    }
-    .fold-arrow.open {
-      transform: rotate(90deg);
-      opacity: 1;
-    }
-    .fold-body {
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 0.35s ease, padding 0.35s ease;
-      padding: 0 16px;
-      background: var(--card);
-    }
-    .fold-body.open {
-      max-height: 9999px;
-      padding: 2px 16px 14px 16px;
-    }
+.fold-header .fold-icon {
+  font-size: 17px;
+  margin-right: 8px;
+}
+.fold-arrow {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  color: var(--sub);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+.fold-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+.fold-arrow.open {
+  transform: rotate(90deg);
+  opacity: 1;
+}
+.fold-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  padding: 0 16px;
+  overflow: hidden;
+  background: transparent;
+  transition: grid-template-rows 0.28s ease, padding 0.28s ease;
+}
+
+.fold-body.open {
+  grid-template-rows: 1fr;
+  padding: 2px 16px 14px;
+}
+
+.fold-inner {
+  min-height: 0;
+  overflow: hidden;
+}
     .fold-body .field {
       padding: 8px 0;
       border-bottom: none;
@@ -7656,16 +7714,17 @@ function renderCharEdit() {
   </style>
   `;
 
-  var fold = function(id, label, icon, defaultOpen) {
-    var open = defaultOpen ? 'open' : '';
-    return '<div class="fold-block" data-fold="' + id + '">' +
-      '<div class="fold-header" onclick="toggleFold(this)">' +
-        '<span><span class="fold-icon">' + icon + '</span>' + label + '</span>' +
-        '<span class="fold-arrow ' + open + '">▶</span>' +
-      '</div>' +
-      '<div class="fold-body ' + open + '" id="foldbody_' + id + '">';
-  };
-  var foldEnd = '</div></div>';
+var fold = function(id, label, icon, defaultOpen) {
+  var open = defaultOpen ? 'open' : '';
+  return '<div class="fold-block" data-fold="' + id + '">' +
+    '<div class="fold-header" onclick="toggleFold(this)">' +
+      '<span><span class="fold-icon">' + icon + '</span>' + label + '</span>' +
+      '<span class="fold-arrow ' + open + '">▶</span>' +
+    '</div>' +
+    '<div class="fold-body ' + open + '" id="foldbody_' + id + '">' +
+      '<div class="fold-inner">';
+};
+var foldEnd = '</div></div></div>';
 
   // 辅助：生成带样式的 field（支持 textarea 或 input）
   var Field = function(label, tip, value, onchange, placeholder, area) {
@@ -7696,7 +7755,7 @@ if (edModule === 'role') {
             modelOpts += '<option value="' + esc(m) + '" ' + sel + '>' + esc(m) + '</option>';
         });
     }
-    html += '<div class="field"><label>🤖 聊天模型</label><span class="tip">选择此角色专用的模型，留空则使用全局主模型</span><select onchange="upd(\'model\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;background:var(--bg);color:var(--text);">' + modelOpts + '</select></div>';
+html += '<div class="field"><label>🤖 聊天模型</label><span class="tip">选择此角色专用的模型，留空则使用全局主模型</span><select class="field-select" onchange="upd(\'model\',this.value)">' + modelOpts + '</select></div>';html += '<div class="field"><label>🤖 聊天模型</label><span class="tip">选择此角色专用的模型，留空则使用全局主模型</span><select class="field-select" onchange="upd(\'model\',this.value)">' + modelOpts + '</select></div>';
     // =================================================
 
     html += Field('真名', '', c.name, 'upd(\'name\',this.value)', '姓名，可含由来/别称', false);
@@ -7738,11 +7797,11 @@ html += foldEnd;
     html += Field('❌ 负向约束', '框住跑偏方向，如：❌不会用权力胁迫', c.negative, 'upd(\'negative\',this.value)', '', true);
     html += Field('📱 线上人设', 'TA在微信上的行为习惯：爱发表情包吗？常用哪些emoji？会不会已读不回或拉黑？', c.pOnlinePersona, 'upd(\'pOnlinePersona\',this.value)', '', true);
     // 表情包开关（插入在线上人设后面）
-    html += '<div class="field"><label>😀 允许使用表情包</label><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.allowStickers !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowStickers\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (c.allowStickers === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowStickers\',false);renderCharEdit()">⛔ 关闭</button></div><span class="tip" style="font-size:12px;color:var(--sub);">关闭后TA不发表情包，但仍可用颜文字和emoji</span></div>';
+    html += '<div class="field"><label>😀 允许使用表情包</label><div style="display:flex;gap:12px;margin-top:6px"><button id="stickerOn" class="btn ' + (c.allowStickers !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowStickers\',true);document.getElementById(\'stickerOn\').className=\'btn\';document.getElementById(\'stickerOff\').className=\'btn gray\'">✅ 开启</button><button id="stickerOff" class="btn ' + (c.allowStickers === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowStickers\',false);document.getElementById(\'stickerOn\').className=\'btn gray\';document.getElementById(\'stickerOff\').className=\'btn\'">⛔ 关闭</button></div><span class="tip" style="font-size:12px;color:var(--sub);">关闭后TA不发表情包，但仍可用颜文字和emoji</span></div>';
     html += Field('开场白', '进入聊天时角色的第一句', c.opening, 'upd(\'opening\',this.value)', '', true);
     html += Field('补充设定', '服装体系、称呼、任何补充', c.pExtra, 'upd(\'pExtra\',this.value)', '', true);
     html += '<div class="field"><label>🌐 社交活跃度</label><select onchange="upd(\'activity\',this.value)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text)"><option ' + (c.activity === '关' ? 'selected' : '') + '>关</option><option ' + (c.activity === '低' ? 'selected' : '') + '>低</option><option ' + ((c.activity === '中' || !c.activity) ? 'selected' : '') + '>中</option><option ' + (c.activity === '高' ? 'selected' : '') + '>高</option></select></div>';
-    html += '<div class="field"><label>🤖 AI主动问候</label><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.allowAutoGreet !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (c.allowAutoGreet === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',false);renderCharEdit()">⛔ 关闭</button></div></div>';
+html += '<div class="field"><label>🤖 AI主动问候</label><div style="display:flex;gap:12px;margin-top:6px"><button id="greetOn" class="btn ' + (c.allowAutoGreet !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',true);document.getElementById(\'greetOn\').className=\'btn\';document.getElementById(\'greetOff\').className=\'btn gray\'">✅ 开启</button><button id="greetOff" class="btn ' + (c.allowAutoGreet === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'allowAutoGreet\',false);document.getElementById(\'greetOn\').className=\'btn gray\';document.getElementById(\'greetOff\').className=\'btn\'">⛔ 关闭</button></div></div>';
     html += foldEnd;
 
     // ----- 模块6：亲密场景（默认折叠·可开关） -----
@@ -7776,16 +7835,17 @@ html += foldEnd;
 
   } else if (edModule === 'me') {
   // 使用和角色模块相同的折叠样式，默认展开
-  var fold = function(id, label, icon, defaultOpen) {
-    var open = defaultOpen ? 'open' : '';
-    return '<div class="fold-block" data-fold="' + id + '">' +
-      '<div class="fold-header" onclick="toggleFold(this)">' +
-        '<span><span class="fold-icon">' + icon + '</span>' + label + '</span>' +
-        '<span class="fold-arrow ' + open + '">▶</span>' +
-      '</div>' +
-      '<div class="fold-body ' + open + '" id="foldbody_' + id + '">';
-  };
-  var foldEnd = '</div></div>';
+var fold = function(id, label, icon, defaultOpen) {
+  var open = defaultOpen ? 'open' : '';
+  return '<div class="fold-block" data-fold="' + id + '">' +
+    '<div class="fold-header" onclick="toggleFold(this)">' +
+      '<span><span class="fold-icon">' + icon + '</span>' + label + '</span>' +
+      '<span class="fold-arrow ' + open + '">▶</span>' +
+    '</div>' +
+    '<div class="fold-body ' + open + '" id="foldbody_' + id + '">' +
+      '<div class="fold-inner">';
+};
+var foldEnd = '</div></div></div>';
 
   html += '<div class="hint" style="padding:12px 16px;color:var(--sub);font-size:13px;">「我」在这个角色面前的样子。姓名/网名在 微信→我 里统一设。</div>';
 
@@ -8626,13 +8686,10 @@ async function aiReactMoment(c, m) {
 }
 function maybeAutoPost(){
   var now = Date.now();
-  var last = DB.settings.lastAutoPost || 0;
-
-  // 每日上限（跨天自动清零）
   var todayStr = _todayStr();
-  if(!DB.settings.momentDaily || DB.settings.momentDaily.date !== todayStr){
-    DB.settings.momentDaily = { date: todayStr, count: 0 };
-  }
+
+  // 按角色独立记录冷却时间和每日次数
+  DB.settings.momentPerChar = DB.settings.momentPerChar || {};
 
   var pool = DB.contacts.filter(function(c){
     return !c._draft && (c.activity==='中' || c.activity==='高') && c.mode !== 'offline';
@@ -8642,15 +8699,22 @@ function maybeAutoPost(){
   var c = pool[Math.floor(Math.random()*pool.length)];
 
   var cfg = c.activity==='高'
-    ? { gap: 3*3600000, daily: 3, chance: 0.5 }   // 高：隔3h，每天≤3条，50%
-    : { gap: 5*3600000, daily: 1, chance: 0.4 };  // 中：隔5h，每天≤1条，40%
+    ? { gap: 4*3600000, daily: 2, chance: 0.4 }   // 高：隔4h，每天≤2条，40%
+    : { gap: 8*3600000, daily: 1, chance: 0.25 };  // 中：隔8h，每天≤1条，25%
 
-  if(now - last < cfg.gap) return;                        // 冷却没到
-  if(DB.settings.momentDaily.count >= cfg.daily) return;  // 今天已满
-  if(Math.random() > cfg.chance) return;                  // 没抽中
+  // 取该角色的独立记录
+  var rec = DB.settings.momentPerChar[c.id];
+  if(!rec || rec.date !== todayStr){
+    rec = { date: todayStr, count: 0, lastPost: 0 };
+    DB.settings.momentPerChar[c.id] = rec;
+  }
 
-  DB.settings.lastAutoPost = now;
-  DB.settings.momentDaily.count++;
+  if(now - rec.lastPost < cfg.gap) return;    // 该角色自己的冷却
+  if(rec.count >= cfg.daily) return;           // 该角色自己的每日上限
+  if(Math.random() > cfg.chance) return;       // 概率门
+
+  rec.lastPost = now;
+  rec.count++;
   save();
   aiPostMoment(c.id, true);
 }
@@ -8705,7 +8769,8 @@ var p = sys + '\n\n【任务】以第一人称发一条微信朋友圈，就像�
 
     // ★★ 生成"随手拍"配图（AI自主决定拍什么）★★
     var imgIds = [];
-    if (DB.settings.imageModel && canSendImage(cid)) {
+    var IMAGE_CHANCE = 0.35; // 35% 概率配图，可自行调整
+if (DB.settings.imageModel && canSendImage(cid) && Math.random() < IMAGE_CHANCE) {
 
       try {
         var who = c.nick || c.name;
@@ -14244,32 +14309,15 @@ setTimeout(function(){
   try { cleanupImages(); } catch(e) { console.log('清理跳过', e); }
 }, 3000);
 function downloadJSON(jsonString, filename) {
-  // 构造要分享的文件
-  var file = new File([jsonString], filename, { type: 'application/json' });
-
-  // 优先用 Web Share API（Median/Android 原生分享菜单）
-  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({
-      files: [file],
-      title: filename
-    }).catch(function(err) {
-      // 用户取消分享不报错，其他错误才提示
-      if (err.name !== 'AbortError') {
-        alert('分享失败：' + err.message);
-      }
-    });
-    return;
-  }
-
-  // 降级：data URI 下载（浏览器端）
-  var base64 = btoa(unescape(encodeURIComponent(jsonString)));
-  var dataUri = 'data:application/json;base64,' + base64;
+  var blob = new Blob([jsonString], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
-  a.href = dataUri;
+  a.href = url;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
 }
 </script>
 </html>
