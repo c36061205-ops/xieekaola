@@ -14309,6 +14309,16 @@ setTimeout(function(){
   try { cleanupImages(); } catch(e) { console.log('清理跳过', e); }
 }, 3000);
 function downloadJSON(jsonString, filename) {
+  // Median 原生下载
+  if (window.median && median.share && median.share.downloadFile) {
+    var blob = new Blob([jsonString], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    median.share.downloadFile({ url: url, filename: filename });
+    setTimeout(function() { URL.revokeObjectURL(url); }, 3000);
+    return;
+  }
+
+  // 普通浏览器降级
   var blob = new Blob([jsonString], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
