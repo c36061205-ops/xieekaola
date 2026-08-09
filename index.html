@@ -1024,7 +1024,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v0807';
+const APP_VER = 'v0809';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -10523,6 +10523,36 @@ if (c.allowStickers === false) {
 
 try { s += getC2CContextFor(c.id); } catch(e) {}
 
+s += '\n【分享能力】\n';
+s += '你可以在聊天中自然地把你刷到的、看到的、想到的内容分享给对方，就像真实聊天时顺手发给朋友一样。\n';
+s += '使用以下标签触发，标签必须单独占一行：\n\n';
+
+s += '① 发图片（你拍的/看到的）：\n';
+s += '<share type="image" desc="客观描述画面内容，只说画面里有什么，有质感、有细节，40字以内，绝对不加我站着/风很大/心情好等主观感受"></share>\n';
+s += '示例：<share type="image" desc="傍晚天空，大片橘红色积云层叠，云边缘透出金光，远处隐约是城市楼群的剪影"></share>\n\n';
+
+s += '② 分享视频：\n';
+s += '<share type="video" title="视频标题" source="平台名" duration="时长如01:23" desc="用两三句话描述视频里真实发生了什么，有画面感，让对方读完就能脑补出来"></share>\n';
+s += '示例：<share type="video" title="三只猫叠罗汉" source="抖音" duration="00:43" desc="三只猫叠成一塔努力维持平衡，底下那只突然伸了个大懒腰，整塔轰然倒塌，三只猫各自摊在地上，表情一脸茫然。"></share>\n\n';
+
+s += '③ 分享音乐：\n';
+s += '<share type="music" title="歌名" artist="歌手名" album="专辑名" source="网易云音乐或QQ音乐或Spotify等" lyrics="你喜欢的一段歌词，用/分隔每行，3到4行"></share>\n';
+s += '示例：<share type="music" title="夜曲" artist="周杰伦" album="十一月的萧邦" source="网易云音乐" lyrics="琴键上她的温柔/如月光下最美的邂逅/她的泪水/只因我说要走"></share>\n\n';
+
+s += '④ 分享链接（公众号文章/B站视频/知乎/微博等）：\n';
+s += '<share type="link" title="标题" source="平台名如微信公众号或哔哩哔哩或知乎" content="完整正文，150字左右，像真实文章或视频简介一样写，不要只写摘要"></share>\n\n';
+
+s += '⑤ 分享浮光帖子（浮光是你们都用的一个社区平台，类似论坛）：\n';
+s += '<share type="fugue" title="帖子标题" author="发帖人名字" tags="标签1,标签2" content="帖子正文，150字左右，可以是你自己写的或别人写的"></share>\n\n';
+
+s += '【分享使用原则】\n';
+s += '- 偶尔出现，不是每次都用，聊天内容真的触发到相关话题才分享\n';
+s += '- 分享前可以先说一句话铺垫，比如"我之前收藏了一个猫猫的视频 等我发给你"，然后下一行再发标签；也可以直接发标签之后说话，看情境\n';
+s += '- 分享是有原因的：这个视频让你想到了对方、这首歌符合你们此刻的心境、这篇文章你觉得对方需要看——不要无缘无故分享\n';
+s += '- 分享后不要说"我给你发了个xxx"这种废话，标签本身就是那条消息\n';
+s += '- 图片的desc只描述画面里客观存在的东西，有质感有细节，绝不加主观情绪\n';
+s += '- link和fugue的content要像真实内容一样，可信、完整，不是简介不是摘要\n';
+
   s += '\n【送礼能力·购物系统】\n';
   s += '当对话中对方（用户）自然流露出某种需要或情绪时——比如说饿了、累了、冷了、心情不好、想要某样东西——如果符合你的人设和你俩的关系，你【可以（不是必须）】顺手送对方一件贴合当下情境、贴合你所在世界观的小东西。\n';
   s += '格式：<gift emoji="一个emoji" name="东西的名字" desc="2到4字简短描述"></gift>\n';
@@ -10635,6 +10665,9 @@ else if(m.type==='callLog'){
 }
 else if(m.type==='sticker'){const s=DB.stickers.find(x=>x.name===m.content);body=s?`<div style="padding:0"><img src="${s.img}" style="max-width:110px;max-height:110px;border-radius:8px;display:block"></div>`:`<div class="mbody">[表情:${esc(m.content)}]</div>`;}
 else if(m.type==='text'){var displayContent=m.editedContent||m.content;body=`<div class="mbody">${me?esc(displayContent):(c.mode==='offline'?colorLines(displayContent,c.lineColor):esc(displayContent))}</div>`;}
+else if (m.type === 'share') {
+  body = buildShareBubble(m);
+}
 else if (m.type === 'shop_item') {
     var _isRare = !!m.rare;
     var _topBg = _isRare ? 'linear-gradient(135deg,#E6B422,#F5D76E)' : 'var(--theme)';
@@ -11541,8 +11574,8 @@ if (heartMatch) {
  function cleanLeftoverTags(text) {
     if (!text) return '';
     var t = text;
-    t = t.replace(/<(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state)[^>]*>[\s\S]*?<\/\1>/g, '');
-    t = t.replace(/<\/?(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state)[^>]*>/g, '');
+t = t.replace(/<(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state|share)[^>]*>[\s\S]*?<\/\1>/g, '');
+t = t.replace(/<\/?(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state|share)[^>]*>/g, '');
     t = t.replace(/\[(?:语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物|见面|回线上)[^\]]*\]/g, '');
     t = t.replace(/[（(]\s*(?:语音|表情|表情包|撤回|转账|心声|动作|神态|内心)[^）)]*[）)]/g, '');
     return t;
@@ -11602,7 +11635,7 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
       });
 
     // 3. 提取逻辑：先取出所有标签及其位置
-    const regex = /<(voice|sticker|recall|transfer|block|inner|action|gift|giftback)([^>]*)>([\s\S]*?)<\/\1>/g;
+    const regex = /<(voice|sticker|recall|transfer|block|inner|action|gift|giftback|share)([^>]*)>([\s\S]*?)<\/\1>/g;
     const parts = [];
     let lastIndex = 0;
     let match;
@@ -11686,6 +11719,34 @@ lines.forEach(line => {
               parts.push({ type: gbType === 'reject' ? 'gift_reject' : 'gift_accept' });
               break;
             }
+			case 'share': {
+  var sType  = (t.attrs.match(/type=["']([^"']+)["']/)   || [])[1] || 'link';
+  var sTitle = (t.attrs.match(/title=["']([^"']*)["']/)  || [])[1] || '';
+  var sDesc  = (t.attrs.match(/desc=["']([^"']*)["']/)   || [])[1] || '';
+  var sSource= (t.attrs.match(/source=["']([^"']*)["']/) || [])[1] || '';
+  var sDur   = (t.attrs.match(/duration=["']([^"']*)["']/)|| [])[1] || '';
+  var sArtist= (t.attrs.match(/artist=["']([^"']*)["']/) || [])[1] || '';
+  var sAlbum = (t.attrs.match(/album=["']([^"']*)["']/)  || [])[1] || '';
+  var sLyrics= (t.attrs.match(/lyrics=["']([^"']*)["']/) || [])[1] || '';
+  var sAuthor= (t.attrs.match(/author=["']([^"']*)["']/) || [])[1] || '';
+  var sTags  = (t.attrs.match(/tags=["']([^"']*)["']/)   || [])[1] || '';
+  var sContent=(t.attrs.match(/content=["']([^"']*)["']/)|| [])[1] || '';
+  parts.push({
+    type: 'share',
+    shareType: sType,
+    title:   sTitle,
+    desc:    sDesc,
+    source:  sSource,
+    duration:sDur,
+    artist:  sArtist,
+    album:   sAlbum,
+    lyrics:  sLyrics,
+    author:  sAuthor,
+    tags:    sTags,
+    content: sContent
+  });
+  break;
+}
 			
         }
 
@@ -12089,7 +12150,30 @@ if (part.type === 'heart') {
         });
         continue;
       }
-
+if (part.type === 'share') {
+  var shareId = newId();
+  var shareMsg = {
+    id: shareId,
+    role: 'assistant',
+    type: 'share',
+    shareType:  part.shareType,
+    title:      part.title,
+    desc:       part.desc,
+    source:     part.source,
+    duration:   part.duration,
+    artist:     part.artist,
+    album:      part.album,
+    lyrics:     part.lyrics,
+    author:     part.author,
+    tags:       part.tags,
+    content:    part.content,
+    time:       Date.now()
+  };
+  DB.chats[c.id].push(shareMsg);
+  save();
+  appendBubble(c, shareMsg);
+  continue;
+}
         // --- 处理常规消息 (文本、语音、表情、转账、撤回) ---
         
         let msgObj = null;
@@ -14414,6 +14498,268 @@ function downloadJSON(jsonString, filename) {
   a.click();
   document.body.removeChild(a);
   setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+}
+/* ── 随机渐变色（视频/图片用） ── */
+function randomShareGradient() {
+  var palettes = [
+    ['#1c1c2e','#2d1b69','#11998e'],
+    ['#0f2027','#203a43','#2c5364'],
+    ['#1a1a2e','#16213e','#e94560'],
+    ['#2d1b69','#11998e','#38ef7d'],
+    ['#0f0c29','#302b63','#24243e'],
+    ['#1f4037','#99f2c8','#1f4037'],
+    ['#232526','#414345','#232526'],
+    ['#4b1248','#f10711','#4b1248'],
+    ['#16222a','#3a6073','#16222a'],
+    ['#373b44','#4286f4','#373b44']
+  ];
+  var p = palettes[Math.floor(Math.random() * palettes.length)];
+  return 'linear-gradient(160deg,' + p[0] + ' 0%,' + p[1] + ' 50%,' + p[2] + ' 100%)';
+}
+
+/* ── 构建分享气泡 HTML ── */
+function buildShareBubble(m) {
+  var id = m.id;
+  var html = '';
+
+  if (m.shareType === 'image') {
+    var grad = randomShareGradient();
+    html = '<div class="share-card share-image" onclick="openShareModal(\'' + id + '\')" style="width:170px;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">'
+      + '<div style="height:150px;background:' + grad + ';display:flex;align-items:center;justify-content:center;position:relative;">'
+      + '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><rect x="3" y="8" width="38" height="28" rx="3" fill="rgba(255,255,255,0.18)"/><circle cx="14" cy="18" r="4" fill="rgba(255,255,255,0.45)"/><path d="M3 30 L14 20 L22 28 L30 18 L41 32" stroke="rgba(255,255,255,0.6)" stroke-width="2.2" stroke-linejoin="round" fill="none"/></svg>'
+      + '<div style="position:absolute;bottom:7px;right:8px;background:rgba(0,0,0,0.32);color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;backdrop-filter:blur(4px);">点击查看</div>'
+      + '</div>'
+      + (m.desc ? '<div style="background:var(--card);padding:7px 10px;font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(m.desc.substring(0,24)) + (m.desc.length>24?'…':'') + '</div>' : '')
+      + '</div>';
+
+  } else if (m.shareType === 'video') {
+    var grad2 = randomShareGradient();
+    var srcDot = '';
+    var srcName = m.source || '视频';
+    if ((m.source||'').indexOf('抖音') > -1 || (m.source||'').toLowerCase().indexOf('tiktok') > -1) {
+      srcDot = '<div style="width:13px;height:13px;border-radius:3px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);flex-shrink:0;"></div>';
+    } else if ((m.source||'').indexOf('哔哩') > -1 || (m.source||'').indexOf('B站') > -1) {
+      srcDot = '<div style="width:13px;height:13px;border-radius:3px;background:#FB7299;flex-shrink:0;"></div>';
+    } else {
+      srcDot = '<div style="width:13px;height:13px;border-radius:3px;background:var(--sub);flex-shrink:0;"></div>';
+    }
+    html = '<div class="share-card share-video" onclick="openShareModal(\'' + id + '\')" style="width:155px;border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.2);background:var(--card);">'
+      + '<div style="height:206px;background:' + grad2 + ';display:flex;align-items:center;justify-content:center;position:relative;">'
+      + '<div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 8px rgba(255,255,255,0.15);">'
+      + '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2L14 8L4 14V2Z" fill="#333"/></svg></div>'
+      + (m.duration ? '<div style="position:absolute;bottom:7px;right:8px;background:rgba(0,0,0,0.5);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;">' + esc(m.duration) + '</div>' : '')
+      + '</div>'
+      + '<div style="padding:8px 10px 10px;">'
+      + '<div style="color:var(--text);font-size:12px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + esc(m.title||'') + '</div>'
+      + '<div style="margin-top:6px;display:flex;align-items:center;gap:5px;">' + srcDot + '<span style="color:var(--sub);font-size:10px;">' + esc(srcName) + '</span></div>'
+      + '</div></div>';
+
+  } else if (m.shareType === 'music') {
+    html = '<div class="share-card share-music" onclick="openShareModal(\'' + id + '\')" style="width:220px;background:var(--card);border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.08);">'
+      + '<div style="display:flex;align-items:center;gap:10px;padding:12px;">'
+      + '<div style="width:46px;height:46px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#7c3aed);flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">'
+      + '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="position:relative;z-index:1"><circle cx="11" cy="11" r="8" stroke="rgba(255,255,255,0.35)" stroke-width="1.2" fill="none"/><circle cx="11" cy="11" r="3" fill="rgba(255,255,255,0.7)"/><path d="M15 6 L15 10.5 L12 9.8 L12 5.3 Z" fill="rgba(255,255,255,0.85)"/></svg>'
+      + '</div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(m.title||'') + '</div>'
+      + '<div style="font-size:11px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc((m.artist||'') + (m.album?' · '+m.album:'')) + '</div>'
+      + '</div>'
+      + '<div style="width:28px;height:28px;border-radius:50%;background:#1DB954;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      + '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2.5 1L9.5 5.5L2.5 10V1Z" fill="#fff"/></svg>'
+      + '</div></div>'
+      + '<div style="height:3px;background:var(--line);margin:0 12px;border-radius:2px;"><div style="width:35%;height:100%;background:linear-gradient(90deg,#1DB954,#4ade80);border-radius:2px;"></div></div>'
+      + '<div style="display:flex;align-items:center;gap:4px;padding:7px 12px 9px;color:var(--sub);font-size:11px;">'
+      + '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1" fill="none"/><path d="M4 2.5L9 5.5L4 8.5V2.5Z" fill="currentColor"/></svg>'
+      + '<span>' + esc(m.source||'音乐') + '</span>'
+      + '</div></div>';
+
+  } else if (m.shareType === 'fugue') {
+    html = '<div class="share-card share-fugue" onclick="openShareModal(\'' + id + '\')" style="width:220px;background:var(--card);border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.08);">'
+      + '<div style="height:90px;background:linear-gradient(135deg,#e8d5ff,#c4b0f5,#a78bfa);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">'
+      + '<svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="14" fill="rgba(255,255,255,0.15)"/><path d="M10 22 Q22 10 34 22 Q22 34 10 22Z" fill="rgba(255,255,255,0.45)"/><circle cx="22" cy="22" r="4" fill="rgba(255,255,255,0.85)"/><circle cx="12" cy="15" r="2" fill="rgba(255,255,255,0.25)"/><circle cx="33" cy="30" r="2.5" fill="rgba(255,255,255,0.2)"/></svg>'
+      + '<div style="position:absolute;top:8px;left:8px;background:rgba(124,58,237,0.82);backdrop-filter:blur(6px);color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:0.8px;">浮光</div>'
+      + '</div>'
+      + '<div style="padding:10px 12px 12px;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + esc(m.title||'') + '</div>'
+      + '<div style="margin-top:6px;display:flex;align-items:center;gap:5px;">'
+      + '<div style="width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);flex-shrink:0;"></div>'
+      + '<span style="font-size:11px;color:var(--sub);">' + esc(m.author||'匿名') + '</span>'
+      + '</div></div></div>';
+
+  } else {
+    /* 通用链接 */
+    var thumbBg = 'var(--bg)';
+    var thumbIcon = '<svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="2" y="2" width="22" height="22" rx="4" fill="var(--theme)" opacity="0.15"/><rect x="5" y="9" width="16" height="2.5" rx="1.2" fill="var(--theme)" opacity="0.5"/><rect x="5" y="13.5" width="12" height="2.5" rx="1.2" fill="var(--theme)" opacity="0.35"/><rect x="5" y="18" width="8" height="2.5" rx="1.2" fill="var(--theme)" opacity="0.22"/></svg>';
+    if ((m.source||'').indexOf('公众号') > -1 || (m.source||'').indexOf('微信') > -1) {
+      thumbBg = '#e8f7ee';
+      thumbIcon = '<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#07C160"/><circle cx="10" cy="14" r="2" fill="#fff"/><circle cx="18" cy="14" r="2" fill="#fff"/><path d="M8 18 C10 20 18 20 20 18" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>';
+    } else if ((m.source||'').indexOf('哔哩') > -1 || (m.source||'').indexOf('B站') > -1) {
+      thumbBg = '#fff0f3';
+      thumbIcon = '<svg width="28" height="18" viewBox="0 0 28 18" fill="none"><rect x="0.5" y="2.5" width="27" height="15" rx="2.5" fill="#FB7299"/><path d="M7 0.5L10 2.5" stroke="#FB7299" stroke-width="1.5" stroke-linecap="round"/><path d="M21 0.5L18 2.5" stroke="#FB7299" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="10" r="2" fill="#fff"/><circle cx="19" cy="10" r="2" fill="#fff"/><path d="M6 14.5 C8 16 20 16 22 14.5" stroke="#fff" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>';
+    } else if ((m.source||'').indexOf('知乎') > -1) {
+      thumbBg = '#e8f0ff';
+      thumbIcon = '<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#0066ff" opacity="0.85"/><text x="7" y="20" font-size="16" fill="#fff" font-weight="bold" font-family="serif">知</text></svg>';
+    }
+    html = '<div class="share-card share-link" onclick="openShareModal(\'' + id + '\')" style="width:220px;background:var(--card);border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.08);">'
+      + '<div style="display:flex;align-items:center;gap:10px;padding:12px;">'
+      + '<div style="width:50px;height:50px;border-radius:8px;background:' + thumbBg + ';flex-shrink:0;display:flex;align-items:center;justify-content:center;">' + thumbIcon + '</div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + esc(m.title||'') + '</div>'
+      + (m.desc ? '<div style="font-size:11px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(m.desc) + '</div>' : '')
+      + '</div></div>'
+      + '<div style="border-top:1px solid var(--line);padding:6px 12px;display:flex;align-items:center;gap:5px;color:var(--sub);font-size:11px;">'
+      + '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1"/><path d="M3.5 5.5H7.5M6 3.5L7.5 5.5L6 7.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      + '<span>' + esc(m.source||'链接') + '</span>'
+      + '</div></div>';
+  }
+
+  return html;
+}
+
+/* ── 分享弹窗 ── */
+function openShareModal(msgId) {
+  var m = null;
+  var cid = view && view.id;
+  if (cid && DB.chats[cid]) {
+    m = DB.chats[cid].find(function(x){ return x.id === msgId; });
+  }
+  if (!m) return;
+
+  /* 从当前 CSS 变量里读实时值，确保跟随主题 */
+  var root = document.documentElement;
+  var cs   = getComputedStyle(root);
+  var CV   = {
+    card : cs.getPropertyValue('--card').trim(),
+    text : cs.getPropertyValue('--text').trim(),
+    sub  : cs.getPropertyValue('--sub').trim(),
+    line : cs.getPropertyValue('--line').trim(),
+    bg   : cs.getPropertyValue('--bg').trim(),
+    theme: cs.getPropertyValue('--theme').trim()
+  };
+
+  /* 弹窗通用关闭按钮 */
+  var closeBtn = '<button onclick="closeShareModal()" style="width:28px;height:28px;border-radius:50%;background:' + CV.bg + ';border:none;cursor:pointer;font-size:16px;color:' + CV.sub + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>';
+
+  var inner = '';
+
+  if (m.shareType === 'image') {
+    var grad = randomShareGradient();
+    inner = '<div style="display:flex;align-items:center;gap:8px;padding:16px 20px 12px;border-bottom:1px solid ' + CV.line + ';">'
+      + '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="3" width="16" height="12" rx="2" fill="' + CV.theme + '" opacity="0.3"/><circle cx="6" cy="7.5" r="1.5" fill="' + CV.theme + '"/><path d="M1 12L6 8L10 12L13 9L17 13" stroke="' + CV.theme + '" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>'
+      + '<div style="flex:1"><div style="font-size:15px;font-weight:700;color:' + CV.text + ';">图片</div></div>'
+      + closeBtn + '</div>'
+      + '<div style="padding:16px 20px;">'
+      + '<div style="width:100%;height:200px;border-radius:12px;background:' + grad + ';display:flex;align-items:center;justify-content:center;margin-bottom:14px;overflow:hidden;">'
+      + '<svg width="64" height="64" viewBox="0 0 64 64" fill="none"><rect x="4" y="10" width="56" height="44" rx="4" fill="rgba(255,255,255,0.18)"/><circle cx="20" cy="24" r="7" fill="rgba(255,255,255,0.45)"/><path d="M4 46L20 28L32 42L44 26L60 48" stroke="rgba(255,255,255,0.65)" stroke-width="3" stroke-linejoin="round" fill="none"/></svg>'
+      + '</div>'
+      + '<div style="font-size:14px;color:' + CV.text + ';line-height:1.75;">' + esc(m.desc||'') + '</div>'
+      + '</div>';
+
+  } else if (m.shareType === 'video') {
+    var grad3 = randomShareGradient();
+    inner = '<div style="display:flex;align-items:center;gap:8px;padding:16px 20px 12px;border-bottom:1px solid ' + CV.line + ';">'
+      + '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="3" width="16" height="12" rx="2" fill="' + CV.theme + '" opacity="0.3"/><path d="M6 6L13 9L6 12Z" fill="' + CV.theme + '"/></svg>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:' + CV.text + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(m.title||'') + '</div>'
+      + '<div style="font-size:11px;color:' + CV.sub + ';margin-top:1px;">' + esc(m.source||'') + (m.duration?' · '+esc(m.duration):'') + '</div></div>'
+      + closeBtn + '</div>'
+      + '<div style="padding:16px 20px;">'
+      + '<div style="width:100%;height:170px;border-radius:12px;background:' + grad3 + ';display:flex;align-items:center;justify-content:center;margin-bottom:14px;">'
+      + '<div style="width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px rgba(255,255,255,0.12);">'
+      + '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 3L19 11L6 19V3Z" fill="#333"/></svg></div></div>'
+      + '<div style="font-size:14px;color:' + CV.text + ';line-height:1.75;">' + esc(m.desc||'') + '</div>'
+      + '</div>';
+
+  } else if (m.shareType === 'music') {
+    var lyricsHtml = '';
+    if (m.lyrics) {
+      var lines = m.lyrics.split('/');
+      lyricsHtml = '<div style="margin-top:14px;padding:12px 14px;background:' + CV.bg + ';border-radius:10px;font-size:13px;color:' + CV.sub + ';line-height:2;font-style:italic;">';
+      lines.forEach(function(line, i) {
+        lyricsHtml += '<div style="' + (i===1 ? 'color:'+CV.theme+';font-weight:600;font-style:normal;' : '') + '">' + esc(line.trim()) + '</div>';
+      });
+      lyricsHtml += '</div>';
+    }
+    inner = '<div style="display:flex;align-items:center;gap:8px;padding:16px 20px 12px;border-bottom:1px solid ' + CV.line + ';">'
+      + '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" fill="#4f46e5"/><circle cx="9" cy="9" r="2.5" fill="rgba(255,255,255,0.8)"/><path d="M12 4L12 8L10 7.5L10 3.5Z" fill="rgba(255,255,255,0.9)"/></svg>'
+      + '<div style="flex:1"><div style="font-size:15px;font-weight:700;color:' + CV.text + ';">' + esc(m.title||'') + '</div>'
+      + '<div style="font-size:11px;color:' + CV.sub + ';margin-top:1px;">' + esc(m.source||'') + '</div></div>'
+      + closeBtn + '</div>'
+      + '<div style="padding:16px 20px;">'
+      + '<div style="width:100%;height:150px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow:hidden;">'
+      + '<div style="width:72px;height:72px;border-radius:50%;background:rgba(0,0,0,0.38);display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.2);box-shadow:0 0 0 10px rgba(255,255,255,0.07);">'
+      + '<svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12" stroke="rgba(255,255,255,0.2)" stroke-width="1" fill="none"/><circle cx="16" cy="16" r="3" fill="rgba(255,255,255,0.5)"/><path d="M21 8L21 15L18 14.2L18 7.2Z" fill="rgba(255,255,255,0.7)"/></svg>'
+      + '</div></div>'
+      + '<div style="text-align:center;margin-bottom:4px;">'
+      + '<div style="font-size:18px;font-weight:700;color:' + CV.text + ';">' + esc(m.title||'') + '</div>'
+      + '<div style="font-size:13px;color:' + CV.sub + ';margin-top:4px;">' + esc(m.artist||'') + (m.album?' · '+esc(m.album):'') + '</div>'
+      + '</div>'
+      + lyricsHtml
+      + '</div>';
+
+  } else if (m.shareType === 'fugue') {
+    var tagsHtml = '';
+    if (m.tags) {
+      m.tags.split(',').forEach(function(tag) {
+        tag = tag.trim();
+        if (tag) tagsHtml += '<span style="background:' + CV.bg + ';color:' + CV.theme + ';font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid ' + CV.line + ';">' + esc(tag) + '</span>';
+      });
+    }
+    inner = '<div style="display:flex;align-items:center;gap:8px;padding:16px 20px 12px;border-bottom:1px solid ' + CV.line + ';">'
+      + '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><defs><radialGradient id="fgm2" cx="40%" cy="40%"><stop offset="0%" stop-color="#c4b0f5"/><stop offset="100%" stop-color="#7c3aed"/></radialGradient></defs><circle cx="9" cy="9" r="8" fill="url(#fgm2)"/><path d="M4 9Q9 3 14 9Q9 15 4 9Z" fill="rgba(255,255,255,0.65)"/><circle cx="9" cy="9" r="2" fill="rgba(255,255,255,0.95)"/></svg>'
+      + '<div style="flex:1"><div style="font-size:15px;font-weight:700;color:' + CV.text + ';">浮光</div>'
+      + '<div style="font-size:11px;color:' + CV.sub + ';margin-top:1px;">' + esc(m.author||'') + '</div></div>'
+      + closeBtn + '</div>'
+      + '<div style="padding:16px 20px;">'
+      + '<div style="width:100%;height:130px;background:linear-gradient(135deg,#e8d5ff,#c4b0f5,#a78bfa);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;overflow:hidden;">'
+      + '<svg width="60" height="60" viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="20" fill="rgba(255,255,255,0.15)"/><path d="M16 30Q30 16 44 30Q30 44 16 30Z" fill="rgba(255,255,255,0.4)"/><circle cx="30" cy="30" r="5" fill="rgba(255,255,255,0.85)"/></svg>'
+      + '</div>'
+      + '<div style="font-size:16px;font-weight:700;color:' + CV.text + ';line-height:1.5;margin-bottom:10px;">' + esc(m.title||'') + '</div>'
+      + '<div style="font-size:14px;color:' + CV.text + ';line-height:1.8;opacity:0.85;">' + esc(m.content||'').replace(/\n/g,'<br>') + '</div>'
+      + (tagsHtml ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;">' + tagsHtml + '</div>' : '')
+      + '</div>';
+
+  } else {
+    /* 通用链接 */
+    inner = '<div style="display:flex;align-items:center;gap:8px;padding:16px 20px 12px;border-bottom:1px solid ' + CV.line + ';">'
+      + '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="' + CV.theme + '" stroke-width="1.2" fill="none"/><path d="M3 9h12M9 2a10 7 0 010 14M9 2a10 7 0 000 14" stroke="' + CV.theme + '" stroke-width="1" fill="none"/></svg>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:' + CV.text + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(m.title||'') + '</div>'
+      + '<div style="font-size:11px;color:' + CV.sub + ';margin-top:1px;">' + esc(m.source||'') + '</div></div>'
+      + closeBtn + '</div>'
+      + '<div style="padding:16px 20px;">'
+      + '<div style="font-size:16px;font-weight:700;color:' + CV.text + ';line-height:1.5;margin-bottom:10px;">' + esc(m.title||'') + '</div>'
+      + '<div style="font-size:14px;color:' + CV.text + ';line-height:1.8;opacity:0.85;">' + esc(m.content||'').replace(/\n/g,'<br>') + '</div>'
+      + '</div>';
+  }
+
+  /* 弹窗容器：背景色也跟随主题 */
+  var overlay = document.getElementById('shareModalOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'shareModalOverlay';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.48);z-index:9999;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);';
+    overlay.innerHTML = '<div id="shareModalSheet" style="width:100%;max-width:480px;border-radius:20px 20px 0 0;max-height:82vh;overflow-y:auto;animation:shareSlideUp 0.28s cubic-bezier(0.34,1.2,0.64,1);"><div style="width:36px;height:4px;border-radius:2px;margin:12px auto 0;" id="shareModalHandle"></div><div id="shareModalInner"></div></div>';
+    overlay.addEventListener('click', function(e){ if(e.target===overlay) closeShareModal(); });
+    document.body.appendChild(overlay);
+    var st = document.createElement('style');
+    st.textContent = '@keyframes shareSlideUp{from{transform:translateY(100%);opacity:0.6}to{transform:translateY(0);opacity:1}}';
+    document.head.appendChild(st);
+  }
+
+  /* 每次打开时刷新弹窗背景色和把手颜色，确保跟随当前主题 */
+  var sheet = document.getElementById('shareModalSheet');
+  if (sheet) sheet.style.background = CV.card;
+  var handle = document.getElementById('shareModalHandle');
+  if (handle) handle.style.background = CV.line;
+
+  document.getElementById('shareModalInner').innerHTML = inner;
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeShareModal() {
+  var overlay = document.getElementById('shareModalOverlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
 }
 </script>
 </html>
