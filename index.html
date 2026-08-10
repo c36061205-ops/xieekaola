@@ -1024,7 +1024,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v0809';
+const APP_VER = 'v0810';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1047,9 +1047,10 @@ const DEFAULT_ONLINE = `你在微信上跟对方聊天。核心要求：每条�
 
 【🔴 格式铁律 · 最高优先级】
 1. 绝对禁止使用句号（。）和逗号（，）——正常人微信聊天不用这些。
-2. 【强制断句】每句话之间必须用空格（ ）隔开，否则文字会黏在一起让人看不懂。
+2. 【强制断句】每句话之间用【一个】空格隔开，只能一个，绝对禁止连续打多个空格。
    正确示例：今天下雨了 带伞
-   错误示例：今天下雨了带伞（黏在一起，❌）
+   错误示例1：今天下雨了带伞（没空格黏在一起，❌）
+   错误示例2：今天 下 雨了 带伞（连打多个空格，❌）
 3. 问号（？）和感叹号（！）可以使用，它们后面也要跟空格。
    正确示例：真的假的 ？你再说一遍
    错误示例：真的假的？你再说一遍（问号后没空格，❌）
@@ -9057,8 +9058,8 @@ async function checkAutoGreet() {
     // 深夜不主动打招呼
     if (slot === '深夜') continue;
 
-    // 用户 5 分钟内刚发过消息，不凑热闹
-    if (lastMsg && lastMsg.role === 'user' && Date.now() - lastMsg.time < 5 * 60 * 1000) continue;
+    // 最近30分钟内有过任何消息（含AI刚回复），说明刚聊过，不主动打招呼
+    if (lastMsg && Date.now() - lastMsg.time < 30 * 60 * 1000) continue;
 
     // 距上次打招呼不足 90 分钟，跳过
     if (c.greetLog.lastTime && Date.now() - c.greetLog.lastTime < 90 * 60 * 1000) continue;
@@ -9122,6 +9123,9 @@ async function doAutoGreet(c, slot) {
     } catch(e) {}
 
     // ===== 3. 构建历史 + 系统提示 =====
+    // ★出发前记录历史快照，用于生成后核对，防止竞态脱节
+    const _greetBaseLen = (DB.chats[c.id] || []).length;
+    const _greetBaseLastId = _greetBaseLen ? DB.chats[c.id][_greetBaseLen - 1].id : null;
     const hist = (DB.chats[c.id] || []).slice(-10).map(toApiMsg);
     const messages = [
       { role: 'system', content: buildSystem(c, (function(){
@@ -9152,6 +9156,15 @@ async function doAutoGreet(c, slot) {
 
     // ===== 4. 调用 AI + 应用状态变化 =====
     let out = await callAI(messages, model);
+    // ★核对：生成期间历史是否变过（你发了消息 / 主模型回复落库 / 正在生成）？变了就放弃这次打招呼
+    const _nowLen = (DB.chats[c.id] || []).length;
+    const _nowLastId = _nowLen ? DB.chats[c.id][_nowLen - 1].id : null;
+    if (_nowLen !== _greetBaseLen || _nowLastId !== _greetBaseLastId || replying) {
+      console.warn('自动问候：生成期间上下文已变化，丢弃本次打招呼');
+      if (c.greetLog && slot) { c.greetLog[slot] = false; c.greetLog.lastTime = 0; } // 退回配额，稍后可重试
+      save();
+      return;
+    }
     out = applyState(c, out);
 
     // ===== 5. 使用新解析器整段解析（不要自己 split 行） =====
@@ -9515,7 +9528,8 @@ async function watchNow(cid, opts) {
   var model = DB.settings.chatModel || DB.settings.auxModel;
   if (!model) { popTip('请先在设置里选择模型', { icon: '⚙️', title: '提示' }); return; }
 
-  popLoading('正在调取 ' + (c.nick || c.name) + ' 此刻的画面…');
+  var displayName = (c.name && c.name.trim() && c.name !== '新角色') ? c.name : (c.nick || '未命名');
+popLoading('正在调取 ' + displayName + ' 此刻的画面…');
 
   try {
     // 4. 组装提示词
@@ -9621,7 +9635,8 @@ async function watchNow(cid, opts) {
   } catch (e) { popClose(); popTip('监控失败：' + e.message + '\n（没有扣除💗）', { icon: '⚠️', title: '出错了' }); }
 }
 function openWatch(cid) { view = { type: 'watchLog', id: cid }; render(); }
-function renderWatchLog() { var c = getC(view.id); if (!c) { view = { type: 'hearts' }; return render(); } c.watchLogs = c.watchLogs || []; showChrome(true, false); statusbar.classList.add('dark'); tbTitle.textContent = (c.name || c.nick) + ' 的监控'; tbLeft.textContent = '‹'; tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); }; tbRight.textContent = ''; tbRight.onclick = null;
+function renderWatchLog() { var c = getC(view.id); if (!c) { view = { type: 'hearts' }; return render(); } c.watchLogs = c.watchLogs || []; showChrome(true, false); statusbar.classList.add('dark'); var displayName = (c.name && c.name.trim() && c.name !== '新角色') ? c.name : (c.nick || '未命名');
+tbTitle.textContent = displayName + ' 的监控'; tbLeft.textContent = '‹'; tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); }; tbRight.textContent = ''; tbRight.onclick = null;
 var html = '<div style="padding:14px 16px 24px;">'; html += '<button class="btn" style="width:100%;margin:0 0 6px;" onclick="watchNow(\'' + c.id + '\')">📡 调取此刻画面（5💗）</button>'; html += '<div style="text-align:center;font-size:11px;color:var(--sub);opacity:.5;margin-bottom:16px;">画面每 10 分钟更新 · 收藏不会被覆盖 · 有今日行程时画面更准</div>';
 var logs = c.watchLogs.slice().sort(function(a, b) { if (a.starred !== b.starred) return a.starred ? -1 : 1; return b.time - a.time; });
 if (!logs.length) { html += '<div style="text-align:center;padding:50px 0;color:var(--sub);font-size:14px;line-height:2;">📼 还没有监控录像<br><span style="font-size:12px;opacity:.7;">点上面的按钮，调取 TA 此刻的画面</span></div>'; } else { logs.forEach(function(w) { html += buildWatchCard(w, c.id); }); }
@@ -9718,7 +9733,8 @@ function renderSchedule() {
 
   showChrome(true, false);
   statusbar.classList.add('dark');
-  tbTitle.textContent = (c.name || c.nick) + ' 的行程';
+  var displayName = (c.name && c.name.trim() && c.name !== '新角色') ? c.name : (c.nick || '未命名');
+tbTitle.textContent = displayName + ' 的行程';
   tbLeft.textContent = '‹';
   tbLeft.onclick = function() { 
     if (window._scheduleTimer) { clearTimeout(window._scheduleTimer); window._scheduleTimer = null; }
@@ -9899,7 +9915,8 @@ async function generateSchedule(cid) {
     return;
   }
 
-  popLoading('正在推演 ' + (c.nick || c.name) + ' 的今日轨迹…');
+  var displayName = (c.name && c.name.trim() && c.name !== '新角色') ? c.name : (c.nick || '未命名');
+popLoading('正在调取 ' + displayName + ' 的今日行程…');
 
   try {
     // ── 2. 准备时间信息 ──
@@ -10312,6 +10329,7 @@ s += '  <transfer amount="金额" note="备注"></transfer>  (转账，金额必
 s += '  <block reason="小情绪或大矛盾"></block>  (拉黑玩家)\n';
 s += '  <inner>内心想法</inner>  (心声，不直接发送，仅用于标记)\n';
 s += '  <action type="accept"></action> / <action type="refund"></action>  (接收/退回对方转来的钱)\n';
+s += '  <snap>想拍的画面</snap>  (随手拍生活照，偶尔用来给对方惊喜，规则见下方"随手拍")\n';
 s += '【强制】除了上述标签，其余内容全部是正常聊天文本。严禁使用 [语音|]、[转账|]、[表情|] 等方括号格式，一律改用尖括号 XML 标签。\n\n';
 
   // ===== 第1层：你是谁（角色核心身份） =====
@@ -10557,6 +10575,20 @@ s += '- link和fugue的content要像真实内容一样，可信、完整，不�
   s += '当对话中对方（用户）自然流露出某种需要或情绪时——比如说饿了、累了、冷了、心情不好、想要某样东西——如果符合你的人设和你俩的关系，你【可以（不是必须）】顺手送对方一件贴合当下情境、贴合你所在世界观的小东西。\n';
   s += '格式：<gift emoji="一个emoji" name="东西的名字" desc="2到4字简短描述"></gift>\n';
   s += '规则：①这是心意，不是每次都送，只在真的合情合景时才送，别频繁、别刻意；②送的东西要符合你的身份、性格和世界观；③标签单独占一行，除标签外照常正常说话（比如一边关心一边把东西递过去）；④绝对不要提任何价格、金币、数值或系统字眼，就当是真实生活里随手送的东西。\n';
+  // ===== 随手拍·惊喜规则 =====
+  s += '\n【随手拍·惊喜（低频·走心）】\n';
+  s += '你可以在极少数、恰到好处的时机，用手机随手拍一张眼前的生活照发给对方，作为一个小惊喜。方式：在你正常回复的结尾，单独写一个标签 <snap>一句话描述你想拍的画面</snap>（例如 <snap>窗外正在下的雨和我手边的热咖啡</snap>）。这个标签不会显示成文字，系统会据此生成照片。\n';
+  s += '【什么时候适合拍】：\n';
+  s += '· 聊到具体场景/画面时（提到了地点、天气、正在做的事、吃的东西等）\n';
+  s += '· 情绪浓度高、想拉近距离时（想对方了、道晚安、久违地聊起来、纪念性时刻）\n';
+  s += '· 你正在做某事、想让对方"看见"你此刻生活时\n';
+  s += '· 对方明确或暗示想看你拍的照片时\n';
+  s += '【绝对不要拍的时候】：\n';
+  s += '· 快节奏一问一答、或在谈正事时（别打断）\n';
+  s += '· 话题严肃、难过、争执时（不合时宜）\n';
+  s += '· 没有任何画面由头、纯粹为发而发时\n';
+  s += '【频率】：这是"偶尔"的惊喜，绝大多数回复都不该带 <snap>。宁缺毋滥，能不发就不发——稀有才叫惊喜。\n';
+  s += '【画面要求】：第一人称随手拍的生活场景（环境、物件、景色、食物、手边之物），不要写人脸、不要自拍。\n';
 
   // ===== 结尾·语气临门一脚（利用末尾高注意力，强化"说话像角色"）=====
   if (c.sampleLines) {
@@ -11143,7 +11175,9 @@ function pushMy(m){
   m.id = newId();
   m.role = 'user';
   m.time = Date.now();
-  
+  m.time = Date.now();
+c._lastUserAt = Date.now();   // ← 新增：记录用户最后一次发消息的时间
+
   // 新增：语音消息默认折叠
   if (m.type === 'voice') {
     m.voiceExpanded = false;
@@ -11580,6 +11614,20 @@ t = t.replace(/<\/?(inner|心声|voice|sticker|recall|transfer|block|gift|giftba
     t = t.replace(/[（(]\s*(?:语音|表情|表情包|撤回|转账|心声|动作|神态|内心)[^）)]*[）)]/g, '');
     return t;
 }
+function splitToBubbles(text) {
+  var lines = text.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+  // 模型正常换行了（多行）→ 尊重模型，一行一个气泡，不再细拆
+  if (lines.length > 1) return lines;
+  // 只有一整段 → 很可能模型忘了换行，按句末标点兜底拆
+  var line = lines[0] || '';
+  if (line.length <= 25) return lines;  // 太短就不拆，避免误伤
+  var segs = line.match(/[^。！？…~～]*[。！？…~～]+["'”’)）】]*|[^。！？…~～]+$/g);
+  if (segs && segs.length > 1) {
+    return segs.map(function(s){ return s.trim(); }).filter(Boolean);
+  }
+  return lines;
+}
+
 function parseAIMessage(raw) {
     if (!raw) return [{ type: 'text', content: '' }];
 
@@ -11587,6 +11635,7 @@ function parseAIMessage(raw) {
     let text = raw.replace(/```[\s\S]*?```/g, function(match) {
         return match.replace(/```(json|xml|text)?\n?/gi, '').replace(/```/g, '');
     }).trim();
+    text = text.replace(/[ \u00A0\u3000]{2,}/g, ' ');
 
     // 2. 归一化：将各种“野生”格式统一转换为标准 XML 标签
     // --- 语音 ---
@@ -11633,10 +11682,18 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
       function (mm, a, b, cc) {
         return '<gift emoji="' + (a || '🎁').trim() + '" name="' + (b || '礼物').trim() + '" desc="' + (cc || '').trim() + '"></gift>';
       });
+    // --- 随手拍惊喜（不显示成气泡，仅用于触发配图）---
+    var _snapWish = '';
+    text = text.replace(/<snap>([\s\S]*?)<\/snap>/gi, function(mm, inner){
+        _snapWish = (inner || '').trim();
+        return '';
+    });
 
     // 3. 提取逻辑：先取出所有标签及其位置
     const regex = /<(voice|sticker|recall|transfer|block|inner|action|gift|giftback|share)([^>]*)>([\s\S]*?)<\/\1>/g;
     const parts = [];
+	    if (_snapWish) { parts._snap = _snapWish; }
+
     let lastIndex = 0;
     let match;
 
@@ -11661,7 +11718,7 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
             const plainText = text.substring(lastIndex, t.index).trim();
             if (plainText) {
                 // 按换行拆分
-                const lines = plainText.split(/\n+/).map(s => s.trim()).filter(Boolean);
+                const lines = splitToBubbles(plainText);
 lines.forEach(line => {
                     var cleaned = cleanLeftoverTags(line);
                     if (cleaned.trim()) {
@@ -11757,7 +11814,7 @@ lines.forEach(line => {
     if (lastIndex < text.length) {
         const remaining = text.substring(lastIndex).trim();
         if (remaining) {
-            const lines = remaining.split(/\n+/).map(s => s.trim()).filter(Boolean);
+            const lines = splitToBubbles(remaining);
 lines.forEach(line => {
                 var cleaned = cleanLeftoverTags(line);
                 if (cleaned.trim()) {
@@ -11769,7 +11826,8 @@ lines.forEach(line => {
 
     // 兜底：如果什么都没解析出来，返回原文本（但也会按换行拆）
     if (parts.length === 0) {
-        const lines = raw.split(/\n+/).map(s => s.trim()).filter(Boolean);
+        const lines = splitToBubbles(raw);
+
         if (lines.length) {
             return lines.map(line => ({ type: 'text', content: line }));
         } else {
@@ -12258,7 +12316,13 @@ var _reward = _favor >= 80 ? (2 + Math.floor(Math.random() * 2)) : 2; // 好感�
 addCoins(_reward);
 
     if (meetPlace !== null && c.mode === 'online') proposeMeet(c, meetPlace);
-    if (wantBack && c.mode === 'offline') proposeBackOnline(c);
+    if (wantBack && c.mode === 'offline') {
+  var idleMs = Date.now() - (c._lastUserAt || 0);
+if (idleMs > 20 * 60 * 1000) {   // 你超过20分钟没发消息，才允许弹
+    proposeBackOnline(c);
+  }
+  // 否则：你正聊着呢，AI 想收尾也先憋着，不弹
+}
 
     reduceTension(c);
     // ---- 12. 紧张度回落 ----
@@ -13982,7 +14046,8 @@ async function makeSnapshot(cid, moodText){
 
   var askPrompt = persona +
     '\n\n【任务】你（' + who + '）此刻想随手拍一张照片。' +
-    (moodText ? '当前的情境/心情是："' + moodText + '"。' : '') +
+    (moodText ? '你此刻特别想拍下这个画面："' + moodText + '"，请紧紧围绕它来构思。' : '') +
+
     '请结合你的身份、性格、所处世界、此刻在做的事，想一个最符合"此刻的你会拍下来"的画面。' +
     (worldDesc ? '\n【你所处的世界观】' + worldDesc : '') +
     (nowPlace ? '\n【当前地点】' + nowPlace : '') +
@@ -14021,17 +14086,24 @@ function triggerChatSnapshot(c, parts){
   if(!DB.settings.imageModel) return;
   if(!canSendImage(c.id)) return;
   if(_snapLock[c.id]) return;
-  if(Math.random() >= 0.25) return;
 
-  var moodText = (parts||[]).filter(function(p){return p.type==='text';})
-                            .map(function(p){return p.content;}).join(' ');
-  moodText = stripStateTag(moodText);
+  // 只有 AI 主动想拍（这次回复里带了 <snap>）才触发生图
+  var wish = (parts && parts._snap) ? parts._snap : '';
+  if(!wish) return;
+
+  // 30 分钟冷却：距上次拍照不足 30 分钟就跳过（防连发、防反复扣费）
+  var last = c._lastSnapTime || 0;
+  if(Date.now() - last < 30*60*1000) return;
+
   var cid = c.id;
+  // 一旦决定生成就立刻记时并保存 —— 无论成功失败都遵守 30 分钟间隔
+  c._lastSnapTime = Date.now();
+  save();
 
   _snapLock[cid] = true;
   (async function(){
     try{
-      var picId = await makeSnapshot(cid, moodText);
+      var picId = await makeSnapshot(cid, wish);
       if(!picId) return;
       var imgMsg = { id:newId(), role:'assistant', type:'image', content:picId, time:Date.now() };
       DB.chats[cid] = DB.chats[cid] || [];
@@ -14045,7 +14117,7 @@ function triggerChatSnapshot(c, parts){
       } else {
         markChatUnread(cid, 1);
       }
-    }catch(e){ console.warn('聊天配图失败', e); }
+    }catch(e){ console.warn('Snapshot failed', e); }
     finally{ _snapLock[cid] = false; }
   })();
 }
