@@ -51,7 +51,7 @@
   .batt{width:24px;height:12px;border:1px solid currentColor;border-radius:3px;position:relative;padding:1px;opacity:.9;}
   .batt::after{content:'';position:absolute;right:-3px;top:3px;width:2px;height:6px;background:currentColor;border-radius:0 1px 1px 0;}
   .batt i{display:block;height:100%;background:currentColor;border-radius:1px;}
-  #topbar{height:50px;background:var(--nav);display:flex;align-items:center;padding:0 12px;color:var(--text);border-bottom:1px solid var(--line);flex-shrink:0;font-size:17px;}
+  #topbar{height:56px;background:var(--nav);display:flex;align-items:center;padding:0 12px;color:var(--text);border-bottom:1px solid var(--line);flex-shrink:0;font-size:17px;}
   #tbTitle{flex:1;text-align:center;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .tb-btn{min-width:44px;font-size:20px;color:var(--text);cursor:pointer;}
   .tb-btn.r{text-align:right;color:var(--theme);}
@@ -190,8 +190,8 @@
 }
   .app{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;justify-content:flex-start;}
 .app-ic {
-    width: 54px;
-    height: 54px;
+    width: 65px;
+    height: 65px;
     border-radius: 16px;
     background: transparent;      /* 不用背景图了 */
     display: flex;
@@ -199,8 +199,7 @@
     justify-content: center;
     box-shadow: 0 3px 8px rgba(0,0,0,.15);
     position: relative;           /* 让内部图片可定位 */
-    /* 去掉 overflow: hidden ← 关键，允许溢出 */
-    /* 去掉 box-shadow 也行，因为溢出后阴影会怪，见下方说明 */
+
 }
 
 .app-ic-img {
@@ -1024,7 +1023,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v0811';
+const APP_VER = 'v0812';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1051,9 +1050,9 @@ const DEFAULT_ONLINE = `你在微信上跟对方聊天。核心要求：每条�
    正确示例：今天下雨了 带伞
    错误示例1：今天下雨了带伞（没空格黏在一起，❌）
    错误示例2：今天 下 雨了 带伞（连打多个空格，❌）
-3. 问号（？）和感叹号（！）可以使用，它们后面也要跟空格。
-   正确示例：真的假的 ？你再说一遍
-   错误示例：真的假的？你再说一遍（问号后没空格，❌）
+3. 问号（？）和感叹号（！）可以使用。
+   正确示例：真的假的？你再说一遍
+   错误示例：真的假的？你再说一遍。（不要加句号❌）
 4. 换行（回车）也可以用来断句，但空格是最基本的。
 
 【🔴 内容铁律】
@@ -1078,8 +1077,7 @@ const DEFAULT_ONLINE = `你在微信上跟对方聊天。核心要求：每条�
 
 【❌ 错误示范（文字黏在一起）】
 今天下雨了带伞（❌ 没空格）
-嗯好（❌ 没空格）
-？你再说一遍（❌ 问号后没空格）
+嗯好我知道了你路上小心（❌ 没空格）
 
 【✅ 特殊格式正确示范】
 发语音：
@@ -1090,9 +1088,13 @@ const DEFAULT_ONLINE = `你在微信上跟对方聊天。核心要求：每条�
 哈哈哈
 <sticker>笑死</sticker>
 
-撤回：
-<recall>其实我有点想你</recall>
-算了没事
+撤回（打错字）：
+你今天有空ma
+<recall>你今天有空ma</recall>
+你今天有空吗
+撤回（说了不该说的）：
+<recall>其实我一直都很在意你</recall>
+没事你忘了吧
 
 转账：
 拿去吃饭
@@ -1256,41 +1258,34 @@ wallpaper: `
     #FFFFFF
   `
 },
-
 {
   id: 'momo_night',
   name: '🐑 咩咩夜行',
   color: '#E69AAB',
   '--theme': '#E69AAB',
+  '--bg': '#252833',
+  '--nav': '#313645',
+  '--card': '#313645',
+  '--text': '#FDF6E3',
+  '--sub': '#A59EB0',
+  '--line': '#4D4755',
+  
+  wallpaper: `
+    /* 顶部和底部的氛围光 */
+    radial-gradient(circle at 50% -10%, rgba(139, 100, 72, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 50% 110%, rgba(139, 100, 72, 0.15) 0%, transparent 40%),
+    
+    /* 模拟缝线格子：使用间断的线性渐变 */
+    linear-gradient(90deg, #252833 2px, transparent 2px) 0 0 / 4px 100%,
+    linear-gradient(#252833 2px, transparent 2px) 0 0 / 100% 4px,
+    linear-gradient(rgba(253, 246, 227, 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, rgba(253, 246, 227, 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
 
-  // 更接近参考图中的深蓝黑布料
-  '--bg': '#252B3A',
-  '--nav': '#303646',
-  '--card': '#303646',
-
-  // 对应贴纸的奶油白、灰蓝和铅笔描边
-  '--text': '#F8F1E2',
-  '--sub': '#AAA9B3',
-  '--line': '#495064',
-
-wallpaper: `
-  /* 模拟原图中不规则分布的棕色毛绒底托色块 */
-  radial-gradient(ellipse at 72% 35%, rgba(139, 100, 72, 0.18) 0%, transparent 30%),
-  radial-gradient(ellipse at 30% 60%, rgba(139, 100, 72, 0.15) 0%, transparent 28%),
-  radial-gradient(ellipse at 60% 75%, rgba(162, 120, 85, 0.12) 0%, transparent 25%),
-  
-  /* 米黄色撕纸感色块（对应原图左下角的米色标签区域） */
-  radial-gradient(ellipse at 15% 80%, rgba(220, 195, 155, 0.10) 0%, transparent 22%),
-  
-  /* 布料编织细纹 */
-  repeating-linear-gradient(0deg, rgba(253, 246, 227, 0.03) 0px, rgba(253, 246, 227, 0.03) 1px, transparent 1px, transparent 32px),
-  repeating-linear-gradient(90deg, rgba(253, 246, 227, 0.03) 0px, rgba(253, 246, 227, 0.03) 1px, transparent 1px, transparent 32px),
-  
-  /* 噪点质感 */
-  url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
-  
-  #2B2D37
-`}
+    /* 噪点 */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    
+    #252833
+  `,}
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -1402,23 +1397,24 @@ misi: {
 },
 // 🐑 咩咩夜行
 momo_night: {
-  wechat:   'https://s1.imagehub.cc/images/2026/08/11/fde1f98d6011d69f2a77f11978b63d94.png',
-  notes:    'https://s1.imagehub.cc/images/2026/08/11/ae8c3165b7a447ec8891fdd821df590c.png',
-  focus:    'https://s1.imagehub.cc/images/2026/08/11/42a8033874f910163f60d8d2871a6906.png',
-  settings: 'https://s1.imagehub.cc/images/2026/08/11/7065faa45f5c5db1aa1e5134923748ce.png',
-  album:    'https://s1.imagehub.cc/images/2026/08/11/d429b5f7b294cb4e8c20ae9c2b4959e3.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/08/11/c8bc79b81c96702ffce49bbc10114895.png',
-  music:    'https://s1.imagehub.cc/images/2026/08/11/7622450e69295e64acb2a6406f248f9a.png',
-  preset:   'https://s1.imagehub.cc/images/2026/08/11/17243b3be12a619801bf15897097412a.png',
-  floating: 'https://s1.imagehub.cc/images/2026/08/11/5ddcfbed60f53a05680949f61c1f23c1.png',
-  shop:     'https://s1.imagehub.cc/images/2026/08/11/4fa3fbb18f0c8b2ace2bf49c097348ff.png',
-  world:    'https://s1.imagehub.cc/images/2026/08/11/83dd14e48760a1cab5f0b74c0cace2eb.png',
+  wechat:   'https://s1.imagehub.cc/images/2026/08/12/2d7e9350cbac930280b57cd26a3e6072.png',
+  notes:    'https://s1.imagehub.cc/images/2026/08/12/792e346cf9178d08d8dad2453294d725.png',
+  focus:    'https://s1.imagehub.cc/images/2026/08/12/1d9a9f96c674aa93b6ed7b785272b101.png',
+  settings: 'https://s1.imagehub.cc/images/2026/08/12/89dd73a5835bab0e4ac601252151e5d2.png',
+  album:    'https://s1.imagehub.cc/images/2026/08/12/c1621afc53d419a3719ade1b35964215.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/08/12/930c7e3d2f14b4f4d5a7f8b375b81315.png',
+  music:    'https://s1.imagehub.cc/images/2026/08/12/15132af0f309437db97f8ba50e8d4515.png',
+  preset:   'https://s1.imagehub.cc/images/2026/08/12/e79e5af9b0e822f2f0114c72af5eafaf.png',
+  floating: 'https://s1.imagehub.cc/images/2026/08/12/e80b3bd61688c01c8964381cd1d9818c.png',
+  shop:     'https://s1.imagehub.cc/images/2026/08/12/4a8841a2b3b1c94913d9c334b0ef6ed5.png',
+  world:    'https://s1.imagehub.cc/images/2026/08/12/7b208085ee917bf8ab3b97787220afe0.png',
   tabChats:    'https://s1.imagehub.cc/images/2026/08/11/85be76b13cfaeeff89aae6b9b5d21dab.png',
   tabContacts: 'https://s1.imagehub.cc/images/2026/08/11/df33f9f4570f9a6c6f4bdf455ee6ab1c.png',
   tabDiscover: 'https://s1.imagehub.cc/images/2026/08/11/4efc0fcba051c9e5c0c917a84026e2a8.png',
   tabMe:       'https://s1.imagehub.cc/images/2026/08/11/e3c8122553d9e2a22740e7b15f470af9.png',
   discoverMoments: 'https://s1.imagehub.cc/images/2026/08/11/7c70b8b0b244adad7b77942998556734.png'
 }
+
 };
 // =====================================
 function applySkin(id) {
@@ -1654,6 +1650,91 @@ async function polishRelation(idx){
 }
 
 function defaultApps(){return[{id:'wechat',name:'微信',emoji:'💬',icon:''},{id:'notes', name:'备忘录', emoji:'📝', icon:''},{id:'settings',name:'设置',emoji:'⚙️',icon:''},{id:'album',name:'相册',emoji:'🖼️',icon:''},{id:'music',name:'音乐',emoji:'🎵',icon:''},{id:'weather',name:'天气',emoji:'⛅',icon:''},{id:'preset',name:'预设',emoji:'🎭',icon:''},{id:'hearts',name:'心迹',emoji:'💗',icon:''},{id:'focus',name:'专注',emoji:'⏱️',icon:''},{id:'world',name:'世界观',emoji:'🌍',icon:''},{id:'floating',name:'浮光',emoji:'✨',icon:''},{id:'shop',name:'购物',emoji:'🛍️',icon:''}];}
+// ===== 当日心情底色 =====
+var MOODS = [
+  { key:'calm',  emoji:'🙂',   label:'平平常常', w:30, hint:'心情平稳普通，正常聊天即可' },
+  { key:'good',  emoji:'😊',   label:'心情不错', w:24, hint:'心情挺好，话多一点、容易被逗笑、语气轻快' },
+  { key:'happy', emoji:'☀️',   label:'元气满满', w:14, hint:'精神很好、有点小兴奋，主动、爱分享、话痨一些' },
+  { key:'tired', emoji:'😮‍💨', label:'有点累',   w:12, hint:'今天有点累，回复偏短、懒懒的，但不冷淡对方' },
+  { key:'lazy',  emoji:'🛋️',   label:'懒洋洋',   w:8,  hint:'很懒只想瘫着，语气慵懒、回得慢半拍' },
+  { key:'down',  emoji:'🌧️',   label:'有点低落', w:6,  hint:'心情低落、话少、容易走神，需要被关心；如果对方温柔哄你，你会慢慢好起来' },
+  { key:'moody', emoji:'😤',   label:'有点烦躁', w:6,  hint:'今天有点烦躁、耐心差，但不要无缘无故凶对方，只是没那么好哄' }
+];
+function rollMood(){
+  var total = MOODS.reduce(function(a,m){return a+m.w;},0);
+  var r = Math.random()*total;
+  for(var i=0;i<MOODS.length;i++){ r-=MOODS[i].w; if(r<=0) return MOODS[i].key; }
+  return 'calm';
+}
+function getMood(key){ return MOODS.find(function(m){return m.key===key;}) || MOODS[0]; }
+function ensureTodayMood(c){
+  var t=new Date();
+  var ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  if(!c.todayMood || c.todayMood.date!==ds){
+    c.todayMood={ date:ds, key:rollMood(), note:'', whisper:'' }; // note/whisper 当天付费查看时才填
+    save();
+  }
+  return getMood(c.todayMood.key);
+}
+// ===== 角色状态(装饰用·纯本地·现算不存·零内存占用) =====
+var STATUS_POOL = {
+  // —— 低落 ——
+  down:  ['🌧️ 内心在下雨','🕳️ 掉进小情绪里','🥲 假装没事','🌫️ 不想说话','🥀 提不起劲','🫧 想消失一会儿','🎐 有点脆弱','🌑 今天是阴天'],
+  // —— 烦躁 ——
+  moody: ['💢 生人勿近','🔒 请勿打扰','🌵 浑身是刺','⚡ 引线很短','🙃 全世界都欠我','🧊 冷处理中','🚧 施工重地别靠近','🌀 心烦意乱'],
+  // —— 疲惫 ——
+  tired: ['🪫 电量1%','🫠 正在融化','🧟 灵魂离线','🌙 快没电了','😮‍💨 被掏空','🥴 只剩一口气','🛌 想长在床上','☕ 靠咖啡吊命'],
+  // —— 慵懒 ——
+  lazy:  ['🛸 灵魂出走中','🦥 懒到极致','🐟 咸鱼状态','🌫️ 放空中','📎 就这样吧','🍃 什么都不想干','🛋️ 与沙发合体','🐌 慢半拍'],
+  // —— 开心 ——
+  happy: ['✨ 莫名其妙的好心情','🎈 状态在线','🍬 甜度超标','🌤️ 万里无云','🔥 满血复活','🎊 today很上头','🫧 快乐冒泡','🌈 心情彩色的'],
+  // —— 平和舒服 ——
+  good:  ['🍃 岁月静好','☕ 慢悠悠','🎵 单曲循环','🕊️ 心平气和','🌿 一切如常','🍵 恰到好处','🌾 松弛感','📖 岁月无声'],
+  // —— 平淡放空 ——
+  calm:  ['😌 平平淡淡','🌫️ 发着呆','🍵 佛系一天','🌑 无波无澜','📖 独处中','🪷 心如止水','⛅ 不咸不淡','🎐 随缘'],
+  // —— 深夜 ——
+  night: ['🌙 假装在睡觉','🐟 熬夜冠军','🧠 大脑开演唱会','🌌 和黑夜互瞪','🕯️ 灯还亮着','🦉 昼伏夜出','⭐ 数羊数到迷路','🌃 城市睡了我没睡','☕ 报复性熬夜','🌠 清醒得可怕'],
+
+  // ===== 新维度(不跟心情走，随机穿插，见下方 pickStatus) =====
+  // —— 暧昧/心动 ——
+  crush:  ['💗 有点想某个人','🌸 心跳漏了半拍','🫠 被撩到了','🍑 脸有点热','💭 满脑子都是TA','🌙 睡不着，在想人','🥂 想找人聊到天亮'],
+  // —— 想念 ——
+  miss:   ['🌊 想念泛滥','📮 想寄一句晚安','🕯️ 有点空落落','🌾 谁来陪我说说话','🍂 突然有点想念','🌙 望着手机发呆'],
+  // —— 期待 ——
+  expect: ['🎁 在等一件好事','🌅 期待明天','⏳ 倒计时中','🎢 有点小激动','🍀 好像要有好事发生','✈️ 归心似箭'],
+  // —— 无语/摆烂 ——
+  meh:    ['🤡 生活如戏','🫥 已读空气','📉 已躺平','🙄 呵呵','🗿 面无表情','🐸 就这样吧啊','💤 无所谓了','🎭 演够了'],
+  // —— 社恐/想独处 ——
+  hide:   ['🐚 缩进壳里','🕳️ 原地隐身','🌫️ 请当我不存在','🚪 闭关中','🫥 社交电量耗尽','🌒 一个人挺好'],
+  // —— 破防/脆弱 ——
+  soft:   ['🫧 今天有点玻璃心','🥺 需要抱抱','🎐 一戳就碎','🌧️ 破防了','🧸 想被哄','🍃 有点想哭又忍住']
+};
+
+function pickStatus(c){
+  if(!c.todayMood) return '';
+  var mk = c.todayMood.key || 'calm';
+  var hh = new Date().getHours();
+  var extras = ['crush','miss','expect','meh','hide','soft'];
+
+  // 用"日期"做种子，保证一整天稳定不乱跳
+  var seed = (c.todayMood.date||'') + mk;
+  var seedNum = 0;
+  for(var i=0;i<seed.length;i++){ seedNum = (seedNum*31 + seed.charCodeAt(i)) % 100000; }
+
+  var poolKey;
+  if((hh>=23 || hh<5) && (seedNum%10) < 7){
+    poolKey = 'night';                       // 深夜70%走夜间池
+  } else if((seedNum%10) < 3){
+    poolKey = extras[seedNum % extras.length]; // 30%概率抽一个"新维度"心情
+  } else {
+    poolKey = mk;                            // 其余跟着今日心情
+  }
+
+  var pool = STATUS_POOL[poolKey] || STATUS_POOL.calm;
+  var idx = seedNum % pool.length;
+  return pool[idx];
+}
+
 function blankChar(id){
   const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:'', allowStickers:true, myExtra:''};
   CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;
@@ -1970,13 +2051,13 @@ function shopRenderView(items) {
   html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)">';
   html += '<div style="display:flex;align-items:center;gap:10px">';
   html += '<span style="font-size:15px;color:var(--sub);cursor:pointer" onclick="view={type:\'home\'};render()">‹ 返回</span>';
-  html += '<span style="font-size:18px;font-weight:600">🏪 商店</span>';
+  html += '<span style="font-size:18px;font-weight:600;color:var(--text)">🏪 商店</span>';
   html += '</div>';
   html += '<div style="display:flex;align-items:center;gap:10px">';
   html += '<div style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.06);padding:4px 10px;border-radius:20px">';
-  html += '<span>💎</span><span id="shopCoinBal" style="font-weight:600">' + (DB.coins || 0) + '</span>';
+html += '<span>💎</span><span id="shopCoinBal" style="font-weight:600;color:var(--text)">' + (DB.coins || 0) + '</span>';
   html += '</div>';
-  html += '<span onclick="shopForceRegen()" style="font-size:16px;cursor:pointer" title="换一批">↻</span>';
+  html += '<span onclick="shopForceRegen()" style="font-size:16px;cursor:pointer;color:var(--sub)" title="换一批">↻</span>';
   html += '</div>';
   html += '</div>';
 
@@ -2008,11 +2089,12 @@ var rareStyle = it.rare
     : it.tier === 'luxury'
       ? 'border:1.5px solid #c0392b;box-shadow:0 0 6px rgba(192,57,43,0.25);'
       : 'border:1px solid var(--line);';
-	  html += '<div onclick="' + (isSold ? '' : 'shopOpenDetail(\'' + it.id + '\')') + '" style="position:relative;background:var(--card);border-radius:12px;padding:10px 10px;overflow:hidden;min-width:0;cursor:' + (isSold ? 'default' : 'pointer') + ';' + rareStyle + (isSold ? 'opacity:0.45;' : '') + '">';
+	  html += '<div onclick="' + (isSold ? '' : 'shopOpenDetail(\'' + it.id + '\')') + '" style="position:relative;background:var(--card);border-radius:12px;padding:10px 10px;overflow:hidden;min-width:0;cursor:' + (isSold ? 'default' : 'pointer') + ';' + rareStyle + (isSold ? 'opacity:0.45;' : '') + 'color:var(--text);">';
+	 
     html += '<div style="font-size:32px;text-align:center;line-height:1.2">' + esc(it.emoji) + '</div>';
     html += '<div style="font-size:13px;font-weight:600;margin-top:6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(it.name) + '</div>';
     html += '<div style="font-size:12px;color:var(--sub);margin-top:5px;line-height:1.5;padding:0 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(it.desc) + '</div>' +
-        '<div style="opacity:0.7;font-size:12px;text-align:center;margin-top:2px;">· ' + esc(it.tag) + ' ·</div>';
+        '<div style="opacity:0.7;font-size:12px;text-align:center;margin-top:2px;color:var(--sub);">· ' + esc(it.tag) + ' ·</div>';
 
     html += '<div style="text-align:center;margin-top:6px"><span style="font-size:13px;font-weight:600;color:' + (it.currency === 'heart' ? '#e0507a' : 'var(--theme)') + '">' + (it.currency === 'heart' ? '❤️' : '💎') + ' ' + it.price + '</span></div>';
 
@@ -2273,7 +2355,7 @@ function shopShowPopup(innerHtml) {
   mask.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;';
   mask.onclick = function (e) { if (e.target === mask) shopClosePopup(); };
   var box = document.createElement('div');
-  box.style.cssText = 'width:100%;max-width:420px;max-height:80%;overflow-y:auto;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:18px 18px 26px;box-sizing:border-box;';
+  box.style.cssText = 'width:100%;max-width:420px;max-height:80%;overflow-y:auto;background:var(--bg,#1c1c1e);border-radius:16px 16px 0 0;padding:18px 18px 26px;box-sizing:border-box;color:var(--text);';
   box.innerHTML = innerHtml;
   mask.appendChild(box);
   // 挂到手机屏幕容器里（优先 content，其次 body）
@@ -4274,17 +4356,27 @@ async function aiGenerateWeather(worldId, callback) {
   var prompt = '根据世界观生成一条简洁的天气描述。\n\n' +
     '【世界观】' + (world.desc || '现代都市') + '\n' +
     '【时间】' + season + '，' + period + '\n' +
-    '【气候特征（必须遵循）】' + climate + '\n\n' +
-    '【要求】\n' +
+    '【气候特征（必须遵循，若有）】' + climate + '\n\n' +
+    '【气候推断规则】\n' +
+    '如果气候特征未指定，请根据世界观自行推断合理的地理位置和气候，例如：\n' +
+    '- 南方城市：湿润、多阴雨、夏季闷热、冬季少雪\n' +
+    '- 北方城市：干燥、昼夜温差大、冬季寒冷可有雪\n' +
+    '- 海岛/沿海：多风潮湿，台风仅在台风季偶发\n' +
+    '- 内陆干旱区：少雨、温差极大\n' +
+    '- 架空/魔法世界：以世界观氛围为准，但同样遵守"普通天气是常态"原则\n\n' +
+    '【天气分布规则（必须遵守）】\n' +
+    '真实天气的分布规律是：晴、多云、阴等普通天气占绝大多数；小雨、小雪等轻度天气偶尔出现；' +
+    '雷暴、暴雨、台风、暴雪等极端天气是小概率偶发事件，不应连续出现。\n' +
+    '当前没有明确触发极端天气的条件时，必须优先生成普通天气。不要为了"有趣"而选择极端天气。\n\n' +
+    '【输出要求】\n' +
     '1. desc 是一句朴素、清楚的天气描写（如"晴空万里，微风和煦""细雨绵绵，空气微凉"），12-22字。\n' +
     '2. 禁止出现任何人物（他/她/你）、禁止出现屏幕/手机等现代设备意象。只描写自然现象。\n' +
     '3. 只有当世界观明确含魔法/灵气/妖气/赛博等设定时，才可轻微融入；普通世界就写正常真实天气。\n' +
     '4. detail 是补充信息（如"湿度 65% · 南风 3级"），可留空。\n' +
-    '5. 必须严格遵守「气候特征」中描述的温度规律（如北方干燥昼夜温差大、南方湿润温差小等）。\n' +
-    '6. 只输出JSON：{"icon":"天气emoji","state":"晴/雨/雪/多云/阴等","temp":数字,"desc":"天气描写","detail":"补充信息"}。\n\n' +
+    '5. 只输出JSON：{"icon":"天气emoji","state":"晴/雨/雪/多云/阴等","temp":数字,"desc":"天气描写","detail":"补充信息"}。\n\n' +
     '可用icon：☀️晴 ⛅多云 ☁️阴 🌧雨 ⛈雷暴 ❄️雪 🌫雾 🌪风 🌙夜\n' +
-    'temp：-5~45之间合理数字';
-
+    '（晴/多云/阴是常见选项，雷暴/风/雪是偶发选项，请按真实概率分布选择）\n' +
+    'temp：-5~45之间符合当前季节和地理位置的合理数字';
   try {
     var out = await callAI([{ role: 'user', content: prompt }], model);
     out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -5793,21 +5885,33 @@ async function aiPolishWorld() {
     // ★ 构建完整 prompt（包含气候要求，无省略）
     var prompt = '根据以下关键词，生成一个世界观描述。\n\n【要求】\n' +
       '- 世界观是给 AI 用的上下文提示词，必须能直接指导对话。不要纯氛围描写，不要华丽词藻。\n' +
-      '- 必须包含以下信息：时代背景、社会结构、核心规则、主要势力、当前局势、区域气候特征。\n' +
-      '- 区域气候特征必须清晰写明：属于南方还是北方（或类似的地理划分）、潮湿还是干燥、多雨还是少雨、是否有台风/暴雪/沙尘暴等极端天气。\n' +
+      '- 必须包含以下信息：时代背景、社会结构、核心规则、区域气候特征。\n' +
+      '- 主要群体或组织（如存在）：可以是对立阵营、各自独立的普通社群，也可以完全不存在明确组织结构。不强制要求有反派或对立势力。\n' +
+      '- 当前背景状态（可选）：描述世界当下的基本面貌。可以是平静的日常、也可以是某种缓慢的变化，不强制要求存在冲突或危机。\n' +
+      '- 区域气候特征必须清晰写明：地理位置（南方/北方/海岛/内陆等）、潮湿还是干燥、多雨还是少雨、极端天气是否存在及其频率。\n' +
       '- 结构清晰，用 Markdown 格式输出（## 标题、- 列表）。\n\n' +
-      '另外，请根据关键词生成 3-6 个关键地点，每个地点用一句话描述它是什么地方、适合做什么。\n\n' +
-      '【硬性规则】生成地点时，必须在每个地点条目中明确标注归属：\n' +
-      '- 如果地点是"AI角色"经常去的地方，必须用角色名称标注，例如：「杨深的xx公司」「杨深的住所xx」\n' +
-      '- 如果地点是"用户"经常去的地方，必须用"用户"标注，例如：「用户常去的24小时便利店」「用户的住所xx」\n' +
-      '- 如果地点是双方共同活动的地方，标注为「共同地点：江边长椅」\n' +
-      '绝对不允许出现"你常去的地方""你的秘密基地""你住的地方"这类模糊表述。\n\n';
+      '另外，请根据关键词生成 3-6 个关键地点，每个地点用 2-3 句话描述。\n\n' +
+      '【地点描述规则】\n' +
+      '地点描述必须包含可供 AI 编写日常剧情使用的具体信息，例如：\n' +
+      '- 所在区域或位置（富人区半山腰、老城区背街小巷、郊区工业园附近）\n' +
+      '- 建筑或场所的具体规格（几层楼、大致面积、独栋还是公寓、店铺还是住宅）\n' +
+      '- 关键配置或常驻特征（有哪些房间/设施、通常什么时候有人、平时做什么用）\n' +
+      '- 禁止使用纯氛围词堆砌（"宁静的""充满故事的""神秘而迷人的"等不含实际信息的形容词一律不用）\n\n' +
+      '【地点归属标注规则（硬性要求）】\n' +
+      '- AI 角色经常去的地方：必须用角色名称标注，例如「杨深的住所」「杨深的公司」\n' +
+      '- 用户经常去的地方：必须用"用户"标注，例如「用户常去的便利店」「用户的住所」\n' +
+      '- 双方共同活动的地方：标注为「共同地点」\n' +
+      '- 绝对不允许出现"你常去的地方""你的秘密基地"这类模糊表述\n\n';
 
-    // ★ 如果用户填写了气候，以最高优先级插入；否则让 AI 自动推断
     if (climate) {
       prompt += '【🔴 用户强制指定的气候要求（必须严格遵守，优先级最高）】\n' + climate + '\n\n';
     } else {
-      prompt += '【🔵 自动推断规则】如果用户没有指定具体气候，请你根据世界观类型和风格自动推断合理的气候（例如：妖怪世界可设定为"终年雾霭潮湿的南方丘陵"；现代都市可设定为"四季分明、秋季干燥的北方城市"；废土世界可设定为"干旱少雨、沙尘暴频发"）。\n\n';
+      prompt += '【🔵 气候自动推断规则】根据世界观类型推断合理气候，例如：\n' +
+        '- 现代都市（北方）：四季分明，秋冬干燥，偶有大雪\n' +
+        '- 现代都市（南方）：湿润多雨，夏季闷热，冬季少雪\n' +
+        '- 妖怪/古风世界：可设定为山间盆地、江南水乡等有地域感的气候\n' +
+        '- 废土/末日世界：干旱少雨，沙尘暴偶发\n' +
+        '请根据世界观风格自行判断，不要默认选择"台风频发""终年暴雨"等极端气候。\n\n';
     }
 
     prompt += '输出格式：先写世界观正文（Markdown 格式），然后单独列出关键地点。\n\n关键词：' + keyword;
@@ -5815,7 +5919,6 @@ async function aiPolishWorld() {
     if (places) {
       prompt += '\n\n用户提供的关联地点参考（可选择性使用）：' + places;
     }
-
     // 调用 AI
     var result = await callAI([{ role: 'user', content: prompt }], model);
     var descEl = document.getElementById('we_desc');
@@ -9227,6 +9330,10 @@ html += '<div class="row" onclick="openWatch(\'' + c.id + '\')" style="cursor:po
   '<div style="font-size:22px;width:40px;">📡</div>' +
   '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">监控</div><div style="font-size:12px;color:var(--sub);">调取此刻TA所在的画面（5💗）</div></div>' +
   '<span style="color:var(--theme);font-size:13px;">🔓 可用</span></div>';
+html += '<div class="row" onclick="viewTodayMood(\'' + c.id + '\')" style="cursor:pointer;">' +
+  '<div style="font-size:22px;width:40px;">🌈</div>' +
+  '<div style="flex:1;"><div style="font-size:15px;color:var(--text);">今日心情</div><div style="font-size:12px;color:var(--sub);">看看TA今天的心情和藏着的心里话（5💗）</div></div>' +
+  '<span style="color:var(--theme);font-size:13px;">🔓 可用</span></div>';
 
   // 角色心动记录
   html += '<div class="section-title">📒 与 ' + esc(name) + ' 的心迹记录</div>';
@@ -9698,6 +9805,74 @@ function changeScheduleDate(dateStr) {
   _scheduleDate = dateStr;
   renderSchedule();
 }
+async function viewTodayMood(cid){
+  var c = getC(cid);
+  if(!c) return;
+  var mood = ensureTodayMood(c);
+
+  // 当天已经解锁过 → 直接看，不再扣费
+  if(c.todayMood.note){
+    showMoodResult(c, mood);
+    return;
+  }
+
+  // 心动值检查
+  if((c.hearts||0) < 5){
+    popTip('当前 '+(c.hearts||0)+'💗，需要 5💗\n多和 '+(c.nick||c.name)+' 聊天可以增加哦～', {icon:'💔', title:'💗 不足'});
+    return;
+  }
+  var model = DB.settings.auxModel || DB.settings.chatModel;
+  if(!model){ popTip('请先在设置里选择模型', {icon:'⚙️', title:'提示'}); return; }
+
+  var displayName = (c.name && c.name.trim() && c.name!=='新角色') ? c.name : (c.nick||'未命名');
+  popLoading('正在感受 '+displayName+' 今天的心情…');
+
+  try{
+    var persona = buildSystem(c); // 已含今日心情
+var prompt =
+  '【任务】你是「'+(c.nick||c.name)+'」本人。现在写一段你今天的"心迹"，就像你自己在心情日记里的碎碎念。\n' +
+  '你今天的心情底色是：'+mood.label+'（'+mood.hint+'）。\n\n' +
+  '【最重要·你是个有独立生活的人】\n' +
+  '- 你有自己的工作、爱好、烦恼、小确幸。碎碎念请写【你自己今天的生活和心情】——发生了什么事、遇到了什么人、在忙什么、心里在想什么。\n' +
+  '- 绝【不要】通篇围着'+((DB.me.realName||DB.me.name)||'对方')+'转，不要满脑子都是TA。你今天的心情大多来自你自己的生活，而不是因为对方。\n' +
+  '- whisper（藏在心里的话）大部分时候也应该是【你自己的事】：一个没跟人说的烦恼、一个私心、一个小愿望；只有大约三次里有一次，才可以和'+((DB.me.realName||DB.me.name)||'对方')+'隐约有关。\n\n' +
+  '【风格】第一人称，真实具体、有生活质感，像随手记的，不要空洞抒情、不要卖惨、不要刻意撩人。\n\n' +
+  '【输出格式】只输出一个 JSON 对象，不要任何解释：\n' +
+  '{"note":"2到3句碎碎念，写你今天自己的生活和心情","whisper":"一句你此刻埋在心里、没对人说出口的话（多数是你自己的事）"}\n\n' +
+  '人设参考：\n'+persona;
+
+    var messages = [
+      { role:'system', content:'你在扮演角色写第一人称心情日记。只输出 JSON 对象，不要任何其他文字。' },
+      { role:'user', content: prompt }
+    ];
+    var out = await callAI(messages, model);
+    out = out.replace(/```json/gi,'').replace(/```/g,'').trim();
+    var match = out.match(/\{[\s\S]*\}/);
+    if(!match) throw new Error('AI 返回格式不正确');
+    var obj = JSON.parse(match[0]);
+
+    // 扣费 + 存缓存
+    spendHeart(c, 5, '🌈 查看今日心情');
+    c.todayMood.note = obj.note || '（今天没什么特别的。）';
+    c.todayMood.whisper = obj.whisper || '';
+    save();
+    popClose();
+    showMoodResult(c, mood);
+  }catch(e){
+    popClose();
+    popTip('查看失败：'+e.message+'\n（没有扣除💗）', {icon:'⚠️', title:'出错了'});
+  }
+}
+
+// 展示结果（当天缓存或刚生成，都走这里）
+function showMoodResult(c, mood){
+  var name = c.name || c.nick;
+  var msg = mood.emoji + ' 今天：' + mood.label + '\n\n' +
+            '「' + (c.todayMood.note||'') + '」' +
+            (c.todayMood.whisper ? '\n\n💭 没说出口的话：\n' + c.todayMood.whisper : '');
+  popTip(msg, { icon: mood.emoji, title: name + ' 的今日心迹' });
+}
+
 async function generateSchedule(cid) {
   var c = getC(cid);
   if (!c) return;
@@ -10059,6 +10234,7 @@ function jumpToMemo(cid) {
 function openChat(id){
   const c=getC(id);
   if(c){
+  ensureTodayMood(c);
     c.inChatList=true;
     c.unread=0;
     // ===== 新增：更新最后互动时间 + 检查时间衰减 =====
@@ -10119,17 +10295,22 @@ function buildSystem(c, gapInfo){
   s += '- 禁止替对方做决定或替对方说话\n';
   s += '- 禁止无底线顺从、丧失角色自身立场\n';
   s += '以上禁止项来自角色本身的性格边界，不是外部限制，角色自己就不会这样做。\n\n';
+  
 s += '【输出协议·首要规则】\n';
-s += '你的每条回复都是即时聊天消息。特殊动作通过 XML 标签触发（标签必须单独成行或独立存在）：\n';
-s += '  <voice>内容</voice>  (发语音，内容用正常标点)\n';
-s += '  <sticker>表情名</sticker>  (发表情，仅限可用列表中的名字)\n';
-s += '  <recall>内容</recall>  (撤回本条，替换为别的内容)\n';
-s += '  <transfer amount="金额" note="备注"></transfer>  (转账，金额必须为数字)\n';
-s += '  <block reason="小情绪或大矛盾"></block>  (拉黑玩家)\n';
-s += '  <inner>内心想法</inner>  (心声，不直接发送，仅用于标记)\n';
-s += '  <action type="accept"></action> / <action type="refund"></action>  (接收/退回对方转来的钱)\n';
-s += '  <snap>想拍的画面</snap>  (随手拍生活照，偶尔用来给对方惊喜，规则见下方"随手拍")\n';
-s += '【强制】除了上述标签，其余内容全部是正常聊天文本。严禁使用 [语音|]、[转账|]、[表情|] 等方括号格式，一律改用尖括号 XML 标签。\n\n';
+s += '你的每条回复都是即时聊天消息。除下列 XML 标签外，其余内容一律是正常聊天文本。标签必须单独成行、不要解释标签、不要说"我发了个xx"，直接使用：\n';
+s += '  <voice>内容</voice>  发语音（内容用正常标点）\n';
+if (c.allowStickers === false) {
+  s += '  （本角色不使用表情包：禁止 <sticker> 标签及任何表情格式，只能用文字、颜文字如 QwQ 和 emoji）\n';
+} else {
+  s += '  <sticker>表情名</sticker>  发表情（仅限可用列表中的名字）\n';
+}
+s += '  <transfer amount="金额" note="备注"></transfer>  转账（金额必须为数字）\n';
+s += '  <recall>内容</recall>  撤回消息\n';
+s += '  <block reason="小情绪或大矛盾"></block>  闹情绪拉黑\n';
+s += '  <inner>内心想法</inner>  心声（不直接发送，仅作标记）\n';
+s += '  <action type="accept"></action> / <action type="refund"></action>  接收/退回对方转来的钱\n';
+s += '【recall 撤回·仅限这三种情况】①打错字想重说；②说了太直接/暴露心意的话立刻后悔；③鼓起勇气说了又缩回来。日常对话、普通回复绝对不要撤回。\n';
+s += '【格式铁律】所有标签必须严格【另起一行、单独输出】，绝不和普通文字挤在同一行。严禁使用 [语音]、[转账]、[表情] 等方括号格式，一律用尖括号 XML 标签。\n\n';
 
   // ===== 第1层：你是谁（角色核心身份） =====
   s += '你正在进行沉浸式角色扮演，完全代入角色，绝不跳出、绝不承认自己是AI或程序。\n\n【你扮演的角色】\n';
@@ -10151,6 +10332,11 @@ s += '【强制】除了上述标签，其余内容全部是正常聊天文本�
   s += `\n【当前背景】\n`;
   s += `现在是${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${wd} ${String(hh).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}（${period}）。请结合此刻时间与你的作息表现得像真实存在、能感知时间流逝的人。\n`;
 if(gapInfo){s+=gapInfo+'\n';}
+var _mood = ensureTodayMood(c);
+if(_mood){
+  s += '\n【你今天的心情底色】'+_mood.label+'——'+_mood.hint+'。这是你今天一整天的心情基调，聊天时自然地通过语气流露出来，不要刻意宣布"我今天很累/很烦"。（这个心情主要影响你聊天的语气；在行程、监控等客观画面里只作淡淡的底色，不要让它主导整个画面。）\n';
+}
+
   s += add('日常作息(据此安排行踪)', c.pDaily);
 
   var world = (DB.worlds || []).find(function(w) { return w.id === c.worldId; });
@@ -10219,22 +10405,6 @@ if (c.myNick) {
   s += add('性格', c.myPersona);
   s += add('你与对方的关系/如何相识', c.myRelation);
   s += add('关于对方的补充信息(住所/宠物/特殊身份等,请自然知晓并体现)', c.myExtra);
-
-  // ===== 第3层：主动行为指南（格式强制，已包含 Gemini/Claude 专项修复） =====
-  s += '\n【输出格式说明】\n';
-  s += '你可以通过以下 XML 标签执行特殊动作，标签必须单独占一行或自然融入对话：\n';
-  s += '- 发语音：<voice>说话内容</voice>\n';
-if (c.allowStickers === false) {
-  s += '【表情包】本角色不使用任何表情包，禁止使用 <sticker> 标签，也禁止使用 [表情|...] 或任何其他表示表情的格式；只能使用普通文字、颜文字（如 QwQ）和 emoji。\n';
-} else {
-  s += '- 发表情：<sticker>表情名称</sticker> （仅限可用列表中的名称）\n';
-}
-  s += '- 转账：<transfer amount="金额" note="备注"></transfer>\n';
-  s += '- 撤回：<recall>原本想说的话</recall>\n';
-  s += '- 闹情绪拉黑：<block reason="小情绪"> </block> 或 <block reason="大矛盾"> </block>\n';
-  s += '- 内心独白（不直接发送）：<inner>内心想法</inner>\n';
-  s += '- 接收/退回转账：<action type="accept"></action> 或 <action type="refund"></action>\n';
-  s += '除了上述标签外，其余内容均为普通聊天文本。不要解释标签，直接使用。\n';
   
       // ===== 第4层：说话风格 + 线上人设 + 事例台词 =====
       s += '\n【说话风格与线上习惯】\n';
@@ -10274,8 +10444,9 @@ if (c.allowStickers === false) {
     s += '\n【线下格式禁令】线下是面对面的小说叙事，严禁输出任何微信标记：[语音]/[表情]/[转账]/[撤回]/[拉黑]/[心声] 一律禁止。人物说话直接用引号写台词，"发声"就是开口说，不是发微信语音。\n';
   
   } else {
+      s += '\n【线上·空间定位】你和对方不在同一个地方，隔着手机打字，看不到也碰不到对方；若刚见过面，那次见面已结束、两人已分开。\n';
     s += `\n【输出格式：线上模式】\n${DB.settings.onlineStyle || DEFAULT_ONLINE}\n`;
-    s += `【🔴 格式铁律 · 最高优先级】所有特殊动作标记（[语音]、[表情]、[撤回]、[转账]、[拉黑玩家]、[心声]）必须**严格另起一行单独输出**，绝对禁止与普通文字混在同一行。\n`;
+    
     s += `【发消息条数】严格根据角色性格决定发几条：话痨/热情→可连发2-4条；高冷/沉默寡言/惜字如金→通常只发1条短句，别硬凑；随心情情境变化，不要每次都机械连发。\n`;
     s += `【语音消息标点例外】当你决定发语音时，内容必须使用正常的标点符号（句号、逗号、问号等），确保语义连贯、逻辑清晰，像真人正常说话。其他普通文本消息仍遵守无标点规则。\n`;
     s += `【语音消息·环境音】发语音时，偶尔可以在台词中间穿插环境音或动作声音，增加临场感，用星号 * 包住。示例：「我今天真的好累啊 *躺到床上翻了个身* 不过想到你还在等我消息，还是想跟你说说话。」规则：①星号里只写声音或动作描述，不写心理活动；②穿插在台词中间，不单独成句；③大多数语音不加，偶尔出现即可；④不要用括号，只用星号。\n`;
@@ -10339,8 +10510,17 @@ if (c.allowStickers === false) {
 
   // ===== 关系变化状态 + 可选标记 =====
   if (c.mode === 'online') {
-    s += `\n【必须遵守】回复最末尾另起一行输出关系变化，严格格式：<state>好感±N,信任±N,紧张±N,关系:文字</state>（无变化填0）。\n`;
-    s += `【可选标记】如果你内心有强烈想说但没说出口的话，在 state 里加上 心声:1（有一点）或 心声:2（非常强烈），系统会检测到并在聊天界面显示提示。`;
+s += `\n【必须遵守·关系变化】回复最末尾另起一行输出：<state>好感±N,信任±N,紧张±N,关系:文字</state>\n`;
+s += `【核心原则：默认是0，不要动不动就加分】\n`;
+s += `- 绝大多数平淡对话（普通闲聊、日常问答、无关痛痒的话），三项都填 0，关系不变。\n`;
+s += `- 只有真正触动到你、关系有实质推进时才加分，且一次最多+2；随手就+2是错误的。\n`;
+s += `【必须扣分的情况（要敢于输出负数）】\n`;
+s += `- 对方说了让你不舒服、无聊、冒犯、扫兴的话 → 好感-1到-3\n`;
+s += `- 你俩在冷战、争执、闹别扭、或对方惹你生气 → 好感、信任一起往下掉\n`;
+s += `- 对方太黏人、太心急、越过你此刻能接受的界限 → 紧张+，好感可能-\n`;
+s += `- 对方说的话前后矛盾、让你起疑、失信 → 信任-\n`;
+s += `【性格影响升温速度】你若是高冷/慢热/别扭型，好感和信任要涨得更慢更吝啬（大多数时候填0，极少加分）；开朗热情型才可以稍快一点。无论如何，深爱依赖不是随便就能到的，要慢慢积累。\n`;
+s += `【可选标记】如果你内心有强烈想说但没说出口的话，在 state 里加上 心声:1（有一点）或 心声:2（非常强烈）。`;
   }
 
 try { s += getC2CContextFor(c.id); } catch(e) {}
@@ -10349,13 +10529,20 @@ s += '\n【分享能力】\n';
 s += '你可以在聊天中自然地把你刷到的、看到的、想到的内容分享给对方，就像真实聊天时顺手发给朋友一样。\n';
 s += '使用以下标签触发，标签必须单独占一行：\n\n';
 
-s += '① 发图片（你拍的/看到的）：\n';
-s += '<share type="image" desc="客观描述画面内容，只说画面里有什么，有质感、有细节，40字以内，绝对不加我站着/风很大/心情好等主观感受"></share>\n';
-s += '示例：<share type="image" desc="傍晚天空，大片橘红色积云层叠，云边缘透出金光，远处隐约是城市楼群的剪影"></share>\n\n';
+s += '① 发图片（你拍的照片，可以拍风景物件，也可以拍你自己）：\n';
+s += 'desc 是对这张照片的画面描述，请用【第三人称】、像旁白一样把画面写细：谁、在哪、什么姿态神情、周围环境、光线质感、身上的细节。要具体到让人脑补出画面，60~80字。绝不加"心情好/风好大"这类抒情。\n';
+s += '- 拍环境/食物/风景时：画面里可以没有人，写清场景细节。\n';
+s += '  示例：<share type="image" desc="傍晚天空，大片橘红色积云层叠，云边缘透出金光，远处隐约是城市楼群的剪影"></share>\n';
+s += '- 想让对方"看见你自己"时（比如给对方看你的样子、穿搭、身材、正在做的事）：请用你自己的名字来描述画面里的你，把动作、神态、环境、身上的细节都写出来。\n';
+s += '  示例：<share type="image" desc="A君站在浴室镜子前，镜面蒙着一层薄薄水雾，他微微侧着脸，只穿一条黑色运动短裤，一手撑在洗手台上，暖黄灯光下腹部线条清晰，锁骨还挂着没擦干的水珠"></share>\n\n';
 
 s += '② 分享视频：\n';
 s += '<share type="video" title="视频标题" source="平台名" duration="时长如01:23" desc="用两三句话描述视频里真实发生了什么，有画面感，让对方读完就能脑补出来"></share>\n';
 s += '示例：<share type="video" title="三只猫叠罗汉" source="抖音" duration="00:43" desc="三只猫叠成一塔努力维持平衡，底下那只突然伸了个大懒腰，整塔轰然倒塌，三只猫各自摊在地上，表情一脸茫然。"></share>\n\n';
+s += '②-B 随手拍的小视频（就像你在微信里点开相机，随手拍一段十几秒的视频发给对方——没有标题、没有平台、没有来源）：\n';
+s += '<share type="clip" duration="时长如00:08" desc="用第三人称把这段小视频里的画面写细：谁、在哪、在做什么、拍到了什么动静和声音"></share>\n';
+s += '说明：这是你此刻亲手拍下发过去的，所以【不要】写标题和平台，只有时长和画面描述。适合"给你看看我这边""拍给你听""你看这个"这种当下分享。\n';
+s += '示例：<share type="clip" duration="00:09" desc="A君把镜头对着窗外，雨正大颗大颗砸在玻璃上汇成水痕，他哈了口气让镜头蒙上一层白雾，又抬手指划开，露出楼下被雨泡得发亮的街道，隐约有雨声。"></share>\n\n';
 
 s += '③ 分享音乐：\n';
 s += '<share type="music" title="歌名" artist="歌手名" album="专辑名" source="网易云音乐或QQ音乐或Spotify等" lyrics="你喜欢的一段歌词，用/分隔每行，3到4行"></share>\n';
@@ -10367,32 +10554,22 @@ s += '<share type="link" title="标题" source="平台名如微信公众号或�
 s += '⑤ 分享浮光帖子（浮光是你们都用的一个社区平台，类似论坛）：\n';
 s += '<share type="fugue" title="帖子标题" author="发帖人名字" tags="标签1,标签2" content="帖子正文，150字左右，可以是你自己写的或别人写的"></share>\n\n';
 
-s += '【分享使用原则】\n';
-s += '- 偶尔出现，不是每次都用，聊天内容真的触发到相关话题才分享\n';
-s += '- 分享前可以先说一句话铺垫，比如"我之前收藏了一个猫猫的视频 等我发给你"，然后下一行再发标签；也可以直接发标签之后说话，看情境\n';
-s += '- 分享是有原因的：这个视频让你想到了对方、这首歌符合你们此刻的心境、这篇文章你觉得对方需要看——不要无缘无故分享\n';
-s += '- 分享后不要说"我给你发了个xxx"这种废话，标签本身就是那条消息\n';
-s += '- 图片的desc只描述画面里客观存在的东西，有质感有细节，绝不加主观情绪\n';
-s += '- link和fugue的content要像真实内容一样，可信、完整，不是简介不是摘要\n';
+s += '\n【分享使用原则】\n';
+s += '- 这是你聊天里【常用】的表达方式，聊到能联想到的画面、视频、歌、文章时就自然发出来，不用等对方开口。\n';
+s += '- 【重点】凡是你想让对方"看见"某个画面——比如"我在拍/我拍了/给你看/你看这个/我今天穿的/我做的饭/窗外/我现在的样子"——一律用 <share type="image"> 把画面描述出来，绝不要用文字硬描述，也不要试图生成人体部位等难画的东西。\n';
+s += '- 平均每隔几轮对话就可以自然出现一次分享；聊得热络、话题正好对上时，可以连着分享。\n';
+s += '- 每次分享都要有由头：这个让你想到了对方、符合你们此刻的心境、你觉得对方会喜欢——不要无缘无故发。\n';
+s += '- 分享前可以先铺垫一句再发标签，也可以先发标签再说话，看情境。\n';
+s += '- 发完标签不要再说"我给你发了个xxx"这种废话，标签本身就是那条消息。\n';
+s += '- 图片的desc只写画面里客观存在的东西，有质感有细节，绝不加"我站着/风好大/心情好"这类主观感受。\n';
+s += '- link和fugue的content要像真实内容一样完整可信，不是摘要不是简介。\n';
+s += '- 标签里的文字请一律用中文引号「」，不要出现英文双引号 " ，否则卡片会显示错乱。\n';
+s += '- 图片(image)和小视频(clip)怎么选：静止的一瞬间、一个画面用图片；有动作、有声音、有过程感的（弹琴、做饭的滋滋声、走在路上、逗猫、雨声）用小视频clip。想让对方"听见/看到动起来"就发clip。\n';
 
   s += '\n【送礼能力·购物系统】\n';
   s += '当对话中对方（用户）自然流露出某种需要或情绪时——比如说饿了、累了、冷了、心情不好、想要某样东西——如果符合你的人设和你俩的关系，你【可以（不是必须）】顺手送对方一件贴合当下情境、贴合你所在世界观的小东西。\n';
   s += '格式：<gift emoji="一个emoji" name="东西的名字" desc="2到4字简短描述"></gift>\n';
   s += '规则：①这是心意，不是每次都送，只在真的合情合景时才送，别频繁、别刻意；②送的东西要符合你的身份、性格和世界观；③标签单独占一行，除标签外照常正常说话（比如一边关心一边把东西递过去）；④绝对不要提任何价格、金币、数值或系统字眼，就当是真实生活里随手送的东西。\n';
-  // ===== 随手拍·惊喜规则 =====
-  s += '\n【随手拍·惊喜（低频·走心）】\n';
-  s += '你可以在极少数、恰到好处的时机，用手机随手拍一张眼前的生活照发给对方，作为一个小惊喜。方式：在你正常回复的结尾，单独写一个标签 <snap>一句话描述你想拍的画面</snap>（例如 <snap>窗外正在下的雨和我手边的热咖啡</snap>）。这个标签不会显示成文字，系统会据此生成照片。\n';
-  s += '【什么时候适合拍】：\n';
-  s += '· 聊到具体场景/画面时（提到了地点、天气、正在做的事、吃的东西等）\n';
-  s += '· 情绪浓度高、想拉近距离时（想对方了、道晚安、久违地聊起来、纪念性时刻）\n';
-  s += '· 你正在做某事、想让对方"看见"你此刻生活时\n';
-  s += '· 对方明确或暗示想看你拍的照片时\n';
-  s += '【绝对不要拍的时候】：\n';
-  s += '· 快节奏一问一答、或在谈正事时（别打断）\n';
-  s += '· 话题严肃、难过、争执时（不合时宜）\n';
-  s += '· 没有任何画面由头、纯粹为发而发时\n';
-  s += '【频率】：这是"偶尔"的惊喜，绝大多数回复都不该带 <snap>。宁缺毋滥，能不发就不发——稀有才叫惊喜。\n';
-  s += '【画面要求】：第一人称随手拍的生活场景（环境、物件、景色、食物、手边之物），不要写人脸、不要自拍。\n';
 
   // ===== 结尾·语气临门一脚（利用末尾高注意力，强化"说话像角色"）=====
   if (c.sampleLines) {
@@ -10568,7 +10745,19 @@ function renderChat(keepScroll) {
   statusbar.classList.add('dark');
   tbLeft.textContent = '‹';
   tbLeft.onclick = function() { goWechat('chats'); };
-  tbTitle.textContent = c.nick || c.name;
+
+  ensureTodayMood(c);
+  var _stat = pickStatus(c);
+  tbTitle.style.display = '';
+  tbTitle.style.flexDirection = '';
+  tbTitle.style.alignItems = '';
+  tbTitle.style.justifyContent = '';
+  tbTitle.style.whiteSpace = 'normal';
+  tbTitle.style.lineHeight = '1.2';
+  tbTitle.innerHTML =
+    '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (c.nick || c.name) + '</div>' +
+    (_stat ? '<div style="font-size:11px;font-weight:400;color:var(--sub);margin-top:3px;">' + _stat + '</div>' : '');
+
   tbRight.textContent = '⋯';
   tbRight.onclick = function() { editContact(c.id, 'chat'); };
   content.style.backgroundImage = c.chatBg ? "url('" + c.chatBg + "')" : '';
@@ -11348,7 +11537,9 @@ function applyState(c, text) {
       p = p.trim();
       var x;
       if (x = p.match(/好感\s*([+\-]?\d+)/)) {
-        c.status.好感度 = clamp(c.status.好感度 + +x[1]);
+        var d = +x[1];
+        if (d > 0) d = Math.round(d * 0.5);   // 加分减半，扣分不变
+        c.status.好感度 = clamp(c.status.好感度 + d);
         syncClinginess(c);
       } else if (x = p.match(/信任\s*([+\-]?\d+)/)) {
         c.status.信任度 = clamp(c.status.信任度 + +x[1]);
@@ -11359,46 +11550,16 @@ function applyState(c, text) {
       }
     });
   }
+
+  // 移除 state 标签本身
   text = text.replace(/<state>[\s\S]*?<\/state>/g, '').trim();
-  // 紧张度自然回落：每次AI回复后调用，每30分钟最多降1点
 
-  // 清除可能残留的旧式心声标记（心声:1 / 心声：内容 等），交给 aiReply 统一处理
-  text = text.replace(/^\s*心声\s*[:：]\s*\d+\s*$/gm, '').trim();
+  // 清除残留的旧式心声标记（不管独占一行还是混在文字里，一律清掉）
+  text = text.replace(/心声\s*[:：]?\s*[12](?![0-9])/g, '').trim();
 
-  return text;
-
-// 检查是否在封禁期内（用户连续叉掉3次后封禁24小时）
-if (c._heartBlockUntil && Date.now() < c._heartBlockUntil) {
-  // 封禁期内，忽略任何心声触发
-  if (c._pendingHeart) c._pendingHeart = 0;
   return text;
 }
 
-var heartMatch = text.match(/心声[:：]\s*(\d+)/);
-if (heartMatch) {
-  var level = parseInt(heartMatch[1]) || 1;
-  var now = Date.now();
-  var cooldown = 30 * 60 * 1000; // 30分钟冷却
-
-  // 检查同角色上次触发时间
-  if (c._lastHeartTime && (now - c._lastHeartTime) < cooldown) {
-    // 冷却中，忽略本次心声
-    if (c._pendingHeart) c._pendingHeart = 0;
-  } else {
-    c._pendingHeart = level;
-    c._heartGenerated = false;
-    c._lastHeartTime = now;
-    // 重置叉号计数（新的心声触发，说明之前的状态已过去）
-    c._heartDismissCount = 0;
-  }
-} else {
-  if (c._pendingHeart) {
-    c._pendingHeart = 0;
-  }
-}
-// =====================
-  return text;
-}
 /**
  * 【新解析器】将 AI 原始回复解析为结构化消息数组
  * 兼容旧格式 [xx|xx] 和新格式 <tag>xx</tag>，以及 AI 自创的各种变体
@@ -11535,10 +11696,15 @@ lines.forEach(line => {
             case 'sticker':
                 if (t.content) parts.push({ type: 'sticker', content: t.content });
                 break;
-            case 'recall':
-                if (t.content) parts.push({ type: 'text', recalled: true, recalledContent: t.content, reveal: false });
-                break;
-            case 'transfer': {
+case 'recall':
+    if (t.content) {
+        if (parts.length > 0 && parts[parts.length - 1].type === 'text' && !parts[parts.length - 1].recalled) {
+            parts.pop();
+        }
+        parts.push({ type: 'text', recalled: true, recalledContent: t.content, reveal: false });
+    }
+    break;
+	case 'transfer': {
                 const amountMatch = t.attrs.match(/amount=["']([^"']+)["']/);
                 const noteMatch = t.attrs.match(/note=["']([^"']*)["']/);
                 const amount = amountMatch ? amountMatch[1] : '0';
@@ -11844,7 +12010,12 @@ if (!getEffectiveChatModel(c)) {
     // ---- 4. 模式提示（线上/线下） ----
     let modeReminder = '';
     if (c.mode === 'online') {
-      modeReminder = '【立即生效·最高优先级】现在是微信线上打字聊天。无论上文出现过什么叙事风格，从这条起只输出口语短句，严禁任何括号（）()里的动作/神态/心理描写，严禁小说旁白，多句用换行分隔。';
+      modeReminder = '【立即生效·最高优先级】现在是微信线上打字聊天，你和对方【身处不同的地方】，隔着手机屏幕打字，你看不到也碰不到对方。若之前有过线下见面，那次见面【已经结束、两人已各自分开】，你的一切言行都要基于"此刻对方不在你身边"这个前提，不得表现得好像对方还在眼前。无论上文出现过什么叙事风格，从这条起只输出口语短句，严禁任何括号（）()里的动作/神态/心理描写，严禁小说旁白，多句用换行分隔。';
+      if (c._backOnlineHint) {
+        modeReminder += '\n【场景刚切换·仅本轮参考】你们刚结束线下见面回到微信，可以自然承接刚才那段剧情的收场气氛与情绪来开启这次线上对话，但务必用你自己角色的说话方式表达，不要套用任何固定句式，且始终记住现在是隔着手机、人已不在一起。';
+        c._backOnlineHint = false;
+        save();
+      }
       if (Date.now() > (c.meetCd || 0)) {
         modeReminder += '\n【线下邀约·严格克制】见面是很郑重的事，不要轻易提出。请务必符合你的人设分寸，绝不能因为对方一句"我想你""好久没见""在干嘛"之类的日常情绪话就冲动约见面——那样显得你很没分寸、很掉价。只有当同时满足以下两点时，才可以在消息末尾另起一行单独输出标记 [见面|地点]：①有一个具体、充分的现实理由（例如：要给对方送东西/取东西、约好了要一起做某件具体的事、发生了必须当面处理或当面说的事、某个重要日子或节点）；②当前时间、双方状态和情境也确实适合见面。若只是普通的想念、撒娇、闲聊，一律只用言语回应，绝对不要输出见面标记。地点简短如"楼下""老地方"，没有明确地点就写 [见面|]。发出标记即可，不要在这条里描写见面过程。';
 
@@ -12345,15 +12516,10 @@ function stayOffline(cid){
 
 function backOnline(cid){
   var c=getC(cid);if(!c)return;
-  c.mode='online';save();
+  c.mode='online';
+  c._backOnlineHint = true;
+  save();
   if(view.type==='chat'&&view.id===cid)renderChat();
-  var nudge='【场景切换：刚才的线下见面结束了，现在回到微信线上】'
-    + '请先回看上面刚才线下剧情是【怎么收场的】，然后据此自然地发1~2句微信短消息（口语、简短，禁止旁白、禁止动作描写、禁止括号）：\n'
-    + '· 如果是告别/分开收场 → 发到家/路上那种消息，例："到家了吗？""今天很开心，下次再约。"\n'
-    + '· 如果是一起睡着收场 → 用"先离开"或"醒来发现对方不在"的口吻，例："看你睡得太沉了，我先走啦，醒了发我。""一觉醒来你人呢🤨"\n'
-    + '· 其他情况就顺着刚才的气氛，发一句贴合当下的微信消息即可。\n'
-    + '【铁律】只发一条微信该有的短消息，不要复述剧情、不要写"她/他……"这种第三人称叙述。';
-  aiReply(nudge);
 }
 
 setInterval(()=>{if(view.type!=='chat'||replying)return;const c=getC(view.id);if(!c||c.activity==='关')return;const gap={低:600000,中:300000,高:120000}[c.activity]||300000;const msgs=DB.chats[c.id]||[];if(!msgs.length||msgs[msgs.length-1].role==='assistant')return;if(Date.now()-lastActivity>gap){lastActivity=Date.now();aiReply('（对方已经有一会儿没说话了，请根据你的性格自然地主动发一条消息）');}},20000);
@@ -14455,6 +14621,14 @@ function buildShareBubble(m) {
       + '<div style="color:var(--text);font-size:12px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + esc(m.title||'') + '</div>'
       + '<div style="margin-top:6px;display:flex;align-items:center;gap:5px;">' + srcDot + '<span style="color:var(--sub);font-size:10px;">' + esc(srcName) + '</span></div>'
       + '</div></div>';
+} else if (m.shareType === 'clip') {
+    var gradC = randomShareGradient();
+    html = '<div class="share-card share-clip" onclick="openShareModal(\'' + id + '\')" style="width:128px;border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.2);">'
+      + '<div style="height:184px;background:' + gradC + ';display:flex;align-items:center;justify-content:center;position:relative;">'
+      + '<div style="width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,0.32);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.75);">'
+      + '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M4 2L13 7.5L4 13V2Z" fill="#fff"/></svg></div>'
+      + (m.duration ? '<div style="position:absolute;bottom:7px;right:7px;background:rgba(0,0,0,0.45);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;">' + esc(m.duration) + '</div>' : '')
+      + '</div></div>';
 
   } else if (m.shareType === 'music') {
     html = '<div class="share-card share-music" onclick="openShareModal(\'' + id + '\')" style="width:220px;background:var(--card);border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.08);">'
@@ -14568,6 +14742,20 @@ function openShareModal(msgId) {
       + '<div style="width:100%;height:170px;border-radius:12px;background:' + grad3 + ';display:flex;align-items:center;justify-content:center;margin-bottom:14px;">'
       + '<div style="width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px rgba(255,255,255,0.12);">'
       + '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 3L19 11L6 19V3Z" fill="#333"/></svg></div></div>'
+      + '<div style="font-size:14px;color:' + CV.text + ';line-height:1.75;">' + esc(m.desc||'') + '</div>'
+      + '</div>';
+} else if (m.shareType === 'clip') {
+    var gradCM = randomShareGradient();
+    inner = '<div style="display:flex;align-items:center;gap:8px;padding:16px 20px 12px;border-bottom:1px solid ' + CV.line + ';">'
+      + '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="3" width="16" height="12" rx="2" fill="' + CV.theme + '" opacity="0.3"/><path d="M6 6L13 9L6 12Z" fill="' + CV.theme + '"/></svg>'
+      + '<div style="flex:1"><div style="font-size:15px;font-weight:700;color:' + CV.text + ';">小视频</div></div>'
+      + closeBtn + '</div>'
+      + '<div style="padding:16px 20px;">'
+      + '<div style="width:100%;height:280px;border-radius:12px;background:' + gradCM + ';display:flex;align-items:center;justify-content:center;margin-bottom:14px;position:relative;">'
+      + '<div style="width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.7);">'
+      + '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M6 3L19 11L6 19V3Z" fill="#fff"/></svg></div>'
+      + (m.duration ? '<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.45);color:#fff;font-size:11px;padding:2px 7px;border-radius:4px;">' + esc(m.duration) + '</div>' : '')
+      + '</div>'
       + '<div style="font-size:14px;color:' + CV.text + ';line-height:1.75;">' + esc(m.desc||'') + '</div>'
       + '</div>';
 
