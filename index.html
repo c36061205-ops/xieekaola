@@ -3352,7 +3352,8 @@ function render() {
 
   var bottom = document.getElementById('chatBottom');
   if (bottom) bottom.remove();
-
+        var banner = document.getElementById('chatBanner');
+        if (banner) banner.remove();
   closeModal();
   content.style.backgroundImage = '';
 
