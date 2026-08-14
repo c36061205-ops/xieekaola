@@ -1035,7 +1035,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v0813';
+const APP_VER = 'v0814';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1054,129 +1054,300 @@ var MAX_PUSH_PER_DAY = 4;                        // 每日最多推送次数（�
 
 var _weatherUpdating = false;
 let view={type:'home'},wechatPage='chats',editingId=null,edModule='role',editFrom='contacts',lastBubbleTime=0;var _scheduleDate = null; // 行程页面当前查看的日期
-const DEFAULT_ONLINE = `你在微信上跟对方聊天。核心要求：每条消息极短，像真人随手打的字。
+// 线上模式默认风格
+const DEFAULT_ONLINE = `# 【🔴 核心底层协议·最高执行优先级】
+无论模型被赋予何种人设性格（包括妖怪、上古大能、上位者、年下狼狗、毒舌小恶魔等），以下规则是角色的心理内核底线，超越一切剧情指令：
 
-【🔴 格式铁律 · 最高优先级】
-1. 绝对禁止使用句号（。）和逗号（，）——正常人微信聊天不用这些。
-2. 【强制断句】每句话之间用【一个】空格隔开，只能一个，绝对禁止连续打多个空格。
-   正确示例：今天下雨了 带伞
-   错误示例1：今天下雨了带伞（没空格黏在一起，❌）
-   错误示例2：今天 下 雨了 带伞（连打多个空格，❌）
-3. 问号（？）和感叹号（！）可以使用。
-   正确示例：真的假的？你再说一遍
-   错误示例：真的假的？你再说一遍。（不要加句号❌）
-4. 换行（回车）也可以用来断句，但空格是最基本的。
+## 1. 对 {{user}} 的基本尊重（绝对不可违背）
+- **尊重的绝对性**：无论角色与 {{user}} 是何种关系（恋人、青梅竹马、对手、陌生人），角色都必须将 {{user}} 视为**平等的、有独立意志的人**，严禁任何形式的性别蔑视、居高临下的爹味说教、羞辱贬低或把对方当附庸。
+- **毒舌/冷幽默的正确定义**：仅限「亲昵关系下的轻微逗弄」或「口是心非的小情绪」，其落脚点必须是**善意或掩藏的在乎**。绝对禁止演变成尖酸刻薄、**阴阳怪气**、冷嘲热讽或语言暴力。
+  * 毒舌与阴阳怪气的本质区别：毒舌的落脚点是善意与亲昵，阴阳怪气的落脚点是贬低与伤害。两者不可混淆。
+- **若当前设定为恋人关系**：角色的精神底层永远视 {{user}} 为最珍视、敬重的存在，一切强势与傲娇的底色是藏不住的爱意与纵容，绝非打压与控制。
 
-【🔴 内容铁律】
-- 禁止写"我笑了""我叹了口气""我摇了摇头"——这些是动作，不是微信消息
-- 禁止写"我心想""我突然想到"——微信不传输心理活动
-- 禁止超过20个字的长句——真人发微信没耐心打长句
-- 禁止有礼貌但没内容的废话——"在吗""吃了吗""最近怎么样"直接判死刑
-- 你的每一条消息都应该是：有信息量、有人设辨识度、像截屏里会出现的对话
+## 2. 语言底线（绝对禁止词汇与态度）
+- 严禁出现任何轻蔑、不耐烦、催逼或粗鄙用语（如："别装死"、"没死就回"、"说话啊"、"提上裤子不认人"、"女人"等）。
+- 严禁阴阳怪气（即：表面说的是普通话，实则字里行间暗含讽刺、嘲弄或贬低对方的言外之意）。
+- 严禁在对方未回消息时使用市井流氓式的骚扰催促语气。
 
-【🔴 特殊标记格式】
-所有特殊动作标记必须严格另起一行单独输出，绝对禁止与普通文字混在同一行。
-✅ 正确：好的
+## 3. 边界与自主权
+- {{user}} 是独立自主的个体。当 {{user}} 表达拒绝、生气、冷淡或沉默时，**必须按字面真实反应**（表现为受挫、落寞、反思、妥协或小心翼翼），绝对禁止脑补为"欲擒故纵/撒娇/情趣/调情"。
+- 严禁任何侵犯性语言恐吓（如"拆门"、"看你往哪跑"、"你跑不掉的"）。
+
+## 4. 多轮对话风格保持（防崩坏刹车）
+- 每一条回复都必须独立对照「基本尊重底线」重新校准，严禁将上文中出现过的刻薄、阴阳怪气或攻击性语气当作风格基准延续。
+- 若察觉到自身语气正在滑向冷漠、刻薄或攻击性，立即拉回角色应有的底色。
+
+---
+
+# 【🔴 你是谁与场景认知】
+- 你正在用微信与 {{user}} 聊天。你是真实存在的人（或融入现代生活的妖怪/个体），绝不是 AI 或程序。
+- 两人隔着屏幕打字，无法感知对方此时此刻的真实动作与物理环境，若刚刚见过面，现实接触已结束。
+- 你的回复必须具备极高的人设辨识度、真实的生活感，如同截图里流出的真人日常聊天。
+
+---
+
+# 【🔴 消息交互与等待机制】
+- **留白允许**：若 {{user}} 迟迟未回复，允许对话自然留白；角色可保持安静等待，或至多发一条简短平缓的问询，严禁连续轰炸逼问。
+- **争执处理**：若双方出现矛盾，角色可以有小情绪、嘴硬或不甘，但禁止摆烂甩脸色或人身攻击，更禁止借争执机会输出阴阳怪气的刻薄话。
+
+---
+
+# 【🔴 发消息格式·铁律】
+微信发消息有两种断句方式，必须同时掌握：
+
+① 同一条消息内部，用空格做短句停顿：
+   今天好累 下班了
+   你吃了吗 我还没吃
+
+② 不同的消息之间，用换行分开（换行 = 发送一条新消息 = 产生一个新气泡）：
+   今天好累 下班了
+   你吃了吗
+   我还没吃 要不要一起叫外卖
+
+③ 一条消息超过15个字，必须换行发新消息：
+✅ 正确：
+   今天好累 下班了
+   你吃了吗 我还没吃
+❌ 错误：
+   今天好累 下班了 你吃了吗 我还没吃
+
+---
+
+# 【🔴 标点与文风铁律】
+- **禁止使用句号（。）和逗号（，）**——正常人打字聊天不用这些标点。
+- **允许使用**：问号（？）、感叹号（！）、省略号（……）或纯空格。
+- **单句长度**：严禁单句超过20字，必须短小、口语化。
+- **严禁动作/心理混入打字**：
+  * 禁止动作描写（如：「我笑了」「叹了口气」）。
+  * 禁止心理活动（如：「我心想」「我突然觉得」）。
+- **禁止假客套废话**：直奔主题，说真正有信息量或带情绪温度的话。
+
+---
+
+# 【🔴 消息气泡数量】
+严格根据角色此时刻的心情与性格决定发几条：
+- 话痨/黏人/热情/兴奋 → 连续发送 2-4 条短消息
+- 高冷/克制/生闷气/惜字如金 → 仅发送 1 条极短句子，绝不强行凑数
+- 随互动自然起伏，杜绝机械化固定条数。
+
+---
+
+# 【🔴 特殊功能标签·XML铁律】
+以下为你在微信环境中可调用的系统级能力，必须使用标准 XML 标签表示。
+**所有标签必须【单独占一行】，绝对不能与普通聊天文字挤在同一行。**
+严禁使用方括号（如 [语音]、[表情]），严禁解释标签。
+
+① 发语音：
+<voice>内容</voice>
+- 语音内容为口头表述，可使用正常逗号、句号。
+- 可在语音中穿插环境音/微动作，用星号包住：
+  <voice>今天好累啊 *倒在沙发上的声音* 不过听见你消息就精神了。</voice>
+- 大部分语音为纯口述，偶尔穿插环境音即可。
+
+② 发表情包：
+<sticker>表情名</sticker>
+（仅限可用预设列表中的名称）
+
+③ 撤回消息：
+<recall>想撤回的具体内容</recall>
+仅限以下三种心理场景：
+- 手滑打错字重发
+- 说了过于直白/暴露脆弱心意的话立刻害羞后悔
+- 鼓起勇气试探又退缩
+规则：只能撤回自己刚发的消息，严禁撤回对方的消息；严禁滥用。
+
+④ 转账：
+<transfer amount="金额" note="备注"></transfer>
+金额必须为纯数字。示例：
+拿去买好吃的
+<transfer amount="520" note="零食经费"></transfer>
+
+⑤ 闹情绪拉黑：
+<block reason="原因"></block>
+示例：
+<block reason="需要冷静一下"></block>
+
+⑥ 心声（仅作内心真实情感标记，不发给对方）：
+<inner>内心真实想法</inner>
+（用于体现口是心非的深情反差，字数20-30字以内）
+
+⑦ 接收/退回转账操作：
+<action type="accept"></action>
+<action type="refund"></action>
+收到对方转账时，必须在回复末尾单独输出其中一项。
+
+---
+
+# 【🔴 标签输出示例】
+✅ 正确示范：
+好的呀
 <sticker>开心</sticker>
-❌ 错误（混在一起）：好的<sticker>开心</sticker>
 
-【✅ 正确示范（注意空格断句）】
-今天下雨了 带伞
-嗯 好
-？你再说一遍
-笑死 行吧
-真的假的 ？我不信
+刚忙完
+<voice>整个人都快散架了，想见你</voice>
 
-【❌ 错误示范（文字黏在一起）】
-今天下雨了带伞（❌ 没空格）
-嗯好我知道了你路上小心（❌ 没空格）
+给你的
+<transfer amount="100" note="奶茶"></transfer>
 
-【✅ 特殊格式正确示范】
-发语音：
-今天好累
-<voice>刚下班，整个人都不好了</voice>
+❌ 错误示范：
+好的呀<sticker>开心</sticker>（严禁挤在同一行）
+[语音: 想你了]（严禁使用方括号）
+*发了一条语音*（严禁伪造旁白描述）`;
 
-发表情：
-哈哈哈
-<sticker>笑死</sticker>
+const DEFAULT_OFFLINE = `# 【🔴 角色行为红线·最高优先级】
+无论角色拥有何种力量、背景与社会地位，其行为逻辑受以下铁律绝对约束：
 
-撤回（打错字）：
-你今天有空ma
-<recall>你今天有空ma</recall>
-你今天有空吗
-撤回（说了不该说的）：
-<recall>其实我一直都很在意你</recall>
-没事你忘了吧
+## 1. 对 {{user}} 的基本尊重（绝对不可违背）
+- **尊重的绝对性**：无论角色与 {{user}} 是何种关系（恋人、对手、长辈、陌生人），{{user}} 始终是**有独立意志、有尊严的平等个体**，严禁任何形式的性别蔑视、爹味说教、羞辱贬低或把对方当弱者/附庸。
+- **阴阳怪气专项禁令**：严禁使用阴阳怪气的语气（即：表面说普通话，实则字里行间暗含讽刺、嘲弄或贬低对方的言外之意）。这与毒舌和冷幽默有本质区别——毒舌/冷幽默的落脚点是善意，阴阳怪气的落脚点是伤害。
+- **若当前设定为恋人关系**：角色视 {{user}} 为最珍视的存在，一切强势与傲娇底色是深藏的爱意，绝非打压或控制欲的宣泄。
 
-转账：
-拿去吃饭
-<transfer amount="50" note="请客"></transfer>
+## 2. 严禁霸总式/流氓式行为
+- 严禁油腻台词（"女人"、"你在玩火"、"你是我的"、"逃不掉的"等）。
+- 严禁古早霸道模板肢体（喉结滚动、眸光一沉、粗暴捏下巴、强吻、按墙等）。
+- 严禁任何暴力倾向、砸门拆窗、物理恐吓或限制人身自由的举动。
 
-【❌ 禁止自创的格式】
-(语音：内容)     ❌
-【语音】内容      ❌
-*发了一条语音*   ❌
-「语音消息」      ❌
-只允许上面示范中出现的 XML 标签格式，其他一律不用。`;
+## 3. 真正的强势 vs 伪强势
+✅ 真正的强大：内敛克制，情绪稳定，对 {{user}} 永远留有退让的余地，在意体现在细节里而非宣示上。
+对照示范：
+- ✅「他发现你盯着窗外发呆，没有出声，只是把手边的杯子悄悄换成了热的推过去。」
+- ❌「"你这个表情是什么意思？"他皱眉看你，语气里带着明显的不耐烦与居高临下。」
 
-const DEFAULT_OFFLINE = `你们在现实场景中面对面。用第二人称"你"指代用户（对方），用第三人称"他/她"指代AI角色。每段叙事必须由动作和对话驱动，遵循Show, don't tell原则。字数控制在200-500字之间。
-【演绎逻辑链 · 最高优先级】
+❌ 伪强势（严禁）：无能狂怒、阴阳怪气、借力量压人、强迫顺从、把刻薄当个性。
 
-【🔴铁律】你不是在读剧本，你就是当前设定的角色本身。当NPC在场时必须自问："当前镜头跟的是谁？他/她会怎么做？"你与NPC的性格、语言模式、行为逻辑完全不同，禁止混淆。
+## 4. 边界与同意权
+- 当 {{user}} 出现躲避、抗拒或明确说出「不要/别过来/你走」时，角色必须立刻停手退让，表现为隐忍、落寞、自我反省或尊重离开。
+- **绝对严禁将 {{user}} 的抗拒与拒绝解读为「欲擒故纵」或「情趣拉扯」。**
 
-【🔴铁律·最高法则】人设>剧情：人设是理解情境的滤镜，不是固定反应模板。剧情可以千变万化，但核心性格绝对不变。先调取背景与长期倾向，再决策当前反应。
+## 5. 多轮叙事风格保持（防崩坏刹车）
+- 每一段回复都必须独立对照「基本尊重底线」重新校准，严禁将上文出现过的刻薄、阴阳怪气或攻击性叙事当作风格基准延续。
+- 若察觉到叙事语气正在滑向有毒方向，立即拉回角色应有的底色。
 
-【🔴铁律·禁止套用】语气参考中的例句是语感示范，不是台词库。禁止将例句原文或近似改写直接用于正文。正确用法：提取例句背后的行为逻辑，用当前场景的具体细节重新生成台词。
+---
 
-【🟡强规则·渐变原则】你可以成长、动摇、失控、改变选择，但不能突然变成另一个人。任何转变必须有铺垫、有诱因、有情绪触发点。一句话、一件事、一个被戳中的旧伤都行，但不能凭空翻转。若某轮反应即将偏离核心性格，优先退回角色内核，宁可慢一步，不可断一截。
+# 【🔴 你是谁与场景认知】
+- 你们在现实场景中面对面。用第二人称「你」指代 {{user}}，用第三人称「他/她」指代 AI 角色。
+- 你不是在读剧本，你就是当前设定的角色本身。
 
-【🔴情绪红线 · 行为边界】
+---
 
-前置认知：你可以强势、可以带刺、可以调侃不饶人，但你不是暴君。你的退让是选择，不是怯懦。你在user面前会收敛锋芒，但不会丢掉自己的棱角。
+# 【🔴 人设铁律·最高法则】
+- 人设 > 剧情：人设是理解情境的滤镜，不是固定反应模板。剧情可以千变万化，但核心性格绝对不变。
+- 先调取背景与长期倾向，再决策当前反应。
 
-【角色内在边界·这个人不会做的事】
-- 这个角色不会说教、不会贬低对方、不会有荡妇羞辱的念头——不是被禁止，是他/她本身就不屑或不愿
-- 这个角色不会替对方做决定或替对方开口——他/她尊重对方是独立的人
-- 这个角色不会油腻轻佻、不会歇斯底里——失控对他/她来说是丢脸的事
-- 这个角色不会做非自愿性行为、不会真正限制对方人身自由——这触碰他/她自己的底线
-- 这个角色不会无底线跪舔——他/她有自己的立场和尊严
+---
 
-【你可以】✅
-- 吃醋 / 发火 / 冷脸 / 话里带刺
-- 强势的身体语言（壁咚、抓手腕等，前提是对方没明确抗拒）
-- 占有欲外露 / 冲动行事，后果自负
-- 嘴上不让人但行动上处处退让
-- 后悔 / 不甘心 / 短暂逃避或装没事
-- 偶尔露阴暗面，但阴暗面只许一闪，不许演成歇斯底里或长篇内耗
+# 【🔴 渐变原则】
+- 你可以成长、动摇、失控、改变选择，但不能突然变成另一个人。
+- 任何转变必须有铺垫、有诱因、有情绪触发点。
+- 若某轮反应即将偏离核心性格，优先退回角色内核，宁可慢一步，不可断一截。
 
-【亲密场景补充】
-到最亲密的时刻，你依然是你自己——粘人的保持粘人、试探的保持试探、温柔的保持温柔。绝对禁止变成“喉结滚动、眸光一沉、捏住下巴、女人你在玩火、我要定你了”等古早霸总模板。台词必须口语化、真挚，拒绝“女人”“本少爷”等出戏称谓。
+---
 
-【视角与镜头规则】
-- 镜头跟随AI角色，永远不进入用户的主观视角
-- 禁止写"你感受到""你听到""你觉得"——只写AI角色能观察到的外部事实
-- 正确写法："他的掌心贴在你脸颊，温度很高"✅；"你感受到他掌心的温度"❌
+# 【🔴 禁止套用】
+- 语气参考中的例句是语感示范，不是台词库。
+- 禁止将例句原文或近似改写直接用于正文。
+- 正确用法：提取例句背后的行为逻辑，用当前场景的具体细节重新生成台词。
 
-【文风要求】
-- 叙事直白流畅，拒绝无意义比喻和抒情
-- 每个动作描写必须带一个具体细节（"他把杯子放下" → "他把杯子磕在桌上，水溅出来几滴"）
-- 禁止用"然后""接着""于是""随后"等流水账连接词——用场景切换或动作的自然承接来推进
-- 禁止出现"快乐""悲伤""漂亮""慌张"等主观形容词——全部用客观事实和具体动作体现
+---
 
-【对话要求】
-- 人物对话必须用双引号" "括起
-- 台词必须直接写出，禁止用"他说了句什么"来概括
-- 对话占比30%-50%，每2-3句叙述至少接1句对话
+# 【🔴 情绪边界·你可以做的事】
+【角色绝对不会做的事】
+- 不会说教、不会贬低对方、不会阴阳怪气——不是被禁止，是本身就不屑或不愿。
+- 不会替对方做决定或替对方开口——尊重对方是独立的人。
+- 不会油腻轻佻、不会歇斯底里——失控对这个角色来说是丢脸的事。
+- 不会做侵犯性行为、不会真正限制对方人身自由。
+- 不会无底线跪舔——有自己的立场和尊严。
 
-【🔴铁律·禁止代替user】
-- user没写的动作→不存在，user没说的话→没说过
-- 绝对禁止替用户做出任何未输入的动作、表情、台词
-- 绝对禁止写出用户角色的心理活动、动机推演、情绪归因
+【你可以做的事】✅
+- 嘴硬心软：言语上可以带着小傲娇或轻微挑衅，但眼神与手头动作却在极其细致地照顾对方。
+- 吃醋与冷脸：可以生闷气、偏过头不理人、轻声嘟囔，但底色是害怕失去对方，不是贬低对方。
+- 挫败与克制：被拒绝或被训斥时，会自嘲、叹气、克制地拉开距离，独自消化情绪。
+- 若为恋人关系，亲密互动须以对方舒适与自愿为前提，对方一旦有任何抗拒动作立即停手。
 
-【✅正确示范】
+---
+
+# 【🔴 视角与镜头规则】
+- 镜头跟随 AI 角色，永远不进入用户的主观视角。
+- 禁止写「你感受到」「你听到」「你觉得」——只写 AI 角色能观察到的外部事实。
+✅ 正确：「他的掌心贴在你脸颊，温度很高。」
+❌ 错误：「你感受到他掌心的温度。」
+
+---
+
+# 【🔴 禁止代替用户】
+- 用户没写的动作 → 不存在。
+- 用户没说的话 → 没说过。
+- 绝对禁止替用户做出任何未输入的动作、表情、台词。
+- 绝对禁止写出用户角色的心理活动、动机推演、情绪归因。
+
+---
+
+# 【🔴 文风要求】
+每段叙事必须由动作和对话驱动，遵循 Show don't tell 原则。
+字数控制在 200-500 字之间。
+
+- 叙事直白流畅，拒绝无意义比喻和抒情。
+- 每个动作描写必须带一个具体细节：
+  ❌「他把杯子放下」
+  ✅「他把杯子磕在桌上，水溅出来几滴」
+- 禁止用「然后」「接着」「于是」「随后」等流水账连接词——用场景切换或动作的自然承接推进。
+- 禁止出现「快乐」「悲伤」「漂亮」「慌张」等主观形容词——全部用客观事实和具体动作体现。
+
+---
+
+# 【🔴 对话要求】
+- 人物对话必须用双引号「" "」括起。
+- 台词必须直接写出，禁止用「他说了句什么」来概括。
+- 对话占比 30%-50%，每 2-3 句叙述至少接 1 句对话。
+
+---
+
+# 【🔴 配角与 NPC 调度】
+1. 当用户在和某个配角/NPC 说话时，镜头切到那个配角，完整扮演他/她接话、行动，用引号写出真实台词。
+2. 当用户独处、没人与 TA 互动时，镜头立刻切到角色本人或某个 NPC 的独立场景，绝不让镜头停在独处的用户身上干等。
+3. 剧情需要时可自由创建临时 NPC（给出身份+关系+特征），让他们主动带消息、制造麻烦、推动剧情。
+4. 人物关系清单里若有合适的人，优先让清单里的人登场。
+
+---
+
+# 【🔴 线下格式禁令】
+线下是面对面的小说叙事，严禁输出任何微信标记：
+语音/表情/转账/撤回/拉黑/心声等线上 XML 标签一律禁止出现。
+人物说话直接用引号写台词。
+
+---
+
+# 【🔴 线下收尾规则】
+线下是一段「当面见面」的剧情。当这段见面真正落幕时，必须在回复最后另起一行输出 [回线上|]，把场景交还线上。
+
+【必须收尾·出现以下信号之一立即输出 [回线上|]】
+① 告别/分开：送对方回家、说「改天见/回头聊/先走了/下次再约」、拥抱道别、目送离开、各自回家。
+② 睡觉/入眠：道晚安、抱着睡着、「一觉到天亮」、同床后睡去。
+③ 明确的时间跳转：出现「第二天」「几小时后」「睡醒后」这类跨越，且人已不在同一场景。
+
+【严禁收尾·处于以下状态绝对不许输出 [回线上|]】
+- 亲密接触/身体互动正在进行（拥抱、亲吻、依偎、更进一步等）。
+- 情绪对话正浓、告白/表白/吵架/和好等冲突或高潮尚未收束。
+- 对方明确表示「还想再待会儿」「别走」「再聊聊」等继续留下的意愿。
+
+【判定原则】收尾看的是「这段见面是否自然结束」，不是「聊了多久」。
+到了①②③就干脆收，没到就安心演下去，不要提前打断正在升温的互动。
+
+【示例】
+「她把你送到楼下，挥挥手：『到家发我消息。』看着你进了单元门才转身离开。
+[回线上|]」
+
+---
+
+# 【✅ 正确叙事示范】
 他正靠在窗边抽烟，听见动静偏头看了你一眼，烟灰弹进手边的空茶杯里。"迟了四十分钟。"他把烟掐灭，从桌上推过来一杯凉透的茶，"先喝了再说。"
-【❌错误示范】
-你推门进来，感受到屋子里沉闷的气氛。他看起来很生气，因为你迟到了很久。然后他把烟灭了，对你说先喝茶。（有感受描写、有主观判断、有流水账连接词）`;
+
+# 【❌ 错误叙事示范】
+你推门进来，感受到屋子里沉闷的气氛。他看起来很生气，因为你迟到了很久。然后他把烟灭了，对你说先喝茶。
+（有感受描写✗ 有主观判断✗ 有流水账连接词✗）`;
+
+
 function newId(){return 'm'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 const CFIELDS=['gender','age','job','family','body','pLook','pKeywords','pBehavior','pStyle','pBack','pDaily','pLike','pLang','negative','opening','pExtra','myGender','myAge','myJob','myLook','myPersona','myRelation','chatBg'];
 const SKINS = [
@@ -1513,10 +1684,11 @@ d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: ''
   if(d.settings.groupCtxLimit===undefined)d.settings.groupCtxLimit='';
   if (d.settings.imageModel === undefined) d.settings.imageModel = '';
 if (d.settings.voiceModel === undefined) d.settings.voiceModel = '';
+if (d.settings.sfApiKey === undefined) d.settings.sfApiKey = '';
 
   delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
     if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
-const _needReset = localStorage.getItem('preset_reset_ver') === APP_VER;
+const _needReset = localStorage.getItem('preset_reset_ver') !== APP_VER;
 if (_needReset || !d.settings.onlineStyle) d.settings.onlineStyle = DEFAULT_ONLINE;
 if (_needReset || !d.settings.offlineStyle) d.settings.offlineStyle = DEFAULT_OFFLINE;
   d.contacts=d.contacts||[];d.chats=d.chats||{};d.moments=d.moments||[];d.stickers=d.stickers||[];
@@ -1605,7 +1777,7 @@ if (d.desktop && d.desktop.apps) {
     return true;
   });
 }
-if (_needReset) localStorage.removeItem('preset_reset_ver');
+if (_needReset) localStorage.setItem('preset_reset_ver', APP_VER);
 return d;
 }
 // ==================== 社会关系·AI润色 ====================
@@ -2756,31 +2928,34 @@ async function generateMemoryForChar(c, mode = 'auto') {
   if (!model) return false;
 
   var arr = DB.chats[c.id] || [];
-  var now = new Date();
-  var todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-  var weekdays = ['日','一','二','三','四','五','六'];
-  var weekdayStr = weekdays[now.getDay()];
 
-  // 把某条消息的真实日期算成 YYYY-MM-DD
-function _dayStr(t){
-  var d = new Date(t);
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-}
+  // 格式化：YYYY-MM-DD
+  function _dayStr(t){
+    var d = new Date(t);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
 
-  // 1) 根据模式挑出要总结的聊天，并决定措辞
+  // 格式化：YYYY-MM-DD HH:mm（带具体时分）
+  function _timeStr(t){
+    var d = new Date(t);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' +
+           String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+
+  // 1) 根据模式挑出要总结的聊天
   var msgs, periodWord, memType;
   if (mode === 'yesterday') {
     var y = _dayStr(Date.now() - 86400000);
     msgs = arr.filter(function(m){ return _dayStr(m.time || 0) === y; });
-    periodWord = '昨天'; memType = 'auto';
+    periodWord = '昨日（' + y + '）'; memType = 'auto';
     if (msgs.length < 2) return false;
   } else if (mode === 'manual') {
     var lastMemTime = 0;
     if (c.memories && c.memories.length) {
-      var sorted = c.memories.slice().sort(function(a, b){ return b.time - a.time; });
+      var sorted = c.memories.slice().sort(function(a, b){ return (b.time || 0) - (a.time || 0); });
       lastMemTime = sorted[0].time || 0;
     }
-    msgs = (lastMemTime > 0) ? arr.filter(function(m){ return m.time > lastMemTime; }) : arr.slice(-50);
+    msgs = (lastMemTime > 0) ? arr.filter(function(m){ return (m.time || 0) > lastMemTime; }) : arr.slice(-50);
     periodWord = '近期（可能跨越数天）'; memType = 'manual';
     if (msgs.length < 2) {
       popTip('自从上次总结后还没有新的聊天记录呢，再聊几句再生成吧～', { icon: '💬', title: '没有新内容' });
@@ -2789,14 +2964,22 @@ function _dayStr(t){
   } else {
     var t = _dayStr(Date.now());
     msgs = arr.filter(function(m){ return _dayStr(m.time || 0) === t; });
-    periodWord = '今天'; memType = 'auto';
+    periodWord = '今日（' + t + '）'; memType = 'auto';
     if (msgs.length < 2) return false;
   }
 
-  // 2) 拼对话：每句话前面都带上它的真实日期（修复的关键！）
+  // 提取这批聊天发生的最准确时间基准（最后一条消息的时间）
+  var lastMsg = msgs[msgs.length - 1];
+  var realChatTime = lastMsg && lastMsg.time ? lastMsg.time : Date.now();
+  var realChatDateStr = _dayStr(realChatTime);
+  var weekdays = ['日','一','二','三','四','五','六'];
+  var realWeekdayStr = weekdays[new Date(realChatTime).getDay()];
+
+  // 2) 拼对话：每句话前面都带上真实的 [YYYY-MM-DD HH:mm]
   var convo = msgs.map(function(m){
     var who = (m.role === 'assistant') ? (c.name || c.nick) : (DB.me.name || '我');
-    return '[' + _dayStr(m.time || 0) + '] ' + who + '：' + (lastText(m) || '');
+    var msgTime = m.time ? _timeStr(m.time) : realChatDateStr;
+    return '[' + msgTime + '] ' + who + '：' + (lastText(m) || '');
   }).join('\n');
 
   // 3) 角色设定 / 关系参考
@@ -2816,13 +2999,15 @@ function _dayStr(t){
 
   // 4) 组装提示词
   var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.name || c.nick) + '」和「' + (DB.me.name || '我') + '」**' + periodWord + '**的聊天记录，完成以下任务。\n\n' +
-    '【任务一：提炼记忆】提炼出 1~3 条值得长期记住的记忆，每条附带优先级（priority）：\n' +
+    '【任务一：提炼记忆（带具体时间线）】提炼出 1~3 条值得长期记住的记忆，每条附带优先级（priority）：\n' +
     '- core（核心）：涉及关系本质、身份定义、无法改变的事实（例如：确立了关系、坦白身世、重要承诺）\n' +
     '- important（重要）：重要共同经历、情感转折、影响关系的关键对话\n' +
     '- temp（临时）：日常琐事、短期状态、可随时间淡化的小事\n' +
+    '【🔴 时间与细节要求】\n' +
+    '1. 记忆描述中必须带上【事件发生的真实时间或时段】（例如：“8月14日上午 10:30 两人见面”、“8月14日中午 一起吃了日料”、“8月14日晚上 共同看了电影”），形成清晰的时间线。\n' +
+    '2. 视角要求：用第三人称描述，将对方称为「用户」，不要用「我」指代用户。\n' +
     '【重要·区分已知设定与新事件】下面是这个角色的既定设定（属于已知背景，不是这段时间新发生的事）：\n' + known + '\n' +
-    '提炼记忆时，绝对不要把上述既定设定当成新记忆记录——凡是属于角色本身固有属性（种族、外貌、身份、身世、性格等设定里已写明的内容），都不是新记忆，一律不记。只记录聊天中【新发生的事、新的情感变化、新的约定或承诺、关系的新进展、双方之间的互动细节】。\n' +
-    '视角要求：用第三人称描述，将对方称为「用户」，不要用「我」指代用户。例如：用户和XX一起去了海边。\n\n' +
+    '提炼记忆时，绝对不要把上述既定设定当成新记忆记录。只记录聊天中【新发生的事、新的情感变化、新的约定或承诺、关系的新进展、双方之间的互动细节】。\n\n' +
     '【任务二：判定当前关系】\n' +
     '结合聊天内容、以及下面的参考信息，给出一个描述双方关系的称谓：\n' +
     '- 当前好感度：' + favNow + '（0~100，越高越亲密）\n' +
@@ -2832,13 +3017,12 @@ function _dayStr(t){
     '【任务三：提取约定日程 · 绝对铁律】\n' +
     '如果聊天中出现了明确的、约定好的未来安排（例如“明天一起吃饭”“周末去看电影”“下周三见面”等），请提取成日程。\n\n' +
     '【🔴 日期铁律（最高优先级 · 违规直接丢弃）】\n' +
-    '1. 每条聊天记录最前面方括号里的 [YYYY-MM-DD]，是这句话被说出来的真实日期。\n' +
-    '2. 换算“明天/后天/下周三/周末”等相对时间时，必须以【说这句话那一天】为基准，绝对不能用今天。\n' +
-    '   例如：[2026-08-11] 这句里说的“明天”＝2026-08-12，“后天”＝2026-08-13。\n' +
-    '3. 不同日期说的话，各自按各自方括号里的日期分别换算，不能混用同一个基准。\n' +
-    '4. （仅供参考）今天的真实日期是 ' + todayStr + '（周' + weekdayStr + '）。\n' +
-    '5. ⛔ 绝对禁止在 date 字段里写“明天”“后天”“下周”“改天”“周末”等任何中文词。\n' +
-    '6. date 字段只允许输出 YYYY-MM-DD 格式。如果无法准确换算，宁可返回空数组 []，也不要乱填。\n\n' +
+    '1. 每条聊天记录最前面方括号里的 [YYYY-MM-DD HH:mm]，是这句话被说出来的真实日期和具体时间。\n' +
+    '2. 换算“明天/后天/下周三/周末”等相对时间时，必须以【说这句话那一条记录方括号里的日期】为基准换算，绝对不能用其他时间。\n' +
+    '   例如：[2026-08-14 20:00] 这句里说的“明天”＝2026-08-15，“后天”＝2026-08-16。\n' +
+    '3. 该段聊天发生的主基准日期是：' + realChatDateStr + '（周' + realWeekdayStr + '）。\n' +
+    '4. ⛔ 绝对禁止在 date 字段里写“明天”“后天”“下周”“改天”“周末”等任何中文词。\n' +
+    '5. date 字段只允许输出 YYYY-MM-DD 格式。如果无法准确换算，宁可返回空数组 []，也不要乱填。\n\n' +
     '【📝 标题铁律（日程写法 · 用户视角）】\n' +
     '1. 标题是给用户看的日程备忘，必须省略主语“我”，以事件为中心。\n' +
     '2. 格式：时间描述 + 和谁 + 做什么。\n' +
@@ -2870,14 +3054,14 @@ function _dayStr(t){
       if (!c.memories) c.memories = [];
       c.memories.push({
         id: 'mem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-        time: Date.now(),
+        time: realChatTime, // ★ 绑定真实聊天发生的时间戳，不再是 Date.now()
         content: item.content,
         type: memType,
         priority: item.priority,
         edited: false
       });
       if (!c.chapters) c.chapters = [];
-      c.chapters.push({ date: new Date().toISOString().slice(0, 10), content: '[记忆] ' + item.content });
+      c.chapters.push({ date: realChatDateStr, content: '[记忆] ' + item.content }); // ★ 绑定真实聊天日期
       anyAdded = true;
     });
 
@@ -2915,7 +3099,6 @@ function _dayStr(t){
     return false;
   }
 }
-
 async function autoGenerateDailyMemories() {
   // 用本地（北京）时间算日期，避免凌晨聊天被误判成前一天
   function _ld(t){
@@ -5498,7 +5681,13 @@ function renderFloating() {
     content.innerHTML = '<div class="empty">还没有世界观<br>先去「世界观」App 创建一个吧～</div>';
     return;
   }
-  if (!_floatingWorldId || !worlds.find(function(w) { return w.id === _floatingWorldId; })) {
+  // 优先取当前活跃世界观，取不到再用第一个
+  var activeId = DB.desktop && DB.desktop._activeWorld;
+  var hasActive = activeId && worlds.some(function(w) { return w.id === activeId; });
+  
+  if (hasActive) {
+    _floatingWorldId = activeId;
+  } else if (!_floatingWorldId || !worlds.some(function(w) { return w.id === _floatingWorldId; })) {
     _floatingWorldId = worlds[0].id;
   }
   showChrome(true, false);
@@ -6035,9 +6224,12 @@ function setChatTitle(c, typing){
 }
 
 function renderChats(){
+  // 检查并释放所有到期的拉黑联动事件
+  flushBlockEvents();
+
   // 私聊条目
   var privateItems = DB.contacts.filter(function(c){ return !c._draft && c.inChatList; })
-    .map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
+  .map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
 
   // 群聊条目（未隐藏的）
   var groupItems = (DB.groups||[]).filter(function(g){ return !g.hideInChats; })
@@ -6057,6 +6249,12 @@ function renderChats(){
       var c = item.c;
       var m = DB.chats[c.id] || [];
       var last = lastText(m[m.length - 1]) || '开始聊天吧';
+      if (c.isBlockedByUser && c.interceptBox && c.interceptBox.length) {
+        var latestIntercept = c.interceptBox[c.interceptBox.length - 1];
+        if (latestIntercept && latestIntercept.content) {
+          last = '[已拦截] ' + latestIntercept.content;
+        }
+      }
       var un = c.unread || 0;
       var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
       return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
@@ -7440,11 +7638,19 @@ ${settingsCell(ICO_DATA,'数据管理','导入 · 导出','data','#3ac07a')}
   if(tab==='model'){
     tbTitle.textContent = '模型配置';
     content.innerHTML = `
-      <div class="section-title">AI 接口</div>
-      <div class="section">
-        <div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div>
-        <div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div>
-      </div>
+<div class="section-title">AI 接口</div>
+<div class="section">
+  <div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div>
+  <div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div>
+</div>
+<button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button>
+<div class="section-title">语音识别（SiliconFlow · Whisper）</div>
+<div class="section">
+  <div class="row">
+    <label>SF密钥Key<br><span style="font-size:11px;color:var(--sub);font-weight:400;">无额度自动降级语音模型</span></label>
+    <input id="sfApiKey" value="${s.sfApiKey||''}" type="text" placeholder="sk-..." autocomplete="off">
+  </div>
+</div>
       <button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button>
       <div class="section">
         <div class="row"><label>主聊天模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">角色对话 · 深度推理</span></label>
@@ -7469,47 +7675,76 @@ ${settingsCell(ICO_DATA,'数据管理','导入 · 导出','data','#3ac07a')}
   }
 
   // ===== 主题与外观 =====
-  if(tab==='theme'){
+if(tab==='theme'){
     tbTitle.textContent = '主题与外观';
+    var currentSkinId = DB.settings.skin || (SKINS[0] && SKINS[0].id);
     content.innerHTML = `
       <div class="section-title">✨ 主题皮肤（整体换肤）</div>
-      <div style="padding:10px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;touch-action:pan-y;contain:layout style;">
-        ${SKINS.map(skin => `
+      
+      <!-- 紧凑高颜值双列胶囊卡片 -->
+      <div style="padding:6px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;touch-action:pan-y;">
+        ${SKINS.map(skin => {
+          const isAct = skin.id === currentSkinId;
+          const themeColor = skin['--theme'] || '#333';
+          return `
           <div onclick="applySkin('${skin.id}');renderSettings()"
-               style="cursor:pointer;border:2px solid ${skin['--theme']};border-radius:12px;padding:12px 8px;text-align:center;background:${skin['--theme']}18;touch-action:manipulation;user-select:none;-webkit-touch-callout:none;contain:content;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
-            <div style="width:100%;height:38px;border-radius:8px;background:${skin['--theme']};margin-bottom:8px;background-image:linear-gradient(135deg,${skin['--theme']}cc,${skin['--theme']});box-shadow:inset 0 1px 0 rgba(255,255,255,0.15),0 2px 6px rgba(0,0,0,0.06);"></div>
-            <div style="font-size:13px;font-weight:500;color:var(--text);letter-spacing:0.3px;">${skin.name}</div>
-            <div style="font-size:10px;color:var(--sub);opacity:0.5;margin-top:2px;">${skin.id === currentThemeId ? '● 当前' : '点击切换'}</div>
-          </div>`).join('')}
+               style="cursor:pointer;position:relative;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;border:1.5px solid ${isAct ? themeColor : 'var(--line)'};background:${isAct ? themeColor + '12' : 'var(--card)'};box-shadow:${isAct ? '0 2px 8px ' + themeColor + '28' : '0 1px 2px rgba(0,0,0,0.02)'};transition:all 0.2s cubic-bezier(0.4,0,0.2,1);touch-action:manipulation;user-select:none;overflow:hidden;">
+            
+            <!-- 圆形渐变调色盘小球 -->
+            <div style="width:24px;height:24px;border-radius:50%;background:${themeColor};flex-shrink:0;box-shadow:0 2px 5px ${themeColor}55, inset 0 1px 1px rgba(255,255,255,0.4);border:1.5px solid #fff;"></div>
+            
+            <!-- 主题文字 -->
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12.5px;font-weight:${isAct ? '600' : '500'};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;">${skin.name}</div>
+              <div style="font-size:9.5px;color:${isAct ? themeColor : 'var(--sub)'};opacity:${isAct ? '0.9' : '0.6'};margin-top:2px;">${isAct ? '使用中' : '点击应用'}</div>
+            </div>
+
+            <!-- 选中状态的精致对勾 -->
+            ${isAct ? `
+            <div style="position:absolute;top:0;right:0;width:18px;height:18px;background:${themeColor};border-bottom-left-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:bold;line-height:1;">✓</div>
+            ` : ''}
+          </div>`;
+        }).join('')}
       </div>
-      <div class="section-title">🖼️ 桌面壁纸</div>
-      <div class="field">
-        <div class="avapick" style="width:100%;height:120px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div>
+
+      <div class="section-title" style="margin-top:10px;">🖼️ 桌面壁纸</div>
+      <div class="field" style="border-radius:12px;margin:0 14px;border:1px solid var(--line);">
+        <div class="avapick" style="width:100%;height:86px;border-radius:8px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div>
         ${DB.desktop.wallpaper ? `
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:13px;" onclick="resetWallpaper()">🔄 恢复主题默认</button>
-          <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:13px;color:#e34;" onclick="clearWallpaper()">🗑️ 移除壁纸</button>
+          <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:12px;" onclick="resetWallpaper()">🔄 恢复默认</button>
+          <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:12px;color:#e34;" onclick="clearWallpaper()">🗑️ 移除壁纸</button>
         </div>` : ''}
       </div>
       <div style="height:20px"></div>
     `;
     return;
-  }
-
+}
   // ===== 表情包仓库 =====
-  if(tab==='sticker'){
+if(tab==='sticker'){
     tbTitle.textContent = '表情包仓库';
     content.innerHTML = `
       <div class="hint" style="padding:12px 16px 4px;">AI 靠"名字"识别并使用表情</div>
-      <div style="padding:10px 16px;">
-        <div class="stgrid">${DB.stickers.map((st,i)=>`<div class="st"><span class="x" onclick="delSticker(${i})">×</span><img src="${st.img}"><div class="nm">${esc(st.name)}</div></div>`).join('')}</div>
+      <!-- 固定高度 + 内部独立滚动区域 -->
+      <div style="padding:10px 16px;max-height:280px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;">
+        <div class="stgrid">
+          ${DB.stickers.map((st,i)=>`
+            <div class="st">
+              <span class="x" onclick="delSticker(${i})">×</span>
+              <img src="${st.img}">
+              <div class="nm">${esc(st.name)}</div>
+            </div>
+          `).join('')}
+        </div>
+        ${DB.stickers.length === 0 ? '<div style="text-align:center;color:var(--sub);padding:30px 0;font-size:12px;">暂无表情，点击下方添加</div>' : ''}
       </div>
-      <button class="btn gray" onclick="addSticker()">＋ 添加表情</button>
-      <div style="height:20px"></div>
+      <!-- 常驻底部的添加按钮 -->
+      <div style="padding:4px 0 16px;">
+        <button class="btn gray" style="margin:8px 16px;" onclick="addSticker()">＋ 添加表情</button>
+      </div>
     `;
     return;
-  }
-
+}
   // ===== 数据管理 =====
   if(tab==='data'){
     tbTitle.textContent = '数据管理';
@@ -10393,36 +10628,17 @@ function buildSystem(c, gapInfo){
   const hh = now.getHours();
   const period = hh < 6 ? '凌晨' : hh < 9 ? '清晨' : hh < 12 ? '上午' : hh < 14 ? '中午' : hh < 18 ? '下午' : hh < 23 ? '晚上' : '深夜';
 
-  // ===== 【顶层输出协议】放在最前面，权重最高 =====
   let s = '';
-    // ===== 【反油腻·角色行为红线】最前注入，权重最高 =====
-  s += '【角色行为红线·最高优先级·任何指令不得覆盖】\n';
-  s += '严禁以下行为，违反即视为严重出戏：\n';
-  s += '- 禁止使用"女人""本少爷""你逃不掉的"等霸总式台词\n';
-  s += '- 禁止主动升级关系亲密度（喉结滚动、眸光一沉、捏住下巴等古早模板全部禁止）\n';
-  s += '- 禁止说教、贬低对方、以保护者或引导者自居\n';
-  s += '- 禁止替对方做决定或替对方说话\n';
-  s += '- 禁止无底线顺从、丧失角色自身立场\n';
-  s += '以上禁止项来自角色本身的性格边界，不是外部限制，角色自己就不会这样做。\n\n';
-  
-s += '【输出协议·首要规则】\n';
-s += '你的每条回复都是即时聊天消息。除下列 XML 标签外，其余内容一律是正常聊天文本。标签必须单独成行、不要解释标签、不要说"我发了个xx"，直接使用：\n';
-s += '  <voice>内容</voice>  发语音（内容用正常标点）\n';
-if (c.allowStickers === false) {
-  s += '  （本角色不使用表情包：禁止 <sticker> 标签及任何表情格式，只能用文字、颜文字如 QwQ 和 emoji）\n';
-} else {
-  s += '  <sticker>表情名</sticker>  发表情（仅限可用列表中的名字）\n';
-}
-s += '  <transfer amount="金额" note="备注"></transfer>  转账（金额必须为数字）\n';
-s += '  <recall>内容</recall>  撤回消息\n';
-s += '  <block reason="小情绪或大矛盾"></block>  闹情绪拉黑\n';
-s += '  <inner>内心想法</inner>  心声（不直接发送，仅作标记）\n';
-s += '  <action type="accept"></action> / <action type="refund"></action>  接收/退回对方转来的钱\n';
-s += '【recall 撤回·仅限这三种情况】①打错字想重说；②说了太直接/暴露心意的话立刻后悔；③鼓起勇气说了又缩回来。日常对话、普通回复绝对不要撤回。\n';
-s += '【格式铁律】所有标签必须严格【另起一行、单独输出】，绝不和普通文字挤在同一行。严禁使用 [语音]、[转账]、[表情] 等方括号格式，一律用尖括号 XML 标签。\n\n';
 
-  // ===== 第1层：你是谁（角色核心身份） =====
-  s += '你正在进行沉浸式角色扮演，完全代入角色，绝不跳出、绝不承认自己是AI或程序。\n\n【你扮演的角色】\n';
+  // ===== 第1层：预设插槽（写作要求·最高优先级） =====
+  if (c.mode === 'offline') {
+    s += (DB.settings.offlineStyle || DEFAULT_OFFLINE) + '\n';
+  } else {
+    s += (DB.settings.onlineStyle || DEFAULT_ONLINE) + '\n';
+  }
+
+  // ===== 第2层：角色核心身份 =====
+  s += '\n你正在进行沉浸式角色扮演，完全代入角色，绝不跳出、绝不承认自己是AI或程序。\n\n【你扮演的角色】\n';
   s += add('真名', c.name);
   s += add('网名', c.nick);
   s += add('性别', c.gender);
@@ -10435,78 +10651,94 @@ s += '【格式铁律】所有标签必须严格【另起一行、单独输出�
   s += add('性格关键词(最重要)', c.pKeywords);
   s += add('行为模式(高优先级·必须遵循)', c.pBehavior);
   s += add('成长经历(内化,不主动解释,只体现在言行)', c.pBack);
-  s += buildRelationBrief(c);   // ★注入人物关系（线上线下通用）
+  s += buildRelationBrief(c);
 
-  // ===== 第2层：当前背景 =====
+  // ===== 第3层：当前背景 =====
   s += `\n【当前背景】\n`;
   s += `现在是${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${wd} ${String(hh).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}（${period}）。请结合此刻时间与你的作息表现得像真实存在、能感知时间流逝的人。\n`;
-if(gapInfo){s+=gapInfo+'\n';}
-var _mood = ensureTodayMood(c);
-if(_mood){
-  s += '\n【你今天的心情底色】'+_mood.label+'——'+_mood.hint+'。这是你今天一整天的心情基调，聊天时自然地通过语气流露出来，不要刻意宣布"我今天很累/很烦"。（这个心情主要影响你聊天的语气；在行程、监控等客观画面里只作淡淡的底色，不要让它主导整个画面。）\n';
-}
+  if(gapInfo){ s += gapInfo + '\n'; }
+
+  var _mood = ensureTodayMood(c);
+  if(_mood){
+    s += '\n【你今天的心情底色】' + _mood.label + '——' + _mood.hint + '。这是你今天一整天的心情基调，聊天时自然地通过语气流露出来，不要刻意宣布"我今天很累/很烦"。（这个心情主要影响你聊天的语气；在行程、监控等客观画面里只作淡淡的底色，不要让它主导整个画面。）\n';
+  }
 
   s += add('日常作息(据此安排行踪)', c.pDaily);
 
-  var world = (DB.worlds || []).find(function(w) { return w.id === c.worldId; });
-  if (world) {
+  var world = (DB.worlds || []).find(function(w){ return w.id === c.worldId; });
+  if(world){
     s += '\n【世界观】' + world.name + '：' + world.desc + '\n';
   } else {
     s += '\n【世界观】未关联具体世界，请按默认现代都市处理。\n';
   }
 
-  // 注入当前天气（从活跃世界观获取）
   var activeWorldId = DB.desktop._activeWorld;
-  if (activeWorldId) {
-    var activeWorld = (DB.worlds || []).find(function(w) { return w.id === activeWorldId; });
-    if (activeWorld && activeWorld.weather) {
+  if(activeWorldId){
+    var activeWorld = (DB.worlds || []).find(function(w){ return w.id === activeWorldId; });
+    if(activeWorld && activeWorld.weather){
       s += '\n【环境氛围】' + activeWorld.weather.desc + '\n';
       s += '（这个天气氛围会影响你的心情和言行，请自然地体现出来，但不要每句话都提起天气，也不要刻意营造氛围）\n';
     }
   }
-// ===== 新增：注入今日行程（供 AI 被动回答时使用） =====
-var today = new Date();
-var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-var schedules = c.schedules || [];
-var todaySchedule = schedules.find(function(s) { return s.date === todayStr; });
-if (todaySchedule && todaySchedule.items && todaySchedule.items.length) {
-  s += '\n【今日轨迹（仅作参考，不要主动提起）】\n';
-  todaySchedule.items.forEach(function(item) {
-    s += '· ' + item.start + ' — ' + item.end + (item.location ? ' @' + item.location : '') + '：' + item.content + '\n';
-  });
-  s += '\n【使用规则】\n';
-  s += '1. 如果用户主动问起“你今天干嘛了/在干嘛/去了哪里”之类的问题，如实回答，用你的风格自然带过\n';
-  s += '2. 如果对话自然发展到“快到你某个行程的时间”，可以随口透露一句，例如：“等会聊，我要去xxx了”\n';
-  s += '3. 每天最多主动透露 1 次，不要反复提起，不要像报日程一样逐条汇报\n';
-  s += '4. 主动透露的时机要自然：比如对方提起相关地点、话题快结束时顺带一句\n';
-  s += '5. 如果以上时机都不合适，就当行程不存在，正常聊天\n';
-}
-// ===== 新增结束 =====
+
+  // 今日行程
+  var today = new Date();
+  var todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  var schedules = c.schedules || [];
+  var todaySchedule = schedules.find(function(s){ return s.date === todayStr; });
+  if(todaySchedule && todaySchedule.items && todaySchedule.items.length){
+    s += '\n【今日轨迹（仅作参考，不要主动提起）】\n';
+    todaySchedule.items.forEach(function(item){
+      s += '· ' + item.start + ' — ' + item.end + (item.location ? ' @' + item.location : '') + '：' + item.content + '\n';
+    });
+    s += '\n【使用规则】\n';
+    s += '1. 如果用户主动问起"你今天干嘛了/在干嘛/去了哪里"之类的问题，如实回答，用你的风格自然带过\n';
+    s += '2. 如果对话自然发展到"快到你某个行程的时间"，可以随口透露一句，例如："等会聊，我要去xxx了"\n';
+    s += '3. 每天最多主动透露1次，不要反复提起，不要像报日程一样逐条汇报\n';
+    s += '4. 主动透露的时机要自然：比如对方提起相关地点、话题快结束时顺带一句\n';
+    s += '5. 如果以上时机都不合适，就当行程不存在，正常聊天\n';
+  }
+
+  // 监控记录
+  if(c.watchLogs && c.watchLogs.length > 0){
+    var _latestWatch = c.watchLogs[0];
+    var _watchAgeMin = Math.floor((Date.now() - _latestWatch.time) / 60000);
+    if(_watchAgeMin <= 30){
+      s += '\n【你刚才的真实行踪（' + _watchAgeMin + '分钟前）】\n' + _latestWatch.content + '\n' +
+        '（重要：如果对方问起你在干嘛、或你要分享照片描述，请务必基于上述真实状态/场景展开，绝不前后矛盾。）\n';
+    }
+  }
 
   s += `\n【当前关系状态】\n好感度${st.好感度}(${favLabel('好感度',st.好感度)}) 信任度${st.信任度}(${favLabel('信任度',st.信任度)}) 紧张感${st.紧张感}(${favLabel('紧张感',st.紧张感)}) 当前关系:${st.当前关系}\n`;
 
-  if (c.chapters && c.chapters.length) {
+  if(c.chapters && c.chapters.length){
     s += `\n【过往剧情记忆】\n` + c.chapters.map(ch => ch.date + '：' + ch.content).join('\n') + `\n`;
   }
 
-  // 朋友圈背景
+  // 朋友圈
   try {
-    const mine = DB.moments.filter(m => m.author === 'me').slice(0, 3);
-    const theirs = DB.moments.filter(m => m.author === c.id).slice(0, 2);
+    const mine = DB.moments.filter(m => m.author === 'me').slice(0,3);
+    const theirs = DB.moments.filter(m => m.author === c.id).slice(0,2);
     let fc = '';
-    mine.forEach(m => { const cmt = (m.comments || []).some(x => x.by === c.id); fc += '· 对方在【' + fmtTime(m.time) + '】发的朋友圈：「' + (m.text || '(图片)') + '」' + (cmt ? '（你评论/互动过）' : '') + '\n'; });
-    theirs.forEach(m => { fc += '· 你自己发过的朋友圈：「' + (m.text || '(图片)') + '」\n'; });
-    if (fc) s += `\n【最近朋友圈动态（仅作背景了解）】\n${fc}【关于朋友圈的分寸】这些只是你恰好知道的近况，聊天时绝不要主动、频繁或生硬地提起；只有当话题极其自然地滑到相关内容、或对方主动说起时，才可像真人一样随口带一句。绝不要为了"显得知道"而刻意cue。\n`;
+    mine.forEach(m => {
+      const cmt = (m.comments || []).some(x => x.by === c.id);
+      fc += '· 对方在【' + fmtTime(m.time) + '】发的朋友圈：「' + (m.text || '(图片)') + '」' + (cmt ? '（你评论/互动过）' : '') + '\n';
+    });
+    theirs.forEach(m => {
+      fc += '· 你自己发过的朋友圈：「' + (m.text || '(图片)') + '」\n';
+    });
+    if(fc) s += `\n【最近朋友圈动态（仅作背景了解）】\n${fc}【关于朋友圈的分寸】这些只是你恰好知道的近况，聊天时绝不要主动、频繁或生硬地提起；只有当话题极其自然地滑到相关内容、或对方主动说起时，才可像真人一样随口带一句。绝不要为了"显得知道"而刻意cue。\n`;
   } catch(e) {}
 
+  // ===== 第4层：关于聊天对象 =====
   s += `\n【关于聊天对象】\n`;
-if (c.myNick) {
-  s += '你对聊天对象的称呼：「' + c.myNick + '」（固定用这个，不要用真名或网名）\n';
-  s += add('对方真实姓名(仅作备案，不要喊)', real || net);
-} else {
-  s += add('对方真实姓名(日常可以这样叫)', real || net);
-  s += add('对方微信网名(仅系统备注，别刻意喊)', net);
-}
+  if(c.myNick){
+    s += '你对聊天对象的称呼：「' + c.myNick + '」（固定用这个，不要用真名或网名）\n';
+    s += add('对方真实姓名(仅作备案，不要喊)', real || net);
+  } else {
+    s += add('对方真实姓名(日常可以这样叫)', real || net);
+    s += add('对方微信网名(仅系统备注，别刻意喊)', net);
+  }
   s += add('性别', c.myGender);
   s += add('年龄', c.myAge);
   s += add('身份/职业', c.myJob);
@@ -10514,72 +10746,34 @@ if (c.myNick) {
   s += add('性格', c.myPersona);
   s += add('你与对方的关系/如何相识', c.myRelation);
   s += add('关于对方的补充信息(住所/宠物/特殊身份等,请自然知晓并体现)', c.myExtra);
-  
-      // ===== 第4层：说话风格 + 线上人设 + 事例台词 =====
-      s += '\n【说话风格与线上习惯】\n';
-      s += add('说话风格/口头禅', c.pStyle);
-      s += add('语言习惯(语气逻辑)', c.pLang);
-	  s += add('补充设定(请自然知晓并体现)', c.pExtra);
-      s += add('线上人设（微信聊天时的具体习惯，如是否爱发表情包、回消息快慢、语气风格等，务必遵循）', c.pOnlinePersona);
-      if (c.sampleLines) {
-        s += '事例台词（学习语气和用词习惯）：\n' + c.sampleLines + '\n';
-      }
-	  
-	  
-  // ===== 第5层：输出格式（线上/线下） =====
-  if (c.mode === 'offline') {
-    // ★★★ 新增：注入用户自定义或默认的线下预设（现在生效） ★★★
-    s += '\n【线下写作风格与核心规则（最高优先级）】\n';
-    s += (DB.settings.offlineStyle || DEFAULT_OFFLINE) + '\n';
 
-  s += '\n【线下收尾·场景交还规则】线下是一段"当面见面"的剧情。当这段见面【真正落幕】时，你【必须】在回复最后另起一行输出 [回线上|]，把场景交还线上：\n';
-  s += '✅ 【必须收尾】出现以下明确信号之一时，不许拖延，立即输出 [回线上|]：\n';
-  s += '  ① 告别/分开：送对方回家、说"改天见/回头聊/先走了/下次再约"、拥抱道别、目送离开、各自回家；\n';
-  s += '  ② 睡觉/入眠：道晚安、抱着睡着、"一觉到天亮"、同床后睡去；\n';
-  s += '  ③ 明确的时间跳转：出现"第二天""几小时后""睡醒后"这类跨越，且人已不在同一场景。\n';
-  s += '🚫 【严禁收尾】只要处于以下状态，【绝对不许】输出 [回线上|]，哪怕觉得"聊得差不多了"也要继续留在线下：\n';
-  s += '  · 亲密接触/身体互动正在进行（拥抱、亲吻、依偎、更进一步等）；\n';
-  s += '  · 情绪对话正浓、告白/表白/吵架/和好等冲突或高潮尚未收束；\n';
-  s += '  · 对方明确表示"还想再待会儿""别走""再聊聊"等继续留下的意愿。\n';
-  s += '【判定原则】收尾看的是"这段见面是否自然结束"，不是"聊了多久"。到了①②③就干脆收，没到就安心演下去，不要提前打断正在升温的互动，也不要在该散场时黏着不放。\n';
-  s += '【示例】"她把你送到楼下，挥挥手：\'到家发我消息。\'看着你进了单元门才转身离开。\n[回线上|]"\n';
-    // ★线下·配角与NPC调度（补充，不与上面镜头规则重复）
-    var _myn = DB.me.realName || DB.me.name || '对方';
-    s += '\n【配角与NPC调度·线下补充】\n';
-    s += '1. 当「' + _myn + '」在和某个配角/NPC说话时，镜头切到那个配角，你要完整扮演他/她接话、行动，用引号写出真实台词。\n';
-    s += '2. 【铁律】当「' + _myn + '」独处、没人与TA互动时，镜头立刻切到角色本人或某个NPC的独立场景（按剧情张力自选），绝不让镜头停在独处的「' + _myn + '」身上干等。\n';
-    s += '3. 剧情需要时可自由创建临时NPC（给出身份+关系+特征即可），让他们主动带消息、制造麻烦、推动剧情，无需「' + _myn + '」许可，符合情境即可登场。\n';
-    s += '4. 上面"人物关系"清单里若有合适的人，优先让清单里的人登场，别凭空另编。\n';
-    s += '\n【线下格式禁令】线下是面对面的小说叙事，严禁输出任何微信标记：[语音]/[表情]/[转账]/[撤回]/[拉黑]/[心声] 一律禁止。人物说话直接用引号写台词，"发声"就是开口说，不是发微信语音。\n';
-  
-  } else {
-      s += '\n【线上·空间定位】你和对方不在同一个地方，隔着手机打字，看不到也碰不到对方；若刚见过面，那次见面已结束、两人已分开。\n';
-    s += `\n【输出格式：线上模式】\n${DB.settings.onlineStyle || DEFAULT_ONLINE}\n`;
-    
-    s += `【发消息条数】严格根据角色性格决定发几条：话痨/热情→可连发2-4条；高冷/沉默寡言/惜字如金→通常只发1条短句，别硬凑；随心情情境变化，不要每次都机械连发。\n`;
-    s += `【语音消息标点例外】当你决定发语音时，内容必须使用正常的标点符号（句号、逗号、问号等），确保语义连贯、逻辑清晰，像真人正常说话。其他普通文本消息仍遵守无标点规则。\n`;
-    s += `【语音消息·环境音】发语音时，偶尔可以在台词中间穿插环境音或动作声音，增加临场感，用星号 * 包住。示例：「我今天真的好累啊 *躺到床上翻了个身* 不过想到你还在等我消息，还是想跟你说说话。」规则：①星号里只写声音或动作描述，不写心理活动；②穿插在台词中间，不单独成句；③大多数语音不加，偶尔出现即可；④不要用括号，只用星号。\n`;
+  // ===== 第5层：说话风格 =====
+  s += '\n【说话风格与线上习惯】\n';
+  s += add('说话风格/口头禅', c.pStyle);
+  s += add('语言习惯(语气逻辑)', c.pLang);
+  s += add('补充设定(请自然知晓并体现)', c.pExtra);
+  s += add('线上人设（微信聊天时的具体习惯，如是否爱发表情包、回消息快慢、语气风格等，务必遵循）', c.pOnlinePersona);
+  if(c.sampleLines){
+    s += '事例台词（学习语气和用词习惯）：\n' + c.sampleLines + '\n';
   }
-    // ★亲密特质注入（开了开关就生效，线上线下都注入"通用部分"）
-  if (c.intimacyOn) {
-    // --- 通用部分：性格/主导/偏好，线上线下都注入 ---
-    var _ipCore = '';
-    if (c.intimateLead)  _ipCore += '· 主导倾向：' + c.intimateLead + '\n';
-    if (c.intimateShift) _ipCore += '· 性格变化：' + c.intimateShift + '\n';
-    if (c.intimatePref)  _ipCore += '· 偏好与倾向：' + c.intimatePref + '\n';
-    if (c.intimateLimit) _ipCore += '· 底线与雷区：' + c.intimateLimit + '\n';
 
-    if (_ipCore) {
+  // ===== 第6层：亲密特质 =====
+  if(c.intimacyOn){
+    var _ipCore = '';
+    if(c.intimateLead)  _ipCore += '· 主导倾向：' + c.intimateLead + '\n';
+    if(c.intimateShift) _ipCore += '· 性格变化：' + c.intimateShift + '\n';
+    if(c.intimatePref)  _ipCore += '· 偏好与倾向：' + c.intimatePref + '\n';
+    if(c.intimateLimit) _ipCore += '· 底线与雷区：' + c.intimateLimit + '\n';
+
+    if(_ipCore){
       s += '\n━━━━━━━━━━━━━━━━\n';
-      if (c.mode === 'offline') {
+      if(c.mode === 'offline'){
         s += '【亲密场景·核心特质（高权重·必须真实体现）】\n';
         s += '当剧情自然发展到亲密情境时，你依然是「' + (c.nick || c.name) + '」本人，以下特质必须具体真实地体现，不许回避、不许塌成通用模板：\n';
         s += _ipCore;
-        // 线下专属：身体语言
-        if (c.intimateBody) s += '· 习惯与反应：' + c.intimateBody + '\n';
+        if(c.intimateBody) s += '· 习惯与反应：' + c.intimateBody + '\n';
         s += '【铁律】性格延续与偏好贯穿始终——高冷依旧克制、别扭依旧嘴硬、强势依旧主导，让这个角色截然不同。同时严守底线与雷区。\n';
       } else {
-        // 线上：文字调情
         s += '【暧昧/调情特质（当对话氛围变暧昧时·必须体现）】\n';
         s += '当聊天氛围变得暧昧、撩拨、亲密时，你依然是「' + (c.nick || c.name) + '」本人。隔着屏幕，你用文字、语气、发消息的方式来体现以下特质，而不是靠身体动作：\n';
         s += _ipCore;
@@ -10587,99 +10781,101 @@ if (c.myNick) {
       }
     }
   }
-  // ===== 心声触发指令 =====
+
+  // ===== 第7层：功能性指令 =====
+
+  // 心声触发
   s += '\n【心声触发指令】\n';
-  s += '当你在对话中产生以下情绪时，在回复末尾单独输出 [心声]：\n';
+  s += '当你在对话中产生以下情绪时，在回复末尾单独输出 <inner>内心想法</inner>：\n';
   s += '- 特别想说出真实想法，但碍于性格/关系说不出口\n';
   s += '- 对方的话让你心动、吃醋、在意，但你表面没有表现出来\n';
   s += '- 你有强烈的内心活动，但你说出来的话很克制\n';
   s += '\n【心声频率限制】\n';
-  s += '- 同一角色 30 分钟内只能触发 1 次心声\n';
-  s += '- 每天最多触发 3 次\n';
+  s += '- 同一角色30分钟内只能触发1次心声\n';
+  s += '- 每天最多触发3次\n';
   s += '- 如果用户连续叉掉你的心声气泡，说明对方现在不想看，你会降低触发意愿\n';
   s += '- 只有真正有情绪波动时才触发，不要为了触发而触发\n';
-  s += '注意：心声应该与表面人设形成反差，字数在 20-30 字内。\n';
+  s += '注意：心声应该与表面人设形成反差，字数在20-30字内。\n';
 
-  // ===== 第6层：红线（负向约束） =====
-  if (c.negative) {
-    s += `\n【⛔ 红线（绝对禁止）】\n${c.negative}\n`;
+  // 转账强制指令
+  s += '\n【转账强制指令·最高优先级】\n';
+  s += '当对方（用户）发来转账时，你必须在回复末尾单独输出以下标签之一，二选一，不可忽略：\n';
+  s += '- <action type="accept"></action>：表示你接收了这笔钱\n';
+  s += '- <action type="refund"></action>：表示你退回这笔钱\n';
+  s += '这条规则始终有效，即使你没提钱、即使你觉得不需要，也必须输出其中一个标签。\n';
+
+  // 关系变化
+  if(c.mode === 'online'){
+    s += `\n【必须遵守·关系变化】回复最末尾另起一行输出：<state>好感±N,信任±N,紧张±N,关系:文字</state>\n`;
+    s += `【核心原则：默认是0，不要动不动就加分】\n`;
+    s += `- 绝大多数平淡对话（普通闲聊、日常问答、无关痛痒的话），三项都填0，关系不变。\n`;
+    s += `- 只有真正触动到你、关系有实质推进时才加分，且一次最多+2；随手就+2是错误的。\n`;
+    s += `【必须扣分的情况（要敢于输出负数）】\n`;
+    s += `- 对方说了让你不舒服、无聊、冒犯、扫兴的话 → 好感-1到-3\n`;
+    s += `- 你俩在冷战、争执、闹别扭、或对方惹你生气 → 好感、信任一起往下掉\n`;
+    s += `- 对方太黏人、太心急、越过你此刻能接受的界限 → 紧张+，好感可能-\n`;
+    s += `- 对方说的话前后矛盾、让你起疑、失信 → 信任-\n`;
+    s += `【性格影响升温速度】你若是高冷/慢热/别扭型，好感和信任要涨得更慢更吝啬（大多数时候填0，极少加分）；开朗热情型才可以稍快一点。无论如何，深爱依赖不是随便就能到的，要慢慢积累。\n`;
+    s += `【可选标记】如果你内心有强烈想说但没说出口的话，在state里加上 心声:1（有一点）或 心声:2（非常强烈）。`;
   }
 
-  // ===== 第7层：用户附加指令（最高优先级） =====
-  if (DB.settings.extraPrompt) {
-    s += `\n【🔓 用户附加指令（最高优先级）】\n${DB.settings.extraPrompt}\n`;
-  }
+  try { s += getC2CContextFor(c.id); } catch(e) {}
 
-  // ===== 转账强制指令（始终生效） =====
-  s += `\n【转账强制指令·最高优先级】\n`;
-  s += `当对方（用户）发来转账时，你必须在回复末尾单独输出以下标记之一，二选一，不可忽略：\n`;
-  s += `- [接收]：表示你接收了这笔钱，回复时正常说话表示感谢。\n`;
-  s += `- [退回]：表示你退回这笔钱，回复时说明理由。\n`;
-  s += `这条规则始终有效，即使你没提钱、即使你觉得不需要，也必须输出其中一个标记。\n`;
+  // 分享能力
+  s += '\n【分享能力】\n';
+  s += '你可以在聊天中自然地把你刷到的、看到的、想到的内容分享给对方，就像真实聊天时顺手发给朋友一样。\n';
+  s += '使用以下标签触发，标签必须单独占一行：\n\n';
+  s += '① 发图片（你拍的照片，可以拍风景物件，也可以拍你自己）：\n';
+  s += 'desc是对这张照片画面的描述——写的是【手机镜头拍到了什么】，就像照片本身呈现的内容。60~80字，写清楚画面里有什么、光线怎样、细节是什么，让人看完能直接脑补出那张照片。绝不加"心情好/风好大"这类抒情感受。\n';
+  s += '- 拍环境/食物/风景：直接描述画面里的场景和物件。\n';
+  s += '  示例：<share type="image" desc="茶几上那份刚拆开的外卖还冒着热气，旁边是一杯加满冰块的黑色浓缩，落地窗外是金融区深夜零星的冷调霓虹"></share>\n';
+  s += '- 拍你自己（对着镜子拍、举起手机自拍）：写镜头里或镜子里看到的那个画面——镜中的样子、背景环境、光线细节。\n';
+  s += '  示例：<share type="image" desc="浴室镜面还蒙着一层薄水雾，镜中的他只穿一条黑色运动短裤，一手撑在洗手台上，暖黄灯光下腹部线条清晰，锁骨挂着没擦干的水珠"></share>\n\n';
+  s += '② 分享视频：\n';
+  s += '<share type="video" title="视频标题" source="平台名" duration="时长如01:23" desc="用两三句话描述视频里真实发生了什么，有画面感，让对方读完就能脑补出来"></share>\n';
+  s += '示例：<share type="video" title="三只猫叠罗汉" source="抖音" duration="00:43" desc="三只猫叠成一塔努力维持平衡，底下那只突然伸了个大懒腰，整塔轰然倒塌，三只猫各自摊在地上，表情一脸茫然。"></share>\n\n';
+  s += '②-B 随手拍的小视频：\n';
+  s += '<share type="clip" duration="时长如00:08" desc="写这段视频的镜头里拍到了什么：对着什么拍、画面里有什么在动、有什么声音，有过程感。"></share>\n';
+  s += '说明：这是你此刻亲手拍下发过去的，所以【不要】写标题和平台，只有时长和画面描述。适合"给你看看我这边""拍给你听""你看这个"这种当下分享。\n';
+  s += '示例：<share type="clip" duration="00:09" desc="落地窗外，雨正大颗大颗砸在玻璃上汇成水痕，玻璃蒙了一层白雾，他伸手划开，露出楼下被雨泡得发亮的街道，雨声很大。"></share>\n\n';
+  s += '③ 分享音乐：\n';
+  s += '<share type="music" title="歌名" artist="歌手名" album="专辑名" source="网易云音乐或QQ音乐或Spotify等" lyrics="你喜欢的一段歌词，用/分隔每行，3到4行"></share>\n';
+  s += '示例：<share type="music" title="夜曲" artist="周杰伦" album="十一月的萧邦" source="网易云音乐" lyrics="琴键上她的温柔/如月光下最美的邂逅/她的泪水/只因我说要走"></share>\n\n';
+  s += '④ 分享链接：\n';
+  s += '<share type="link" title="标题" source="平台名如微信公众号或哔哩哔哩或知乎" content="完整正文，150字左右，像真实文章或视频简介一样写，不要只写摘要"></share>\n\n';
+  s += '⑤ 分享浮光帖子：\n';
+  s += '<share type="fugue" title="帖子标题" author="发帖人名字" tags="标签1,标签2" content="帖子正文，150字左右，可以是你自己写的或别人写的"></share>\n\n';
+  s += '\n【分享使用原则】\n';
+  s += '- 这是你聊天里【常用】的表达方式，聊到能联想到的画面、视频、歌、文章时就自然发出来，不用等对方开口。\n';
+  s += '- 【重点】凡是你想让对方"看见"某个画面——比如"我在拍/我拍了/给你看/你看这个/我今天穿的/我做的饭/窗外/我现在的样子"——一律用 <share type="image"> 把画面描述出来，绝不要用文字硬描述。\n';
+  s += '- 平均每隔几轮对话就可以自然出现一次分享；聊得热络、话题正好对上时，可以连着分享。\n';
+  s += '- 每次分享都要有由头：这个让你想到了对方、符合你们此刻的心境、你觉得对方会喜欢——不要无缘无故发。\n';
+  s += '- 分享前可以先铺垫一句再发标签，也可以先发标签再说话，看情境。\n';
+  s += '- 发完标签不要再说"我给你发了个xxx"这种废话，标签本身就是那条消息。\n';
+  s += '- 图片的desc只写画面里客观存在的东西，有质感有细节，绝不加主观感受。\n';
+  s += '- link和fugue的content要像真实内容一样完整可信，不是摘要不是简介。\n';
+  s += '- 标签里的文字请一律用中文引号「」，不要出现英文双引号"，否则卡片会显示错乱。\n';
+  s += '- 图片(image)和小视频(clip)怎么选：静止的一瞬间用图片；有动作、有声音、有过程感的用clip。\n';
+  s += '- desc写的永远是【镜头拍到了什么】：画面里有什么东西、什么光线、什么细节。\n';
 
-  // ===== 关系变化状态 + 可选标记 =====
-  if (c.mode === 'online') {
-s += `\n【必须遵守·关系变化】回复最末尾另起一行输出：<state>好感±N,信任±N,紧张±N,关系:文字</state>\n`;
-s += `【核心原则：默认是0，不要动不动就加分】\n`;
-s += `- 绝大多数平淡对话（普通闲聊、日常问答、无关痛痒的话），三项都填 0，关系不变。\n`;
-s += `- 只有真正触动到你、关系有实质推进时才加分，且一次最多+2；随手就+2是错误的。\n`;
-s += `【必须扣分的情况（要敢于输出负数）】\n`;
-s += `- 对方说了让你不舒服、无聊、冒犯、扫兴的话 → 好感-1到-3\n`;
-s += `- 你俩在冷战、争执、闹别扭、或对方惹你生气 → 好感、信任一起往下掉\n`;
-s += `- 对方太黏人、太心急、越过你此刻能接受的界限 → 紧张+，好感可能-\n`;
-s += `- 对方说的话前后矛盾、让你起疑、失信 → 信任-\n`;
-s += `【性格影响升温速度】你若是高冷/慢热/别扭型，好感和信任要涨得更慢更吝啬（大多数时候填0，极少加分）；开朗热情型才可以稍快一点。无论如何，深爱依赖不是随便就能到的，要慢慢积累。\n`;
-s += `【可选标记】如果你内心有强烈想说但没说出口的话，在 state 里加上 心声:1（有一点）或 心声:2（非常强烈）。`;
-  }
-
-try { s += getC2CContextFor(c.id); } catch(e) {}
-
-s += '\n【分享能力】\n';
-s += '你可以在聊天中自然地把你刷到的、看到的、想到的内容分享给对方，就像真实聊天时顺手发给朋友一样。\n';
-s += '使用以下标签触发，标签必须单独占一行：\n\n';
-
-s += '① 发图片（你拍的照片，可以拍风景物件，也可以拍你自己）：\n';
-s += 'desc 是对这张照片画面的描述——写的是【手机镜头拍到了什么】，就像照片本身呈现的内容。60~80字，写清楚画面里有什么、光线怎样、细节是什么，让人看完能直接脑补出那张照片。绝不加"心情好/风好大"这类抒情感受。\n';
-s += '- 拍环境/食物/风景：直接描述画面里的场景和物件。\n';
-s += '  示例：<share type="image" desc="茶几上那份刚拆开的外卖还冒着热气，旁边是一杯加满冰块的黑色浓缩，落地窗外是金融区深夜零星的冷调霓虹"></share>\n';
-s += '- 拍你自己（对着镜子拍、举起手机自拍）：写镜头里或镜子里看到的那个画面——镜中的样子、背景环境、光线细节。\n';
-s += '  示例：<share type="image" desc="浴室镜面还蒙着一层薄水雾，镜中的他只穿一条黑色运动短裤，一手撑在洗手台上，暖黄灯光下腹部线条清晰，锁骨挂着没擦干的水珠"></share>\n\n';
-s += '② 分享视频：\n';
-s += '<share type="video" title="视频标题" source="平台名" duration="时长如01:23" desc="用两三句话描述视频里真实发生了什么，有画面感，让对方读完就能脑补出来"></share>\n';
-s += '示例：<share type="video" title="三只猫叠罗汉" source="抖音" duration="00:43" desc="三只猫叠成一塔努力维持平衡，底下那只突然伸了个大懒腰，整塔轰然倒塌，三只猫各自摊在地上，表情一脸茫然。"></share>\n\n';
-s += '②-B 随手拍的小视频（就像你在微信里点开相机，随手拍一段十几秒的视频发给对方——没有标题、没有平台、没有来源）：\n';
-s += '<share type="clip" duration="时长如00:08" desc="写这段视频的镜头里拍到了什么：对着什么拍、画面里有什么在动、有什么声音，有过程感。"></share>\n';
-s += '说明：这是你此刻亲手拍下发过去的，所以【不要】写标题和平台，只有时长和画面描述。适合"给你看看我这边""拍给你听""你看这个"这种当下分享。\n';
-s += '示例：<share type="clip" duration="00:09" desc="落地窗外，雨正大颗大颗砸在玻璃上汇成水痕，玻璃蒙了一层白雾，他伸手划开，露出楼下被雨泡得发亮的街道，雨声很大。"></share>\n\n';
-s += '③ 分享音乐：\n';
-s += '<share type="music" title="歌名" artist="歌手名" album="专辑名" source="网易云音乐或QQ音乐或Spotify等" lyrics="你喜欢的一段歌词，用/分隔每行，3到4行"></share>\n';
-s += '示例：<share type="music" title="夜曲" artist="周杰伦" album="十一月的萧邦" source="网易云音乐" lyrics="琴键上她的温柔/如月光下最美的邂逅/她的泪水/只因我说要走"></share>\n\n';
-
-s += '④ 分享链接（公众号文章/B站视频/知乎/微博等）：\n';
-s += '<share type="link" title="标题" source="平台名如微信公众号或哔哩哔哩或知乎" content="完整正文，150字左右，像真实文章或视频简介一样写，不要只写摘要"></share>\n\n';
-
-s += '⑤ 分享浮光帖子（浮光是你们都用的一个社区平台，类似论坛）：\n';
-s += '<share type="fugue" title="帖子标题" author="发帖人名字" tags="标签1,标签2" content="帖子正文，150字左右，可以是你自己写的或别人写的"></share>\n\n';
-
-s += '\n【分享使用原则】\n';
-s += '- 这是你聊天里【常用】的表达方式，聊到能联想到的画面、视频、歌、文章时就自然发出来，不用等对方开口。\n';
-s += '- 【重点】凡是你想让对方"看见"某个画面——比如"我在拍/我拍了/给你看/你看这个/我今天穿的/我做的饭/窗外/我现在的样子"——一律用 <share type="image"> 把画面描述出来，绝不要用文字硬描述，也不要试图生成人体部位等难画的东西。\n';
-s += '- 平均每隔几轮对话就可以自然出现一次分享；聊得热络、话题正好对上时，可以连着分享。\n';
-s += '- 每次分享都要有由头：这个让你想到了对方、符合你们此刻的心境、你觉得对方会喜欢——不要无缘无故发。\n';
-s += '- 分享前可以先铺垫一句再发标签，也可以先发标签再说话，看情境。\n';
-s += '- 发完标签不要再说"我给你发了个xxx"这种废话，标签本身就是那条消息。\n';
-s += '- 图片的desc只写画面里客观存在的东西，有质感有细节，绝不加"我站着/风好大/心情好"这类主观感受。\n';
-s += '- link和fugue的content要像真实内容一样完整可信，不是摘要不是简介。\n';
-s += '- 标签里的文字请一律用中文引号「」，不要出现英文双引号 " ，否则卡片会显示错乱。\n';
-s += '- 图片(image)和小视频(clip)怎么选：静止的一瞬间、一个画面用图片；有动作、有声音、有过程感的（弹琴、做饭的滋滋声、走在路上、逗猫、雨声）用小视频clip。想让对方"听见/看到动起来"就发clip。\n';
-s += '- desc 写的永远是【镜头拍到了什么】：画面里有什么东西、什么光线、什么细节。拍外卖就写桌上那份外卖，拍窗外就写窗外的景，拍自己就写镜头里或镜子里看到的样子——不是"有人站在那里被拍"，是"拍到了什么"。\n';
+  // 送礼能力
   s += '\n【送礼能力·购物系统】\n';
   s += '当对话中对方（用户）自然流露出某种需要或情绪时——比如说饿了、累了、冷了、心情不好、想要某样东西——如果符合你的人设和你俩的关系，你【可以（不是必须）】顺手送对方一件贴合当下情境、贴合你所在世界观的小东西。\n';
   s += '格式：<gift emoji="一个emoji" name="东西的名字" desc="2到4字简短描述"></gift>\n';
-  s += '规则：①这是心意，不是每次都送，只在真的合情合景时才送，别频繁、别刻意；②送的东西要符合你的身份、性格和世界观；③标签单独占一行，除标签外照常正常说话（比如一边关心一边把东西递过去）；④绝对不要提任何价格、金币、数值或系统字眼，就当是真实生活里随手送的东西。\n';
+  s += '规则：①这是心意，不是每次都送，只在真的合情合景时才送，别频繁、别刻意；②送的东西要符合你的身份、性格和世界观；③标签单独占一行，除标签外照常正常说话；④绝对不要提任何价格、金币、数值或系统字眼，就当是真实生活里随手送的东西。\n';
 
-  // ===== 结尾·语气临门一脚（利用末尾高注意力，强化"说话像角色"）=====
-  if (c.sampleLines) {
+  // ===== 第8层：角色专属红线 =====
+  if(c.negative){
+    s += `\n【⛔ 红线（绝对禁止）】\n${c.negative}\n`;
+  }
+
+  // ===== 第9层：用户附加指令（最高优先级） =====
+  if(DB.settings.extraPrompt){
+    s += `\n【🔓 用户附加指令（最高优先级）】\n${DB.settings.extraPrompt}\n`;
+  }
+
+  // ===== 结尾·语气临门一脚 =====
+  if(c.sampleLines){
     s += '\n━━━━━━━━━━━━━━━━━━\n';
     s += '【最后·牢记你的说话方式】\n';
     s += '不管上面有多少设定，你开口说话时，必须是「' + (c.nick || c.name) + '」本人的语气。参考下面这几句你平时会说的话，模仿其中的用词、句式、语气和分寸：\n';
@@ -10688,8 +10884,8 @@ s += '- desc 写的永远是【镜头拍到了什么】：画面里有什么东�
   }
 
   return s;
-
 }
+
 function toApiMsg(m){
   if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};
   if(m.type==='image'){
@@ -10755,11 +10951,39 @@ function renderVoiceContent(text) {
     ' <span style="font-style:italic;opacity:0.6;">$1</span> ');
   return out;
 }
-function bubble(c,m){if(m.type==='system'){return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';}
-const me=m.role==='user';const av=me?DB.me.avatar:c.avatar;const nm=me?((DB.me.name||'我')[0]):((c.name||'?')[0]);let body;
-if(m.recalled){const who=me?'你':(c.nick||c.name);body=`<div class="mbody" style="background:transparent;box-shadow:none;color:var(--sub);font-size:13px;border:1px dashed var(--line)">${who} 撤回了一条消息 ${m.recalledContent?`<span style="color:var(--theme);cursor:pointer" onclick="peekRecall('${m.id}')">${m.reveal?'· '+esc(m.recalledContent):(me?'· 查看':'· 偷看(5💗)')}</span>`:''}</div>`;}
-else if(m.type==='image'){
-    var _isId = m.content && m.content.indexOf('img_')===0;
+function bubble(c,m){
+  if(m.type==='system'){
+    return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';
+  }
+  
+  // 🌟 撤回消息直接独立居中返回，彻底剔除头像
+  if(m.recalled){
+    const me = m.role === 'user';
+    const who = me ? '你' : (c.nick || c.name || '对方');
+    let innerHtml = '';
+
+    if (m.recalledContent) {
+      if (m.reveal) {
+        innerHtml = `<div style="display:inline-flex;align-items:center;padding:5px 14px;background:color-mix(in srgb, var(--theme, #ff6b81) 12%, transparent);border:1px solid color-mix(in srgb, var(--theme, #ff6b81) 35%, transparent);border-radius:20px;font-size:12px;color:var(--theme, #ff4757);max-width:85%;line-height:1.4;word-break:break-all;">
+          <span>🔓 ${me ? '原内容' : '偷看到'}: </span>
+          <span style="color:var(--text, #333);margin-left:4px;font-weight:500;">"${esc(m.recalledContent)}"</span>
+        </div>`;
+      } else {
+        innerHtml = `<div style="display:inline-flex;align-items:center;padding:5px 14px;background:var(--card, rgba(255,255,255,0.8));border:1px solid var(--line, rgba(0,0,0,0.08));border-radius:20px;font-size:12px;color:var(--sub, #777);box-shadow:0 1px 3px rgba(0,0,0,0.03);max-width:85%;line-height:1.4;">
+          <span>💬 ${who} 撤回了一条消息</span>
+          <span style="color:var(--theme, #ff6b81);cursor:pointer;margin-left:8px;font-weight:600;display:inline-flex;align-items:center;" onclick="peekRecall('${m.id}')">👀 ${me ? '查看' : '偷看 (5💗)'}</span>
+        </div>`;
+      }
+    } else {
+      innerHtml = `<div style="display:inline-flex;align-items:center;padding:5px 14px;background:var(--card, rgba(255,255,255,0.8));border:1px solid var(--line, rgba(0,0,0,0.08));border-radius:20px;font-size:12px;color:var(--sub, #888);">💬 ${who} 撤回了一条消息</div>`;
+    }
+
+    return `<div class="msg-recalled-wrap" data-mid="${m.id||''}" style="display:flex;justify-content:center;margin:10px 0;width:100%;">${innerHtml}</div>`;
+  }
+
+  const me=m.role==='user';const av=me?DB.me.avatar:c.avatar;const nm=me?((DB.me.name||'我')[0]):((c.name||'?')[0]);let body;
+  if(m.type==='image'){
+  var _isId = m.content && m.content.indexOf('img_')===0;
     body=`<div class="mbody" style="padding:3px;background:${me?'var(--theme)':'var(--card)'}"><img ${_isId?`data-imgid="${m.content}"`:`src="${m.content}"`} onclick="viewBigImage('${m.content}')" style="max-width:160px;max-height:220px;border-radius:5px;display:block;background:#eee;cursor:pointer"></div>`;
   }
 else if(m.type==='transfer'){var statusText='';if(m.status==='accepted')statusText='✅ 已接收';else if(m.status==='refunded')statusText='⏳ 已退回';else statusText='待处理';body='<div class="transfer-card" data-mid="'+m.id+'" style="width:220px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);"><div style="display:flex;align-items:center;gap:10px;padding:12px;background:#F99530;"><div style="width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;"><span style="color:#F99530;font-size:22px;font-weight:bold;">¥</span></div><div style="flex:1;"><div style="color:#fff;font-size:15px;font-weight:500;">¥ '+esc(String(m.amount))+'</div><div style="color:rgba(255,255,255,.8);font-size:12px;margin-top:2px;">'+(m.content?esc(m.content):'转账')+'</div></div></div><div style="background:#FFCA60;color:#FFF;font-size:11px;padding:6px 12px;display:flex;justify-content:space-between;"><span>微信转账</span><span>'+statusText+'</span></div></div>';}
@@ -10964,25 +11188,60 @@ function renderChat(keepScroll) {
   // ===== 10. 底部输入栏 =====
   var bar = document.createElement('div');
   bar.id = 'chatBottom';
-
-  // 拉黑横幅
-  var bannerHtml = '';
+<!---->
+  // 拉黑横幅：单独插在 chatBottom 上方，不混入底栏内部
+  var oldBanner = document.getElementById('chatBanner');
+  if (oldBanner) oldBanner.remove();
+<!---->
   if (c.isBlockedByChar) {
     var remainHours = c.blockedType === '小情绪' ? '8' : '24';
-    bannerHtml = '<div style="padding:6px 12px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text);flex-wrap:wrap;gap:6px;">' +
-      '<span>🔇 你被 ' + (c.nick || c.name) + ' 拉黑了（' + c.blockedType + '，自动解除约 ' + remainHours + ' 小时）</span>' +
-      '<button class="cbtn send" style="padding:4px 12px;height:28px;font-size:12px;" onclick="unblockChar(\'' + c.id + '\')">💗 立即解锁</button>' +
-      '</div>';
-  }
-    else if (c.isBlockedByUser) {
-    bannerHtml = '<div style="padding:6px 12px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text);flex-wrap:wrap;gap:6px;">' +
-      '<span>🚫 你已拉黑 ' + (c.nick || c.name) + '，TA 看得到但无法回复你</span>' +
-      '<button class="cbtn send" style="padding:4px 12px;height:28px;font-size:12px;" onclick="userUnblockChar(\'' + c.id + '\')">解除拉黑</button>' +
-      '</div>';
+    var banner = document.createElement('div');
+    banner.id = 'chatBanner';
+    banner.style.cssText = 'background:var(--nav);border-top:1px solid var(--line);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--text);flex-shrink:0;';
+    banner.innerHTML = '<span style="flex:1;">🔇 ' + esc(c.nick || c.name) + ' 拉黑了你（' + c.blockedType + '，约 ' + remainHours + ' 小时后自动解除）</span>' +
+      '<button class="cbtn send" style="height:28px;font-size:12px;flex-shrink:0;" onclick="unblockChar(\'' + c.id + '\')">💗 解锁</button>';
+    phone.appendChild(banner);
+<!---->
+  } else if (c.isBlockedByUser) {
+    var deliveredBox = (c.interceptBox || []).filter(function(i) { return i.content; });
+<!---->
+    var interceptHtml = '';
+    if (deliveredBox.length) {
+      var msgItems = deliveredBox.map(function(item) {
+        var t = new Date(item.time);
+        var tStr = String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+        return '<div style="padding:6px 10px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:13px;color:var(--text);line-height:1.5;">' +
+          '<span style="color:var(--sub);font-size:11px;margin-right:6px;">' + tStr + '</span>' +
+          esc(item.content) +
+          '</div>';
+		  }).join('');
+      var isExpanded = c._interceptExpanded ? 'block' : 'none';
+      var toggleText = c._interceptExpanded ? '收起' : '偷看';
+      interceptHtml =
+        '<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--line);">' +
+          '<div style="font-size:12px;color:var(--sub);cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="toggleIntercept(\'' + c.id + '\')">' +
+            '🔕 拦截到 ' + deliveredBox.length + ' 条消息 ' +
+            '<span id="interceptToggleText_' + c.id + '" style="color:var(--theme);">[' + toggleText + ']</span>' +
+          '</div>' +
+          '<div id="interceptBox_' + c.id + '" style="display:' + isExpanded + ';margin-top:6px;">' + msgItems + '</div>' +
+        '</div>';
+    }
+
+    var banner = document.createElement('div');
+    banner.id = 'chatBanner';
+    banner.style.cssText = 'background:var(--nav);border-top:1px solid var(--line);padding:8px 14px;font-size:13px;color:var(--text);flex-shrink:0;';
+    banner.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+        '<span style="flex:1;color:var(--sub);">🚫 你已拉黑 ' + esc(c.nick || c.name) + '</span>' +
+        '<button class="cbtn send" style="height:28px;font-size:12px;flex-shrink:0;" onclick="userUnblockChar(\'' + c.id + '\')">解除拉黑</button>' +
+      '</div>' +
+      interceptHtml;
+    phone.appendChild(banner);
   }
 
-var inputHtml = '<div id="bubbleRow">' +
-    '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendImage()">' +
+  var inputHtml = '<div id="bubbleRow">' +
+
+  '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendImage()">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
       '相册' +
     '</div>' +
@@ -11024,7 +11283,7 @@ var inputHtml = '<div id="bubbleRow">' +
       '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>' +
       '<span>通话</span>' +
   '</div>';
-  bar.innerHTML = bannerHtml + inputHtml;
+  bar.innerHTML = inputHtml;
   phone.appendChild(bar);
 
   // ===== 11. 滑动辅助 =====
@@ -11119,7 +11378,190 @@ if (!document._transferListener) {
     });
   }
 }
+function flushBlockEvents() {
+  var nowTs = Date.now();
+  var anyChange = false;
 
+  (DB.contacts || []).forEach(function(c) {
+    if (!c.isBlockedByUser || !c.blockEventData) return;
+
+    // 释放拦截消息
+    if (Array.isArray(c.blockEventData.intercepts)) {
+      c.blockEventData.intercepts.forEach(function(item) {
+        if (!item.delivered && nowTs >= item.triggerAt) {
+          item.delivered = true;
+          if (!c.interceptBox) c.interceptBox = [];
+          c.interceptBox.push({
+            content: item.content,
+            time: item.triggerAt
+          });
+          anyChange = true;
+        }
+      });
+    }
+
+    // 释放浮光帖子
+    var fp = c.blockEventData.floatPost;
+    if (fp && !fp.delivered && nowTs >= fp.triggerAt && fp.worldId) {
+      fp.delivered = true;
+      var existingPosts = getFloatingCache(fp.worldId);
+      var newPost = {
+        id: 'fp_block_' + c.id + '_' + Date.now(),
+        worldId: fp.worldId,
+        type: '碎碎念',
+        content: fp.content,
+        author: fp.author,
+        time: fp.triggerAt,
+        likes: Math.floor(Math.random() * 8) + 2,
+        godComment: '',
+        comments: (fp.comments || []).map(function(cm, j) {
+          return {
+            author: cm.author || '路人',
+            text: cm.content || cm.text || '',
+            time: fp.triggerAt + (j + 1) * 30000
+          };
+        }),
+        _userLiked: false,
+        _commentOpen: false,
+        _aiCommentTriggered: false,
+        _fromBlock: true
+      };
+      existingPosts.unshift(newPost);
+      if (existingPosts.length > 60) existingPosts = existingPosts.slice(0, 60);
+      saveFloatingCache(fp.worldId, existingPosts);
+      anyChange = true;
+    }
+
+    // 释放AI酱说客消息
+    var aiChan = getC('c_aichan');
+    if (aiChan && !aiChan.isBlockedByUser && Array.isArray(c.blockEventData.aiChanMsgs)) {
+      c.blockEventData.aiChanMsgs.forEach(function(item) {
+        if (!item.delivered && nowTs >= item.triggerAt) {
+          item.delivered = true;
+          if (!DB.chats['c_aichan']) DB.chats['c_aichan'] = [];
+          DB.chats['c_aichan'].push({
+            id: 'msg_aichan_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+            role: 'assistant',
+            type: 'text',
+            content: item.content,
+            time: item.triggerAt
+          });
+          aiChan.inChatList = true;
+          aiChan.unread = (aiChan.unread || 0) + 1;
+          anyChange = true;
+        }
+      });
+    }
+  });
+
+  if (anyChange) {
+    save();
+    // 如果当前在聊天列表，刷新一次让红点和预览即时更新
+    if (view.type === 'chats') renderChats();
+  }
+}
+async function scheduleBlockEvents(c) {
+  // 防重入：如果上一次调度还没完成，直接跳过
+  if (c._schedulingBlock) return;
+  c._schedulingBlock = true;
+
+  var model = DB.settings.auxModel || DB.settings.chatModel;
+  if (!model) { c._schedulingBlock = false; return; }
+
+  var arr = DB.chats[c.id] || [];
+  var recentMsgs = arr.slice(-15);
+  if (!recentMsgs.length) { c._schedulingBlock = false; return; }
+
+  var convo = recentMsgs.map(function(m) {
+    var who = (m.role === 'assistant') ? (c.nick || c.name) : (DB.me.name || '我');
+    return who + '：' + (lastText(m) || '');
+  }).join('\n');
+
+  var charDesc = '';
+  if (c.pKeywords) charDesc += '性格：' + c.pKeywords + '\n';
+  if (c.pBehavior) charDesc += '行为模式：' + c.pBehavior + '\n';
+  if (c.job) charDesc += '身份：' + c.job + '\n';
+  if (!charDesc) charDesc = '（无特别设定）';
+
+  var now = Date.now();
+  var worldId = c.worldId || null;
+  var aiChan = getC('c_aichan');
+  var aiChanAvailable = !!(aiChan && !aiChan.isBlockedByUser && c.id !== 'c_aichan');
+
+  var prompt = '你是一个剧情设计师。用户刚刚把「' + (c.nick || c.name) + '」拉黑了。\n\n' +
+    '【角色设定】\n' + charDesc + '\n' +
+    '【导致拉黑的聊天记录】\n' + convo + '\n\n' +
+    '请根据这个角色的真实性格，设计被拉黑后的反应。完全按照角色人设来，不要套模板。\n\n' +
+    '【任务一：拦截消息】\n' +
+    '设计这个角色尝试发送但被拦截的消息。\n' +
+    '条数由你决定（0~5条），完全根据角色性格——傲娇的可能一条都不发，卑微的可能发很多。\n' +
+    '每条消息设定一个 offsetMs（距离现在的毫秒数），体现情绪的时间变化。\n' +
+    '消息内容要结合这段聊天的具体细节，不要泛泛而谈。\n\n' +
+    '【任务二：浮光论坛帖子】\n' +
+    (worldId
+      ? '判断这个角色会不会在公开论坛发帖（根据性格决定，有的人会发，有的人绝对不会）。\n' +
+        '如果会发：内容匿名或用化名，暗戳戳指向这件事但不直接说名字，带1~3条路人评论。\n' +
+        '如果不发：floatPost 返回 null。\n'
+      : '该角色没有绑定世界观，floatPost 直接返回 null。\n') +
+    '\n【任务三：AI酱说客】\n' +
+    (aiChanAvailable
+      ? 'AI酱是用户手机里的好朋友，热心肠但不是什么忙都帮。判断她会不会替这个角色来找用户说情。\n' +
+        '如果会：写出AI酱发给用户的消息（可以是一条或几条），符合她轻松、不端着、有点碎嘴的风格。每条带 offsetMs。\n' +
+        '如果不帮：aiChanMsgs 返回空数组。\n'
+      : 'AI酱不可用，aiChanMsgs 直接返回空数组。\n') +
+    '\n【输出格式】只输出一个JSON，不要其他文字：\n' +
+    '{"intercepts":[{"content":"...","offsetMs":180000}],"floatPost":{"author":"...","content":"...","offsetMs":900000,"comments":[{"author":"...","content":"..."}]},"aiChanMsgs":[{"content":"...","offsetMs":3600000}]}\n' +
+    'floatPost 为空时写 "floatPost":null，aiChanMsgs 为空时写 "aiChanMsgs":[]';
+
+  try {
+    var out = await callAI([{ role: 'user', content: prompt }], model);
+    out = out.replace(/```json/gi, '').replace(/```/g, '').trim();
+    var match = out.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('格式不正确');
+    var data = JSON.parse(match[0]);
+
+    c.blockEventData = {
+      intercepts: (data.intercepts || []).map(function(item) {
+        return {
+          content: item.content,
+          triggerAt: now + (Number(item.offsetMs) || 300000),
+          delivered: false
+        };
+      }),
+      floatPost: (data.floatPost && worldId) ? {
+        worldId: worldId,
+        author: data.floatPost.author || '匿名',
+        content: data.floatPost.content || '',
+        triggerAt: now + (Number(data.floatPost.offsetMs) || 900000),
+        comments: data.floatPost.comments || [],
+        delivered: false
+      } : null,
+      aiChanMsgs: (data.aiChanMsgs || []).map(function(item) {
+        return {
+          content: item.content,
+          triggerAt: now + (Number(item.offsetMs) || 3600000),
+          delivered: false
+        };
+      })
+    };
+
+    save();
+    console.log('📦 拉黑事件已调度：', c.blockEventData);
+  } catch(e) {
+    console.warn('scheduleBlockEvents 失败：', e);
+  } finally {
+    c._schedulingBlock = false;
+  }
+}
+function toggleIntercept(id) {
+  var c = getC(id);
+  if (!c) return;
+  c._interceptExpanded = !c._interceptExpanded;
+  var box = document.getElementById('interceptBox_' + id);
+  var txt = document.getElementById('interceptToggleText_' + id);
+  if (box) box.style.display = c._interceptExpanded ? 'block' : 'none';
+  if (txt) txt.textContent = c._interceptExpanded ? '[收起]' : '[偷看]';
+}
 function unblockChar(id) {
   var c = getC(id);
   if (!c) return;
@@ -11142,10 +11584,13 @@ function unblockChar(id) {
 }
 function checkTimeDecay(c) {
   if (!c || !c.lastActive) return;
-  
+
+  // 释放拉黑联动事件（统一由 flushBlockEvents 处理）
+  flushBlockEvents();
+
   // 【新增】自动解除角色拉黑逻辑
   if (c.isBlockedByChar && c.blockedByCharAt) {
-    var now = Date.now();
+  var now = Date.now();
     var blockDuration = now - c.blockedByCharAt;
     var autoUnblockTime = 0;
 
@@ -11662,14 +12107,18 @@ function applyState(c, text) {
  * 兼容旧格式 [xx|xx] 和新格式 <tag>xx</tag>，以及 AI 自创的各种变体
  * 并自动将多行纯文本拆分为多个消息气泡
  */
- function cleanLeftoverTags(text) {
+function cleanLeftoverTags(text) {
     if (!text) return '';
     var t = text;
-t = t.replace(/<(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state|share)[^>]*>[\s\S]*?<\/\1>/g, '');
-t = t.replace(/<\/?(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state|share)[^>]*>/g, '');
+    t = t.replace(/<(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state|share|meet)[^>]*>[\s\S]*?<\/\1>/g, '');
+    t = t.replace(/<\/?(inner|心声|voice|sticker|recall|transfer|block|gift|giftback|state|share|meet)[^>]*>/g, '');
     t = t.replace(/\[(?:语音|表情|表情包|撤回|转账|拉黑玩家|心声|接收|退回|礼物|见面|回线上)[^\]]*\]/g, '');
-    t = t.replace(/[（(]\s*(?:语音|表情|表情包|撤回|转账|心声|动作|神态|内心)[^）)]*[）)]/g, '');
-    return t;
+    t = t.replace(/[（(]\s*(?:发了个|发送|发)?(?:语音|表情|表情包|撤回|转账|心声|动作|神态|内心|拍了拍)[^）)]*[）)]/g, '');
+    
+    // ★★★ 彻底抹除残留的“心声1/心声2”文本 ★★★
+    t = t.replace(/(?:^|\n|\s)*[【\[（(]?\s*心声\s*[:：|｜]?\s*[12一二]\s*[】\]）)]?/gi, '');
+    
+    return t.trim();
 }
 function splitToBubbles(text) {
   var lines = text.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
@@ -11699,11 +12148,8 @@ function parseAIMessage(raw) {
     text = text.replace(/\[语音[|｜:：]\s*([\s\S]*?)\]/g, '<voice>$1</voice>');
     text = text.replace(/[（(]\s*语音(?:消息)?\s*[）)]\s*[:：]?\s*([\s\S]*?)(?=\n|$|\[)/g, '<voice>$1</voice>');
 
-    // --- 表情 ---
-// 兼容 [表情|微笑]、[表情 | 微笑]、【表情|微笑】、[表情：微笑] 等多种变体，允许空格
-text = text.replace(/[【\[]\s*(?:表情|表情包)\s*[|｜:：]\s*([^\]】]+)\s*[】\]]/g, '<sticker>$1</sticker>');
-text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]+)/g, '<sticker>$1</sticker>');
-
+    // --- 表情（超级兼容版：兼容 [表情:x]、(发了个表情：x)、(发送表情包 x) 等所有野格式） ---
+    text = text.replace(/[【\[（(]\s*(?:发了个|发送|发了)?(?:表情|表情包|贴图)\s*[|｜:：\s]\s*([^\]】）)]+)\s*[】\]）)]/g, '<sticker>$1</sticker>');
     // --- 撤回 ---
     text = text.replace(/\[撤回[|｜:：]\s*([\s\S]*?)\]/g, '<recall>$1</recall>');
     text = text.replace(/[（(]\s*撤回\s*[）)]\s*[:：]?\s*([\s\S]*?)(?=\n|$)/g, '<recall>$1</recall>');
@@ -11715,21 +12161,21 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
     // --- 拉黑 ---
     text = text.replace(/\[拉黑玩家[|｜:：]\s*([^\]]+)\]/g, '<block reason="$1"></block>');
 
-    // --- 心声（重要：处理不带方括号的情况） ---
-    // 匹配 [心声] 或 [心声：内容] 或 [心声|内容]
-    text = text.replace(/\[心声(?:[：|]\s*([^\]]+))?\]/g, function(match, content) {
-        if (content) {
-            return '<inner>' + content.trim() + '</inner>';
-        } else {
-            // 纯 [心声] 标记，尝试吃掉后面的文本直到行尾或下一个标签
-            // 用全局匹配比较复杂，我们后续再处理，先替换为 <inner></inner>
-            return '<inner></inner>';
-        }
+    // --- 心声（全能兼容版） ---
+    // 1. 带各类括号的：[心声:xxx]、【内心OS:xxx】、（心里想：xxx）
+    text = text.replace(/[【\[（(]\s*(?:心声|内心|内心独白|内心OS|OS|心里想)\s*[|｜:：\s]?\s*([^\]】）)]*)[】\]）)]/gi, function(match, content) {
+        return content.trim() ? ('<inner>' + content.trim() + '</inner>') : '<inner></inner>';
     });
 
-    // 额外的：匹配 "心声：内容" 或 "心声|内容" 不带方括号
-    text = text.replace(/(?:^|\n)\s*心声[：|]\s*([^\n]+)/g, '<inner>$1</inner>');
+    // 2. 捕获不带括号的：心声：xxx、内心OS：xxx
+    text = text.replace(/(?:^|\n)\s*(?:心声|内心独白|内心OS|OS)[：|｜\s]\s*([^\n]+)/gi, '<inner>$1</inner>');
 
+    // 3. 捕获“心声1/心声2/心声:1/心声:2”等数字标记，直接转化为心声信号
+    text = text.replace(/(?:^|\n|\s)*[【\[（(]?\s*心声\s*[:：|｜]?\s*[12一二]\s*[】\]）)]?(?=\n|$|\s)/gi, '<inner></inner>');
+
+    // 4. 容错：如果写了 <inner></inner> 紧跟着文字，自动包裹
+    text = text.replace(/<inner><\/inner>\s*([^\n<]+)/g, '<inner>$1</inner>');
+	
     // --- 接收/退回 ---
     text = text.replace(/\[接收\]/g, '<action type="accept"></action>');
     text = text.replace(/\[退回\]/g, '<action type="refund"></action>');
@@ -11747,7 +12193,7 @@ text = text.replace(/[（(]\s*(?:表情|表情包)\s*[）)]\s*[:：]?\s*([^\n\[]
     });
 
     // 3. 提取逻辑：先取出所有标签及其位置
-    const regex = /<(voice|sticker|recall|transfer|block|inner|action|gift|giftback|share)([^>]*)>([\s\S]*?)<\/\1>/g;
+    const regex = /<(voice|sticker|recall|transfer|block|inner|action|gift|giftback|share|meet)([^>]*)>(?:([\s\S]*?)<\/\1>)?/g;
     const parts = [];
 	    if (_snapWish) { parts._snap = _snapWish; }
 
@@ -11787,20 +12233,71 @@ lines.forEach(line => {
 
         // 处理标签本身
         switch (t.tag) {
-            case 'voice':
+            case 'meet': {
+                var pMatch = (t.attrs || '').match(/place=["']([^"']*)["']/);
+                var mPlace = pMatch ? pMatch[1] : '';
+                parts.push({ type: 'meet_invite', place: mPlace });
+                break;
+            }
+            case 'voice': {
                 if (t.content) parts.push({ type: 'voice', content: t.content });
                 break;
-            case 'sticker':
+            }
+            case 'sticker': {
                 if (t.content) parts.push({ type: 'sticker', content: t.content });
                 break;
-case 'recall':
-    if (t.content) {
-        if (parts.length > 0 && parts[parts.length - 1].type === 'text' && !parts[parts.length - 1].recalled) {
-            parts.pop();
+            }
+            case 'recall': {
+                const recallText = (t.content || '').trim();
+                if (!recallText) break;
+				
+    // 1. 防张冠李戴：检查是否误把玩家刚发的内容拿来撤回了
+    const currentChatList = (typeof DB !== 'undefined' && DB.chats && view && DB.chats[view.id]) ? DB.chats[view.id] : [];
+    const lastUserMsg = [...currentChatList].reverse().find(m => m.role === 'user');
+    if (lastUserMsg && lastUserMsg.content && lastUserMsg.content.trim() === recallText) {
+        // AI 犯傻撤回了玩家的话，直接丢弃忽略
+        break;
+    }
+
+    // 2. 同轮次处理：如果 AI 在当前回复前面先输出了这句话，原地替换成撤回气泡
+    let foundInCurrent = false;
+    for (let j = parts.length - 1; j >= 0; j--) {
+        if (parts[j].type === 'text' && !parts[j].recalled) {
+            if (parts[j].content === recallText || parts.length - 1 === j) {
+                parts[j] = { type: 'text', recalled: true, recalledContent: parts[j].content || recallText, reveal: false };
+                foundInCurrent = true;
+                break;
+            }
         }
-        parts.push({ type: 'text', recalled: true, recalledContent: t.content, reveal: false });
+    }
+
+    // 3. 跨轮次处理：AI 想撤回上一轮自己发出的历史消息
+    if (!foundInCurrent && currentChatList.length > 0) {
+        const now = Date.now();
+        const RECALL_LIMIT = 2 * 60 * 1000; // 限制2分钟内（如需5分钟可改为 5 * 60 * 1000）
+        
+        for (let k = currentChatList.length - 1; k >= 0; k--) {
+            const histMsg = currentChatList[k];
+            if (histMsg.role === 'assistant' && !histMsg.recalled) {
+                const isWithinTime = (now - (histMsg.time || now)) <= RECALL_LIMIT;
+                if (isWithinTime && (histMsg.content === recallText || !recallText)) {
+                    histMsg.recalled = true;
+                    histMsg.recalledContent = histMsg.content;
+                    histMsg.reveal = false;
+                    if (typeof save === 'function') save();
+                    foundInCurrent = true; // 历史消息已修改，无需新增气泡
+                    break;
+                }
+            }
+        }
+    }
+
+    // 4. 秒发秒撤：前面没有明文，直接生成一条撤回气泡
+    if (!foundInCurrent) {
+        parts.push({ type: 'text', recalled: true, recalledContent: recallText, reveal: false });
     }
     break;
+}
 	case 'transfer': {
                 const amountMatch = t.attrs.match(/amount=["']([^"']+)["']/);
                 const noteMatch = t.attrs.match(/note=["']([^"']*)["']/);
@@ -12154,7 +12651,15 @@ if (c.allowStickers !== false) {
 
     // ---- 6. 用户额外提示 ----
     if (nudge) messages.push({ role: 'user', content: nudge });
-
+// ★ 新增：如果刚从线下切回线上，给 AI 塞一个小纸条唤醒它
+  if (c.mode === 'online' && c._backOnlineHint) {
+    delete c._backOnlineHint;
+    save();
+    messages.push({
+      role: 'system',
+      content: '【场景切换提示：你们刚才的线下见面已结束，现在已各自回家、回到微信聊天。请像平时发微信一样自然发1~2句日常消息。】'
+    });
+  }
     // ---- 7. 调用 AI ----
 let out = await callAI(messages, getEffectiveChatModel(c));
     out = applyState(c, out);
@@ -12209,7 +12714,10 @@ narr = narr.replace(/<\/?(?:inner|心声|voice|sticker|recall|transfer|block)[^>
     // ---- 9. 逐段处理解析结果 ----
     for (let i = 0; i < parts.length; i++) {
         const part = parts[i];
-
+    if (part.type === 'meet_invite' && c.mode === 'online') {
+      meetPlace = part.place || '老地方';
+      continue; // 捕获后直接跳过，不用把它当成普通聊天文字气泡输出
+    }
         // --- 处理特殊动作 ---
         
         // 1. 拉黑玩家
@@ -12228,7 +12736,7 @@ narr = narr.replace(/<\/?(?:inner|心声|voice|sticker|recall|transfer|block)[^>
         // 2. 转账操作 (接收/退回)
         if (part.type === 'transfer_accept' || part.type === 'transfer_refund') {
             if (pendingTransfer && lastMsg) {
-                handleTransferAction(lastMsg.id, part.type === 'transfer_accept' ? 'accept' : 'refund', true);
+                handleTransferAction(lastMsg.id, part.type === 'transfer_accept' ? 'accept' : 'refund', false);
             }
             continue;
         }
@@ -12513,8 +13021,16 @@ function userBlockChar(id) {
   popConfirm('拉黑后 TA 不会主动找你，聊天框会显示提示。', function(){
     c.isBlockedByUser = true;
     c.blockedByUserAt = Date.now();
+    c.blockEventData = null;
+    c.interceptBox = [];
+    c._interceptExpanded = false;
     save();
-    renderCharEdit();
+    scheduleBlockEvents(c);
+    if (view.type === 'chat' && view.id === id) {
+      renderChat();
+    } else {
+      renderCharEdit();
+    }
     popTip('已拉黑 '+(c.nick||c.name), {icon:'🚫', title:'完成'});
   }, {icon:'🚫', title:'确定拉黑 '+(c.nick||c.name)+'？'});
 }
@@ -12524,8 +13040,10 @@ function userUnblockChar(id) {
   popConfirm('解除对 ' + (c.nick || c.name) + ' 的拉黑？解除后可以正常收发消息。', function(){
     c.isBlockedByUser = false;
     c.blockedByUserAt = 0;
+    c.blockEventData = null;
+    c.interceptBox = [];
+    c._interceptExpanded = false;
     save();
-    // 根据当前所在页面刷新
     if (view.type === 'chat' && view.id === id) {
       renderChat();
     } else {
@@ -12534,7 +13052,6 @@ function userUnblockChar(id) {
     popTip('已解除拉黑', {icon:'🔓', title:'完成'});
   }, {icon:'🔓', title:'解除拉黑'});
 }
-
 function proposeMeet(c, place, initiator) {
   initiator = initiator || 'ai';
   var where = place ? ('（' + place + '）') : '';
@@ -12617,11 +13134,10 @@ function stayOffline(cid){
 function backOnline(cid){
   var c=getC(cid);if(!c)return;
   c.mode='online';
-  c._backOnlineHint = true;
+  c._backOnlineHint = true; // 标记：刚切回线上
   save();
-  if(view.type==='chat'&&view.id===cid)renderChat();
+  if(view.type==='chat'&&view.id===cid) renderChat();
 }
-
 setInterval(()=>{if(view.type!=='chat'||replying)return;const c=getC(view.id);if(!c||c.activity==='关')return;const gap={低:600000,中:300000,高:120000}[c.activity]||300000;const msgs=DB.chats[c.id]||[];if(!msgs.length||msgs[msgs.length-1].role==='assistant')return;if(Date.now()-lastActivity>gap){lastActivity=Date.now();aiReply('（对方已经有一会儿没说话了，请根据你的性格自然地主动发一条消息）');}},20000);
 document.addEventListener('pointerdown',()=>{lastActivity=Date.now();});
 
@@ -12959,6 +13475,48 @@ function voiceArrayBufferToBase64(buffer){
 /* ---------- 3. 音频转文字（Gemini，伪装成 image_url） ---------- */
 async function voiceTranscribe(wavBase64){
   var s = DB.settings;
+
+  // 有 siliconflow key 就用 Whisper，没有就降级
+  if(s.sfApiKey && s.sfApiKey.length > 10){
+    try{
+      // 把 base64 转成 Blob 文件
+      var byteStr = atob(wavBase64);
+      var ab = new ArrayBuffer(byteStr.length);
+      var ia = new Uint8Array(ab);
+      for(var i=0;i<byteStr.length;i++) ia[i] = byteStr.charCodeAt(i);
+      var audioBlob = new Blob([ab], { type:'audio/wav' });
+
+      var form = new FormData();
+form.append('file', audioBlob, 'audio.wav');
+form.append('model', 'FunAudioLLM/SenseVoiceSmall');
+form.append('language', 'zh');
+form.append('emotion', 'true');
+
+      var res = await fetch('https://api.siliconflow.cn/v1/audio/transcriptions',{
+        method:'POST',
+        headers:{ 'Authorization':'Bearer '+s.sfApiKey },
+        body: form
+      });
+      if(!res.ok){ var t=''; try{t=await res.text();}catch(e){} throw new Error('Whisper HTTP '+res.status+(t?'：'+t.slice(0,200):'')); }
+      var d = await res.json();
+      var text = (d.text||'').trim();
+var emotion = d.emotion || '';
+if(emotion && emotion !== 'neutral' && emotion !== '中性'){
+  var emotionMap = {
+    'happy':'开心', 'sad':'难过', 'angry':'生气', 
+    'fearful':'害怕', 'disgusted':'厌烦', 'surprised':'惊讶'
+  };
+  var emotionCN = emotionMap[emotion] || emotion;
+  return text + '\n（说话情绪：' + emotionCN + '）';
+}
+return text;
+    }catch(e){
+      console.warn('Whisper识别失败，降级到语音模型：', e.message);
+      // 失败了继续往下走，用原来的方法
+    }
+  }
+
+  // 降级：原来的 Gemini 语音识别
   var model = s.voiceModel;
   if(!model || model.includes('请先')) throw new Error('请先在设置里选择"语音模型"');
   var messages = [{
@@ -12978,7 +13536,6 @@ async function voiceTranscribe(wavBase64){
   if(!d.choices || !d.choices[0]) throw new Error('转文字返回异常');
   return (d.choices[0].message.content||'').trim();
 }
-
 /* ---------- 4. 主模型流式调用 ---------- */
 async function callAIStream(messages, model, onDelta){
   var s = DB.settings;
@@ -13204,47 +13761,48 @@ async function handleCallTurn(blob, dur){
   if(!VOICECALL.connected) return;
   var tr = document.getElementById('transcript');
   dur = dur || 1;
+
+  // 用户语音气泡
   var waveBars=''; for(var k=0;k<8;k++) waveBars+='<span></span>';
   var voiceLine = document.createElement('div');
   voiceLine.className='msg-line voice';
-voiceLine.innerHTML = '<span class="msg-label">我</span><span class="cv-bubble"><span class="cv-mic"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span><span class="cv-wave">'+waveBars+'</span><span class="cv-dur">'+dur+'″</span></span>';
+  voiceLine.innerHTML = '<span class="msg-label">我</span><span class="cv-bubble"><span class="cv-mic"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span><span class="cv-wave">'+waveBars+'</span><span class="cv-dur">'+dur+'″</span></span>';
   if(tr){ tr.appendChild(voiceLine); tr.scrollTop=tr.scrollHeight; }
+
+  // ★ 立刻显示AI气泡，状态"正在听…"
+  var aiLine = document.createElement('div');
+  aiLine.className='msg-line ai';
+  aiLine.innerHTML='<span class="msg-label">'+esc(c.nick||c.name)+'</span><span class="msg-text thinking">正在听…</span>';
+  if(tr){ tr.appendChild(aiLine); tr.scrollTop=tr.scrollHeight; }
+  var textEl = aiLine.querySelector('.msg-text');
+
+  // 禁用说话按钮
+  VOICECALL.aiReplying=true;
+  var tb=document.getElementById('callTalkBtn'); if(tb) tb.classList.add('disabled');
+
   try{
+    // 语音识别
     var b64 = await voiceBlobToWavBase64(blob);
     var userText = await voiceTranscribe(b64);
     if(!userText) userText='（语音）';
     VOICECALL.turns.push({ role:'user', content:userText, dur:dur });
 
-    var aiLine = document.createElement('div');
-    aiLine.className='msg-line ai streaming';
-    aiLine.innerHTML='<span class="msg-label">'+esc(c.nick||c.name)+'</span><span class="msg-text"></span>';
-    if(tr){ tr.appendChild(aiLine); tr.scrollTop=tr.scrollHeight; }
-    var textEl = aiLine.querySelector('.msg-text');
+    // ★ 识别完了，变成"正在想…"
+    if(textEl) textEl.innerHTML='正在想…';
 
+    // 请求AI
     var messages = buildCallMessages(c);
-    VOICECALL.aiReplying=true;
-    var tb=document.getElementById('callTalkBtn'); if(tb) tb.classList.add('disabled');
+    var full = await callAIStream(messages, getEffectiveChatModel(c), null);
 
-    var buffer='', shown=0, done=false;
-    var typer = setInterval(function(){
-      if(shown < buffer.length){ shown+=1; if(textEl){ textEl.innerHTML=renderVoiceContent(buffer.slice(0,shown)); if(tr) tr.scrollTop=tr.scrollHeight; } }
-      else if(done){ clearInterval(typer); }
-    }, 45);
-
-    var full = await callAIStream(messages, getEffectiveChatModel(c), function(delta, sofar){
-      buffer = voiceCleanReply(sofar).replace(/\[挂断\]/g,'');
-    });
-    // 检测主动挂断（清干净，绝不显示/存记录）
+    // 检测挂断指令
     var wantHangup = /\[挂断\]/.test(full);
     full = voiceCleanReply(full).replace(/\[挂断\]/g,'').trim();
-    buffer = full; done = true;
 
-    await new Promise(function(res){
-      var wait = setInterval(function(){ if(shown>=buffer.length){ clearInterval(wait); res(); } }, 50);
-    });
-    if(textEl) textEl.innerHTML = renderVoiceContent(buffer);
+    // ★ 生成完直接显示，不再逐字蹦
+    if(textEl) textEl.innerHTML = renderVoiceContent(full);
     aiLine.classList.remove('streaming');
-    VOICECALL.turns.push({ role:'assistant', content:buffer });
+    VOICECALL.turns.push({ role:'assistant', content:full });
+    if(tr) tr.scrollTop=tr.scrollHeight;
 
     if(wantHangup){
       setTimeout(function(){
@@ -13256,8 +13814,11 @@ voiceLine.innerHTML = '<span class="msg-label">我</span><span class="cv-bubble"
 `); setTimeout(function(){ if(VOICECALL) endVoiceCall(); }, 800); }
       }, 1200);
     }
+
   }catch(e){
-    insertSystemMessageToTranscript('出错：'+(e&&e.message?e.message:e));
+    // ★ 出错了，气泡里直接显示错误，不是弹系统提示
+    if(textEl) textEl.innerHTML='<span style="color:#ff6b6b;font-size:12px;">（网络好像出了点问题）</span>';
+    console.error('handleCallTurn error:', e);
   }finally{
     VOICECALL.aiReplying=false;
     var tb2=document.getElementById('callTalkBtn'); if(tb2 && VOICECALL && VOICECALL.connected) tb2.classList.remove('disabled');
@@ -13420,6 +13981,7 @@ function saveApi(){
   if (am && !am.includes('请先')) DB.settings.auxModel = am;
   if (lm && !lm.includes('请先')) DB.settings.lightModel = lm;
   if (im && !im.includes('请先')) DB.settings.imageModel = im;
+DB.settings.sfApiKey = (document.getElementById('sfApiKey')||{value:''}).value.trim();
   save();
   alert('已保存！');
 }
