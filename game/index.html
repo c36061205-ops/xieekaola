@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>游戏</title>
+<style>
+  :root{--theme:#ff6b81;--bg:#1c1c1e;--card:#2c2c2e;--text:#fff;--sub:#8e8e93;--line:rgba(255,255,255,.08);}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{background:#000;display:flex;justify-content:center;font-family:-apple-system,"PingFang SC",sans-serif;color:var(--text);}
+  #app{width:390px;min-height:100vh;background:var(--bg);position:relative;overflow-y:auto;}
+
+  /* 顶部栏 */
+  .topbar{position:sticky;top:0;z-index:10;height:52px;display:flex;align-items:center;
+    padding:0 14px;background:var(--bg);border-bottom:1px solid var(--line);backdrop-filter:blur(10px);}
+  .topbar .back{font-size:24px;cursor:pointer;width:32px;}
+  .topbar .title{flex:1;text-align:center;font-size:17px;font-weight:600;}
+  .topbar .right{width:32px;text-align:right;font-size:13px;color:var(--sub);}
+
+  /* 顶部资产条（金币/心动值）*/
+  .wallet{display:flex;gap:10px;padding:14px;}
+  .wallet .w-card{flex:1;background:var(--card);border-radius:14px;padding:12px 14px;
+    display:flex;align-items:center;gap:8px;}
+  .wallet .w-ico{font-size:22px;}
+  .wallet .w-num{font-size:18px;font-weight:700;}
+  .wallet .w-label{font-size:11px;color:var(--sub);}
+
+  /* 网格:两列 */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:12px 14px 30px;}
+
+  /* 卡片 */
+  .game{background:var(--card);border-radius:18px;padding:22px 14px 16px;
+    display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;
+    cursor:pointer;overflow:hidden;transition:transform .12s;
+    box-shadow:0 3px 12px rgba(0,0,0,.14);}
+  .game:active{transform:scale(.95);}
+
+  /* 小图标(带柔和底色圈)*/
+  .game .cover{width:92px;height:92px;
+    display:flex;align-items:center;justify-content:center;font-size:44px;}
+  .game .cover img{width:100%;height:100%;object-fit:contain;}
+
+  .game .g-name{font-size:14px;font-weight:600;}
+  .game .g-desc{font-size:11px;color:var(--sub);text-align:center;line-height:1.4;}
+
+  .game.soon{opacity:.6;}
+  .game .badge{position:absolute;top:8px;right:8px;font-size:9px;padding:2px 7px;
+    border-radius:9px;background:rgba(0,0,0,.4);color:#fff;z-index:2;}
+  .game .badge.hot{background:var(--theme);}
+  .section-title{padding:8px 16px 4px;font-size:12px;color:var(--sub);}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 顶部栏：返回主 App -->
+  <div class="topbar">
+    <div class="back" onclick="goHome()">‹</div>
+    <div class="title">游戏</div>
+    <div class="right"></div>
+  </div>
+
+  <!-- 钱包：显示金币和心动值（占位，之后接主 App 的 DB）-->
+  <div class="wallet">
+    <div class="w-card">
+      <span class="w-ico">🪙</span>
+      <div><div class="w-num" id="coinNum">--</div><div class="w-label">金币</div></div>
+    </div>
+
+  </div>
+
+  <div class="section-title">和 TA 一起玩</div>
+
+  <!-- 游戏网格 -->
+  <div class="grid" id="gameGrid">
+
+    <!-- 电子宠物 -->
+    <div class="game" onclick="openGame('pet')">
+      <span class="badge hot">NEW</span>
+      <div class="cover"><img src="https://s1.imagehub.cc/images/2026/08/15/95013345ba6d3dfca176d37889a18aa0.png"></div>
+      <div class="g-name">崽崽</div>
+      <div class="g-desc">和 TA 一起养的小家伙</div>
+    </div>
+
+    <!-- 塔罗占卜 -->
+    <div class="game soon" onclick="openGame('tarot')">
+      <span class="badge">敬请期待</span>
+      <div class="cover"><img src="https://s1.imagehub.cc/images/2026/08/15/c45993c44ae33c1c46c5baec56408a41.png"></div>
+      <div class="g-name">塔罗占卜</div>
+      <div class="g-desc">让 TA 为你解读今日</div>
+    </div>
+
+    <!-- 海龟汤 -->
+    <div class="game soon" onclick="openGame('turtle')">
+      <span class="badge">敬请期待</span>
+      <div class="cover"><img src="https://s1.imagehub.cc/images/2026/08/15/c6b7c3199bf6f4eec5a1c27600ee3ce3.png"></div>
+      <div class="g-name">海龟汤</div>
+      <div class="g-desc">和 TA 一问一答猜谜</div>
+    </div>
+
+    <!-- 预留位：以后加新游戏复制一块就行 -->
+    <div class="game soon">
+      <span class="badge">敬请期待</span>
+      <div class="icon">✨</div>
+      <div class="g-name">更多</div>
+      <div class="g-desc">还在路上…</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ===== 读取主 App 的存档（同域名共享 localStorage）=====
+  // ⚠️ 这里的 'wechatDB' 要改成你主项目实际存 DB 用的那个 key！
+  var DB_KEY = 'myrp_data_v1';
+
+  var DB = null;
+  function loadDB(){
+    try{ DB = JSON.parse(localStorage.getItem(DB_KEY)) || {}; }catch(e){ DB = {}; }
+  }
+  function saveDB(){ try{ localStorage.setItem(DB_KEY, JSON.stringify(DB)); }catch(e){} }
+
+  // 显示金币和心动值（字段名按你主 App 的实际结构改）
+  function refreshWallet(){
+    if(!DB) return;
+    var coins = (DB.coins!=null ? DB.coins : (DB.settings&&DB.settings.coins)) || 0;
+    // 心动值可能是"每个角色各自的"，这里先显示总和占位，之后再按你实际结构调
+    var heart = 0;
+    document.getElementById('coinNum').textContent = coins;
+    document.getElementById('heartNum').textContent = heart || '--';
+  }
+
+  function goHome(){ location.href = '../22.html'; }  // 改成你主 App 的文件名
+
+  function openGame(key){
+    if(key==='pet'){
+      location.href='pet.html';
+    }else{
+      alert('这个还在做，敬请期待～');
+    }
+  }
+  // 读取主 App 存的主题颜色，套到游戏页上
+  function applyTheme(){
+    try{
+      var colors = JSON.parse(localStorage.getItem('myrp_theme_colors'));
+      if(colors){
+        for(var k in colors){
+          if(colors[k]) document.documentElement.style.setProperty(k, colors[k]);
+        }
+      }
+    }catch(e){}
+  }
+
+  loadDB();
+  applyTheme();
+  refreshWallet();
+
+</script>
+</body>
+</html>
