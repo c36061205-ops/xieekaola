@@ -9,11 +9,13 @@
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
   body{background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;
     font-family:-apple-system,"PingFang SC",sans-serif;color:var(--text);}
-  #app{width:390px;height:100vh;background:var(--bg);position:relative;overflow:hidden;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  #app{width:400px;height:100vh;height:100dvh;max-height:880px;max-width:100vw;background:var(--bg);
+    position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    border-radius:32px;border:2px solid rgba(255,255,255,0.06);}
+  @media(max-width:420px){#app{width:100vw;height:100vh;height:100dvh;max-height:none;border-radius:0;border:0;}}
 
   /* 返回 */
-  .back{position:absolute;top:14px;left:14px;z-index:30;font-size:28px;cursor:pointer;
+  .back{position:absolute;top:48px;left:14px;z-index:30;font-size:28px;cursor:pointer;color:var(--text);opacity:.7;}
     color:var(--text);opacity:.7;}
 
   /* ===== 掌机机身 ===== */
@@ -144,10 +146,38 @@
     padding:7px 10px;font-size:12px;cursor:pointer;}
   .dev-row .dbtn.on{background:var(--theme);border-color:var(--theme);}
   .dev-title{font-size:12px;color:var(--sub);margin:10px 0 5px;}
+  
+    #statusbar{position:absolute;top:0;left:0;width:100%;height:44px;display:flex;
+    align-items:center;justify-content:space-between;padding:10px 18px 0 18px;
+    font-size:14px;font-weight:600;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.4);
+    z-index:200;pointer-events:none;box-sizing:border-box;}
+	  #statusbar.dark{color:var(--theme);text-shadow:none;}
+
+  #island{position:absolute;left:50%;top:16px;transform:translateX(-50%);width:100px;
+    height:22px;background:#000;border-radius:14px;z-index:60;pointer-events:none;}
+  .sb-right{display:flex;align-items:center;gap:6px;font-size:12px;}
+  .batt{width:24px;height:12px;border:1px solid currentColor;border-radius:3px;position:relative;padding:1px;opacity:.9;}
+  .batt::after{content:'';position:absolute;right:-3px;top:3px;width:2px;height:6px;background:currentColor;border-radius:0 1px 1px 0;}
+  .batt i{display:block;height:100%;background:currentColor;border-radius:1px;}
+
 </style>
 </head>
 <body>
 <div id="app">
+    <div id="statusbar" class="dark"><span id="sbTime">00:00</span><div id="island"></div><span class="sb-right">
+    <span>5G</span>
+    <span style="display:inline-flex;align-items:center;">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="14" width="3" height="6" rx="1" fill="currentColor"/>
+        <rect x="7" y="10" width="3" height="10" rx="1" fill="currentColor"/>
+        <rect x="12" y="5" width="3" height="15" rx="1" fill="currentColor"/>
+        <rect x="17" y="1" width="3" height="19" rx="1" fill="currentColor"/>
+      </svg>
+    </span>
+    <span class="batt"><i id="battLvl" style="width:80%"></i></span>
+  </span></div>
+  <!-- 下面原来的 .back、.machine 都不动 -->
+
   <div class="back" onclick="goHome()">‹</div>
 
   <div class="machine">
@@ -438,8 +468,25 @@ function toggleFree(){FREE=!FREE;openDev();}
 function devSendOff(){if(confirm('触发远行?'))sendOff();}
 function devReset(){if(confirm('删除重开?')){DB.pet=null;saveDB();location.reload();}}
 
-function goHome(){if(history.length>1)history.back();else location.href='index.html';}
+function goHome(){if(history.length>1)history.back();else location.href='hub.html';}
 function preload(){for(var f in IMG)for(var s in IMG[f]){var i=new Image();i.src=IMG[f][s];}}
+function tick(){
+  var n=new Date();
+  var hh=String(n.getHours()).padStart(2,'0');
+  var mm=String(n.getMinutes()).padStart(2,'0');
+  var el=document.getElementById('sbTime');
+  if(el)el.textContent=hh+':'+mm;
+}
+tick(); setInterval(tick,1000);
+var batteryManager=null;
+function updateBatteryUI(b){var el=document.getElementById('battLvl');if(!el)return;
+  el.style.width=(b?Math.round(b.level*100):80)+'%';}
+function initBattery(){if(!navigator.getBattery)return;
+  navigator.getBattery().then(function(b){batteryManager=b;updateBatteryUI(b);
+    b.addEventListener('levelchange',function(){updateBatteryUI(b);});
+    b.addEventListener('chargingchange',function(){updateBatteryUI(b);});}).catch(function(){});}
+initBattery();
+
 preload();initPet();
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&pet){loadDB();pet=DB.pet;if(pet){decay();checkGrow();render();}}});
 </script>
