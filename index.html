@@ -279,7 +279,7 @@ textarea {
 
 /* ===== 长按浮动小气泡菜单 ===== */
 #popmenu{position:absolute;z-index:9999;
-  background:color-mix(in srgb, var(--theme) 16%, #2b2b2d);
+  background:color-mix(in srgb, var(--theme) 14%, var(--card));
   border:1px solid color-mix(in srgb, var(--theme) 40%, transparent);
   border-radius:14px;display:flex;padding:5px;
   box-shadow:0 8px 26px rgba(0,0,0,.5);
@@ -288,13 +288,13 @@ textarea {
 #popmenu.show{opacity:1;transform:scale(1);pointer-events:auto;}
 #popmenu .pop-item{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:4px;min-width:50px;padding:8px 3px;cursor:pointer;border-radius:9px;
-  color:#fff;font-size:11px;transition:background .12s;}
+  color:var(--text);font-size:11px;transition:background .12s;}
 #popmenu .pop-item:active{background:color-mix(in srgb, var(--theme) 45%, transparent);}
 #popmenu .pop-item.danger{color:#ff5b62;}
 #popmenu .pop-ico{width:21px;height:21px;display:flex;align-items:center;justify-content:center;}
 #popmenu .pop-ico svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
 #popmenu .pop-arrow{position:absolute;width:12px;height:12px;
-  background:color-mix(in srgb, var(--theme) 16%, #2b2b2d);
+  background:color-mix(in srgb, var(--theme) 14%, var(--card));
   border-right:1px solid color-mix(in srgb, var(--theme) 40%, transparent);
   border-bottom:1px solid color-mix(in srgb, var(--theme) 40%, transparent);
   transform:rotate(45deg);bottom:-6px;}
@@ -6488,7 +6488,7 @@ function groupBubble(m){
 var slideStyle = 'min-width:0;' + (me ? 'text-align:right;' : 'text-align:left;');
 if (m.type !== 'voice') slideStyle += 'max-width:70%;';
 
-return '<div class="msg '+(me?'me':'')+'" data-mid="'+(m.id||'')+'"><div class="avatar" ...></div><div class="msg-slide" style="' + slideStyle + '">'+nameTag+body+'</div></div>';
+return '<div class="msg '+(me?'me':'')+'" data-mid="'+(m.id||'')+'"><div class="avatar" style="'+(av?'background-image:url(\''+av+'\')':'')+'">'+(av?'':esc(initial))+'</div><div class="msg-slide" style="' + slideStyle + '">'+nameTag+body+'</div></div>';
 }
 
 // ==================== 群聊界面 ====================
@@ -6597,6 +6597,8 @@ if (true) {   // 群聊固定按线上模式渲染
         }
     }
 }
+attachLongPress();
+
 }
 // ==================== 群聊·消息菜单 ====================
 function openGroupMsgMenu(id, isMe, el){
@@ -7971,7 +7973,8 @@ var foldEnd = '</div></div></div>';
 
 if (edModule === 'role') {
     // ----- 模块1：基础信息 -----
-    html += fold('basic', '基础信息', '📋', true);
+    html += fold('basic', '基础信息', '📋', false);
+
     html += '<div class="field"><label>头像（点击选择）</label><div class="avapick" style="--ava:' + (c.avatar ? 'url(\'' + c.avatar + '\')' : 'none') + '" onclick="pickAvatar()">' + (c.avatar ? '' : '点击上传') + '</div></div>';
 
     // ========== 新增：聊天模型下拉选择 ==========
@@ -8083,7 +8086,8 @@ var foldEnd = '</div></div></div>';
 
   html += '<div class="hint" style="padding:12px 16px;color:var(--sub);font-size:13px;">「我」在这个角色面前的样子。姓名/网名在 微信→我 里统一设。</div>';
 
-  html += fold('me_basic', '我方基本信息', '👤', true);
+  html += fold('me_basic', '我方基本信息', '👤', false);
+
     // ===== 社会关系模块（群聊用）=====
   html += '<div class="frow" style="display:flex;gap:8px;padding:0;">' +
     '<div class="field" style="flex:1;"><label>我的性别</label><input type="text" value="' + esc(c.myGender || '') + '" onchange="upd(\'myGender\',this.value)" placeholder="男/女"></div>' +
@@ -8096,7 +8100,10 @@ var foldEnd = '</div></div></div>';
   html += fold('me_persona', '我方性格与关系', '💭', false);
   html += '<div class="field"><label>我的性格</label><textarea oninput="ag(this)" onchange="upd(\'myPersona\',this.value)" placeholder="">' + esc(c.myPersona || '') + '</textarea></div>';
   html += '<div class="field"><label>我和TA的关系 / 怎么认识的</label><span class="tip" style="font-size:12px;color:var(--sub);">让AI开局就懂你俩什么关系</span><textarea oninput="ag(this)" onchange="upd(\'myRelation\',this.value)" placeholder="">' + esc(c.myRelation || '') + '</textarea></div>';
-  html += '<div class="field"><label>TA对我的称呼</label><span class="tip" style="font-size:12px;color:var(--sub);">AI必须用这个称呼叫你，不填则默认喊名字</span><input type="text" onchange="upd(\'myNick\',this.value)" placeholder="例：小笨蛋、宝、学长…" value="' + esc(c.myNick || '') + '"></div>';
+  html += '<div class="field"><label>TA对我的称呼 · 常用</label><span class="tip" style="font-size:12px;color:var(--sub);">平时聊天用的称呼，不填则默认喊名字</span><input type="text" onchange="upd(\'myNick\',this.value)" placeholder="例：宝、小笨蛋、学长…" value="' + esc(c.myNick || '') + '"></div>' +
+'<div class="field"><label>TA对我的称呼 · 亲密/撒娇时</label><span class="tip" style="font-size:12px;color:var(--sub);">气氛暧昧、撒娇、说情话时用（选填）</span><input type="text" onchange="upd(\'myNickIntimate\',this.value)" placeholder="例：老婆、心肝、宝贝…" value="' + esc(c.myNickIntimate || '') + '"></div>' +
+'<div class="field"><label>TA对我的称呼 · 生气/吵架时</label><span class="tip" style="font-size:12px;color:var(--sub);">TA生气、闹别扭、吵架时用（选填）</span><input type="text" onchange="upd(\'myNickAngry\',this.value)" placeholder="例：喂、那个谁、你…" value="' + esc(c.myNickAngry || '') + '"></div>'
+;
   
   html += foldEnd;
 
@@ -10716,13 +10723,23 @@ function buildSystem(c, gapInfo){
 
   // ===== 第4层：关于聊天对象 =====
   s += `\n【关于聊天对象】\n`;
-  if(c.myNick){
-    s += '你对聊天对象的称呼：「' + c.myNick + '」（固定用这个，不要用真名或网名）\n';
-    s += add('对方真实姓名(仅作备案，不要喊)', real || net);
-  } else {
-    s += add('对方真实姓名(日常可以这样叫)', real || net);
-    s += add('对方微信网名(仅系统备注，别刻意喊)', net);
-  }
+    // ★★★ 关键段落：使用 myNick / myNickIntimate / myNickAngry ★★★
+    if (c.myNick || c.myNickIntimate || c.myNickAngry) {
+        var _hasScene = c.myNickIntimate || c.myNickAngry;
+        if (_hasScene) {
+            s += '【称呼规则】随对话氛围自然切换你对聊天对象的称呼：\n';
+            if (c.myNick) s += '· 平常聊天时，以「' + c.myNick + '」为主\n';
+            if (c.myNickIntimate) s += '· 气氛亲密/撒娇/暧昧/说情话时 → 「' + c.myNickIntimate + '」\n';
+            if (c.myNickAngry) s += '· 你生气/闹别扭/吵架/冷战时 → 「' + c.myNickAngry + '」\n';
+            s += '依据最近几轮对话的情绪来判断该用哪个，自然过渡，不要生硬切换，也不要在同一句话里混用多个称呼。\n';
+        } else {
+            s += '你对聊天对象的称呼，以「' + c.myNick + '」为主。\n';
+        }
+        s += '这些称呼是主基调，不必每句都喊；也可以像真人一样，偶尔拿对方的网名「' + net + '」做点亲昵的变化或调侃（比如取其中一个字加"小"、叫个谐音昵称），让称呼显得自然随手，别死板地从头喊到尾。尽量少直呼对方的大名「' + (real || net) + '」，那样显得生硬见外。\n';
+    } else {
+        s += add('对方真实姓名(日常可以这样叫)', real || net);
+        s += add('对方微信网名(仅系统备注，别刻意喊)', net);
+    }
   s += add('性别', c.myGender);
   s += add('年龄', c.myAge);
   s += add('身份/职业', c.myJob);
@@ -11863,12 +11880,17 @@ function showBubbleMenu(items, el){
     });
   });
 
-  // 找到气泡本体（.msg 行里除头像外的那个元素），对准它而不是整行
-  var bodyEl = el;
-  var kids = el.children;
-  for(var _k=0;_k<kids.length;_k++){
-    if(!kids[_k].classList.contains('cavatar')){ bodyEl=kids[_k]; break; }
+  // 找到气泡本体：群聊在 .msg-slide 里，私聊直接是非头像的子元素
+  var bodyEl = el.querySelector('.msg-slide');   // 群聊结构
+  if(!bodyEl){
+    var kids = el.children;
+    for(var _k=0;_k<kids.length;_k++){
+      var cl = kids[_k].classList;
+      if(cl && (cl.contains('cavatar') || cl.contains('avatar'))) continue; // 跳过两种头像
+      bodyEl = kids[_k]; break;
+    }
   }
+  if(!bodyEl) bodyEl = el;
   var b=bodyEl.getBoundingClientRect(), p=phone.getBoundingClientRect();
 
   var mw=pop.offsetWidth, mh=pop.offsetHeight;
@@ -11920,24 +11942,40 @@ function attachLongPress(){
   document.querySelectorAll('#content .msg').forEach(function(el){
     if(el._sw)return;el._sw=true;
     var id=el.dataset.mid;var isMe=el.classList.contains('me');
-    var timer=null,sx=0,sy=0,longFired=false;
+    var timer=null,sx=0,sy=0,longFired=false,touched=false;
+
+    var getPoint=function(e){
+      if(e.touches&&e.touches[0]) return {x:e.touches[0].clientX,y:e.touches[0].clientY};
+      if(e.changedTouches&&e.changedTouches[0]) return {x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY};
+      return {x:e.clientX,y:e.clientY};
+    };
     var clear=function(){ if(timer){clearTimeout(timer);timer=null;} };
-    el.addEventListener('pointerdown',function(e){
-      sx=e.clientX;sy=e.clientY;longFired=false;
+    var start=function(e){
+      var p=getPoint(e);sx=p.x;sy=p.y;longFired=false;
       clear();
       timer=setTimeout(function(){
         longFired=true;timer=null;
         if(view.type==='groupChat') openGroupMsgMenu(id,isMe,el);
         else openMsgMenu(id,isMe,el);
       },550);
-    });
-    el.addEventListener('pointermove',function(e){
+    };
+    var move=function(e){
       if(!timer)return;
-      if(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10) clear();
-    });
-    el.addEventListener('pointerup',clear);
-    el.addEventListener('pointercancel',clear);
-    el.addEventListener('pointerleave',clear);
+      var p=getPoint(e);
+      if(Math.abs(p.x-sx)>10||Math.abs(p.y-sy)>10) clear();
+    };
+
+    // 触摸设备（手机 / WebView）
+    el.addEventListener('touchstart',function(e){ touched=true; start(e); },{passive:true});
+    el.addEventListener('touchmove',move,{passive:true});
+    el.addEventListener('touchend',clear);
+    el.addEventListener('touchcancel',clear);
+    // 桌面鼠标（touched 为真时跳过，避免手机上重复触发）
+    el.addEventListener('mousedown',function(e){ if(touched)return; start(e); });
+    el.addEventListener('mousemove',move);
+    el.addEventListener('mouseup',clear);
+    el.addEventListener('mouseleave',clear);
+
     // 长按弹菜单后，拦截紧接着那次 click，避免又触发看大图/播放语音
     el.addEventListener('click',function(e){
       if(longFired){ e.stopPropagation();e.preventDefault();longFired=false; }
@@ -13366,7 +13404,7 @@ async function triggerC2CInteractions(moment){
       pushRecentC2C((poster.nick||poster.name),poster.id,chosen.name,(chosen.kind==='char'?chosen.id:'npc'),moment,bundle.reply,'reply');
     }
     save();
-    if(typeof renderMoments==='function') renderMoments();
+    if(view.type==='moments' && typeof renderMoments==='function') renderMoments();
   }catch(e){ console.error('c2c互动失败',e); }
 }
 /* ============================================================
