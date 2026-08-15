@@ -11858,8 +11858,7 @@ var MMICON={
 
 /* 显示浮动小气泡菜单 */
 function showBubbleMenu(items, el){
-  var old=document.getElementById('popmenu');
-  if(old&&old.parentNode) old.parentNode.removeChild(old);
+  closeBubbleMenu(); // 先清掉旧的
 
   var pop=document.createElement('div');
   pop.id='popmenu';
@@ -11872,27 +11871,27 @@ function showBubbleMenu(items, el){
   phone.appendChild(pop);
 
   pop.querySelectorAll('.pop-item').forEach(function(node){
-    node.addEventListener('click',function(e){
-      e.stopPropagation();
+    var run=function(e){
+      e.stopPropagation(); e.preventDefault();
       var i=+node.dataset.i;
       closeBubbleMenu();
       items[i].fn();
-    });
+    };
+    node.addEventListener('click', run);
   });
 
   // 找到气泡本体：群聊在 .msg-slide 里，私聊直接是非头像的子元素
-  var bodyEl = el.querySelector('.msg-slide');   // 群聊结构
+  var bodyEl = el.querySelector('.msg-slide');
   if(!bodyEl){
     var kids = el.children;
     for(var _k=0;_k<kids.length;_k++){
       var cl = kids[_k].classList;
-      if(cl && (cl.contains('cavatar') || cl.contains('avatar'))) continue; // 跳过两种头像
+      if(cl && (cl.contains('cavatar') || cl.contains('avatar'))) continue;
       bodyEl = kids[_k]; break;
     }
   }
   if(!bodyEl) bodyEl = el;
   var b=bodyEl.getBoundingClientRect(), p=phone.getBoundingClientRect();
-
   var mw=pop.offsetWidth, mh=pop.offsetHeight;
   var left=(b.left-p.left)+b.width/2-mw/2;
   left=Math.max(8,Math.min(left,phone.clientWidth-mw-8));
@@ -11904,14 +11903,25 @@ function showBubbleMenu(items, el){
   pop.style.left=left+'px'; pop.style.top=top+'px';
   requestAnimationFrame(function(){ pop.classList.add('show'); });
 
+  // 关闭监听：点到菜单内部不关，点外面才关（手机/电脑通用）
+  var closer=function(e){
+    if(e.target && e.target.closest && e.target.closest('#popmenu')) return;
+    closeBubbleMenu();
+  };
+  window._popCloser=closer;
   setTimeout(function(){
-    document.addEventListener('click', closeBubbleMenu, {once:true});
-    document.addEventListener('touchstart', closeBubbleMenu, {once:true});
+    document.addEventListener('touchstart', closer, true);
+    document.addEventListener('mousedown', closer, true);
   },0);
 }
 
 /* 关闭浮动菜单 */
 function closeBubbleMenu(){
+  if(window._popCloser){
+    document.removeEventListener('touchstart', window._popCloser, true);
+    document.removeEventListener('mousedown', window._popCloser, true);
+    window._popCloser=null;
+  }
   var pop=document.getElementById('popmenu');
   if(!pop) return;
   pop.classList.remove('show');
