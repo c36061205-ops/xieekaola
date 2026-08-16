@@ -3060,22 +3060,32 @@ async function generateMemoryForChar(c, mode = 'auto') {
     '- 目前的关系称谓：' + relNow + '\n' +
     '【参考词表】陌生人、普通朋友、好朋友、暧昧对象、喜欢的人、恋人、亲密恋人、异地恋人、青梅竹马、冷战中、破冰阶段、分手后、前任、单恋对象——你可以直接使用这些词，也可以在此基础上小幅调整，但禁止使用脱离日常语言的文学化表达。\n' +
     '要求：①用词必须是日常口语，普通人能一眼看懂 ②若发生了明确的关系转折，称谓据此更新 ③若只是日常聊天，保持原有称谓或仅做微调 ④控制在8字以内。\n\n' +
-    '【任务三：提取约定日程 · 绝对铁律】\n' +
-    '如果聊天中出现了明确的、约定好的未来安排（例如“明天一起吃饭”“周末去看电影”“下周三见面”等），请提取成日程。\n\n' +
+    // ===== 任务三：提取约定日程（核心规则） =====
+    '【任务三：提取用户本人的待办日程 · 绝对铁律】\n' +
+    '这是写在【用户本人的手机待办备忘录】里的日程提醒，主体必须且只能是「' + (DB.me.name || '用户') + '」本人接下来要做的事。\n\n' +
+    '【🔴 判定与过滤原则（不符合则直接忽略，不要提取）】\n' +
+    '1. 只提取【' + (DB.me.name || '用户') + '】亲自参与的未来约定（如双方约好一起吃饭、对方要来找用户等）。\n' +
+    '2. ⛔ 绝对不提取与用户无关的事：他人之间的安排（如“B和C明天去做苦力”）、角色自己的私事（如角色自己去办护照且未邀请用户），直接忽略，绝对不要提取！\n' +
+    '3. 聊过去的事、没有定下明确未来时间安排的，不要提取。\n\n' +
     '【🔴 日期铁律（最高优先级 · 违规直接丢弃）】\n' +
     '1. 每条聊天记录最前面方括号里的 [YYYY-MM-DD HH:mm]，是这句话被说出来的真实日期和具体时间。\n' +
     '2. 换算“明天/后天/下周三/周末”等相对时间时，必须以【说这句话那一条记录方括号里的日期】为基准换算，绝对不能用其他时间。\n' +
     '   例如：[2026-08-14 20:00] 这句里说的“明天”＝2026-08-15，“后天”＝2026-08-16。\n' +
     '3. 该段聊天发生的主基准日期是：' + realChatDateStr + '（周' + realWeekdayStr + '）。\n' +
-    '4. ⛔ 绝对禁止在 date 字段里写“明天”“后天”“下周”“改天”“周末”等任何中文词。\n' +
-    '5. date 字段只允许输出 YYYY-MM-DD 格式。如果无法准确换算，宁可返回空数组 []，也不要乱填。\n\n' +
-    '【📝 标题铁律（日程写法 · 用户视角）】\n' +
-    '1. 标题是给用户看的日程备忘，必须省略主语“我”，以事件为中心。\n' +
-    '2. 格式：时间描述 + 和谁 + 做什么。\n' +
-    '✅ 正确示例：明天和A一起看电影、晚上和B去吃饭、周末C来家里\n' +
-    '❌ 错误示例：我和A明天去看电影、A来我家、和A约好（没有时间/事件模糊）\n\n' +
+    '4. ⛔ 绝对禁止在 date 字段里写“明天”“后天”“下周”“改天”“周末”等任何中文词，只允许输出 YYYY-MM-DD 格式。若无法准确换算，events 返回空数组 []。\n\n' +
+    '【📝 标题写法 · 严格遵守以下规则】\n' +
+    '1. 视角要求：用户自己的待办备忘。默认主体就是用户，因此【严禁出现】“用户”、“我”、“二人”、“双方”等词汇。\n' +
+    '2. 称呼要求：提及对方时，直接使用对方的名字「' + (c.name || c.nick) + '」或具体称呼，不能写成“用户”。\n' +
+    '3. 格式规范：时间时段描述（如明晚/下午/周末） + 和谁 + 事项。\n' +
+    '【对照示例】\n' +
+    '✅ 对话“明晚我们一起去看花” ➔ title: "明晚和' + (c.name || c.nick) + '一起去看花"\n' +
+    '❌ 错误标题（严禁！）："明晚和用户一起去看花"、"我和' + (c.name || c.nick) + '明晚去看花"\n' +
+    '✅ 对话“B和C明天一起去做苦力” ➔ 与用户无关，events 返回 []（不提取）\n' +
+    '❌ 错误处理（严禁！）：提取成 "明天和C一起做苦力" 或 "B和C去做苦力"\n\n' +
+
+    // ===== 输出格式定义（JSON Schema） =====
     '【输出格式】只输出一个 JSON 对象，不要任何其他文字：\n' +
-    '{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓","events":[{"date":"YYYY-MM-DD","title":"明天和A一起看电影"}]}\n\n' +
+    '{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓","events":[{"date":"YYYY-MM-DD","title":"明晚和' + (c.name || c.nick) + '一起去看花"}]}\n\n' +
     '聊天记录：\n' + convo + extraBlock;
 
   // 5) 调 AI 并写回
@@ -6250,7 +6260,7 @@ const wxT={chats:'微信',contacts:'通讯录',discover:'发现',me:'我'};
 function renderWechat(){showChrome(true,true);statusbar.classList.add('dark');tbTitle.textContent=wxT[wechatPage];tbLeft.textContent='‹';tbLeft.onclick=goHome;if(wechatPage==='contacts'){tbRight.textContent='＋';tbRight.onclick=addContact;}else{tbRight.textContent='';tbRight.onclick=null;}document.querySelectorAll('#tabbar .tab').forEach(t=>t.classList.toggle('active',t.dataset.page===wechatPage));if(wechatPage==='chats')renderChats();else if(wechatPage==='contacts')renderContacts();else if(wechatPage==='discover')renderDiscover();else renderWxMe();refreshMomentBadge();}
 function avatarHtml(c){const bg=c.avatar?`background-image:url('${c.avatar}')`:'';return `<div class="avatar" style="${bg}">${c.avatar?'':(c.name?c.name[0]:'?')}</div>`;}
 function lastText(m){
-  if(!m)return'';
+  if(!m || m.hidden) return '';
   if(m.recalled)return'[有一条消息被撤回]';
   if(m.type==='image')return'[图片]';
   if(m.type==='transfer')return'[转账]';
@@ -6307,7 +6317,8 @@ function renderChats(){
     if (item.kind === 'private') {
       var c = item.c;
       var m = DB.chats[c.id] || [];
-      var last = lastText(m[m.length - 1]) || '开始聊天吧';
+      var visibleMsgs = m.filter(function(x){ return !x.hidden; });
+      var last = lastText(visibleMsgs[visibleMsgs.length - 1]) || '开始聊天吧';
       if (c.isBlockedByUser && c.interceptBox && c.interceptBox.length) {
         var latestIntercept = c.interceptBox[c.interceptBox.length - 1];
         if (latestIntercept && latestIntercept.content) {
@@ -7100,7 +7111,28 @@ if (c.allowStickers !== false) {
       messages.push({ role: 'system', content: buildGroupFocus(g, c) });
       messages.push({ role: 'user', content: '现在轮到你（' + nm + '）在群里发言。' });
 	  
-	  
+	      // ---- [修复400] 保证 messages 末尾必须是 user ----
+    var _lastMsg = messages[messages.length - 1];
+    if (!_lastMsg || _lastMsg.role !== 'user') {
+      var _autoPrompt = '（继续）';
+
+      if (wasBackOnline) {
+        // 场景A：刚切回线上（手动或自动）
+        _autoPrompt = '（系统提示·仅供参考不要复述：你们的线下见面已经结束，现在各自在不同地方用微信聊天。请用微信打字的口吻自然开启对话，不要再描写同处一室的动作。）';
+      } else if (c.mode === 'offline') {
+        // 场景B：还在线下，检查是否隔了很久
+        var _offlineChats = DB.chats[c.id] || [];
+        var _lastMsgTime = _offlineChats.length ? _offlineChats[_offlineChats.length - 1].time : 0;
+        var _hoursPassed = _lastMsgTime ? (Date.now() - _lastMsgTime) / 3600000 : 0;
+        if (_hoursPassed >= 3) {
+          _autoPrompt = '（系统提示·仅供参考不要复述：距离上次互动已经过去' + Math.floor(_hoursPassed) + '小时，这场见面该自然收尾了。请在回复中自然写出道别、各自离开，并在回复最末尾单独加上 [回线上|]）';
+        } else {
+          _autoPrompt = '（请顺着当前剧情继续）';
+        }
+      }
+
+      messages.push({ role: 'user', content: _autoPrompt });
+    }
       // ---- 调用 AI ----
       let out = '';
       try {
@@ -11173,6 +11205,7 @@ function renderChat(keepScroll) {
   var html = more ? '<div class="ts">（仅显示最近150条，更早' + more + '条已折叠，记忆不受影响）</div>' : '';
   lastBubbleTime = 0;
   show.forEach(function(m) {
+    if (m.hidden) return; // ★ 隐形小纸条跳过渲染
     var t = m.time || Date.now();
     if (!lastBubbleTime || t - lastBubbleTime > 300000) {
       html += tsHtml(t);
@@ -11180,7 +11213,8 @@ function renderChat(keepScroll) {
     }
     html += bubble(c, m);
   });
-
+  
+  
 // ===== 7. 心声气泡（已改用全局弹窗，此处不再生成） =====
 // 删除旧的常驻气泡，改为在页面渲染完成后通过 showHeartBubbleDirect 触发弹窗
   content.innerHTML = html;
@@ -11259,7 +11293,12 @@ function renderChat(keepScroll) {
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><circle cx="12" cy="15" r="2"/></svg>' +
       '转账' +
     '</div>' +
+    '<div class="bubble-btn" onclick="openNotePanel()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' +
+      '小纸条' +
+    '</div>' +
   '</div>' +
+
   '<div id="inputRow">' +
     '<div class="plus-btn" onclick="togglePanel()">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
@@ -11704,7 +11743,7 @@ function toggleMode() {
     proposeMeet(c, '', 'user');
   }
 }
-function appendBubble(c,m){if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
+function appendBubble(c,m){if(m.hidden)return;if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
 function scrollBottom(){
   requestAnimationFrame(() => {
     content.scrollTop = content.scrollHeight;
@@ -11714,6 +11753,163 @@ function scrollBottom(){
     }, 150);
   });
 }
+// ==================== 快捷小纸条系统 (无Emoji·SVG版) ====================
+const PRESET_NOTES = [
+  {
+    id: 'p_ooc',
+    title: '拉回人设 (防OOC)',
+    desc: '当 AI 语气失真、机械化时使用',
+    content: '（【系统修正·场外提示】：请立即调整状态，严格遵循你的性格设定、说话语气和行为习惯，抹去机械感与违和感，回归角色本身。）',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+  },
+  {
+    id: 'p_fmt',
+    title: '规范格式',
+    desc: '提醒断句、空格及排版规范',
+    content: '（【系统修正·格式规范】：注意排版规范，严格按照当前场景模式输出，控制单句长度，多用自然换行与标点，严禁出现违规格式标记。）',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>'
+  },
+  {
+    id: 'p_story',
+    title: '推进剧情',
+    desc: '打破原地闲聊，推动故事发展',
+    content: '（【剧情推进·导演提示】：不要在原地反复闲聊拉扯，请主动根据当前时间、地点与情境，自然抛出新事件、新话题或做出具体的行动，推动故事向前发展。）',
+    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>'
+  }
+];
+
+// 执行塞入纸条
+function doSendNote(content, title) {
+  var c = getC(view.id);
+  if (!c) return;
+
+  var noteMsg = {
+    id: newId(),
+    role: 'user',
+    type: 'silent',
+    content: content,
+    hidden: true,
+    time: Date.now()
+  };
+
+  if (!DB.chats[c.id]) DB.chats[c.id] = [];
+  DB.chats[c.id].push(noteMsg);
+  save();
+
+  closeNotePanel();
+
+  if (typeof popTip === 'function') {
+    popTip('已塞入小纸条：' + title, { title: '小纸条' });
+  } else {
+    alert('已塞入小纸条：' + title);
+  }
+}
+
+// 触发预设纸条
+function sendPresetNote(id) {
+  var item = PRESET_NOTES.find(function(x) { return x.id === id; });
+  if (item) doSendNote(item.content, item.title);
+}
+
+// 触发自定义纸条
+function sendCustomNote(idx) {
+  var list = DB.customNotes || [];
+  var item = list[idx];
+  if (item) doSendNote('（【场外提示】：' + item.content + '）', item.title);
+}
+
+// 打开小纸条弹窗面板（完美贴合手机内部）
+function openNotePanel() {
+  var old = document.getElementById('noteModal');
+  if (old) old.remove();
+
+  var customList = DB.customNotes || [];
+  var phoneEl = document.getElementById('phone') || document.body;
+
+  var html = '<div id="noteModal" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;justify-content:center;border-radius:inherit;overflow:hidden;">' +
+    '<div style="background:var(--nav, #fff);width:100%;border-radius:20px 20px 0 0;padding:16px;max-height:80%;display:flex;flex-direction:column;box-sizing:border-box;color:var(--text, #333);box-shadow:0 -4px 20px rgba(0,0,0,0.15);">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+        '<div style="font-weight:bold;font-size:15px;display:flex;align-items:center;gap:6px;">' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
+          '<span>小纸条</span>' +
+          '<span style="font-size:11px;color:var(--sub, #888);font-weight:normal;">(场外提示·不公开显示)</span>' +
+        '</div>' +
+        '<div style="cursor:pointer;padding:4px 8px;font-size:18px;color:var(--sub, #888);" onclick="closeNotePanel()">✕</div>' +
+      '</div>' +
+
+      '<div style="overflow-y:auto;flex:1;padding-right:2px;">' +
+        '<div style="font-size:12px;color:var(--sub, #888);margin-bottom:6px;">预设小纸条</div>' +
+        PRESET_NOTES.map(function(n) {
+          return '<div style="background:var(--bg, #f5f5f5);padding:10px 12px;border-radius:10px;margin-bottom:8px;cursor:pointer;border:1px solid var(--line, #eee);display:flex;align-items:center;gap:10px;" onclick="sendPresetNote(\'' + n.id + '\')">' +
+            '<div style="color:var(--theme, #07c160);flex-shrink:0;">' + n.svg + '</div>' +
+            '<div style="flex:1;">' +
+              '<div style="font-weight:600;font-size:13px;margin-bottom:2px;">' + n.title + '</div>' +
+              '<div style="font-size:11px;color:var(--sub, #888);">' + n.desc + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+
+        '<div style="font-size:12px;color:var(--sub, #888);margin-top:10px;margin-bottom:6px;">自定义小纸条</div>' +
+        (customList.length === 0 ? '<div style="font-size:12px;color:var(--sub, #aaa);margin-bottom:8px;text-align:center;padding:8px 0;">暂无自定义小纸条</div>' : '') +
+        customList.map(function(n, idx) {
+          return '<div style="background:var(--bg, #f5f5f5);padding:10px 12px;border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line, #eee);">' +
+            '<div style="flex:1;cursor:pointer;margin-right:8px;" onclick="sendCustomNote(' + idx + ')">' +
+              '<div style="font-weight:600;font-size:13px;margin-bottom:2px;display:flex;align-items:center;gap:6px;">' +
+                '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' +
+                esc(n.title) +
+              '</div>' +
+              '<div style="font-size:11px;color:var(--sub, #888);line-height:1.3;">' + esc(n.content) + '</div>' +
+            '</div>' +
+            '<button onclick="deleteCustomNote(' + idx + ')" style="background:none;border:none;color:#ff4d4f;cursor:pointer;padding:6px;display:flex;align-items:center;">' +
+              '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+            '</button>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+
+      '<div style="border-top:1px solid var(--line, #eee);padding-top:10px;margin-top:6px;">' +
+        '<div style="font-size:12px;color:var(--sub, #888);margin-bottom:6px;">新增小纸条</div>' +
+        '<input id="newNoteTitle" placeholder="标题（例如：不要提某话题）" style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid var(--line, #ddd);margin-bottom:6px;background:var(--bg, #f9f9f9);color:var(--text, #333);font-size:12px;" />' +
+        '<textarea id="newNoteContent" placeholder="具体的提示词内容..." rows="2" style="width:100%;box-sizing:border-box;padding:8px 10px;border-radius:6px;border:1px solid var(--line, #ddd);margin-bottom:8px;background:var(--bg, #f9f9f9);color:var(--text, #333);font-size:12px;resize:none;"></textarea>' +
+        '<button onclick="addCustomNote()" style="width:100%;background:var(--theme, #07c160);color:#fff;border:none;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+          '<span>保存新小纸条</span>' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  phoneEl.insertAdjacentHTML('beforeend', html);
+}
+
+function closeNotePanel() {
+  var el = document.getElementById('noteModal');
+  if (el) el.remove();
+}
+
+// 添加自定义
+function addCustomNote() {
+  var t = document.getElementById('newNoteTitle').value.trim();
+  var c = document.getElementById('newNoteContent').value.trim();
+  if (!t || !c) {
+    alert('请同时填写标题和内容');
+    return;
+  }
+  if (!DB.customNotes) DB.customNotes = [];
+  DB.customNotes.push({ id: 'c_' + Date.now(), title: t, content: c });
+  save();
+  openNotePanel();
+}
+
+// 删除自定义
+function deleteCustomNote(idx) {
+  if (!DB.customNotes) return;
+  DB.customNotes.splice(idx, 1);
+  save();
+  openNotePanel();
+}
+// ========================================================
+
 function pushMy(m){
   var c = getC(view.id);
   if (!c) return;
@@ -12690,8 +12886,12 @@ if (!getEffectiveChatModel(c)) {
     if (lim > 0 && allh.length > lim) allh = allh.slice(-lim);
     const hist = allh;
 
-    // ---- 2. 检查是否有待处理的转账 ----
-    const lastMsg = (DB.chats[c.id] || []).slice(-1)[0];
+    // ---- 2. 检查是否有待处理的转账（向前跳过隐形小纸条） ----
+    const _chatArr = DB.chats[c.id] || [];
+    let lastMsg = null;
+    for (let i = _chatArr.length - 1; i >= 0; i--) {
+      if (!_chatArr[i].hidden) { lastMsg = _chatArr[i]; break; }
+    }
     const pendingTransfer = (
       lastMsg &&
       lastMsg.role === 'user' &&
@@ -12715,7 +12915,7 @@ if (!getEffectiveChatModel(c)) {
         var msgs = DB.chats[c.id] || [];
         var lastUser = null;
         for(var i = msgs.length-1; i >= 0; i--){
-          if(msgs[i].role === 'user'){ lastUser = msgs[i]; break; }
+          if(msgs[i].role === 'user' && !msgs[i].hidden){ lastUser = msgs[i]; break; }
         }
         if(!lastUser) return null;
         if(Date.now() - lastUser.time < 60*60*1000) return null;
@@ -12744,7 +12944,8 @@ return '【时间提示】对方上一条消息发于' + timeStr + '，而现在
     let modeReminder = '';
     if (c.mode === 'online') {
       modeReminder = '【立即生效·最高优先级】现在是微信线上打字聊天，你和对方【身处不同的地方】，隔着手机屏幕打字，你看不到也碰不到对方。若之前有过线下见面，那次见面【已经结束、两人已各自分开】，你的一切言行都要基于"此刻对方不在你身边"这个前提，不得表现得好像对方还在眼前。无论上文出现过什么叙事风格，从这条起只输出口语短句，严禁任何括号（）()里的动作/神态/心理描写，严禁小说旁白，多句用换行分隔。';
-      if (c._backOnlineHint) {
+      var wasBackOnline = !!c._backOnlineHint;
+	  if (c._backOnlineHint) {
         modeReminder += '\n【场景刚切换·仅本轮参考】你们刚结束线下见面回到微信，可以自然承接刚才那段剧情的收场气氛与情绪来开启这次线上对话，但务必用你自己角色的说话方式表达，不要套用任何固定句式，且始终记住现在是隔着手机、人已不在一起。';
         c._backOnlineHint = false;
         save();
@@ -12756,7 +12957,8 @@ return '【时间提示】对方上一条消息发于' + timeStr + '，而现在
         modeReminder += '\n【注意】对方刚婉拒了线下见面，这段时间内不要再提议见面、不要输出见面标记，自然继续线上聊天即可。';
       }
     } else {
-      modeReminder = '【立即生效·最高优先级·线下小说模式】现在是线下面对面场景，用第三人称小说笔法叙事：细致描写动作、神态、心理、环境细节，节奏张弛有度，避免流水账。所有人物台词必须用中文双引号“”括起（不要用「」方括号）；叙事描写里绝对不要用引号去强调或包裹词语，引号只保留给人物真正说出口的话。称呼对方请用其真实姓名或你俩关系里的称呼，严禁把对方的"微信网名"当作本名写进叙述。你只演你自己这一个角色，绝不替对方说话或替对方做决定。禁止任何微信功能格式（转账/表情等）。\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实间隔无关，哪怕对方隔很久才回也无缝承接，绝不提"过了一天""好久没见"。\n【线下收尾】当这段见面剧情自然走到尾声（该道别/该各自回家/事情办完了），不要无止境地黏着继续，请在叙事末尾另起一行单独输出标记：[回线上|]，表示这次见面告一段落、可以回到线上。只在剧情真的到收尾时才用，别硬结束。';
+      modeReminder = '【立即生效·最高优先级·线下小说模式】现在是线下面对面场景，用第三人称小说笔法叙事：细致描写动作、神态、心理、环境细节，节奏张弛有度，避免流水账。所有人物台词必须用中文双引号“”括起（不要用「」方括号）；叙事描写里绝对不要用引号去强调或包裹词语，引号只保留给人物真正说出口的话。称呼对方请用其真实姓名或你俩关系里的称呼，严禁把对方的"微信网名"当作本名写进叙述。你只演你自己这一个角色，绝不替对方说话或替对方做决定。禁止任何微信功能格式（转账/表情等）。\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实间隔无关，哪怕对方隔很久才回也无缝承接，绝不提"过了一天""好久没见"。\n【线下收尾】当这段见面剧情自然走到尾声（该道别/该各自回家/事情办完了），不要无止境地黏着继续，请在叙事末尾另起一行单独输出标记：[回线上|]，表示这次见面告一段落、可以回到线上。只在剧情真的到收尾时才用，别硬结束。\n【严禁输出[回线上|]的情况】以下任何一种情况出现，都绝对不能输出该标记：你的正文里还有提问（"你想…""要不要…""我们去…"等）；两人还在同一场所继续互动；这段叙述还有下文未完；对方刚到/刚开始某件事。总之：只要两人还没有物理上分开、各自离开现场，就不能输出。'
+	  ;
     }
     messages.push({ role: 'system', content: modeReminder });
 // 把可用的表情清单告诉 AI，但只在允许表情时才告诉它
@@ -13289,26 +13491,33 @@ function enterOffline(cid,place){
 }
 
 function proposeBackOnline(c){
-  if(!c || c.mode!=='offline') return;                    // 不在线下就不弹
-  // 节流：距上次弹窗 / 上次点"继续留在线下"不足10分钟，不再弹
+  if(!c || c.mode !== 'offline') return;
+  // 节流：10分钟内不重复显示
   if(c._lastProposeAt && (Date.now() - c._lastProposeAt) < 10*60*1000) return;
-  if(document.getElementById('backOnlineModal')) return;  // 已有弹窗，不叠加
+  if(document.getElementById('backOnlineBar')) return;
   c._lastProposeAt = Date.now(); save();
 
-  var mo=document.createElement('div');mo.className='modal';mo.id='backOnlineModal';
-  mo.innerHTML='<div class="sheet-box"><div style="text-align:center;font-size:14px;color:var(--sub);padding:8px 0 12px">📱 这次见面告一段落了</div><button class="btn" onclick="this.closest(\'.modal\').remove();backOnline(\''+c.id+'\')">💬 回到线上聊天</button><button class="btn gray" onclick="stayOffline(\''+c.id+'\')">📖 继续留在线下</button></div>';
-  mo.onclick=function(e){ /* 自动弹窗，禁止点空白误关 */ };
-  phone.appendChild(mo);
-}
+  var bar = document.createElement('div');
+  bar.id = 'backOnlineBar';
+  bar.style.cssText = 'text-align:center;margin:15px auto;padding:10px 14px;background:rgba(0,0,0,0.06);border-radius:12px;font-size:12px;color:#888;max-width:85%;';
+  bar.innerHTML = '<span>📱 这次见面告一段落了</span>' +
+    '<div style="margin-top:8px;display:flex;justify-content:center;gap:10px;">' +
+      '<button class="btn" style="font-size:12px;padding:4px 10px;height:auto;" onclick="document.getElementById(\'backOnlineBar\').remove();backOnline(\'' + c.id + '\')">💬 回到微信</button>' +
+      '<button class="btn gray" style="font-size:12px;padding:4px 10px;height:auto;" onclick="stayOffline(\'' + c.id + '\')">📖 继续待着</button>' +
+    '</div>';
 
+  content.appendChild(bar);
+  content.scrollTop = content.scrollHeight;
+}
 // 新增：用户选择"继续留在线下"，刷新节流时间戳，10分钟内不再打扰
 function stayOffline(cid){
-  var c=getC(cid);
+  var c = getC(cid);
   if(c){ c._lastProposeAt = Date.now(); save(); }
-  var m=document.getElementById('backOnlineModal');
+  var bar = document.getElementById('backOnlineBar');
+  if(bar) bar.remove();
+  var m = document.getElementById('backOnlineModal');
   if(m) m.remove();
 }
-
 function backOnline(cid){
   var c=getC(cid);if(!c)return;
   c.mode='online';
