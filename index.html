@@ -1059,7 +1059,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026816';
+const APP_VER = 'v2026817';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1491,7 +1491,31 @@ wallpaper: `
     url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
     
     #252833
-  `,}
+  `,},
+{
+  id: 'sunset_parfait',
+  name: '🍨 落日芭菲',
+  color: '#DE8B59',           // 优化：夕阳暖杏金（落日余晖+焦糖甜品感，告别俗粉与冷绿）
+  '--theme': '#DE8B59',        // 顶栏和时钟环像夕阳光晕一样温暖耐看
+  '--bg': '#FAF8F5',
+  '--nav': '#FAF8F5',
+  '--card': '#FFFFFF',
+  '--text': '#36303B',         // 深紫灰文字
+  '--sub': '#6F6575',
+  '--line': '#EAE1E8',
+  '--ring-opacity': '0.9',
+  
+  /* 晚霞天幕：暮色蓝 ➔ 薰衣草紫 ➔ 香草米白（完美烘托落日暖金） */
+  wallpaper: `
+    linear-gradient(180deg, 
+      #C6DBF8 0%, 
+      #E5E0F8 22%, 
+      #F4ECF2 50%, 
+      #FAF2EE 78%, 
+      #FAF7F2 100%
+    )
+  `
+}
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -1625,6 +1649,30 @@ momo_night: {
   tabDiscover: 'https://s1.imagehub.cc/images/2026/08/11/4efc0fcba051c9e5c0c917a84026e2a8.png',
   tabMe:       'https://s1.imagehub.cc/images/2026/08/11/e3c8122553d9e2a22740e7b15f470af9.png',
   discoverMoments: 'https://s1.imagehub.cc/images/2026/08/11/7c70b8b0b244adad7b77942998556734.png'
+},
+
+// 🍨 落日芭菲
+sunset_parfait: {
+  // 桌面应用图标
+  wechat:   'https://s1.imagehub.cc/images/2026/08/17/eaacfa12b255f9070044015ea8b5cf6b.png',
+  notes:    'https://s1.imagehub.cc/images/2026/08/17/13d509ea093f0a7dc72ca0bd854a33b5.png',
+  focus:    'https://s1.imagehub.cc/images/2026/08/17/b801c42ac7d095a328c7a185b72ae8f0.png',
+  settings: 'https://s1.imagehub.cc/images/2026/08/17/315ad2de6f61445e1a3479e99d29d46f.png',
+  album:    'https://s1.imagehub.cc/images/2026/08/17/1fe2d3ca0ecd1dd19db7c429a760dc00.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/08/17/a867c7134e057106bc68cc570dacb71f.png',
+  music:    'https://s1.imagehub.cc/images/2026/08/17/12d36e6504dc700d4466fad09d029d51.png',
+  preset:   'https://s1.imagehub.cc/images/2026/08/17/67f5de5716cb36b844e247aba2a54485.png',
+  floating: 'https://s1.imagehub.cc/images/2026/08/17/96d9b1cf4ccfd009a2cbcb99e3d75509.png',
+  shop:     'https://s1.imagehub.cc/images/2026/08/17/4d8db04fd9ddecc11db9321dc6d5efab.png',
+  world:    'https://s1.imagehub.cc/images/2026/08/17/de03ab383d76419937dbf9d938093fac.png',
+  game:     'https://s1.imagehub.cc/images/2026/08/17/754f806d13159efb1a3e612dd532723b.png',
+  // 底栏图标
+  tabChats:    'https://s1.imagehub.cc/images/2026/08/17/9c6162e67e2bff3e7f07f46f8ea1e046.png',
+  tabContacts: 'https://s1.imagehub.cc/images/2026/08/17/63b353ba58510c4723c9f244e156bf78.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/17/b25905b6d0872b1eb32fa263f0809df6.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/08/17/ff0a315da9b8a9606f5d470ce965c30b.png',
+  // 发现页 - 朋友圈入口
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/17/ffc13fb7f7fb9f3416a4ec6200d886fe.png'
 }
 
 };
@@ -1800,12 +1848,14 @@ if (!_aiChan) {
   const _tmp = { contacts: [], chats: d.chats };
   seedAiChan(_tmp);
   const _newData = _tmp.contacts[0];
-  // 保留这些字段不覆盖（用户的互动数据）
-  const _KEEP = ['status', 'hearts', 'heartsTotal', 'heartLog', 'heartMile',
-                 'lastActive', '_lastDecayCheck', 'memories', 'schedules',
-                 'chapters', 'inChatList', 'isBlockedByChar', 'blockedByCharAt'];
-  _KEEP.forEach(k => { _newData[k] = _aiChan[k]; });
-  Object.assign(_aiChan, _newData);
+  
+  // 仅增量补齐缺失的字段，绝不覆盖用户已有的自定义内容（包括头像、昵称、人设等）
+  Object.keys(_newData).forEach(key => {
+    // 如果已有字段不存在，或者当前为空/未定义，才从新模板中补齐
+    if (_aiChan[key] === undefined || _aiChan[key] === null || _aiChan[key] === '') {
+      _aiChan[key] = _newData[key];
+    }
+  });
 }
 if (d.desktop && d.desktop.apps) {
   d.desktop.apps = d.desktop.apps.filter(function(a) {
@@ -8396,6 +8446,7 @@ function updRelation(idx, key, val){
   if(key==='targetId') render();
 }
 // 把角色的社会关系整理成一段给 AI 看的"人物清单"
+// ===== 社会关系整理成人物清单 =====
 function buildRelationBrief(c){
   var rels = (c.relations || []);
   if (!rels.length) return '';
@@ -8409,7 +8460,7 @@ function buildRelationBrief(c){
     } else {
       var t = getC(r.targetId);
       if (!t) return; // 已删除的角色跳过
-      name   = t.name || t.nick || '?';   // 真名优先
+      name   = t.name || t.nick || '?';
       gender = t.gender || '';
       job    = t.job || '';
     }
@@ -8422,9 +8473,15 @@ function buildRelationBrief(c){
     lines.push('· ' + name + meta + rel + desc);
   });
   if (!lines.length) return '';
-  return '\n\n【你生活中已存在的人物（剧情需要时优先让他们登场，别另起炉灶）】\n' + lines.join('\n');
+  
+  var guide = '\n\n【你生活中的真实社交圈（重要设定）】\n' +
+    '以下是你日常生活中真实存在的人物。请根据真实人设自然展现，不要刻意回避或向对方隐瞒：\n' +
+    '1. 聊天时：聊到生活近况、周末去向、情感心事、日常烦恼或八卦时，自然提及他们（例如提到暧昧对象的微妙互动、恋人的日常、朋友同事的趣事）。所有关系都是你生活的一部分，无需避嫌。\n' +
+    '2. 朋友圈互动时：他们会以符合彼此关系的语气与你互动（暧昧对象可能会带点关心/调侃/特定暗号，朋友会吐槽或约饭）。\n' +
+    '3. 需要提到他人时，优先从以下人物中选择，不要凭空捏造新人物。\n' +
+    lines.join('\n');
+  return guide;
 }
-
 // 折叠切换函数（放在全局，和 renderCharEdit 平级）
 function toggleFold(header) {
   var body = header.nextElementSibling;
@@ -10985,9 +11042,9 @@ function toApiMsg(m){
   if(m.type==='transfer')return{role:m.role,content:`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};
   if(m.type==='redpacket')return{role:m.role,content:`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};
   if(m.type==='voice')return{role:m.role,content:`（语音消息）${m.content}`};
-  if(m.type==='sticker')return{role:m.role,content:`（发了个表情：${m.content}）`};
-  // ★ 新增：通话记录 —— 把整通电话的对话内容展开给 AI，它才记得聊过啥、谁挂的
-  if(m.type==='callLog'){
+if(m.type==='sticker')return{role:m.role,content:`（发了个表情：${m.content}）`};
+// ★ 新增：通话记录 —— 把整通电话的对话内容展开给 AI，它才记得聊过啥、谁挂的
+if(m.type==='callLog'){
     var _txt = '（你和对方进行了一次语音通话，时长'+(m.duration||'')+'。通话内容如下：\n';
     if(m.turns && m.turns.length){
       _txt += m.turns.map(function(t){
@@ -12525,7 +12582,7 @@ function parseAIMessage(raw) {
     });
 
     // 3. 提取逻辑：先取出所有标签及其位置
-    const regex = /<(voice|sticker|recall|transfer|block|inner|action|gift|giftback|share|meet)([^>]*)>(?:([\s\S]*?)<\/\1>)?/g;
+    const regex = /<(voice|sticker|recall|transfer|block|inner|action|giftback|gift|share|meet)([^>]*)>(?:([\s\S]*?)<\/\1>)?/g;
     const parts = [];
 	    if (_snapWish) { parts._snap = _snapWish; }
 
@@ -12540,7 +12597,7 @@ function parseAIMessage(raw) {
             end: regex.lastIndex,
             tag: match[1],
             attrs: match[2],
-            content: match[3].trim(),
+            content: (match[3] || '').trim(),
             raw: match[0]
         });
     }
@@ -12980,13 +13037,12 @@ if (c.allowStickers !== false) {
           '。你必须在回复末尾单独一行输出 [接收] 或 [退回]，二选一，没有第三种选择。接收就感谢对方，退回就说明理由。这条标记必须单独占一行。'
       });
     }
-    if (pendingGift) {
-      messages.push({
-        role: 'system',
-        content: '【礼物反应·必须执行】对方刚送了你一件礼物「' + lastMsg.content + '」。你要按人设自然回应（开心/害羞/感动/或委婉推辞），并在回复末尾单独一行输出 <giftback type="accept"></giftback>（收下）或 <giftback type="reject"></giftback>（婉拒），二选一，必须输出。绝不提任何价格、数字或系统内容。'
-      });
-    }
-
+if (pendingGift) {
+  messages.push({
+    role: 'system',
+    content: '【礼物反应·必须执行】对方刚送了你一件礼物「' + lastMsg.content + '」。你要按人设自然回应（开心/害羞/感动/或委婉推辞），并在回复末尾单独一行输出 <giftback type="accept"></giftback>（收下）或 <giftback type="reject"></giftback>（婉拒），二选一，必须输出。注意：这次你只需要回应对方的礼物，绝对不要输出 <gift> 标签，也不要给对方送礼物。'
+  });
+}
     // ---- 6. 用户额外提示 ----
     if (nudge) messages.push({ role: 'user', content: nudge });
 // ★ 新增：如果刚从线下切回线上，给 AI 塞一个小纸条唤醒它
@@ -13519,12 +13575,37 @@ function stayOffline(cid){
   if(m) m.remove();
 }
 function backOnline(cid){
-  var c=getC(cid);if(!c)return;
-  c.mode='online';
+  var c = getC(cid);
+  if (!c) return;
+  c.mode = 'online';
   c._backOnlineHint = true; // 标记：刚切回线上
+
+  // 场景感知版切换提示词：让 AI 依据上下文自动推断分别场景
+  var transitionPrompt = "[系统指令：线下见面已自然结束，双方已分开并各自处于独立空间，已正式切换为线上微信聊天模式。\n" +
+    "【场景推断要求】：请严格结合上文最后发生的情境自然接话，切勿出戏：\n" +
+    "1. 若是在某人家中过夜/同住：请依据地点逻辑判断（如在User家则是你已离开回自己那边；若在你家则是User醒后先走了，你可以有类似“一睁眼你怎么不见了/到家了吗”的自然反应）。\n" +
+    "2. 若是正常约会/聚餐/看电影/外出：则是各自道别后回到了自己的地方。\n" +
+    "【互动规范】：双方本次线下已经彻底分开，请专注于当前的手机微信打字互动，顺应分开后的线上状态，不要动不动就提出“马上折返跑去找对方”或立刻要求再次见面。]";
+
+  // 构造一条标准的用户消息（界面隐藏，但大模型请求时会带上，解决 400 结尾报错）
+  var noteMsg = {
+    id: newId(),
+    role: 'user',
+    type: 'text',          // 改为标准的 text 类型，防止被接口构建器过滤
+    content: transitionPrompt,
+    hidden: true,          // 界面渲染时跳过气泡
+    time: Date.now()
+  };
+
+  if (!DB.chats[c.id]) DB.chats[c.id] = [];
+  DB.chats[c.id].push(noteMsg);
+
+  c._lastUserAt = Date.now(); // 刷新用户最后发言时间
+
   save();
-  if(view.type==='chat'&&view.id===cid) renderChat();
+  if (view.type === 'chat' && view.id === cid) renderChat();
 }
+
 setInterval(()=>{if(view.type!=='chat'||replying)return;const c=getC(view.id);if(!c||c.activity==='关')return;const gap={低:600000,中:300000,高:120000}[c.activity]||300000;const msgs=DB.chats[c.id]||[];if(!msgs.length||msgs[msgs.length-1].role==='assistant')return;if(Date.now()-lastActivity>gap){lastActivity=Date.now();aiReply('（对方已经有一会儿没说话了，请根据你的性格自然地主动发一条消息）');}},20000);
 document.addEventListener('pointerdown',()=>{lastActivity=Date.now();});
 
@@ -13625,18 +13706,19 @@ function collectC2CCommenters(poster){
   return list;
 }
 
-function c2cShouldComment(commenter,moment){
-  var type=(commenter.rel.relationType||'').trim();
-  var p=0.15;
-  if(/恋人|夫妻|情侣|男女朋友/.test(type)) p=0.4;
-  else if(/闺蜜|挚友|兄弟|好友/.test(type)) p=0.3;
-  else if(/家人|父|母|哥|弟|姐|妹|亲/.test(type)) p=0.3;
-  else if(/朋友|同学|同事|同伴/.test(type)) p=0.2;
-  else if(/敌|仇|前任|讨厌/.test(type)) p=0.18;
-  if(moment.images&&moment.images.length) p+=0.03;
-  return Math.random()<p;
+// 根据关系标签计算评论概率
+function c2cShouldComment(commenter, moment){
+  var type = (commenter.rel.relationType || '').trim();
+  var p = 0.2;  // 基础概率提升至 20%
+  if(/暧昧|喜欢|暗恋|追求/.test(type)) p = 0.45;          // 暧昧/喜欢阶段互动最积极 → 45%
+  else if(/恋人|夫妻|情侣|男女朋友/.test(type)) p = 0.4;  // 恋人 → 40%
+  else if(/闺蜜|挚友|兄弟|好友/.test(type)) p = 0.35;     // 闺蜜/挚友 → 35%
+  else if(/家人|父|母|哥|弟|姐|妹|亲/.test(type)) p = 0.3; // 家人 → 30%
+  else if(/朋友|同学|同事|同伴/.test(type)) p = 0.25;      // 朋友/同事 → 25%
+  else if(/敌|仇|前任|讨厌/.test(type)) p = 0.15;          // 敌对/讨厌 → 15%
+  if(moment.images && moment.images.length) p += 0.05;
+  return Math.random() < p;
 }
-
 function c2cBrief(char,fallbackName){
   if(!char) return fallbackName||'某人';
   var s=(char.nick||char.name||fallbackName||'某人');
