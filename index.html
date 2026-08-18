@@ -13153,6 +13153,7 @@ if (pendingGift) {
     // ---- 7. 调用 AI ----
 let out = await callAI(messages, getEffectiveChatModel(c));
     out = applyState(c, out);
+	out = out.replace(/\[\d{4}-\d{2}-\d{2}\s+\d{1,2}[:：]\d{2}\]\s*/g, ''); // 擦掉AI误吐的时间戳
 
     // ---- 8. 解析 AI 回复 (使用新解析器) ----
     // 1. <state> 标签已在上面处理过，这里不再重复调用
