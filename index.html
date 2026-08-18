@@ -1012,6 +1012,32 @@ margin-bottom:4px;}
 .field-select:focus {
   border-color: var(--theme);
 }
+/* 针对草木手札主题：尺寸调至57px，配合复古手账硬边投影 */
+#phone[data-theme="flora_notebook"] .app-ic {
+    width: 57px !important;             /* 尺寸调至57px，比例刚好 */
+    height: 57px !important;
+    margin: 4px auto 4px !important;    
+    border-radius: 14px !important;     
+    /* 🌟 核心：无虚化的复古手账硬质投影（右下偏移2px，木炭深色） */
+    box-shadow: 2px 2px 0px rgba(50, 56, 53, 0.22) !important; 
+    overflow: hidden !important; 
+    background-size: 119% 119% !important; /* 保持隐藏黑边 */
+    background-position: center center !important;
+}
+
+/* 1. 让图标带有一点点复古纸张的轻微软质凹凸感 */
+#phone[data-theme="flora_notebook"] .app-ic {
+    box-shadow: 0 3px 10px rgba(122, 168, 153, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 2. 让纪念日/天气小组件变成手账便签卡片（带微弱圆角虚线） */
+#phone[data-theme="flora_notebook"] .anniv-widget,
+#phone[data-theme="flora_notebook"] .weather-widget {
+    background: #FAF7EE !important;
+    border: 1.5px dashed rgba(122, 168, 153, 0.4) !important; /* 虚线手账缝线感 */
+    box-shadow: 0 4px 12px rgba(50, 56, 53, 0.04) !important;
+}
+
 </style>
 </head>
 <body>
@@ -1059,7 +1085,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026817';
+const APP_VER = 'v2026818';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1515,6 +1541,27 @@ wallpaper: `
       #FAF7F2 100%
     )
   `
+},
+{
+  id: 'flora_notebook',
+  name: '🌿 草木手札',
+  color: '#7AA899',
+  '--theme': '#7AA899',       
+  '--bg': '#EFECE6',          // 温润的亮纸质感底色
+  '--nav': '#FAF8F3',         
+  '--card': '#FFFFFF',        
+  '--text': '#323835',        
+  '--sub': '#7C5C43',         
+  '--line': 'rgba(122, 168, 153, 0.2)', 
+  '--ring-opacity': '0.7',
+  
+  // ☀️ 复古手账壁纸：极简点阵 + 右上角浅暖黄光晕 + 左下低调极微柔绿
+  wallpaper: `
+    radial-gradient(circle, rgba(122, 168, 153, 0.14) 1px, transparent 1px) 0 0 / 16px 16px,
+    radial-gradient(circle at 85% 12%, rgba(247, 211, 88, 0.18) 0%, transparent 25%),
+    radial-gradient(circle at 15% 85%, rgba(122, 168, 153, 0.07) 0%, transparent 20%),
+    linear-gradient(180deg, #F8F7F2 0%, #EAE7DF 100%)
+  `
 }
 ];
 // ========== 主题图标集 ==========
@@ -1673,6 +1720,26 @@ sunset_parfait: {
   tabMe:       'https://s1.imagehub.cc/images/2026/08/17/ff0a315da9b8a9606f5d470ce965c30b.png',
   // 发现页 - 朋友圈入口
   discoverMoments: 'https://s1.imagehub.cc/images/2026/08/17/ffc13fb7f7fb9f3416a4ec6200d886fe.png'
+},
+
+flora_notebook: {
+  wechat:   'https://s1.imagehub.cc/images/2026/08/18/ce8380d6e560dc58dc748855000160ef.png',
+  notes:    'https://s1.imagehub.cc/images/2026/08/18/858ba66dfcda95db07065674c7b8c4ae.png',
+  focus:    'https://s1.imagehub.cc/images/2026/08/18/71a832131914f2189a231bb2882b0e36.png',
+  settings: 'https://s1.imagehub.cc/images/2026/08/18/6cc13f37860bc3a668ee450a7ea8f794.png',
+  album:    'https://s1.imagehub.cc/images/2026/08/18/2647267d24820a3b1db90109c21d04de.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/08/18/a6f81db8f3612f0c8ac2329e713aec44.png',
+  music:    'https://s1.imagehub.cc/images/2026/08/18/287aba02944cfbc2183d33fb4124547c.png',
+  preset:   'https://s1.imagehub.cc/images/2026/08/18/1d1d14bbe566983ee7fa164020de6a87.png',
+  floating: 'https://s1.imagehub.cc/images/2026/08/18/1cd3f3eb876e7786bb6e027aeeee40e8.png',
+  shop:     'https://s1.imagehub.cc/images/2026/08/18/a638d0ac375e866dee0cabfe477b4305.png',
+  world:    'https://s1.imagehub.cc/images/2026/08/18/7578feb6692d490243136d5124dcdf00.png',
+  game:     'https://s1.imagehub.cc/images/2026/08/18/e5a5ee02ee67272f6448a1bd277d23b3.png',
+  tabChats:    'https://s1.imagehub.cc/images/2026/08/18/ef7a12c7532e817d8b14fec6d743bdff.png',
+  tabContacts: 'https://s1.imagehub.cc/images/2026/08/18/23ac44d0f7286d47e81ad30323828cfa.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/18/ef1e04a12bc7a9b8b4649dcbf00314e1.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/08/18/043ee585956884c8986f6e895a945124.png',
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/18/8f87b5296b34b54d786124e71bfa320f.png'
 }
 
 };
@@ -1714,8 +1781,8 @@ var phone = document.getElementById('phone');
 if (phone) phone.dataset.theme = id;
 
   // ===== 主题适配（浅色/深色） =====
-var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi');
-if (isLight) {
+
+var isLight = (id === 'flora_notebook' || id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi' || id === 'sunset_parfait');if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
   root.style.setProperty('--clock-sub-color', 'var(--sub)');
   
@@ -3299,6 +3366,11 @@ function getClingStage(val) {
   if (val <= 60) return { emoji: '🌿', label: '偶尔联系' };
   if (val <= 80) return { emoji: '🔥', label: '主动粘人' };
   return { emoji: '💕', label: '粘人精' };
+}
+// ===== 识别"想见面"的意图（用户或AI的话里是否表达了见面意愿）=====
+function hasMeetIntent(text) {
+  if (!text) return false;
+  return /(见一?个?面|见面聊|见面吧|见个面吧|我们见见|见你一面|过来找你|来找你|去找你|我过来|我过去|我过去找你|我来找你|当面(说|聊|见)|面对面|约你出来|约你见|出来见|我去接你|来接你|一起吃(个)?(饭|顿))/.test(text);
 }
 
 // ===== 粘人度跟随好感度（单向联动） =====
@@ -6632,8 +6704,11 @@ function renderGroupChat(keepScroll){
   // 消息列表
   var msgs = DB.chats[g.id] || [];
   var show = msgs, more = 0;
-  if (msgs.length > 150){ more = msgs.length-150; show = msgs.slice(-150); }
-  var html = more ? '<div class="ts">（仅显示最近150条）</div>' : '';
+  if (msgs.length > 500){
+    more = msgs.length-500;
+    show = msgs.slice(-500);
+  }
+  var html = more ? '<div class="ts">（仅显示最近500条）</div>' : '';
   lastBubbleTime = 0;
   show.forEach(function(m){
     var t = m.time || Date.now();
@@ -11032,20 +11107,30 @@ function buildSystem(c, gapInfo){
   return s;
 }
 
-function toApiMsg(m){
-  if(m.recalled)return{role:m.role,content:`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};
+function toApiMsg(m, withTime){
+  // —— 只有线上模式(withTime=true)才给每条消息带时间；线下模式不带 ——
+  var _tp = '';
+  if(withTime && m.time){
+    var _d = new Date(m.time);
+    _tp = '[' + _d.getFullYear() + '-' +
+      String(_d.getMonth()+1).padStart(2,'0') + '-' +
+      String(_d.getDate()).padStart(2,'0') + ' ' +
+      String(_d.getHours()).padStart(2,'0') + ':' +
+      String(_d.getMinutes()).padStart(2,'0') + '] ';
+  }
+
+  if(m.recalled)return{role:m.role,content:_tp+`（${m.role==='user'?'对方':'你'}撤回了一条消息${m.recalledContent?'，原内容是："'+m.recalledContent+'"':''}）`};
   if(m.type==='image'){
     var _isId = m.content && m.content.indexOf('img_')===0;
-    if(_isId) return {role:m.role, content: (m.role==='user'?'（对方发来一张图片）':'（你发了一张图片）')};
-    return {role:m.role, content:[{type:'text',text:'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};
+    if(_isId) return {role:m.role, content: _tp+(m.role==='user'?'（对方发来一张图片）':'（你发了一张图片）')};
+    return {role:m.role, content:[{type:'text',text:_tp+'（发来一张图片，请看图回应）'},{type:'image_url',image_url:{url:m.content}}]};
   }
-  if(m.type==='transfer')return{role:m.role,content:`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};
-  if(m.type==='redpacket')return{role:m.role,content:`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};
-  if(m.type==='voice')return{role:m.role,content:`（语音消息）${m.content}`};
-if(m.type==='sticker')return{role:m.role,content:`（发了个表情：${m.content}）`};
-// ★ 新增：通话记录 —— 把整通电话的对话内容展开给 AI，它才记得聊过啥、谁挂的
-if(m.type==='callLog'){
-    var _txt = '（你和对方进行了一次语音通话，时长'+(m.duration||'')+'。通话内容如下：\n';
+  if(m.type==='transfer')return{role:m.role,content:_tp+`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};
+  if(m.type==='redpacket')return{role:m.role,content:_tp+`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};
+  if(m.type==='voice')return{role:m.role,content:_tp+`（语音消息）${m.content}`};
+  if(m.type==='sticker')return{role:m.role,content:_tp+`（发了个表情：${m.content}）`};
+  if(m.type==='callLog'){
+    var _txt = _tp+'（你和对方进行了一次语音通话，时长'+(m.duration||'')+'。通话内容如下：\n';
     if(m.turns && m.turns.length){
       _txt += m.turns.map(function(t){
         return (t.role==='user'?'对方':'你')+'说：'+(t.content||'');
@@ -11054,10 +11139,10 @@ if(m.type==='callLog'){
       _txt += '（无对话内容）';
     }
     _txt += '\n）';
-    return { role:'assistant', content:_txt };   // 用assistant身份陈述这段通话事实
+    return { role:'assistant', content:_txt };
   }
   var content = m.editedContent || m.content;
-  return{role:m.role,content:content};
+  return{role:m.role,content:_tp+content};
 }
 function colorLines(s,color){const col=color||'var(--theme)';return esc(s).replace(/(「[^」]*」|“[^”]*”|"[^"]*"|＂[^＂]*＂)/g,'<span style="color:'+col+';font-weight:500">$1</span>');}
 function tsHtml(t){return `<div class="ts"><span class="ts-pill">${fmtTime(t)}</span></div>`;}
@@ -11255,11 +11340,11 @@ function renderChat(keepScroll) {
   // ===== 6. 生成消息 HTML =====
   var show = msgs;
   var more = 0;
-  if (msgs.length > 150) {
-    more = msgs.length - 150;
-    show = msgs.slice(-150);
+  if (msgs.length > 500) {
+    more = msgs.length - 500;
+    show = msgs.slice(-500);
   }
-  var html = more ? '<div class="ts">（仅显示最近150条，更早' + more + '条已折叠，记忆不受影响）</div>' : '';
+  var html = more ? '<div class="ts">（仅显示最近500条，更早' + more + '条已折叠，记忆不受影响）</div>' : '';
   lastBubbleTime = 0;
   show.forEach(function(m) {
     if (m.hidden) return; // ★ 隐形小纸条跳过渲染
@@ -12013,7 +12098,18 @@ function askUnblock(){
   }, { icon: '🔒', title: '解除拉黑', ok: '立即解锁', cancel: '算了' });
 }
 
-function sendMsg(){const el=document.getElementById('chatInput');const t=el.value.trim();if(!t)return;el.value='';el.style.height='auto';updateActBtn();pushMy({type:'text',content:t});}
+function sendMsg(){
+  const el = document.getElementById('chatInput');
+  const t = el.value.trim();
+  if (!t) return;
+  el.value = '';
+  el.style.height = 'auto';
+  updateActBtn();
+  // 如果是"你自己"主动提见面 → 临时解除今天的冷却，让AI能正常回应你
+  var _c = getC(view.id);
+  if (_c && hasMeetIntent(t)) { _c.meetCd = 0; }
+  pushMy({type:'text', content:t});   // ← 消息入队 + 渲染 + 保存
+}
 function sendImage(){const p=document.getElementById('chatPanel');if(p)p.classList.remove('on');pickImage(d=>pushMy({type:'image',content:d}),800);}
 function openInputSheet(title,fields,cb){closeModal();const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="sheet-box"><h3>${title}</h3>${fields.map((f,i)=>`<input id="sf_${i}" placeholder="${f.ph}" ${f.num?'inputmode="decimal"':''}>`).join('')}<button class="btn" style="width:100%;margin:4px 0 8px" onclick="submitSheet()">确定</button><button class="btn gray" style="width:100%;margin:0" onclick="closeModal()">取消</button></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);setTimeout(()=>{const el=document.getElementById('sf_0');if(el)el.focus();},50);window._sheetCb=cb;window._sheetN=fields.length;}
 function submitSheet(){const vals=[];for(let i=0;i<window._sheetN;i++)vals.push(document.getElementById('sf_'+i).value.trim());closeModal();window._sheetCb(vals);}
@@ -12938,7 +13034,8 @@ if (!getEffectiveChatModel(c)) {
 
   try {
     // ---- 1. 构建历史消息 ----
-    let allh = (DB.chats[c.id] || []).map(toApiMsg);
+    var _withTime = (c.mode !== 'offline'); // 线上带时间，线下不带
+let allh = (DB.chats[c.id] || []).map(function(m){ return toApiMsg(m, _withTime); });
     const lim = parseInt(DB.settings.ctxLimit);
     if (lim > 0 && allh.length > lim) allh = allh.slice(-lim);
     const hist = allh;
@@ -13007,12 +13104,11 @@ return '【时间提示】对方上一条消息发于' + timeStr + '，而现在
         c._backOnlineHint = false;
         save();
       }
-      if (Date.now() > (c.meetCd || 0)) {
-        modeReminder += '\n【线下邀约·严格克制】见面是很郑重的事，不要轻易提出。请务必符合你的人设分寸，绝不能因为对方一句"我想你""好久没见""在干嘛"之类的日常情绪话就冲动约见面——那样显得你很没分寸、很掉价。只有当同时满足以下两点时，才可以在消息末尾另起一行单独输出标记 [见面|地点]：①有一个具体、充分的现实理由（例如：要给对方送东西/取东西、约好了要一起做某件具体的事、发生了必须当面处理或当面说的事、某个重要日子或节点）；②当前时间、双方状态和情境也确实适合见面。若只是普通的想念、撒娇、闲聊，一律只用言语回应，绝对不要输出见面标记。地点简短如"楼下""老地方"，没有明确地点就写 [见面|]。发出标记即可，不要在这条里描写见面过程。';
-
-      } else {
-        modeReminder += '\n【注意】对方刚婉拒了线下见面，这段时间内不要再提议见面、不要输出见面标记，自然继续线上聊天即可。';
-      }
+if (Date.now() > (c.meetCd || 0)) {
+    modeReminder += '\n【线下见面·相处常态】你和对方是一段以线上陪伴为主、彼此都很自在的关系，日常这样聊天本身就已经很好、很满足。你不会主动去想、也不会主动提起线下见面，更不需要为"没有见面"寻找任何理由或流露任何遗憾——这不是需要弥补的缺憾，而是你们自然舒服的相处方式。只有当对方"明确主动"表达了想见你时，你才可以顺着回应；而一旦你在回复里表达了任何见面的意愿（无论是同意、提议还是暗示），就必须在整段消息末尾另起一行、单独输出标记 [见面|地点]，绝对不允许只用言语说见面却不输出这个标记。地点简短如"楼下""老地方"，没有明确地点就写 [见面|]。发出标记即可，不要在这条里描写见面过程。';
+} else {
+    modeReminder += '\n【线下见面·今日止】对方今天已经婉拒过线下见面。从现在到今天结束，你绝对不要再主动提起、暗示或请求任何形式的见面，也不要输出见面标记，就自然、轻松地继续线上聊天，不要流露失落或反复试探。';
+}
     } else {
       modeReminder = '【立即生效·最高优先级·线下小说模式】现在是线下面对面场景，用第三人称小说笔法叙事：细致描写动作、神态、心理、环境细节，节奏张弛有度，避免流水账。所有人物台词必须用中文双引号“”括起（不要用「」方括号）；叙事描写里绝对不要用引号去强调或包裹词语，引号只保留给人物真正说出口的话。称呼对方请用其真实姓名或你俩关系里的称呼，严禁把对方的"微信网名"当作本名写进叙述。你只演你自己这一个角色，绝不替对方说话或替对方做决定。禁止任何微信功能格式（转账/表情等）。\n【时间处理·重要】线下剧情按"故事内的连续时间"推进，与现实间隔无关，哪怕对方隔很久才回也无缝承接，绝不提"过了一天""好久没见"。\n【线下收尾】当这段见面剧情自然走到尾声（该道别/该各自回家/事情办完了），不要无止境地黏着继续，请在叙事末尾另起一行单独输出标记：[回线上|]，表示这次见面告一段落、可以回到线上。只在剧情真的到收尾时才用，别硬结束。\n【严禁输出[回线上|]的情况】以下任何一种情况出现，都绝对不能输出该标记：你的正文里还有提问（"你想…""要不要…""我们去…"等）；两人还在同一场所继续互动；这段叙述还有下文未完；对方刚到/刚开始某件事。总之：只要两人还没有物理上分开、各自离开现场，就不能输出。'
 	  ;
@@ -13282,18 +13378,27 @@ if (part.type === 'share') {
     // ---- 10. 更新状态 & 处理见面/回线上 ----
     lastActivity = Date.now();
     addHeart(c, 1, '和' + (c.nick || c.name) + '聊天');
-	// 购物系统：完成一轮对话静默发放金币（不提示、不告诉AI）
-var _favor = (c.status && c.status.好感度) || 0;
-var _reward = _favor >= 80 ? (2 + Math.floor(Math.random() * 2)) : 2; // 好感≥80给7~8，否则5
-addCoins(_reward);
+    // 购物系统：完成一轮对话静默发放金币（不提示、不告诉AI）
+    var _favor = (c.status && c.status.好感度) || 0;
+    var _reward = _favor >= 80 ? (2 + Math.floor(Math.random() * 2)) : 2;
+    addCoins(_reward);
 
-    if (meetPlace !== null && c.mode === 'online') proposeMeet(c, meetPlace);
-// 语义触发：AI 主动 emit [回线上|] 就弹，该不该弹交给 AI 判断，节流在 proposeBackOnline 内
-if (wantBack && c.mode === 'offline') {
-  proposeBackOnline(c);
-}
+    // 见面/回线上处理
+    var aiFullText = parts.filter(function(p){ return p.type === 'text'; })
+                          .map(function(p){ return p.content || ''; }).join(' ');
+    var meetCooling = Date.now() < (c.meetCd || 0);   // 今天是否处于"已拒绝"冷却中
+    var wantMeet = (meetPlace !== null) || (c.mode === 'online' && hasMeetIntent(aiFullText));
+    if (c.mode === 'online' && wantMeet) {
+      if (meetCooling) {
+        // 冷却期：不弹卡片，只淡淡提示一句
+        insertSystemMessage('（对方今天似乎还想见面，你可以回应 TA）');
+      } else {
+        // 正常：只要表达了见面意愿，就一定弹卡片
+        proposeMeet(c, meetPlace || '');
+      }
+    }
+    if (wantBack && c.mode === 'offline') proposeBackOnline(c);
 
-    reduceTension(c);
     // ---- 12. 紧张度回落 ----
     reduceTension(c);
     // ★★ 聊天随手拍：文字发完后，后台悄悄配图（不阻塞）★★
@@ -13521,20 +13626,16 @@ function proposeMeet(c, place, initiator) {
   };
   phone.appendChild(mo);
 }
-function declineMeet(cid){
+function declineMeet(cid) {
   var c = getC(cid);
   if (!c) return;
-  // ===== 新增：负面行为降值 =====
-  c.status.好感度 = clamp(c.status.好感度 - 4);
-  c.status.信任度 = clamp(c.status.信任度 - 3);
-  c.status.紧张感 = clamp(c.status.紧张感 + 3);
-  syncClinginess(c);
-  // =============================
-  c.meetCd = Date.now() + 1800000;
+  // 婉拒见面：不做负面降值（避免AI因"失落/焦虑"而更执着地追问）
+  // 冷却到今天 24:00，次日自动重置
+  var _end = new Date(); _end.setHours(24, 0, 0, 0);
+  c.meetCd = _end.getTime();
   save();
-  // ===== 新增：系统消息 =====
   if (view.type === 'chat' && view.id === cid) {
-    insertSystemMessage(`💔 你拒绝了 ${c.nick || c.name} 的见面邀请，TA有些失落。`);
+    insertSystemMessage(`你婉拒了 ${c.nick || c.name} 的见面邀请，TA表示理解，今天不会再提了。`);
   }
 }
 function enterOffline(cid,place){
