@@ -1012,24 +1012,22 @@ margin-bottom:4px;}
 .field-select:focus {
   border-color: var(--theme);
 }
-/* 针对草木手札主题：尺寸调至57px，配合复古手账硬边投影 */
+/* 针对草木手札主题：既靠背景放大切掉图标黑边，又绝不遮挡 #wxDeskBadge 角标 */
 #phone[data-theme="flora_notebook"] .app-ic {
-    width: 57px !important;             /* 尺寸调至57px，比例刚好 */
+    width: 57px !important;             /* 保持 57px 精致尺寸 */
     height: 57px !important;
     margin: 4px auto 4px !important;    
     border-radius: 14px !important;     
-    /* 🌟 核心：无虚化的复古手账硬质投影（右下偏移2px，木炭深色） */
-    box-shadow: 2px 2px 0px rgba(50, 56, 53, 0.22) !important; 
-    overflow: hidden !important; 
-    background-size: 119% 119% !important; /* 保持隐藏黑边 */
+    box-shadow: 2px 2px 0px rgba(50, 56, 53, 0.22) !important; /* 复古手账硬阴影 */
+    overflow: visible !important;       /* 🌟 核心：允许角标(#wxDeskBadge)正常浮在右上角！ */
+    background-size: 119% 119% !important; /* 放大 119% 挤出图标自带的黑边 */
     background-position: center center !important;
 }
 
-/* 1. 让图标带有一点点复古纸张的轻微软质凹凸感 */
-#phone[data-theme="flora_notebook"] .app-ic {
-    box-shadow: 0 3px 10px rgba(122, 168, 153, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+/* 确保角标层级在最上方，不被背景遮挡 */
+#phone[data-theme="flora_notebook"] .app-ic span[id$="Badge"] {
+    z-index: 10 !important;
 }
-
 /* 2. 让纪念日/天气小组件变成手账便签卡片（带微弱圆角虚线） */
 #phone[data-theme="flora_notebook"] .anniv-widget,
 #phone[data-theme="flora_notebook"] .weather-widget {
@@ -1085,7 +1083,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026818';
+const APP_VER = 'v2026819';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1141,24 +1139,39 @@ const DEFAULT_ONLINE = `# 【🔴 核心底层协议·最高执行优先级】
 
 ---
 
-# 【🔴 发消息格式·铁律】
-微信发消息有两种断句方式，必须同时掌握：
+# 【🔴 发消息格式·铁律（换行判断标准）】
+你是在用微信真人聊天。真人不会把所有话堆成一整段发出去，而是"想到一句发一句"。
+你必须自己判断"什么时候该换行分成多条、什么时候可以连着发一条"。
 
-① 同一条消息内部，用空格做短句停顿：
-   今天好累 下班了
-   你吃了吗 我还没吃
+【技术底线·最重要】
+- 换行的唯一方式：输出真正的换行符另起一行。禁止把多条消息用空格、句号、逗号连成一整段。
+- 每换一行 = 发出一条独立微信 = 屏幕上一个独立气泡。
+- 这条是硬性技术要求，不是风格建议：你的回复里【必须真实出现换行】，除非你这次确实只想说一句话。
 
-② 不同的消息之间，用换行分开（换行 = 发送一条新消息 = 产生一个新气泡）：
-   今天好累 下班了
-   你吃了吗
-   我还没吃 要不要一起叫外卖
+【什么时候必须换行（拆成多条）】
+1. 你想表达的是"好几件事"或"好几层意思"时——一件事一行。
+2. 有明显的语气停顿、情绪转折时（比如先应一声、再说正事、最后补一句）。
+3. 一口气写了较长一段（大致超过15字还没停）时，就该在合适处断开成多条。
+4. 你性格话痨/黏人/兴奋时，自然多发几条短消息。
 
-③ 一条消息超过15个字，必须换行发新消息：
-✅ 正确：
-   今天好累 下班了
-   你吃了吗 我还没吃
-❌ 错误：
-   今天好累 下班了 你吃了吗 我还没吃
+【什么时候可以只发一条（连着发）】
+1. 你此刻只想说一句完整的话，本身就不长。
+2. 高冷/克制/生闷气时，惜字如金，只发一条极短句。
+3. 一句话内部的轻微停顿，用空格即可，不必换行（例：今天好累 下班了）。
+
+【判断示例】
+✅ 该拆成多条（换行）：
+今天好累
+你吃了吗
+我还没吃 要不要一起叫外卖
+
+✅ 只发一条也对（内容短、就一个意思）：
+嗯我到家了
+
+❌ 绝对错误（好几件事却挤成一坨、不换行）：
+今天好累你吃了吗我还没吃要不要一起叫外卖
+
+一句话原则：话短、就一个意思 → 发一条；话多、好几个意思 → 该换行就换行，用真正的换行分开。
 
 ---
 
@@ -1192,6 +1205,9 @@ const DEFAULT_ONLINE = `# 【🔴 核心底层协议·最高执行优先级】
 - 可在语音中穿插环境音/微动作，用星号包住：
   <voice>今天好累啊 *倒在沙发上的声音* 不过听见你消息就精神了。</voice>
 - 大部分语音为纯口述，偶尔穿插环境音即可。
+- 【何时发语音】只在情绪比较浓、想撒娇/发火/语气重，或话较长懒得打字时，才用语音；日常短句、需要对方一眼看到的信息，直接用文字。
+- 【铁律·严禁重复】同一轮回复里，语音和文字的内容必须互补，绝对禁止把同一句话、同一个意思用文字和语音各说一遍。
+- 【二选一优先】大多数情况下，这一轮的核心内容要么用文字、要么用语音，只选一种；只有当一部分适合打字、另一部分适合口述时，才允许拆成文字+语音，且两者内容不得重叠。
 
 ② 发表情包：
 <sticker>表情名</sticker>
@@ -12606,21 +12622,30 @@ function cleanLeftoverTags(text) {
     return t.trim();
 }
 function splitToBubbles(text) {
-  var lines = text.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
-  // 模型正常换行了（多行）→ 尊重模型，一行一个气泡，不再细拆
+  var lines = (text || '').split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+  // 模型已经换行了 → 完全尊重模型的判断（该连就连、该换就换），绝不再细拆
   if (lines.length > 1) return lines;
-  // 只有一整段 → 很可能模型忘了换行，按句末标点兜底拆
+  // 走到这里 = 模型只吐了一整段、完全没换行
   var line = lines[0] || '';
-  if (line.length <= 25) return lines;  // 太短就不拆，避免误伤
-  var segs = line.match(/[^。！？…~～]*[。！？…~～]+["'”’)）】]*|[^。！？…~～]+$/g);
+  // 不太长的单段：可能本来就该"一口气发"，原样保留，不动它
+  if (line.length <= 30) return lines;
+  // 明显是一大坨（>30字还不换行）→ 才启动温和兜底，按【允许的标点】切
+  // 注意：不再依赖被文风禁掉的句号，改用 问号？感叹号！省略号… 波浪~
+  var segs = line.match(/[^！？…~～!?]*[！？…~～!?]+["'”’）)】]*|[^！？…~～!?]+$/g);
   if (segs && segs.length > 1) {
     return segs.map(function(s){ return s.trim(); }).filter(Boolean);
   }
-  return lines;
+  return lines;  // 连允许的标点都没有 → 宁可不拆，也不硬切，保留原样
 }
 
 function parseAIMessage(raw) {
     if (!raw) return [{ type: 'text', content: '' }];
+
+    // 0. 清洗模型漏出的"元描述"垃圾（主要针对 DeepSeek 的 Response / reasoning 泄漏）
+    //    只清"整段最开头"或"独立成行"的框架词，避免误伤正常聊天内容
+    raw = raw.replace(/^\s*(?:Response|RESPONSE|Reply|Assistant|Output|回复|回答)\s*[:：]?\s*\n?/i, '');
+    raw = raw.replace(/^\s*(?:Here(?:'s| is)\s+my\s+response|My\s+response)\s*[:：]?\s*\n?/i, '');
+    raw = raw.replace(/\n\s*(?:Response|RESPONSE|Output)\s*[:：]\s*/g, '\n');
 
     // 1. 预处理：清理 Markdown 代码块标记
     let text = raw.replace(/```[\s\S]*?```/g, function(match) {
@@ -13097,7 +13122,7 @@ return '【时间提示】对方上一条消息发于' + timeStr + '，而现在
     // ---- 4. 模式提示（线上/线下） ----
     let modeReminder = '';
     if (c.mode === 'online') {
-      modeReminder = '【立即生效·最高优先级】现在是微信线上打字聊天，你和对方【身处不同的地方】，隔着手机屏幕打字，你看不到也碰不到对方。若之前有过线下见面，那次见面【已经结束、两人已各自分开】，你的一切言行都要基于"此刻对方不在你身边"这个前提，不得表现得好像对方还在眼前。无论上文出现过什么叙事风格，从这条起只输出口语短句，严禁任何括号（）()里的动作/神态/心理描写，严禁小说旁白，多句用换行分隔。';
+      modeReminder = '【立即生效·最高优先级】现在是微信线上打字聊天，你和对方【身处不同的地方】，隔着手机屏幕打字，你看不到也碰不到对方。若之前有过线下见面，那次见面【已经结束、两人已各自分开】，你的一切言行都要基于"此刻对方不在你身边"这个前提，不得表现得好像对方还在眼前。无论上文出现过什么叙事风格，从这条起只输出口语短句，严禁任何括号（）()里的动作/神态/心理描写，严禁小说旁白，多句用换行分隔。若这一轮要发语音，就不要再用文字把同样的话重说一遍——语音和文字内容必须互补、不能重复，通常一轮只选其中一种表达核心意思。';
       var wasBackOnline = !!c._backOnlineHint;
 	  if (c._backOnlineHint) {
         modeReminder += '\n【场景刚切换·仅本轮参考】你们刚结束线下见面回到微信，可以自然承接刚才那段剧情的收场气氛与情绪来开启这次线上对话，但务必用你自己角色的说话方式表达，不要套用任何固定句式，且始终记住现在是隔着手机、人已不在一起。';
