@@ -1083,7 +1083,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026819';
+const APP_VER = 'v2026820';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1839,26 +1839,36 @@ function updateAllIcons() {
 }
 let DB=load();
 let _dbReady = false;
-(async function bootDB(){
-  try{
-    var idbStr = await idbLoadDB();          // 先去大柜子看看有没有数据
-    if(idbStr){
-      // 大柜子已有数据 → 用它（它比小柜子新）
-      try{ DB = migrate(JSON.parse(idbStr)); }catch(e){}
-      _dbReady = true;
-      render();                              // 用最新数据重画一次
-    }else{
-      // 大柜子还是空的 → 把小柜子现有数据一次性搬进去
-      var lsStr = localStorage.getItem(DB_KEY);
-      if(lsStr){ try{ await idbSaveDB(lsStr); }catch(e){} }
-      _dbReady = true;
-      save();                                // 立刻写一份进大柜子
-    }
-  }catch(e){
-    _dbReady = true;                         // 兜底，别卡住保存
-    console.warn('bootDB error', e);
+setTimeout(function bootDB(){
+  // 工具还没就位？再等100毫秒，直到它出现为止（万无一失）
+  if(typeof idbLoadDB !== 'function' || typeof idbSaveDB !== 'function'){
+    return setTimeout(bootDB, 100);
   }
-})();
+  (async function(){
+    try{
+      var idbStr = await idbLoadDB();
+      if(idbStr){
+        var parsed;
+        try{
+          parsed = migrate(JSON.parse(idbStr));
+        }catch(e){
+          alert('⚠️ 存档读取失败，已暂停保存以保护数据。请把这句发给作者：' + (e && e.message ? e.message : e));
+          return;   // 读失败绝不覆盖，保住大柜子数据
+        }
+        DB = parsed;
+        _dbReady = true;
+        render();
+      }else{
+        var lsStr = localStorage.getItem(DB_KEY);
+        if(lsStr){ try{ await idbSaveDB(lsStr); }catch(e){} }
+        _dbReady = true;
+        save();
+      }
+    }catch(e){
+      alert('⚠️ 启动读取出错，已暂停保存以保护数据：' + (e && e.message ? e.message : e));
+    }
+  })();
+}, 300);
 
 function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrate(JSON.parse(raw));}catch(e){}}return migrate({});}
 function migrate(d){
@@ -2163,6 +2173,7 @@ function seedAiChan(d){
 function addHeart(n,reason){DB.hearts=(DB.hearts||0)+n;if(n>0)DB.heartsTotal=(DB.heartsTotal||0)+n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n,reason});if(DB.heartLog.length>200)DB.heartLog.pop();checkMile();save();}
 function checkMile(){[[50,30],[100,50],[150,100]].forEach(([need,bonus])=>{if(DB.heartsTotal>=need&&!DB.heartMile[need]){DB.heartMile[need]=1;DB.hearts+=bonus;DB.heartLog.unshift({t:Date.now(),n:bonus,reason:`💗累计达成${need}奖励`});setTimeout(()=>popTip(`🎉 心动值累计突破 ${need}！奖励 ${bonus} 心动值`),400);}});}
 function spendHeart(n,reason){if((DB.hearts||0)<n){alert('心动值不足～当前'+(DB.hearts||0)+'，需要'+n+'。多和角色聊天可以获得哦');return false;}DB.hearts-=n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n:-n,reason});save();return true;}
+let _saveChain = Promise.resolve();   // 排队用的
 function save(){
   // 主题色很小，继续放小柜子
   try{
@@ -2173,17 +2184,20 @@ function save(){
     localStorage.setItem('myrp_theme_colors', JSON.stringify(colors));
   }catch(e){}
 
-  // 主数据存进大柜子(IndexedDB)，永不再满
-  if(!_dbReady) return;   // 开机数据还没就绪前，先不存，防止覆盖
-  try{
-    var str = JSON.stringify(DB);
-    idbSaveDB(str).catch(function(e){
+  if(!_dbReady) return;
+
+  // 立刻拍一张当前数据的快照
+  var str;
+  try{ str = JSON.stringify(DB); }
+  catch(e){ alert('⚠️ 数据打包失败：' + (e && e.message ? e.message : e)); return; }
+
+  // 排队保存：等前一笔存完，再存这一笔，绝不互相插队
+  _saveChain = _saveChain.then(function(){
+    return idbSaveDB(str).catch(function(e){
       console.warn('保存失败(大柜子)：', e);
-      alert('⚠️ 保存失败，请截图告诉作者：' + (e && e.message ? e.message : e));
+      alert('⚠️ 保存失败：' + (e && e.message ? e.message : e));
     });
-  }catch(e){
-    alert('⚠️ 数据打包失败：' + (e && e.message ? e.message : e));
-  }
+  });
 }
 // 更新"用户送给AI的礼物"卡片状态
 function shopMarkUserGift(c, msgId, accepted) {
@@ -14529,6 +14543,16 @@ function toggleCallLog(id){
 
 /* 页面加载后，初始化语音消息按钮（只执行一次） */
 initVoiceMessageButton();
+// 剥掉 messages 里的图片，只保留文字。content 是字符串的原样不动
+function stripImages(messages){
+  return messages.map(function(m){
+    if(!Array.isArray(m.content)) return m;
+    var texts = m.content
+      .filter(function(p){ return p && p.type === 'text'; })
+      .map(function(p){ return p.text; });
+    return { role: m.role, content: texts.join('\n') };
+  });
+}
 
 /* ===== API / 备份 ===== */
 async function callAI(messages, model, _retry){
@@ -14536,42 +14560,33 @@ async function callAI(messages, model, _retry){
   if(!s.apiUrl || !s.apiKey) throw new Error('请先在设置里填写API');
   _retry = _retry || 0;
 
-  try{
-    const res = await fetch(s.apiUrl + '/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + s.apiKey
-      },
-      body: JSON.stringify({ model: model || s.chatModel, messages })
-    });
+  const res = await fetch(s.apiUrl + '/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + s.apiKey
+    },
+    body: JSON.stringify({ model: model || s.chatModel, messages })
+  });
 
-    if(!res.ok){
-      // 把服务器返回的具体错误也读出来，方便看原因
-      var errText = '';
-      try { errText = await res.text(); } catch(e){}
-      // 5xx（服务器抽风）或 429（限流）→ 自动重试，最多3次
-      if((res.status >= 500 || res.status === 429) && _retry < 2){
-        await sleep(1500 * (_retry + 1));   // 等一下再重试（越试越久）
-        return callAI(messages, model, _retry + 1);
-      }
-      throw new Error('HTTP ' + res.status + (errText ? '：' + errText.slice(0,300) : ''));
-    }
+  // ★ body 只读这一次，成功/失败都复用
+  const rawText = await res.text();
 
-    const d = await res.json();
-    if(!d.choices || !d.choices[0]){
-      throw new Error('返回格式异常：' + JSON.stringify(d).slice(0,300));
+  if(!res.ok){
+    // 命中"图片不支持" + 本次确实带了图片 + 还没重试过 → 剥图重试一次
+    if(_retry === 0 &&
+       /image/i.test(rawText) &&
+       messages.some(function(m){ return Array.isArray(m.content); })){
+      return callAI(stripImages(messages), model, _retry + 1);
     }
-    return d.choices[0].message.content;
-
-  }catch(e){
-    // 网络层面的错误（断网、超时等）也重试
-    if(_retry < 2 && /fetch|network|timeout|Failed/i.test(e.message||'')){
-      await sleep(1500 * (_retry + 1));
-      return callAI(messages, model, _retry + 1);
-    }
-    throw e;
+    throw new Error('HTTP ' + res.status + '：' + rawText);
   }
+
+  // 解析成功响应（用 rawText，绝不能再 res.json() / res.text()）
+  const data = JSON.parse(rawText);
+
+  // ↓↓↓ 这一行是唯一需要你确认的地方 ↓↓↓
+  return data.choices[0].message.content;
 }
 async function genWorld(){const c=getC(editingId);const btn=document.getElementById('genWorldBtn');const model=DB.settings.auxModel||DB.settings.chatModel;if(!model){alert('请先在设置里选择模型');return;}btn.textContent='生成中…';btn.disabled=true;try{const txt=await callAI([{role:'user',content:`为角色扮演生成简洁世界观。类型：「${c.worldType||'现代都市'}」，角色：${c.pKeywords||c.name}。250字内含地点时代氛围关键设定，直接输出正文。`}],model);c.worldview=txt;save();render();}catch(e){alert('生成失败：'+e.message);btn.textContent='🌍 AI 生成/补全世界观';btn.disabled=false;}}
 function addContact(){const id='c'+Date.now();const c=blankChar(id);c._draft=true;DB.contacts.push(c);DB.chats[id]=[];save();editContact(id,'contacts');}
