@@ -1838,6 +1838,27 @@ function updateAllIcons() {
   if (tabMe) tabMe.src = icons.tabMe;
 }
 let DB=load();
+let _dbReady = false;
+(async function bootDB(){
+  try{
+    var idbStr = await idbLoadDB();          // 先去大柜子看看有没有数据
+    if(idbStr){
+      // 大柜子已有数据 → 用它（它比小柜子新）
+      try{ DB = migrate(JSON.parse(idbStr)); }catch(e){}
+      _dbReady = true;
+      render();                              // 用最新数据重画一次
+    }else{
+      // 大柜子还是空的 → 把小柜子现有数据一次性搬进去
+      var lsStr = localStorage.getItem(DB_KEY);
+      if(lsStr){ try{ await idbSaveDB(lsStr); }catch(e){} }
+      _dbReady = true;
+      save();                                // 立刻写一份进大柜子
+    }
+  }catch(e){
+    _dbReady = true;                         // 兜底，别卡住保存
+    console.warn('bootDB error', e);
+  }
+})();
 
 function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrate(JSON.parse(raw));}catch(e){}}return migrate({});}
 function migrate(d){
@@ -2143,7 +2164,7 @@ function addHeart(n,reason){DB.hearts=(DB.hearts||0)+n;if(n>0)DB.heartsTotal=(DB
 function checkMile(){[[50,30],[100,50],[150,100]].forEach(([need,bonus])=>{if(DB.heartsTotal>=need&&!DB.heartMile[need]){DB.heartMile[need]=1;DB.hearts+=bonus;DB.heartLog.unshift({t:Date.now(),n:bonus,reason:`💗累计达成${need}奖励`});setTimeout(()=>popTip(`🎉 心动值累计突破 ${need}！奖励 ${bonus} 心动值`),400);}});}
 function spendHeart(n,reason){if((DB.hearts||0)<n){alert('心动值不足～当前'+(DB.hearts||0)+'，需要'+n+'。多和角色聊天可以获得哦');return false;}DB.hearts-=n;DB.heartLog=DB.heartLog||[];DB.heartLog.unshift({t:Date.now(),n:-n,reason});save();return true;}
 function save(){
-  // 保留原主题色存储逻辑不变
+  // 主题色很小，继续放小柜子
   try{
     var cs = getComputedStyle(document.documentElement);
     var keys = ['--theme','--bg','--card','--text','--sub','--line','--nav'];
@@ -2152,15 +2173,16 @@ function save(){
     localStorage.setItem('myrp_theme_colors', JSON.stringify(colors));
   }catch(e){}
 
-  // 主要数据存储逻辑：成功时静默，失败时弹窗提醒
+  // 主数据存进大柜子(IndexedDB)，永不再满
+  if(!_dbReady) return;   // 开机数据还没就绪前，先不存，防止覆盖
   try{
-    localStorage.setItem(DB_KEY, JSON.stringify(DB));
-    // 成功时什么都不做
+    var str = JSON.stringify(DB);
+    idbSaveDB(str).catch(function(e){
+      console.warn('保存失败(大柜子)：', e);
+      alert('⚠️ 保存失败，请截图告诉作者：' + (e && e.message ? e.message : e));
+    });
   }catch(e){
-    // 失败时用 alert 弹出详细提示
-    var size = Math.round(JSON.stringify(DB).length / 1024);
-    alert('⚠️ 保存失败！存储可能已满，请先导出备份，不要关闭页面\n\n错误信息：' + e.message + '\n当前存档大小：' + size + ' KB');
-    console.warn('保存失败(可能存储满了)：' + e.message);
+    alert('⚠️ 数据打包失败：' + (e && e.message ? e.message : e));
   }
 }
 // 更新"用户送给AI的礼物"卡片状态
@@ -15052,6 +15074,44 @@ function deleteImage(id) {
       .catch(function(e) { reject(e); });
   });
 }
+// ===== 【新增·大柜子放文字】把聊天数据存进 IndexedDB，跟图片分开一格 =====
+const DBSTORE_NAME = 'myrp_dbstore';
+let _dbStore = null;
+function _openDBStore(){
+  return new Promise(function(resolve, reject){
+    if(_dbStore) return resolve(_dbStore);
+    const req = indexedDB.open(DBSTORE_NAME, 1);
+    req.onupgradeneeded = function(e){
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
+    };
+    req.onsuccess = function(e){ _dbStore = e.target.result; resolve(_dbStore); };
+    req.onerror = function(e){ reject(e); };
+  });
+}
+// 把整份数据写进大柜子
+function idbSaveDB(str){
+  return new Promise(function(resolve, reject){
+    _openDBStore().then(function(db){
+      const tx = db.transaction('kv','readwrite');
+      tx.objectStore('kv').put(str, 'DB');
+      tx.oncomplete = function(){ resolve(true); };
+      tx.onerror = function(e){ reject(e); };
+    }).catch(reject);
+  });
+}
+// 从大柜子读出数据
+function idbLoadDB(){
+  return new Promise(function(resolve){
+    _openDBStore().then(function(db){
+      const tx = db.transaction('kv','readonly');
+      const r = tx.objectStore('kv').get('DB');
+      r.onsuccess = function(){ resolve(r.result || null); };
+      r.onerror = function(){ resolve(null); };
+    }).catch(function(){ resolve(null); });
+  });
+}
+
 // 存图：传入 b64 和可选的 roleId（图片属于哪个角色），返回图片 id
 async function saveImage(b64, roleId){
   const db = await _openImgDB();
