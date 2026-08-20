@@ -14555,38 +14555,54 @@ function stripImages(messages){
 }
 
 /* ===== API / 备份 ===== */
+// 函数名: callAI
 async function callAI(messages, model, _retry){
   const s = DB.settings;
   if(!s.apiUrl || !s.apiKey) throw new Error('请先在设置里填写API');
   _retry = _retry || 0;
 
-  const res = await fetch(s.apiUrl + '/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + s.apiKey
-    },
-    body: JSON.stringify({ model: model || s.chatModel, messages })
-  });
+  try{
+    const res = await fetch(s.apiUrl + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + s.apiKey
+      },
+      body: JSON.stringify({ model: model || s.chatModel, messages })
+    });
 
-  // ★ body 只读这一次，成功/失败都复用
-  const rawText = await res.text();
+    // ★ body 只读这一次，成功/失败都复用 rawText
+    var rawText = '';
+    try { rawText = await res.text(); } catch(e){}
 
-  if(!res.ok){
-    // 命中"图片不支持" + 本次确实带了图片 + 还没重试过 → 剥图重试一次
-    if(_retry === 0 &&
-       /image/i.test(rawText) &&
-       messages.some(function(m){ return Array.isArray(m.content); })){
-      return callAI(stripImages(messages), model, _retry + 1);
+    if(!res.ok){
+      // ★ 图片不支持 → 剥掉图片、原样重试一次（不占用 5xx 的重试次数）
+      if(/image/i.test(rawText) &&
+         messages.some(function(m){ return Array.isArray(m.content); })){
+        return callAI(stripImages(messages), model, _retry);
+      }
+      // 5xx（服务器抽风）或 429（限流）→ 自动重试，最多3次
+      if((res.status >= 500 || res.status === 429) && _retry < 2){
+        await sleep(1500 * (_retry + 1));   // 等一下再重试（越试越久）
+        return callAI(messages, model, _retry + 1);
+      }
+      throw new Error('HTTP ' + res.status + (rawText ? '：' + rawText.slice(0,300) : ''));
     }
-    throw new Error('HTTP ' + res.status + '：' + rawText);
+
+    const d = JSON.parse(rawText);
+    if(!d.choices || !d.choices[0]){
+      throw new Error('返回格式异常：' + JSON.stringify(d).slice(0,300));
+    }
+    return d.choices[0].message.content;
+
+  }catch(e){
+    // 网络层面的错误（断网、超时等）也重试
+    if(_retry < 2 && /fetch|network|timeout|Failed/i.test(e.message||'')){
+      await sleep(1500 * (_retry + 1));
+      return callAI(messages, model, _retry + 1);
+    }
+    throw e;
   }
-
-  // 解析成功响应（用 rawText，绝不能再 res.json() / res.text()）
-  const data = JSON.parse(rawText);
-
-  // ↓↓↓ 这一行是唯一需要你确认的地方 ↓↓↓
-  return data.choices[0].message.content;
 }
 async function genWorld(){const c=getC(editingId);const btn=document.getElementById('genWorldBtn');const model=DB.settings.auxModel||DB.settings.chatModel;if(!model){alert('请先在设置里选择模型');return;}btn.textContent='生成中…';btn.disabled=true;try{const txt=await callAI([{role:'user',content:`为角色扮演生成简洁世界观。类型：「${c.worldType||'现代都市'}」，角色：${c.pKeywords||c.name}。250字内含地点时代氛围关键设定，直接输出正文。`}],model);c.worldview=txt;save();render();}catch(e){alert('生成失败：'+e.message);btn.textContent='🌍 AI 生成/补全世界观';btn.disabled=false;}}
 function addContact(){const id='c'+Date.now();const c=blankChar(id);c._draft=true;DB.contacts.push(c);DB.chats[id]=[];save();editContact(id,'contacts');}
