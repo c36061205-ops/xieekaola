@@ -1083,7 +1083,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026820';
+const APP_VER = 'v2026821';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1857,12 +1857,13 @@ setTimeout(function bootDB(){
         }
         DB = parsed;
         _dbReady = true;
-        render();
+        bootStartup();
       }else{
         var lsStr = localStorage.getItem(DB_KEY);
         if(lsStr){ try{ await idbSaveDB(lsStr); }catch(e){} }
         _dbReady = true;
         save();
+        bootStartup();
       }
     }catch(e){
       alert('⚠️ 启动读取出错，已暂停保存以保护数据：' + (e && e.message ? e.message : e));
@@ -2126,7 +2127,7 @@ function pickStatus(c){
 }
 
 function blankChar(id){
-  const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:'', allowStickers:true, myExtra:'', autoMemo:true};
+const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:'', allowStickers:true, myExtra:'', autoMemo:true, giftLog:[]};
   CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;
 }
 function seedAiChan(d){
@@ -2268,7 +2269,7 @@ var SHOP_FIXED_ITEMS = [
   // 美食
   { name: '奶油蛋糕', emoji: '🍰', desc: '入口即化的绵软', tag: '美食', price: 20 },
   { name: '手工巧克力', emoji: '🍫', desc: '微苦回甘', tag: '美食', price: 18 },
-  { name: '寿司拼盘', emoji: '🍣', desc: '新鲜', tag: '美食', price: 28 },
+  { name: '寿司拼盘', emoji: '🍣', desc: '现捏的，米饭还温着', tag: '美食', price: 28 },
   { name: '关东煮', emoji: '🍢', desc: '深夜里热乎乎的一串', tag: '美食', price: 16 },
   { name: '焦糖布丁', emoji: '🍮', desc: '嫩滑弹牙', tag: '美食', price: 13 },
   // 生活
@@ -2283,12 +2284,12 @@ var SHOP_FIXED_ITEMS = [
   { name: '针织手套', emoji: '🧤', desc: '露指的，方便打字', tag: '服饰', price: 20 },
   { name: '中筒棉袜', emoji: '🧦', desc: '踩上去软软的', tag: '服饰', price: 12 },
   { name: 'oversize卫衣', emoji: '👕', desc: '慵懒宽松，居家超舒服', tag: '服饰', price: 48 },
-  { name: '风衷外套', emoji: '🧥', desc: '经典卡其，怎么穿都对', tag: '服饰', price: 68 },
+  { name: '风衣外套', emoji: '🧥', desc: '经典卡其，怎么穿都对', tag: '服饰', price: 68 },
   { name: '小白鞋', emoji: '👟', desc: '百搭', tag: '服饰', price: 55 },
   // 数码
   { name: '无线耳机', emoji: '🎧', desc: '降噪，戴上世界安静了', tag: '数码', price: 55 },
   { name: '充电宝', emoji: '🔋', desc: '大容量，出门不慌', tag: '数码', price: 40 },
-  { name: '拍立得', emoji: '📷', desc: '定格', tag: '数码', price: 60 },
+  { name: '拍立得', emoji: '📷', desc: '咔嚓一声，定格此刻', tag: '数码', price: 60 },
   // 珠宝（2个）
   { name: '锁骨链', emoji: '📿', desc: '细细一条，恰到好处', tag: '珠宝', price: 45 },
   { name: '对戒', emoji: '💍', desc: '闪耀的承诺', tag: '珠宝', price: 50 },
@@ -2310,8 +2311,8 @@ async function shopGenerate() {
     '你是一个商店的选品官。请根据下面这个"世界观设定"，生成一批适合在这个世界里售卖的商品。\n\n' +
     '【世界观】' + worldDesc + '\n\n' +
     '【要求】\n' +
-    '1. 基础商品生成 16 到 20 件，覆盖各品类。若有角色信息，则在此基础上【额外】为每个角色各追加 1~2 件，总数可以超过 20 件。\n' +
-    '2. 尽量覆盖这些品类，每个品类争取有 2~3 件，各品类定位如下：\n' +
+    '1. 基础商品生成 30 到 40 件，尽量丰富、像一个真正商品琳琅满目的商店。若有角色信息，则在此基础上【额外】为每个角色各追加 3~5 件，总数可以更多。\n' +
+    '2. 尽量覆盖这些品类，每个品类争取有 4~6 件，各品类定位如下：\n' +
     '   ·美食：偏【外卖/餐厅现做】的热乎成品餐食（如一碗牛肉面、一份炸鸡、一笼小笼包），不是超市的包装食材或生鲜。\n' +
     '   ·饮品：偏【现做现调】的成品饮料（如现煮咖啡、手打柠檬茶、热可可），可直接饮用。\n' +
     '   ·服饰：可穿戴的衣物鞋帽配饰，要有具体款式和材质感（如羊绒围巾、oversize卫衣、复古皮靴）。\n' +
@@ -2321,9 +2322,10 @@ async function shopGenerate() {
     '   ·生活：日用小物、家居、香氛、治愈系小东西等提升生活幸福感的物件。\n' +
     '   ·奇物：脑洞新奇、带点神秘或趣味的东西，尤其适合非现代世界观（如会发光的石头、装着回忆的瓶子）。\n' +
     '3. 其中要有 1 到 2 件是"珍稀商品"（rare=true）。\n' +
-	(charHints ? ('★额外追加：以下每个角色各追加 1~2 件专属商品，贴合其喜好或习性，这些商品不占基础商品名额。角色信息如下：\n' + charHints + '\n每件追加商品在 forChar 字段写上对应角色的名字（只写名字，不超过10字）；基础商品的 forChar 一律留空字符串。每个角色都必须有对应商品，不能遗漏。角色专属商品的价格档位要根据商品本身的性质决定，不要因为是角色喜欢的就自动拔高价格，一瓶酒就是日常价，不应该定到奢侈档。\n') : '') +
+    (charHints ? ('★额外追加：以下每个角色各追加 3~5 件专属商品，贴合其喜好或习性，这些商品不占基础商品名额。角色信息如下：\n' + charHints + '\n【重要·避免死板】贴合角色喜好时，不要每件都直接生成他喜欢的东西本身，而要围绕这个喜好发散出不同的形态、场景和品类。例如角色喜欢"黑巧克力"，就应生成像黑巧克力蛋糕、黑巧冰淇淋、黑巧礼盒、黑巧慕斯、黑巧饼干、黑巧热可可这样各不相同的东西，而不是反复生成同一块"纯黑巧克力"；喜欢喝酒就可以是不同的酒、下酒菜、酒具、醒酒的小物。同一个角色的几件专属商品之间要有明显区别，尽量覆盖吃的、用的、穿的、玩的等不同方向。\n每件追加商品在 forChar 字段写上对应角色的名字（只写名字，不超过10字）；基础商品的 forChar 一律留空字符串。每个角色都必须有对应商品，不能遗漏。角色专属商品的价格档位要根据商品本身的性质决定，不要因为是角色喜欢的就自动拔高价格，一瓶酒就是日常价，不应该定到奢侈档。\n') : '') +
 	
-    '4. 商品必须贴合世界观：现代都市就是正常商品；妖怪/仙侠世界带点奇异色彩；赛博/科幻世界带科技感。\n' +
+    '★气质配比：商品要接地气与特色搭配着来——大约三分之二应该是这个世界里"普通居民日常真的会买来吃、穿、用"的接地气东西（只带一点世界观味道），比如妖怪世界里狐妖爱吃的桂花糖糕、驱蚊的艾草香囊、给尾巴梳毛的桃木梳；只有大约三分之一才是奇物、法器、带神秘感或收藏价值的特色货。不要整店都是华丽炫酷的神器宝物，要有浓浓的生活气息。\n' +
+
     '★重要：以下这些商品店里已经有了，你生成的商品名和它们【不能重复、也不能是它们的变体】（比如已有"关东煮"，就不要再生成"深夜的关东煮"）：' +
     (typeof SHOP_FIXED_ITEMS !== 'undefined' ? SHOP_FIXED_ITEMS.map(function (x) { return x.name; }).join('、') : '') + '\n' +
     '5. 每件商品的品类标签(tag)从这些里选一个最贴切的：美食、饮品、服饰、珠宝、数码、周边、生活、奇物。\n' +
@@ -2899,19 +2901,7 @@ async function shopDoGift(it, c) {
     it.soldOut = true;
   }
   save();
-  // 珍稀彩蛋 C：写入角色长期记忆（用真名，第三人称，避免"你/你"混淆）
-  if (it.rare) {
-    c.chapters = c.chapters || [];
-    var _now = new Date();
-    var _ds = _now.getFullYear() + '-' + (_now.getMonth() + 1) + '-' + _now.getDate();
-    var _userName = DB.me.realName || DB.me.name || '对方';
-    var _charName = c.name || c.nick || '我';
-    c.chapters.push({
-      date: _ds,
-      content: _userName + '郑重地送给' + _charName + '一件珍贵的礼物「' + it.name + '」，' + _charName + '很珍惜这份心意，记在了心里。'
-    });
-    save();
-  }
+  // （珍稀礼物不再写入过往剧情记忆，统一记入下方礼物记录 giftLog）
 
   // 4) 跨世界观翻译（商品来源世界 != 目标角色世界，才翻译）
   var giftName = it.name;
@@ -2961,10 +2951,24 @@ async function shopDoGift(it, c) {
     time: Date.now()
   };
   DB.chats[c.id] = DB.chats[c.id] || [];
-DB.chats[c.id].push(msg);
-c._hasPendingGift = true;   // ← 新增：标记该角色有待处理的礼物
-c.inChatList = true;
-save();
+  DB.chats[c.id].push(msg);
+  // ← 新增：写入礼物记录（用户送给 TA）
+  c.giftLog = c.giftLog || [];
+  c.giftLog.push({
+    id: newId(),
+    time: Date.now(),
+    from: 'user',
+    emoji: it.emoji,
+    name: giftName,
+    desc: giftDesc,
+    price: it.price,
+    currency: it.currency,
+    rare: !!it.rare,
+    story: it.rare ? (it.story || '') : ''
+  });
+  c._hasPendingGift = true;   // ← 新增：标记该角色有待处理的礼物
+  c.inChatList = true;
+  save();
   // 6) 关闭弹窗 → 跳进该角色聊天
   shopClosePopup();
   openChat(c.id);
@@ -3033,6 +3037,20 @@ function shopAiSendGift(c, itemLike, opts) {
   };
   DB.chats[c.id] = DB.chats[c.id] || [];
   DB.chats[c.id].push(msg);
+  // ← 新增：写入礼物记录（TA 送给用户）
+  c.giftLog = c.giftLog || [];
+  c.giftLog.push({
+    id: newId(),
+    time: msg.time,
+    from: 'ai',
+    emoji: msg.emoji,
+    name: msg.content,
+    desc: msg.desc,
+    price: 0,
+    currency: '',
+    rare: !!msg.rare,
+    story: msg.rare ? (msg.story || '') : ''
+  });
   c.inChatList = true;
   save();
 
@@ -7065,9 +7083,19 @@ function buildGroupSystem(c, g){
   if (world) s += '\n【世界观】' + world.name + '：' + world.desc + '\n';
 
   // ===== 剧情记忆（关键转折点） =====
-  if (c.chapters && c.chapters.length) {
-    s += '\n【过往剧情记忆】\n' + c.chapters.map(function(ch){ return ch.date + '：' + ch.content; }).join('\n') + '\n';
-  }
+if (c.chapters && c.chapters.length) {
+  s += `\n【过往剧情记忆】\n` + c.chapters.map(ch => ch.date + '：' + ch.content).join('\n') + `\n`;
+}
+
+if (c.giftLog && c.giftLog.length) {
+  s += `\n【你和对方之间的礼物往来记录】（务必按方向理解，绝不能弄反：「你送给对方」是你送的，「对方送给你」是TA送的）\n`;
+  s += c.giftLog.slice().sort((a,b)=>a.time-b.time).map(function(g){
+    var d = new Date(g.time);
+    var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    var dir = (g.from === 'ai') ? '你送给对方' : '对方送给你';
+    return '· ' + ds + '　' + dir + '：' + g.name + (g.desc ? '（' + g.desc + '）' : '') + (g.rare && g.story ? '，' + g.story : '');
+  }).join('\n') + `\n`;
+}
 
   // ===== 群聊环境 =====
   s += '\n【当前群聊】群名：' + g.name + '\n';
@@ -10664,11 +10692,193 @@ function renderMemoMain() {
   html += '</div>';
   content.innerHTML = html;
 }
-function renderMemoDetail(cid) {
+// —— 记忆整理：状态（撤销备份只存内存，绝不 save 进 localStorage）——
+var _memoSel = { on:false, cid:null, ids:{} };
+var _memoUndo = null;
+var _memoUndoTimer = null;
+var _cmpSrcIds = null;
+function memoSelEnter(cid){ _memoSel={on:true,cid:cid,ids:{}}; renderMemoDetail(cid,'memory'); }
+function memoSelExit(cid){ _memoSel={on:false,cid:null,ids:{}}; renderMemoDetail(cid,'memory'); }
+function memoSelToggle(cid,mid){ _memoSel.ids[mid]=!_memoSel.ids[mid]; renderMemoDetail(cid,'memory'); }
+function memoSelQuick(cid,days){
+  var c=getC(cid); if(!c)return;
+  if(days===-1){ _memoSel.ids={}; renderMemoDetail(cid,'memory'); return; }
+  var cut=days>0?(Date.now()-days*86400000):0;
+  _memoSel.ids={};
+  (c.memories||[]).forEach(function(m){ if(days===0||m.time>=cut) _memoSel.ids[m.id]=true; });
+  renderMemoDetail(cid,'memory');
+}
+
+function _memoModal(inner){
+  closeModal();
+  var mo=document.createElement('div'); mo.className='modal'; mo.id='modal';
+  mo.innerHTML='<div class="sheet-box">'+inner+'</div>';
+  phone.appendChild(mo);
+  return mo;
+}
+
+async function requestCompress(c, ids, model){
+  var selected=(c.memories||[]).filter(function(m){return ids.indexOf(m.id)!==-1;})
+    .sort(function(a,b){return a.time-b.time;});
+  var listText=selected.map(function(m,i){
+    return (i+1)+'. ['+(m.priority==='core'?'核心':m.priority==='important'?'重要':'日常')+'|'+fmtDate(m.time)+'] '+m.content;
+  }).join('\n');
+  var prompt='你是记忆整理助手。下面是「'+(c.name||c.nick)+'」和用户之间的一批记忆，共 '+selected.length+' 条，请把它们重新归纳压缩成【3 到 6 条】最值得长期保留的记忆。\n\n'+
+    '【保留与删除规则】\n'+
+    '1. 必须保留：涉及关系本质、身份/身世、重要承诺、关系转折的核心记忆。\n'+
+    '2. 合并精简：同一主题的多条重要经历合并成一条，保留关键时间线信息。\n'+
+    '3. 直接删除：日常琐事等临时小事；与"送礼物/收到礼物"相关的内容；单纯的行程/待办安排。这些不要出现在结果里。\n'+
+    '4. 少而精，宁可合并也别罗列流水账。\n'+
+    '5. 每条重新判定 priority：只能是 core 或 important，不要输出 temp。\n\n'+
+    '【原始记忆】\n'+listText+'\n\n'+
+    '【只输出 JSON 数组，不要多余文字】格式：\n[{"content":"整理后的记忆","priority":"core"}]';
+  var raw=await callAI([
+    {role:'system',content:'你只输出合法 JSON 数组，不加代码块标记。'},
+    {role:'user',content:prompt}
+  ], model);
+  var t=(raw||'').replace(/```(json)?/gi,'').replace(/```/g,'').trim();
+  var s=t.indexOf('['), e=t.lastIndexOf(']');
+  if(s===-1||e===-1) throw new Error('AI 返回格式异常');
+  var arr=JSON.parse(t.substring(s,e+1));
+  if(!arr||!arr.length) throw new Error('整理结果为空');
+  return arr;
+}
+
+async function doCompress(cid){
+  var c=getC(cid); if(!c)return;
+  var ids=Object.keys(_memoSel.ids).filter(function(k){return _memoSel.ids[k];});
+  if(ids.length<2){ showToast('至少选择 2 条记忆'); return; }
+  var model=DB.settings.auxModel||DB.settings.chatModel;
+  if(!model){ alert('请先在设置里选择模型'); return; }
+  popLoading('正在整理 ' + (c.name || c.nick || '') + ' 的记忆…');
+  try{
+    var arr=await requestCompress(c, ids, model);
+    _cmpSrcIds=ids;
+    popClose();
+    openCompressPreview(cid, arr);
+  }catch(err){
+    popClose();
+    popTip(err.message||'整理失败',{icon:'⚠️',title:'整理失败'});
+  }
+}
+
+async function regenCompress(cid){
+  var c=getC(cid); if(!c||!_cmpSrcIds)return;
+  var model=DB.settings.auxModel||DB.settings.chatModel;
+  closeModal();
+  popLoading('正在重新整理 ' + (c.name || c.nick || '') + ' 的记忆…');
+  try{
+    var arr=await requestCompress(c, _cmpSrcIds, model);
+    popClose();
+    openCompressPreview(cid, arr);
+  }catch(err){
+    popClose();
+    popTip(err.message||'整理失败',{icon:'⚠️',title:'整理失败'});
+  }
+}
+function cmpSetPri(i, val){
+  var hid=document.getElementById('cmpPri'+i);
+  if(hid) hid.value=val;
+  var btns=document.querySelectorAll('button[data-pri="'+i+'"]');
+  btns.forEach(function(b){
+    var v=b.getAttribute('data-val');
+    var color=(v==='core')?'#e5484d':'#e8912a';
+    var on=(v===val);
+    b.style.border='1.5px solid '+(on?color:'var(--line)');
+    b.style.background=on?color:'transparent';
+    b.style.color=on?'#fff':'var(--sub)';
+  });
+}
+
+function openCompressPreview(cid, arr){
+  var priBtn=function(i,val,label,color,cur){
+    var on=(cur===val);
+    return '<button type="button" onclick="cmpSetPri('+i+',\''+val+'\')" data-pri="'+i+'" data-val="'+val+'" style="flex:1;border:1.5px solid '+(on?color:'var(--line)')+';background:'+(on?color:'transparent')+';color:'+(on?'#fff':'var(--sub)')+';font-size:12px;font-weight:600;padding:5px 0;border-radius:8px;cursor:pointer;">'+label+'</button>';
+  };
+  var inner='<h3 style="margin:0 0 4px;font-size:17px;">整理预览</h3>'+
+    '<div style="font-size:12px;color:var(--sub);margin-bottom:12px;">原 '+_cmpSrcIds.length+' 条 → 整理成 <b style="color:var(--theme);">'+arr.length+'</b> 条，可修改后确认</div>'+
+    '<div style="max-height:52vh;overflow-y:auto;margin:0 -4px;padding:0 4px;">';
+  arr.forEach(function(item,i){
+    var cur=(item.priority==='core')?'core':'important';
+    inner+='<div style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;">'+
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">'+
+        '<input type="hidden" id="cmpPri'+i+'" value="'+cur+'">'+
+        priBtn(i,'core','核心','#e5484d',cur)+
+        priBtn(i,'important','重要','#e8912a',cur)+
+      '</div>'+
+      '<textarea id="cmpTxt'+i+'" style="width:100%;min-height:62px;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:13.5px;background:var(--card);color:var(--text);line-height:1.6;resize:vertical;box-sizing:border-box;">'+esc(item.content||'')+'</textarea>'+
+    '</div>';
+  });
+  inner+='</div>'+
+    '<div style="display:flex;gap:8px;margin-top:14px;">'+
+      '<button type="button" onclick="regenCompress(\''+cid+'\')" style="flex:1;border:1.5px solid var(--theme);background:transparent;color:var(--theme);font-size:14px;font-weight:600;padding:11px 0;border-radius:10px;cursor:pointer;">重新生成</button>'+
+      '<button type="button" onclick="confirmCompress(\''+cid+'\','+arr.length+')" style="flex:1;border:none;background:var(--theme);color:#fff;font-size:14px;font-weight:600;padding:11px 0;border-radius:10px;cursor:pointer;">确认替换</button>'+
+    '</div>'+
+    '<button type="button" onclick="closeModal()" style="width:100%;margin-top:8px;border:none;background:transparent;color:var(--sub);font-size:13px;padding:8px 0;cursor:pointer;">取消</button>';
+  _memoModal(inner);
+}
+
+function confirmCompress(cid, count){
+  var c=getC(cid); if(!c)return;
+  var ids=_cmpSrcIds||[];
+  var newMems=[];
+  for(var i=0;i<count;i++){
+    var tx=document.getElementById('cmpTxt'+i);
+    var pr=document.getElementById('cmpPri'+i);
+    if(!tx)continue;
+    var content=tx.value.trim();
+    if(!content)continue;
+    newMems.push({content:content, priority: pr?pr.value:'important'});
+  }
+  if(!newMems.length){ showToast('内容不能为空'); return; }
+  clearMemoUndo();
+  var backup=(c.memories||[]).filter(function(m){return ids.indexOf(m.id)!==-1;});
+  _memoUndo={cid:cid, mems:backup, addedIds:[]};
+  c.memories=(c.memories||[]).filter(function(m){return ids.indexOf(m.id)===-1;});
+  var base=Date.now();
+  newMems.forEach(function(nm,i){
+    var id=newId();
+    c.memories.push({id:id, time:base-i*1000, content:nm.content, priority:nm.priority});
+    _memoUndo.addedIds.push(id);
+  });
+  save();
+  closeModal();
+  _memoSel={on:false,cid:null,ids:{}};
+  _cmpSrcIds=null;
+  renderMemoDetail(cid,'memory');
+  _memoUndoTimer=setTimeout(function(){
+    clearMemoUndo();
+    var bar=document.getElementById('memoUndoBar');
+    if(bar) bar.remove();
+  }, 5*60*1000);
+  showToast('已整理：'+ids.length+' → '+newMems.length+' 条');
+}
+
+function undoCompress(){
+  if(!_memoUndo){ showToast('撤销已过期'); var b=document.getElementById('memoUndoBar'); if(b)b.remove(); return; }
+  var c=getC(_memoUndo.cid);
+  if(!c){ clearMemoUndo(); return; }
+  c.memories=(c.memories||[]).filter(function(m){return _memoUndo.addedIds.indexOf(m.id)===-1;});
+  _memoUndo.mems.forEach(function(m){ c.memories.push(m); });
+  save();
+  var cid=_memoUndo.cid;
+  clearMemoUndo();
+  renderMemoDetail(cid,'memory');
+  showToast('已撤销');
+}
+
+function clearMemoUndo(){
+  if(_memoUndoTimer){ clearTimeout(_memoUndoTimer); _memoUndoTimer=null; }
+  _memoUndo=null;
+}
+
+function renderMemoDetail(cid, tab) {
   var c = getC(cid);
   if (!c) { view = { type: 'memo' }; render(); return; }
 
-  // ★改动8-A：进入详情=看过了，清除该角色的未读标记
+  if (tab) view._memoTab = tab;
+  var curTab = view._memoTab || 'memory';
+
   if (DB.memoUnread && DB.memoUnread[cid] !== undefined) {
     delete DB.memoUnread[cid];
     save();
@@ -10684,46 +10894,135 @@ function renderMemoDetail(cid) {
   tbRight.onclick = null;
 
   var mems = (c.memories || []).slice().sort(function(a, b) { return b.time - a.time; });
-  var html = '<div style="padding:10px 0;">';
+  var gifts = (c.giftLog || []).slice().sort(function(a, b) { return b.time - a.time; });
 
-  // ★改动8-B：自动记忆开关（放在记忆列表上方）
-  html += '<div style="margin:0 14px 10px;padding:14px 16px;background:var(--card);border-radius:12px;border:1px solid var(--line);">' +
-    '<label style="font-weight:600;font-size:14px;color:var(--text);">🤖 每日自动记录记忆</label>' +
-    '<span style="display:block;font-size:12px;color:var(--sub);margin:4px 0 8px;">关闭后，第二天不会自动总结与TA的聊天</span>' +
-    '<div style="display:flex;gap:12px;">' +
-      '<button class="btn ' + (c.autoMemo !== false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="var x=getC(\'' + cid + '\');x.autoMemo=true;save();renderMemoDetail(\'' + cid + '\')">✅ 开启</button>' +
-      '<button class="btn ' + (c.autoMemo === false ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="var x=getC(\'' + cid + '\');x.autoMemo=false;save();renderMemoDetail(\'' + cid + '\')">⛔ 关闭</button>' +
-    '</div>' +
+  var themeSoft = 'color-mix(in srgb,var(--theme) 12%,var(--card))';
+  var segBg = 'color-mix(in srgb,var(--line) 70%,var(--card))';
+
+  var html = '<div style="padding-bottom:26px;">';
+
+  // ===== 头部：头像 + 名字 + 统计 =====
+  var av = c.avatar
+    ? '<div style="width:72px;height:72px;border-radius:50%;flex-shrink:0;border:3px solid var(--card);box-shadow:0 5px 16px rgba(0,0,0,0.12);background-image:url(\'' + c.avatar + '\');background-size:cover;background-position:center;"></div>'
+    : '<div style="width:72px;height:72px;border-radius:50%;flex-shrink:0;border:3px solid var(--card);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:600;background:linear-gradient(135deg,var(--theme),color-mix(in srgb,var(--theme) 55%,#fff));box-shadow:0 5px 16px color-mix(in srgb,var(--theme) 35%,transparent);">' + esc((c.nick || c.name || '?')[0]) + '</div>';
+
+  html += '<div style="display:flex;align-items:center;gap:16px;padding:14px 24px 18px;">' +
+    av +
+    '<div><div style="font-size:22px;font-weight:700;color:var(--text);">' + esc(c.nick || c.name) + '</div>' +
+    '<div style="font-size:13px;color:var(--sub);margin-top:5px;">' + mems.length + ' 条记忆 · ' + gifts.length + ' 件礼物往来</div></div>' +
   '</div>';
 
-  if (!mems.length) {
-    html += '<div class="empty">还没有记忆，点下方手动添加，或让 AI 生成～</div>';
-  } else {
-    mems.forEach(function(m) {
-      var priorityLabel = '';
-      var priorityColor = '';
-      if (m.priority === 'core') { priorityLabel = '🔴 核心'; priorityColor = '#e34'; }
-      else if (m.priority === 'important') { priorityLabel = '🟡 重要'; priorityColor = '#f90'; }
-      else { priorityLabel = '⚪ 临时'; priorityColor = '#888'; }
+  // ===== 胶囊分段控件 =====
+  var tabBtn = function(key, label) {
+    var on = curTab === key;
+    return '<button onclick="renderMemoDetail(\'' + cid + '\',\'' + key + '\')" style="flex:1;border:none;background:' + (on ? 'var(--card)' : 'transparent') + ';color:' + (on ? 'var(--text)' : 'var(--sub)') + ';padding:9px 0;font-size:14px;font-weight:600;border-radius:9px;cursor:pointer;' + (on ? 'box-shadow:0 2px 6px rgba(0,0,0,0.10);' : '') + '">' + label + '</button>';
+  };
+  html += '<div style="margin:0 22px;background:' + segBg + ';border-radius:12px;padding:4px;display:flex;gap:4px;">' +
+    tabBtn('memory', '记忆') +
+    tabBtn('gift', '礼物') +
+  '</div>';
 
-      html += '<div style="margin:8px 14px;padding:14px 16px;background:var(--card);border-radius:12px;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,0.04);">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
-          '<span style="font-size:12px;color:var(--sub);">' + fmtDate(m.time) + '</span>' +
-          '<span style="font-size:12px;font-weight:600;color:' + priorityColor + ';">' + priorityLabel + '</span>' +
-        '</div>' +
-        '<div style="font-size:14px;color:var(--text);line-height:1.6;white-space:pre-wrap;">' + esc(m.content) + '</div>' +
-        '<div style="display:flex;gap:8px;margin-top:10px;">' +
-          '<button class="btn gray" style="flex:1;margin:0;padding:5px 0;font-size:12px;border-radius:6px;" onclick="editMemo(\'' + cid + '\',\'' + m.id + '\')">✏️ 编辑</button>' +
-          '<button class="btn gray" style="flex:1;margin:0;padding:5px 0;font-size:12px;border-radius:6px;color:#e34;" onclick="deleteMemo(\'' + cid + '\',\'' + m.id + '\')">🗑️ 删除</button>' +
-        '</div>' +
+  if (curTab === 'memory') {
+    html += '<div style="padding:16px 16px 0;">';
+    var selMode = (_memoSel.on && _memoSel.cid === cid);
+
+    // 撤销横条（有内存备份且是本角色时显示）
+    if (_memoUndo && _memoUndo.cid === cid) {
+      html += '<div id="memoUndoBar" style="display:flex;align-items:center;justify-content:space-between;background:color-mix(in srgb,var(--theme) 12%,var(--card));border:1px solid color-mix(in srgb,var(--theme) 30%,transparent);border-radius:12px;padding:10px 14px;margin-bottom:12px;">' +
+        '<span style="font-size:13px;color:var(--text);">已整理记忆，5 分钟内可撤销</span>' +
+        '<button onclick="undoCompress()" style="border:none;background:var(--theme);color:#fff;font-size:13px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;">撤销</button>' +
       '</div>';
-    });
-  }
+    }
 
-  html += '<div style="padding:0 14px;margin-top:12px;">' +
-    '<button class="btn" style="width:100%;margin:0 0 8px;" onclick="addMemoManual(\'' + cid + '\')">＋ 手动添加记忆</button>' +
-    '<button class="btn" style="width:100%;margin:0;" onclick="generateMemo(\'' + cid + '\')">🤖 AI 生成今日记忆</button>' +
-  '</div>';
+    if (selMode) {
+      var selCount = Object.keys(_memoSel.ids).filter(function(k){return _memoSel.ids[k];}).length;
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">' +
+        '<button class="btn gray" style="margin:0;padding:6px 12px;font-size:13px;" onclick="memoSelQuick(\''+cid+'\',7)">近7天</button>' +
+        '<button class="btn gray" style="margin:0;padding:6px 12px;font-size:13px;" onclick="memoSelQuick(\''+cid+'\',30)">近30天</button>' +
+        '<button class="btn gray" style="margin:0;padding:6px 12px;font-size:13px;" onclick="memoSelQuick(\''+cid+'\',0)">全选</button>' +
+        '<button class="btn gray" style="margin:0;padding:6px 12px;font-size:13px;" onclick="memoSelQuick(\''+cid+'\',-1)">清空</button>' +
+      '</div>';
+      html += '<div style="display:flex;gap:10px;margin-bottom:18px;">' +
+        '<button class="btn gray" style="flex:1;margin:0;" onclick="memoSelExit(\''+cid+'\')">退出整理</button>' +
+        '<button class="btn" style="flex:1;margin:0;'+(selCount<2?'opacity:.5;pointer-events:none;':'')+'" onclick="doCompress(\''+cid+'\')">整理选中 ('+selCount+')</button>' +
+      '</div>';
+    } else {
+      // 自动记忆开关（紧凑一行）
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:12px;padding:12px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.05);margin-bottom:12px;">' +
+        '<div><div style="font-size:14px;font-weight:600;color:var(--text);">每日自动记录记忆</div>' +
+        '<div style="font-size:12px;color:var(--sub);margin-top:2px;">关闭后，第二天不会自动总结</div></div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button class="btn ' + (c.autoMemo !== false ? '' : 'gray') + '" style="margin:0;padding:6px 12px;font-size:13px;" onclick="var x=getC(\'' + cid + '\');x.autoMemo=true;save();renderMemoDetail(\'' + cid + '\')">开</button>' +
+          '<button class="btn ' + (c.autoMemo === false ? '' : 'gray') + '" style="margin:0;padding:6px 12px;font-size:13px;" onclick="var x=getC(\'' + cid + '\');x.autoMemo=false;save();renderMemoDetail(\'' + cid + '\')">关</button>' +
+        '</div></div>';
+
+      // 操作按钮
+      html += '<div style="display:flex;gap:10px;margin-bottom:18px;">' +
+        '<button class="btn gray" style="flex:1;margin:0;" onclick="addMemoManual(\'' + cid + '\')">＋ 添加</button>' +
+        '<button class="btn gray" style="flex:1;margin:0;" onclick="generateMemo(\'' + cid + '\')">AI 生成</button>' +
+        '<button class="btn gray" style="flex:1;margin:0;'+((mems.length<2)?'opacity:.5;pointer-events:none;':'')+'" onclick="memoSelEnter(\''+cid+'\')">整理</button>' +
+      '</div>';
+    }
+
+    if (!mems.length) {
+      html += '<div class="empty">还没有记忆，点上方添加，或让 AI 生成～</div>';
+    } else {
+      html += '<div style="position:relative;padding-left:22px;">' +
+        '<div style="position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--line);"></div>';
+      mems.forEach(function(m) {
+        var pc, pl;
+        if (m.priority === 'core') { pc = '#e5484d'; pl = '核心'; }
+        else if (m.priority === 'important') { pc = '#e8912a'; pl = '重要'; }
+        else { pc = '#9b9b9b'; pl = '日常'; }
+        var checked = selMode && _memoSel.ids[m.id];
+        html += '<div style="position:relative;margin-bottom:16px;'+(selMode?'cursor:pointer;':'')+'" '+(selMode?'onclick="memoSelToggle(\''+cid+'\',\''+m.id+'\')"':'')+'>' +
+          '<div style="position:absolute;left:-22px;top:5px;width:12px;height:12px;border-radius:50%;background:' + pc + ';border:2.5px solid var(--card);box-shadow:0 0 0 3px ' + pc + '22;"></div>' +
+          '<div style="font-size:12px;color:var(--sub);font-weight:600;margin-bottom:6px;">' + fmtDate(m.time) + '</div>' +
+          '<div style="background:var(--card);border-radius:12px;padding:12px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.05);'+(checked?'outline:2px solid var(--theme);':'')+'">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
+              '<span style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:' + pc + '1f;color:' + pc + ';">' + pl + '</span>' +
+              (selMode
+                ? '<span style="width:20px;height:20px;border-radius:6px;border:2px solid '+(checked?'var(--theme)':'var(--line)')+';background:'+(checked?'var(--theme)':'transparent')+';display:flex;align-items:center;justify-content:center;">'+(checked?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>':'')+'</span>'
+                : '<span style="display:flex;gap:2px;">' +
+                  '<button onclick="editMemo(\'' + cid + '\',\'' + m.id + '\')" style="border:none;background:transparent;color:var(--sub);cursor:pointer;padding:3px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>' +
+                  '<button onclick="deleteMemo(\'' + cid + '\',\'' + m.id + '\')" style="border:none;background:transparent;color:#e5484d;cursor:pointer;padding:3px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>' +
+                '</span>'
+              ) +
+            '</div>' +
+            '<div style="font-size:14.5px;color:var(--text);line-height:1.65;white-space:pre-wrap;">' + esc(m.content) + '</div>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+
+  } else {
+    // ===== 礼物 Tab =====
+    html += '<div style="padding:16px 16px 0;">';
+    if (!gifts.length) {
+      html += '<div class="empty">还没有礼物往来～</div>';
+    } else {
+      gifts.forEach(function(g) {
+        var toTa = (g.from !== 'ai');
+        var dirColor = toTa ? 'var(--theme)' : '#e5484d';
+        var dirText = toTa ? ('你送给' + esc(c.nick || c.name) + '的') : (esc(c.nick || c.name) + '送给你的');
+        var priceStr = (g.from === 'ai') ? '心意' : ((g.currency === 'heart') ? (g.price + ' 心动值') : (g.price + ' 金币'));
+        var badgeBg = g.rare ? 'linear-gradient(135deg,#fdf1c9,#f5df8e)' : themeSoft;
+        html += '<div style="position:relative;display:flex;align-items:center;gap:13px;background:var(--card);border-radius:14px;padding:13px 14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);' + (g.rare ? 'border:1.5px solid #E6B422;box-shadow:0 0 12px rgba(230,180,34,0.22);' : '') + '">' +
+          '<div style="width:50px;height:50px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:27px;background:' + badgeBg + ';">' + (g.emoji || '🎁') + '</div>' +
+          '<div style="flex:1;min-width:0;padding-right:32px;">' +
+            '<div style="font-size:15px;font-weight:600;color:var(--text);word-break:break-all;">' + esc(g.name) + (g.rare ? ' <span style="font-size:11px;color:#b8860b;">稀有</span>' : '') + '</div>' +
+            '<div style="font-size:12px;font-weight:600;color:' + dirColor + ';margin:2px 0;">' + dirText + '</div>' +
+            (g.desc ? '<div style="font-size:12.5px;color:var(--sub);word-break:break-all;">' + esc(g.desc) + '</div>' : '') +
+            '<div style="font-size:11.5px;color:var(--sub);margin-top:4px;">' + fmtDate(g.time) + ' · ' + priceStr + (g.rare && g.story ? ' · ' + esc(g.story) : '') + '</div>' +
+          '</div>' +
+          '<button style="position:absolute;top:10px;right:10px;border:none;background:transparent;color:#e5484d;font-size:12px;cursor:pointer;padding:2px 4px;white-space:nowrap;" onclick="deleteGiftLog(\'' + cid + '\',\'' + g.id + '\')">删除</button>' +
+        '</div>';
+      });
+    }
+    html += '</div>';
+  }
 
   html += '</div>';
   content.innerHTML = html;
@@ -10779,6 +11078,14 @@ function addMemo(cid, content, priority, type) {
   c.chapters.push({ date: dateStr, content: '[记忆] ' + content });
   save();
 }
+function deleteGiftLog(cid, gid) {
+  var c = getC(cid);
+  if (!c) return;
+  if (!confirm('确定删除这条礼物记录吗？')) return;
+  c.giftLog = (c.giftLog || []).filter(function(g) { return g.id !== gid; });
+  save();
+  renderMemoDetail(cid);
+}
 
 function deleteMemo(cid, mid) {
   var c = getC(cid);
@@ -10820,6 +11127,23 @@ function editMemo(cid, mid) {
   mo.onclick = function(e) { if (e.target === mo) closeModal(); };
   phone.appendChild(mo);
   setTimeout(function() { var el = document.getElementById('editMemoInput'); if (el) el.focus(); }, 50);
+}
+function submitEditMemo(cid, mid) {
+  var c = getC(cid);
+  if (!c) return;
+  var mem = (c.memories || []).find(function(m) { return m.id === mid; });
+  if (!mem) return;
+
+  var inputEl = document.getElementById('editMemoInput');
+  var priEl = document.getElementById('editMemoPriority');
+  var newContent = inputEl ? inputEl.value.trim() : '';
+  if (!newContent) { alert('记忆内容不能为空'); return; }
+
+  mem.content = newContent;
+  if (priEl) mem.priority = priEl.value;
+  save();
+  closeModal();
+  renderMemoDetail(cid, 'memory');
 }
 
 async function generateMemo(cid) {
@@ -11156,6 +11480,7 @@ s += '- 标签里的文字请一律用中文引号「」，不要出现英文双
   s += '当对话中对方（用户）自然流露出某种需要或情绪时——比如说饿了、累了、冷了、心情不好、想要某样东西——如果符合你的人设和你俩的关系，你【可以（不是必须）】顺手送对方一件贴合当下情境、贴合你所在世界观的小东西。\n';
   s += '格式：<gift emoji="一个emoji" name="东西的名字" desc="2到4字简短描述"></gift>\n';
   s += '规则：①这是心意，不是每次都送，只在真的合情合景时才送，别频繁、别刻意；②送的东西要符合你的身份、性格和世界观；③标签单独占一行，除标签外照常正常说话；④绝对不要提任何价格、金币、数值或系统字眼，就当是真实生活里随手送的东西。\n';
+  s += '【历史礼物的方向】聊天记录里出现的礼物会标明方向：「对方送给你一件礼物」是对方送你的，「你送给对方一件礼物」是你之前送出去的。提及任何礼物时务必按标注理解，绝对别把方向弄反——别把自己送出去的说成对方送你的，也别把对方送你的说成你送的。\n';
 
   // ===== 第8层：角色专属红线 =====
   if(c.negative){
@@ -11199,6 +11524,7 @@ function toApiMsg(m, withTime){
   }
   if(m.type==='transfer')return{role:m.role,content:_tp+`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};
   if(m.type==='redpacket')return{role:m.role,content:_tp+`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};
+  if(m.type==='shop_item'){var _gf=m.from||(m.role==='assistant'?'ai':'user');return{role:m.role,content:_tp+`（${_gf==='ai'?'你送给对方一件礼物':'对方送给你一件礼物'}：${m.content||''}${m.desc?'——'+m.desc:''}${m.rare&&m.story?'。'+m.story:''}）`};}
   if(m.type==='voice')return{role:m.role,content:_tp+`（语音消息）${m.content}`};
   if(m.type==='sticker')return{role:m.role,content:_tp+`（发了个表情：${m.content}）`};
   if(m.type==='callLog'){
@@ -14690,7 +15016,14 @@ setInterval(function() {
   if (view.type === 'charEdit') return;
   maybeAutoPost();
 }, 30 * 60 * 1000);
-render();tick();restoreFocusState();setTimeout(updateAllIcons, 100);if(focusPhase==='work'&&view.type==='focus')render();
+function bootStartup(){
+  render();
+  tick();
+  restoreFocusState();
+  setTimeout(updateAllIcons, 100);
+  if(focusPhase==='work'&&view.type==='focus') render();
+}
+
 function exportCharacter(id) {
   var c = getC(id);
   if (!c) {
