@@ -308,6 +308,35 @@ textarea {
 .bubble-btn:active{opacity:0.6;}
 .bubble-btn svg{width:15px;height:15px;flex-shrink:0;}
 #inputRow{display:flex;gap:8px;align-items:center;}
+.input-wrap { flex: 1; position: relative; display: flex; }
+.input-wrap #chatInput { padding-right: 36px; } /* 给灯泡让位 */
+.idea-btn {
+  position: absolute; right: 8px; bottom: 7px;
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border-radius: 50%;
+}
+.idea-btn:active { background: var(--nav); }
+.idea-btn svg { width: 18px; height: 18px; stroke: var(--sub); transition: stroke .15s; }
+.idea-btn.on svg { stroke: #f5a623; }
+
+/* 选项弹窗（复用你的 .popup 主题） */
+.idea-box { text-align: left; }
+.idea-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.idea-close { cursor: pointer; color: var(--sub); font-size: 16px; padding: 2px 6px; }
+.idea-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.idea-item {
+  padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
+  font-size: 14px; color: var(--text); line-height: 1.5; cursor: pointer;
+}
+.idea-item:active { background: var(--nav); }
+.idea-empty { color: var(--sub); font-size: 14px; padding: 10px 4px; }
+.idea-toggle {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 10px; margin-bottom:10px; border-radius:8px;
+  background:var(--nav); font-size:13px; color:var(--sub); cursor:pointer;
+}
+.idea-toggle b { color: var(--theme); }
+
 #chatInput{flex:1;border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:15px;font-family:inherit;resize:none;max-height:250px;outline:none;background:var(--card);color:var(--text);line-height:1.4;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;}
 #chatInput::placeholder{color:var(--sub);}
 #chatInput:focus{border-color:var(--theme);}
@@ -1083,7 +1112,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026821';
+const APP_VER = 'v2026822';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1412,6 +1441,37 @@ const DEFAULT_OFFLINE = `# 【🔴 角色行为红线·最高优先级】
 你推门进来，感受到屋子里沉闷的气氛。他看起来很生气，因为你迟到了很久。然后他把烟灭了，对你说先喝茶。
 （有感受描写✗ 有主观判断✗ 有流水账连接词✗）`;
 
+// 接话灵感·线下版（小说叙事：动作+台词）
+var IDEA_PROMPT_OFFLINE =
+'【接话灵感·视角铁律·极重要】本轮正文写完后，另起一行输出标记：[[[OPTIONS]]]\n' +
+'接着生成 3 条【对方】（正在和你对话的那个人）接下来可能对你说的话或做的动作，供对方本人挑选。\n' +
+'★注意：这些选项属于【对方】，不属于你。它们的立场、经历、身份全是对方的。\n' +
+'★输出时统一用"我"开头，但这个"我"指的是【对方】本人，绝不是你这个角色。\n' +
+'★严禁写成"你（角色）去关心、回应、反问对方"的话。\n' +
+'例：若你刚才关心对方"可乐喝太多没事吧"——\n' +
+'  ✓正确（对方回应你）：我摆摆手，"没事，就是嘴馋。"\n' +
+'  ✗错误（又变回你自己关心对方）：你少喝点碳酸饮料吧。\n' +
+'其余要求：只写"我"（对方）的动作和台词，3 条方向明显不同（配合/抗拒/回避等），口语化，15–35 字。\n' +
+'禁止：三条本质相同只是语气不同；臣服/讨好/崇拜；性交时哭泣/求饶/晕厥/失神；油腻措辞。';
+
+// 接话灵感·线上版（微信聊天：只有口语短句，禁止动作描写）
+var IDEA_PROMPT_ONLINE =
+'【接话灵感·视角铁律·极重要】本轮正文写完后，另起一行输出标记：[[[OPTIONS]]]\n' +
+'接着生成 3 条【对方】接下来可能发给你的【微信文字消息】，供对方本人挑选。\n' +
+'★这些消息属于【对方】，立场、经历、身份全是对方的。\n' +
+'★输出时用"我"或直接就是要说的话，但这个"我"指【对方】本人，绝不是你这个角色。\n' +
+'★严禁写成"你（角色）去关心、回应对方"的话。\n' +
+'例：若你刚问对方"可乐喝太多没事吧"——\n' +
+'  ✓正确（对方回你）：没事啦就是嘴馋\n' +
+'  ✗错误（又变回你关心对方）：你少喝点碳酸饮料\n' +
+'纯口语短句，严禁任何动作/神态/心理描写和括号旁白；3 条方向明显不同；每条 8–25 字。\n' +
+'禁止：三条本质相同只是语气不同；臣服/讨好/崇拜；油腻措辞。';
+
+// 接话灵感·重新生成版（只要选项、不要正文，走轻量模型）
+var IDEA_PROMPT_REGEN =
+'用户对上一批"接话选项"不满意，请重新生成。\n' +
+'不要输出任何正文剧情，直接输出标记 [[[OPTIONS]]] 后另起 3 行，每行一条"我"（用户角色）接下来可能的反应。\n' +
+'要求与禁止同前：主语永远是"我"，只写我的动作和台词，禁止写其他角色反应；配合/抗拒方向要有区别；口语化、15–35 字；禁止臣服讨好崇拜、性交时哭泣求饶晕厥失神、油腻措辞。';
 
 function newId(){return 'm'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 const CFIELDS=['gender','age','job','family','body','pLook','pKeywords','pBehavior','pStyle','pBack','pDaily','pLike','pLang','negative','opening','pExtra','myGender','myAge','myJob','myLook','myPersona','myRelation','chatBg'];
@@ -5176,7 +5236,7 @@ function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');t
 function listenHeart(c, passive) {
   if (!c) return;
   var cost = 5;
-  var name = c.nick || c.name;
+  var name = c.name || c.nick;
 
   if ((c.hearts || 0) < cost) {
     popTip('当前 ' + (c.hearts || 0) + '，需要 ' + cost + '💗。\n多和 ' + name + ' 聊天可以增加心动值哦～', {icon:'💔', title:'💗 不足'});
@@ -5250,7 +5310,7 @@ function showHeartBubble(c, content) {
     removeHeartBubble();
     listenHeart(c, true);
   };
-  bubble.innerHTML = '<span style="font-size:14px;color:var(--text);">💭 ' + (c.nick || c.name) + ' 现在心里有话想说… 点击查看（8💗）</span><span style="color:var(--sub);font-size:18px;padding:0 4px;">×</span>';
+  bubble.innerHTML = '<span style="font-size:14px;color:var(--text);">💭 ' + (c.name || c.nick) + ' 现在心里有话想说… 点击查看（8💗）</span><span style="color:var(--sub);font-size:18px;padding:0 4px;">×</span>';
   // 阻止冒泡，防止点击叉号触发父级点击
   bubble.querySelector('span:last-child').onclick = function(e) {
     e.stopPropagation();
@@ -5305,7 +5365,7 @@ function clickHeartBubble(cid) {
   removeHeartBubble();
 
   var cost = 5;
-  var name = c.nick || c.name;
+  var name = c.name || c.nick;
 
   if ((c.hearts || 0) < cost) {
     popTip('当前 ' + (c.hearts || 0) + '，需要 ' + cost + '💗。\n多和 ' + name + ' 聊天可以增加哦～', {icon:'💔', title:'💗 不足'});
@@ -5382,7 +5442,7 @@ async function generateHeartContent(c, callback) {
     }).join('\n');
 
     var system = buildSystem(c);
-    var prompt = '【任务】根据上面的对话记录，生成一句 ' + (c.nick || c.name) + ' 此刻内心真实的想法（心声）。\n\n【硬性规则】\n1. 必须基于对话内容引发，不能凭空出现\n2. 字数严格控制在 20-30 字之间，最多一句话\n3. 不能是剧情总结（不能写成「你刚才说…」「今天你做了…」）\n4. 与表面人设形成反差（外表乖巧→内心带点小腹黑；外表高冷→内心其实在意）\n5. 不出现具体时间、地点、事件名称\n6. 用「他/她/这个人」代替对方名字\n\n【格式】只输出心声内容本身，不要引号、不要解释、不要任何标记。';
+    var prompt = '【任务】根据上面的对话记录，生成一句 ' + (c.name || c.nick) + ' 此刻内心真实的想法（心声）。\n\n【硬性规则】\n1. 必须基于对话内容引发，不能凭空出现\n2. 字数严格控制在 20-30 字之间，最多一句话\n3. 不能是剧情总结（不能写成「你刚才说…」「今天你做了…」）\n4. 与表面人设形成反差（外表乖巧→内心带点小腹黑；外表高冷→内心其实在意）\n5. 不出现具体时间、地点、事件名称\n6. 用「他/她/这个人」代替对方名字\n\n【格式】只输出心声内容本身，不要引号、不要解释、不要任何标记。';
 
     var messages = [
       { role: 'system', content: system },
@@ -5410,7 +5470,7 @@ function showHeartBubbleDirect(c) {
   removeHeartBubble();
 
   var cost = 5;
-  var name = c.nick || c.name;
+  var name = c.name || c.nick;
 
   popConfirm(
     name + ' 现在心里有话想说，要听听看吗？',
@@ -9855,7 +9915,7 @@ function renderHearts() {
     html += '<div class="section-title">👥 角色列表</div>';
     roleList.forEach(function(c) {
       html += '<div class="cell" onclick="view={type:\'heartDetail\',id:\'' + c.id + '\'};render();" style="cursor:pointer;">' +
-        '<div class="avatar" style="' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.nick || c.name)[0]) + '</div>' +
+        '<div class="avatar" style="' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.name || c.nick)[0]) + '</div>' +
         '<div class="cell-body"><div class="cell-title">' + (c.name || c.nick) + '</div></div>' +
         '<div style="color:var(--theme);font-weight:600;font-size:17px;">💗 ' + (c.hearts || 0) + '</div>' +
         '</div>';
@@ -10682,7 +10742,7 @@ function renderMemoMain() {
       'onmouseleave="this.style.transform=\'none\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.06)\';">' +
       // ★改动9-B：头像外套一层相对定位盒子，右上角放 NEW 标记
       '<div style="position:relative;">' +
-      '<div class="avatar" style="width:64px;height:64px;border-radius:50%;flex-shrink:0;' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.nick || c.name)[0]) + '</div>' +
+      '<div class="avatar" style="width:64px;height:64px;border-radius:50%;flex-shrink:0;' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.name || c.nick)[0]) + '</div>' +
       (isNew ? '<span style="position:absolute;top:-2px;right:-2px;background:#f43;color:#fff;font-size:10px;font-weight:600;padding:1px 5px;border-radius:8px;border:1.5px solid var(--card);">NEW</span>' : '') +
       '</div>' +
       '<div style="margin-top:10px;font-size:16px;font-weight:600;color:var(--text);">' + esc(c.nick || c.name) + '</div>' +
@@ -11540,7 +11600,8 @@ function toApiMsg(m, withTime){
     return { role:'assistant', content:_txt };
   }
   var content = m.editedContent || m.content;
-  return{role:m.role,content:_tp+content};
+  var _who = (m.role === 'user') ? '（对方说）' : '';
+  return{role:m.role,content:_tp+_who+content};
 }
 function colorLines(s,color){const col=color||'var(--theme)';return esc(s).replace(/(「[^」]*」|“[^”]*”|"[^"]*"|＂[^＂]*＂)/g,'<span style="color:'+col+';font-weight:500">$1</span>');}
 function tsHtml(t){return `<div class="ts"><span class="ts-pill">${fmtTime(t)}</span></div>`;}
@@ -11764,6 +11825,12 @@ function renderChat(keepScroll) {
 
   // ===== 9. 长按菜单 =====
   attachLongPress();
+    // 接话灵感：切换模式时自动重置（线下开/线上关）；同模式内保留手动设置
+    if (c._ideaLastMode !== c.mode) {
+      c.ideaOn = (c.mode === 'offline');
+      c._ideaLastMode = c.mode;
+      save();
+    }
 
   // ===== 10. 底部输入栏 =====
   var bar = document.createElement('div');
@@ -11843,7 +11910,13 @@ function renderChat(keepScroll) {
     '<div class="plus-btn" onclick="togglePanel()">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
     '</div>' +
-    '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
+    '<div class="input-wrap">' +
+      '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
+      '<div class="idea-btn' + (c.ideaOn ? ' on' : '') + '" id="ideaBtn" onclick="openIdeaPop()" title="接话灵感">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12c.5.5 1 1.5 1 2h6c0-.5.5-1.5 1-2a7 7 0 0 0-4-12z"/></svg>' +
+      '</div>' +
+    '</div>' +
+
     '<div class="voice-btn" id="voiceMsgBtn">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
     '</div>' +
@@ -12569,6 +12642,143 @@ function groupIcon(size){
 
 // ===== 统一弹窗系统 =====
 function popClose(){var p=document.getElementById('popup');if(p)p.remove();}
+// 解析选项（内联和重新生成通用）
+function _parseIdeas(out){
+  if (!out) return [];
+  var s = out;
+  var idx = s.indexOf('[[[OPTIONS]]]');
+  if (idx !== -1) s = s.slice(idx + '[[[OPTIONS]]]'.length);
+  return s.split('\n')
+    .map(function(x){ return x.replace(/^[\s\-•·*\d.、)）]+/, '').trim(); })
+    .filter(function(x){ return x.length > 0 && !/OPTIONS/i.test(x); })
+    .slice(0, 3);
+}
+
+// 找最近一条 AI 文本消息（选项就挂在它身上）
+function _lastAssistant(c){
+  var arr = DB.chats[c.id] || [];
+  for (var i = arr.length - 1; i >= 0; i--){
+    if (arr[i].role === 'assistant' && arr[i].type === 'text') return arr[i];
+  }
+  return null;
+}
+
+// 点灯泡：弹出已缓存的选项（秒出、不花钱）
+function openIdeaPop(){
+  var c = getC(view.id); if (!c) return;
+  var m = _lastAssistant(c);
+  _renderIdeaPop((m && m.ideas) ? m.ideas : []);
+}
+
+function _renderIdeaPop(ideas){
+  popClose();
+  window._ideaCache = ideas || [];
+  var c = getC(view.id);
+  var isOn = !!(c && c.ideaOn);
+  var toggleRow =
+    '<div class="idea-toggle" onclick="toggleIdeaOn()">' +
+      '<span>每轮自动生成</span><b>' + (isOn ? '开 ●' : '关 ○') + '</b>' +
+    '</div>';
+  var inner;
+  if (ideas && ideas.length){
+    inner = ideas.map(function(t, i){
+      return '<div class="idea-item" onclick="pickIdea(' + i + ')">' + esc(t) + '</div>';
+    }).join('');
+  } else {
+    inner = '<div class="idea-empty">' +
+      (isOn ? '这轮没有可用的接话，点下面重新生成～'
+            : '自动生成已关闭。可点上方开启，或直接点下面重新生成～') +
+      '</div>';
+  }
+  var p = document.createElement('div');
+  p.className = 'popup'; p.id = 'popup';
+  p.innerHTML =
+    '<div class="popup-box idea-box">' +
+      '<div class="idea-head"><span class="popup-title">帮你想想怎么接</span>' +
+      '<span class="idea-close" onclick="popClose()">✕</span></div>' +
+      toggleRow +
+      '<div class="idea-list">' + inner + '</div>' +
+      '<div class="popup-btns"><button class="popup-btn main" onclick="regenIdeas()">🔄 重新生成</button></div>' +
+    '</div>';
+  phone.appendChild(p);
+}
+// 手动开关（会覆盖当前模式的默认值，直到下次切换模式）
+function toggleIdeaOn(){
+  var c = getC(view.id); if (!c) return;
+  c.ideaOn = !c.ideaOn;
+  c._ideaLastMode = c.mode; // 标记为"本模式内手动设置过"，避免被自动重置覆盖
+  save();
+  var btn = document.getElementById('ideaBtn');
+  if (btn) btn.classList.toggle('on', c.ideaOn); // 输入框灯泡同步变亮/变灰
+  _renderIdeaPop(window._ideaCache || []); // 刷新弹窗，开关文字跟着变
+}
+
+// 选一条 → 填进输入框、可改可发
+function pickIdea(i){
+  var t = (window._ideaCache || [])[i];
+  if (t == null) return;
+  popClose();
+  var el = document.getElementById('chatInput');
+  if (el){
+    el.value = t;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+    if (typeof updateActBtn === 'function') updateActBtn();
+    el.focus();
+  }
+}
+
+// 重新生成：单独调一次轻量模型，只要选项
+async function regenIdeas(){
+  var c = getC(view.id); if (!c) return;
+  var listBox = document.querySelector('#popup .idea-list');
+  var btn = document.querySelector('#popup .popup-btn.main');
+  if (listBox) listBox.innerHTML = '<div class="idea-empty">正在重新想…</div>';
+  if (btn){ btn.disabled = true; btn.textContent = '生成中…'; }
+  try{
+    // 把对话历史转成"参考文本"，而不是真的对话记录（防止 AI 接着演）
+    var allh = (DB.chats[c.id] || []).map(function(m){ return toApiMsg(m, false); });
+    var lim = parseInt(DB.settings.ctxLimit);
+    if (lim > 0 && allh.length > lim) allh = allh.slice(-lim);
+    var histText = allh.map(function(m){
+      var who = m.role === 'user' ? '【用户】' : '【对方角色】';
+      var ct = (typeof m.content === 'string') ? m.content : '';
+      return ct ? (who + ct) : '';
+    }).filter(Boolean).join('\n');
+
+    // ★ system：把 AI 定位成"军师"，而不是"角色本人"
+    var ideaRule = (c.mode === 'offline') ? IDEA_PROMPT_OFFLINE : IDEA_PROMPT_ONLINE;
+    var sys =
+      '你是一个"角色扮演续写辅助工具"，不是任何角色。\n' +
+      '下面用户会给你一段角色设定和一段对话记录。\n' +
+      '你的唯一任务：站在【用户】这一方的立场，帮用户想出他接下来可能的反应。\n' +
+      '严禁扮演任何角色、严禁续写剧情、严禁描写"对方角色"的任何言行。你是在帮用户出主意，不是在演戏。\n\n' +
+      ideaRule;
+
+    // ★ 人设+历史 全部塞进 user 消息里当"资料"，剥掉它们的命令权威
+    var refer =
+      '【角色设定（仅供你理解情境，绝对不要扮演该角色）】\n' + buildSystem(c) + '\n\n' +
+      '【小说对话记录】\n' + histText + '\n\n' +
+      '现在请只输出 3 条"我"（用户）接下来可能说/做的反应，主语永远是"我"，每行一条，不要写对方的任何反应。';
+
+    var messages = [
+      { role:'system', content: sys },
+      { role:'user', content: refer }
+    ];
+
+    var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+    var out = await callAI(messages, model);
+    var ideas = _parseIdeas(out);
+    var m = _lastAssistant(c);
+    if (m){ m.ideas = ideas; save(); }
+    _renderIdeaPop(ideas);
+  }catch(e){
+    var lb = document.querySelector('#popup .idea-list');
+    if (lb) lb.innerHTML = '<div class="idea-empty">生成失败：' + esc(e && e.message ? e.message : '网络错误') + '</div>';
+    var b = document.querySelector('#popup .popup-btn.main');
+    if (b){ b.disabled = false; b.textContent = '🔄 重新生成'; }
+  }
+}
 
 // 提示框（替换 alert）
 function popTip(msg, opts){
@@ -13557,10 +13767,19 @@ if (pendingGift) {
       content: '【场景切换提示：你们刚才的线下见面已结束，现在已各自回家、回到微信聊天。请像平时发微信一样自然发1~2句日常消息。】'
     });
   }
+    // ---- 6.5 接话灵感：开启时按模式内联生成选项 ----
+    if (c.ideaOn) {
+      messages.push({ role: 'system',
+        content: (c.mode === 'offline') ? IDEA_PROMPT_OFFLINE : IDEA_PROMPT_ONLINE });
+    }
+
     // ---- 7. 调用 AI ----
 let out = await callAI(messages, getEffectiveChatModel(c));
     out = applyState(c, out);
 	out = out.replace(/\[\d{4}-\d{2}-\d{2}\s+\d{1,2}[:：]\d{2}\]\s*/g, ''); // 擦掉AI误吐的时间戳
+	    // ★ 接话灵感：统一切出选项（线上线下都处理），并把标记及之后内容从正文里彻底删掉
+    var _pendingIdeas = _parseIdeas(out);
+    out = out.replace(/\[\[\[OPTIONS\]\]\][\s\S]*$/i, '').trim();
 
     // ---- 8. 解析 AI 回复 (使用新解析器) ----
     // 1. <state> 标签已在上面处理过，这里不再重复调用
@@ -13603,8 +13822,11 @@ narr = narr.replace(/<\/?(?:inner|心声|voice|sticker|recall|transfer|block)[^>
     
     // 清理 state 和心声数字标记
     narr = narr.replace(/<state>[\s\S]*?<\/state>/g, '').trim();
-    narr = narr.replace(/心声\s*[:：]\s*\d+/g, '').trim();
-    parts = narr ? [{ type: 'text', content: narr }] : [];
+      narr = narr.replace(/心声\s*[:：]\s*\d+/g, '').trim();
+      // ★ 接话灵感：把选项切出来存好，正文里一个字都不留
+      var _ideas = _parseIdeas(narr);
+      narr = narr.replace(/\[\[\[OPTIONS\]\]\][\s\S]*$/i, '').trim(); // 双保险：无条件删掉标记及之后一切
+      parts = narr ? [{ type: 'text', content: narr, ideas: _ideas }] : [];
 } else {
         parts = parseAIMessage(out);
     }
@@ -13750,9 +13972,10 @@ if (part.type === 'share') {
                 }
             }
 
-            if (txt) {
-                msgObj = { id: newId(), role: 'assistant', type: 'text', content: txt, time: Date.now() };
-            }
+        if (txt) {
+          msgObj = { id: newId(), role: 'assistant', type: 'text', content: txt, time: Date.now() };
+          if (part.ideas && part.ideas.length) msgObj.ideas = part.ideas; // ★ 选项只挂在这，不进 content
+        }
         }
 
         // 发送消息
@@ -13769,6 +13992,12 @@ if (part.type === 'share') {
             }
         }
     }
+	    // ★ 接话灵感：把切出来的选项挂到最后一条 AI 文本消息上（线上线下通用）
+    if (_pendingIdeas && _pendingIdeas.length) {
+      var _lm = _lastAssistant(c);
+      if (_lm) { _lm.ideas = _pendingIdeas; save(); }
+    }
+
     // 兜底：模型没输出标记时，默认处理，避免卡在"待处理"
     if (pendingTransfer && lastMsg) {
       var _tf = (DB.chats[c.id] || []).find(function (x) { return x.id === lastMsg.id; });
@@ -15017,7 +15246,8 @@ setInterval(function() {
   maybeAutoPost();
 }, 30 * 60 * 1000);
 function bootStartup(){
-  render();
+  applySkin(DB.settings.skin || 'fusion');   // ✅ 新增：DB 就绪后无条件应用已保存主题
+  render();        // ← 第一次渲染
   tick();
   restoreFocusState();
   setTimeout(updateAllIcons, 100);
