@@ -15438,14 +15438,18 @@ window.addEventListener('load', function() {
 window.addEventListener('resize', function() {
   applyPhoneScale();
 });
-// 手机键盘弹出时，把手机整体高度缩到可见区域，避免键盘遮挡（且不露黑块）
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', function() {
+// 手机键盘弹出时，让手机正好铺满可见区域，避免黑块和遮挡
+if (window.visualViewport && window.innerWidth < 420) {
+  var vv = window.visualViewport;
+  function fitPhone() {
     var phone = document.getElementById('phone');
     if (!phone) return;
-    if (window.innerWidth >= 420) return; // 只在手机上生效，电脑不受影响
-    phone.style.height = window.visualViewport.height + 'px';
-  });
+    phone.style.height = vv.height + 'px';                 // 高度铺满可见区
+    phone.style.transform = 'translateY(' + vv.offsetTop + 'px)'; // 位置对齐顶部
+  }
+  vv.addEventListener('resize', fitPhone);  // 键盘弹起/收起时触发
+  vv.addEventListener('scroll', fitPhone);  // 页面被顶动时触发
+  fitPhone();
 }
 
 // 每次渲染页面后也执行一次（保证切换页面后重新适配）
