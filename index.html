@@ -15424,6 +15424,7 @@ function applyPhoneScale() {
   var scaleX = availW / designWidth;
   var scaleY = availH / designHeight;
   var scale = Math.min(scaleX, scaleY, 1); // 最大不超过 1，避免放大变模糊
+scale = Math.max(scale, 0.85); // 最小不低于 0.85，避免电脑窗口矮时缩得太小
 
   phone.style.transform = 'scale(' + scale + ')';
 }
@@ -15437,6 +15438,15 @@ window.addEventListener('load', function() {
 window.addEventListener('resize', function() {
   applyPhoneScale();
 });
+// 手机键盘弹出时，把手机整体高度缩到可见区域，避免键盘遮挡（且不露黑块）
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', function() {
+    var phone = document.getElementById('phone');
+    if (!phone) return;
+    if (window.innerWidth >= 420) return; // 只在手机上生效，电脑不受影响
+    phone.style.height = window.visualViewport.height + 'px';
+  });
+}
 
 // 每次渲染页面后也执行一次（保证切换页面后重新适配）
 // 在 render 函数的最末尾加上这行：
