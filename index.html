@@ -379,11 +379,34 @@ textarea {
 @keyframes popFade{from{opacity:0}to{opacity:1}}
 @keyframes popUp{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes popSpin{to{transform:rotate(360deg)}}
-  .stgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-  .stgrid .st{position:relative;}
-  .stgrid img{width:100%;aspect-ratio:1;object-fit:contain;cursor:pointer;background:var(--bg);border-radius:8px;}
-  .stgrid .nm{font-size:10px;text-align:center;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .stgrid .x{position:absolute;right:-4px;top:-4px;background:#e34;color:#fff;border-radius:50%;width:18px;height:18px;font-size:12px;display:flex;align-items:center;justify-content:center;}
+/* ===== 设置页 · 表情卡片网格 ===== */
+.stgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start;}
+.st-card{position:relative;box-sizing:border-box;background:var(--card);border:2px solid transparent;border-radius:14px;padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.st-card:active{transform:scale(.96);}
+.st-card img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:8px;background:var(--bg);}
+.st-card .nm{font-size:11px;color:var(--sub);margin-top:6px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.st-card .del{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
+
+/* ===== 添加占位卡片（设置页 + 聊天页 共用）===== */
+/* 外层跟表情卡片同结构，边框透明用来对齐；虚线只加在里面的正方形上 */
+.st-add{box-sizing:border-box;background:transparent;border:2px solid transparent;border-radius:14px;padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;color:var(--sub);cursor:pointer;}
+.st-add .add-inner{width:100%;aspect-ratio:1;box-sizing:border-box;border:2px dashed #c9ccd1;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.st-add:active{color:#07c160;}
+.st-add:active .add-inner{border-color:#07c160;}
+.st-add .plus{font-size:30px;line-height:1;font-weight:300;}
+.st-add .t{font-size:11px;margin-top:6px;}
+
+/* ===== 聊天页 · 表情选择窗口 ===== */
+.picker-head{padding:2px 2px 10px;font-weight:600;font-size:15px;color:var(--text);}
+.picker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;height:220px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;align-items:start;}
+.picker-grid .p-st{box-sizing:border-box;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;cursor:pointer;}
+.picker-grid .p-st img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:8px;background:var(--bg);}
+.picker-grid .p-st .nm{font-size:10px;color:var(--sub);margin-top:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.picker-grid .st-add{padding:0;}
+.picker-grid .st-add .add-inner{border-radius:8px;}
+.picker-grid .st-add .plus{font-size:26px;}
+.picker-grid .st-add .t{font-size:10px;margin-top:4px;}
+
 :root {
   --theme: #B34A6A;
   --bg: #1F1A2A;
@@ -1112,7 +1135,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026822';
+const APP_VER = 'v2026823';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -7584,15 +7607,20 @@ function groupSendImage(){ togglePanel(); pickImage(function(d){ groupPush({ rol
 
 function openGroupStickerPicker(){
   var list = DB.stickers || [];
-  if(!list.length){ alert('还没有表情，先去私聊的表情面板里添加吧～'); return; }
   var grid = list.map(function(s){
-    return '<div onclick="groupPickSticker(\''+esc(s.name)+'\')" style="cursor:pointer;padding:4px;"><img src="'+s.img+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;"></div>';
+    return '<div class="p-st" onclick="groupPickSticker(\''+esc(s.name)+'\')"><img src="'+s.img+'"><div class="nm">'+esc(s.name)+'</div></div>';
   }).join('');
   var mo = document.createElement('div');
   mo.className='modal'; mo.id='modal';
-  mo.innerHTML = '<div class="modal-box"><div style="font-weight:600;margin-bottom:10px;color:var(--text);">选择表情</div>'+
-    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:300px;overflow-y:auto;">'+grid+'</div>'+
-    '<button class="btn gray" style="width:100%;margin:10px 0 0 0;box-sizing:border-box;" onclick="closeModal()">取消</button></div>';
+  mo.innerHTML = '<div class="modal-box">'+
+    '<div class="picker-head">选择表情</div>'+
+    '<div class="picker-grid">'+
+      '<div class="st-add" onclick="addStickerFromGroupPicker()"><div class="add-inner"><span class="plus">＋</span></div><div class="t">添加</div></div>'
++
+      grid+
+    '</div>'+
+    '<button class="btn gray" style="width:100%;margin:10px 0 0 0;box-sizing:border-box;" onclick="closeModal()">取消</button>'+
+  '</div>';
   mo.onclick = function(e){ if(e.target===mo) closeModal(); };
   phone.appendChild(mo);
 }
@@ -8076,22 +8104,20 @@ if(tab==='sticker'){
     tbTitle.textContent = '表情包仓库';
     content.innerHTML = `
       <div class="hint" style="padding:12px 16px 4px;">AI 靠"名字"识别并使用表情</div>
-      <!-- 固定高度 + 内部独立滚动区域 -->
-      <div style="padding:10px 16px;max-height:280px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;">
+      <div style="padding:10px 14px 20px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;">
         <div class="stgrid">
+<div class="st-add" onclick="addSticker()">
+  <div class="add-inner"><span class="plus">＋</span></div>
+  <div class="t">添加表情</div>
+</div>
           ${DB.stickers.map((st,i)=>`
-            <div class="st">
-              <span class="x" onclick="delSticker(${i})">×</span>
+            <div class="st-card">
+              <span class="del" onclick="delSticker(${i})">×</span>
               <img src="${st.img}">
               <div class="nm">${esc(st.name)}</div>
             </div>
           `).join('')}
         </div>
-        ${DB.stickers.length === 0 ? '<div style="text-align:center;color:var(--sub);padding:30px 0;font-size:12px;">暂无表情，点击下方添加</div>' : ''}
-      </div>
-      <!-- 常驻底部的添加按钮 -->
-      <div style="padding:4px 0 16px;">
-        <button class="btn gray" style="margin:8px 16px;" onclick="addSticker()">＋ 添加表情</button>
       </div>
     `;
     return;
@@ -8142,6 +8168,38 @@ function clearWallpaper() {
   }, { icon: '🗑️', title: '移除壁纸' });
 }
 function pickAppIcon(i){pickImage(d=>{DB.desktop.apps[i].icon=d;save();render();},160,true);}
+// 从私聊表情窗口里添加表情
+function addStickerFromPicker(){
+  pickImage(function(d){
+    popPrompt('给这个表情起个名字（AI 会用它来识别）','如：开心、哭哭、摊手',function(name){
+      if(name && name.trim()){
+        DB.stickers.push({id:'s'+Date.now(),name:name.trim(),img:d});
+        save();
+        closeModal();
+        openStickerPicker();   // 加完重新打开窗口，立刻看到新表情
+      }else{
+        popTip('请输入表情名称',{icon:'😶',title:'提示'});
+      }
+    },{icon:'😀',title:'添加表情'});
+  },240,true);
+}
+
+// 从群聊表情窗口里添加表情
+function addStickerFromGroupPicker(){
+  pickImage(function(d){
+    popPrompt('给这个表情起个名字（AI 会用它来识别）','如：开心、哭哭、摊手',function(name){
+      if(name && name.trim()){
+        DB.stickers.push({id:'s'+Date.now(),name:name.trim(),img:d});
+        save();
+        closeModal();
+        openGroupStickerPicker();
+      }else{
+        popTip('请输入表情名称',{icon:'😶',title:'提示'});
+      }
+    },{icon:'😀',title:'添加表情'});
+  },240,true);
+}
+
 function addSticker() {
   pickImage(function(d) {
     popPrompt(
@@ -12602,14 +12660,21 @@ function toggleVoice(id){
 function openStickerPicker(){
   var panel = document.getElementById('chatPanel');
   if (panel) panel.classList.remove('on');
-  if(!DB.stickers.length){
-    popTip('去 设置→表情包仓库 添加吧～',{icon:'😶',title:'还没有表情'});
-    return;
-  }
+  var grid = DB.stickers.map(function(s,i){
+    return '<div class="p-st" onclick="sendSticker('+i+')"><img src="'+s.img+'"><div class="nm">'+esc(s.name)+'</div></div>';
+  }).join('');
   var mo=document.createElement('div');
   mo.className='modal';
   mo.id='modal';
-  mo.innerHTML='<div class="modal-box"><div class="stgrid">'+DB.stickers.map(function(s,i){return '<div class="st"><img src="'+s.img+'" onclick="sendSticker('+i+')"><div class="nm">'+esc(s.name)+'</div></div>';}).join('')+'</div><button class="btn gray" style="width:100%;margin:10px 0 0 0;box-sizing:border-box;" onclick="closeModal()">取消</button></div>';
+  mo.innerHTML='<div class="modal-box">'+
+    '<div class="picker-head">选择表情</div>'+
+    '<div class="picker-grid">'+
+      '<div class="st-add" onclick="addStickerFromPicker()"><div class="add-inner"><span class="plus">＋</span></div><div class="t">添加</div></div>'
++
+      grid+
+    '</div>'+
+    '<button class="btn gray" style="width:100%;margin:10px 0 0 0;box-sizing:border-box;" onclick="closeModal()">取消</button>'+
+  '</div>';
   mo.onclick=function(e){if(e.target===mo)closeModal();};
   phone.appendChild(mo);
 }
