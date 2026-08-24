@@ -14816,16 +14816,10 @@ form.append('emotion', 'true');
       });
       if(!res.ok){ var t=''; try{t=await res.text();}catch(e){} throw new Error('Whisper HTTP '+res.status+(t?'：'+t.slice(0,200):'')); }
       var d = await res.json();
-      var text = (d.text||'').trim();
-var emotion = d.emotion || '';
-if(emotion && emotion !== 'neutral' && emotion !== '中性'){
-  var emotionMap = {
-    'happy':'开心', 'sad':'难过', 'angry':'生气', 
-    'fearful':'害怕', 'disgusted':'厌烦', 'surprised':'惊讶'
-  };
-  var emotionCN = emotionMap[emotion] || emotion;
-  return text + '\n（说话情绪：' + emotionCN + '）';
-}
+	  console.log('语音模型返回的原始内容：', d);
+var text = (d.text||'').trim();
+// 去掉语音模型自动塞进文字里的情绪表情（😔叹气等），只保留干净的文字
+text = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}]/gu, '').trim();
 return text;
     }catch(e){
       console.warn('Whisper识别失败，降级到语音模型：', e.message);
@@ -15152,7 +15146,9 @@ function buildCallMessages(c){
     '【字数】每次回复简短口语化，控制在1~3句、40字以内，你来我往，别长篇大论。'+
     '【环境音】偶尔可在台词中间用星号*包住穿插环境音或动作声，如「等我一下*翻东西的声音*找到啦」，只写声音动作不写心理，偶尔即可，不要用括号。'+
     '【结束通话】只有当对话真的到了自然告别的时机（互相道别完、你要去忙了），才可以在你这句话最末尾单独加 [挂断] 两字表示你挂电话；平时绝对不要用，一通电话最多一次。'+
-    '除此之外严禁大段动作/神态/心理描写，严禁旁白，严禁任何微信功能格式（表情/转账/见面标记等）。' });
+    '除此之外严禁大段动作/神态/心理描写，严禁旁白，严禁任何微信功能格式（表情/转账/见面标记等）。'+
+    '【体会对方情绪】对方是通过语音跟你说话的，你要结合TA这句话的内容、用词、语气和前面的聊天上下文，自己用心去体会TA此刻的真实情绪——是开心、生气、委屈、撒娇还是失落，然后像真人一样自然地回应这份情绪。不要只看字面意思，也不要因为一句平常的话就默认对方在叹气或不开心。' });
+
   var allh = (DB.chats[c.id] || []).map(toApiMsg);
   var lim = parseInt(DB.settings.ctxLimit);
   if(lim > 0 && allh.length > lim) allh = allh.slice(-lim);
