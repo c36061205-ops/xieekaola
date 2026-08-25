@@ -406,6 +406,17 @@ textarea {
 .picker-grid .st-add .add-inner{border-radius:8px;}
 .picker-grid .st-add .plus{font-size:26px;}
 .picker-grid .st-add .t{font-size:10px;margin-top:4px;}
+/* 聊天表情弹窗：让窗口撑高、网格填满剩余空间 */
+.sticker-modal .modal-box{
+  height:80%;
+  display:flex;
+  flex-direction:column;
+}
+.sticker-modal .picker-grid{
+  height:auto;      /* 覆盖原来的固定 220px */
+  flex:1;           /* 吃掉标题和取消按钮之外的全部空间 */
+  min-height:0;     /* 保证 flex 内部滚动正常 */
+}
 
 :root {
   --theme: #B34A6A;
@@ -1087,6 +1098,52 @@ margin-bottom:4px;}
     border: 1.5px dashed rgba(122, 168, 153, 0.4) !important; /* 虚线手账缝线感 */
     box-shadow: 0 4px 12px rgba(50, 56, 53, 0.04) !important;
 }
+/* ===== 世界观APP · 杂志排版风 ===== */
+.wv-list{padding:8px 16px}
+.wv-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.wv-item:last-child{border-bottom:none}
+.wv-icon{font-size:26px;width:46px;height:46px;background:var(--card);border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wv-info{flex:1;min-width:0}
+.wv-name{font-size:16px;font-weight:600;color:var(--text)}
+.wv-desc{font-size:13px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wv-meta{display:flex;gap:14px;font-size:12px;color:var(--sub);margin-top:6px}
+
+.wv-d-head{display:flex;align-items:center;gap:14px;padding:22px 18px 4px}
+.wv-d-ico{font-size:40px}
+.wv-d-title{font-size:22px;font-weight:700;color:var(--text)}
+.wv-weather{margin:10px 18px 0;font-size:14px;color:var(--text)}
+.wv-weather b{font-weight:600}
+.wv-sec-t{font-size:12px;color:var(--sub);padding:20px 18px 8px;letter-spacing:.3px}
+.wv-desc-box{margin:0 18px;font-size:15px;color:var(--text);line-height:1.85;white-space:pre-wrap;position:relative}
+.wv-desc-box.fold{max-height:200px;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,#000 80%,transparent);mask-image:linear-gradient(180deg,#000 80%,transparent)}
+.wv-toggle{padding:10px 18px 0;font-size:14px;color:var(--theme);cursor:pointer}
+.wv-entry{display:flex;align-items:center;margin:0 18px;padding:14px 0;border-top:1px solid var(--line);cursor:pointer}
+.wv-entry-t{flex:1;font-size:16px;color:var(--text)}
+.wv-entry-c{font-size:14px;color:var(--sub);margin-right:8px}
+.wv-entry-a{color:#c8c8cd;font-size:18px}
+.wv-foot{display:flex;gap:24px;padding:22px 18px}
+.wv-fbtn{font-size:15px;color:var(--sub);cursor:pointer}
+.wv-fbtn.del{color:#fa5151}
+
+.wv-lore-tip{font-size:13px;color:var(--sub);line-height:1.6;padding:16px 18px 4px}
+.wv-lore-acts{display:flex;gap:10px;padding:8px 18px 4px}
+.wv-btn{padding:7px 16px;border-radius:30px;font-size:13px;font-weight:500;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer;display:inline-block}
+.wv-btn.primary{background:var(--theme);color:#fff;border-color:var(--theme)}
+.wv-lore-item{display:flex;align-items:flex-start;gap:10px;padding:14px 18px;border-top:1px solid var(--line);cursor:pointer}
+.wv-lore-dot{font-size:11px;color:var(--theme);flex-shrink:0;line-height:1.7}
+.wv-lore-dot.off{color:var(--sub);opacity:.4}
+.wv-lore-c{flex:1;min-width:0}
+.wv-lore-kw{font-size:15px;font-weight:600;color:var(--text)}
+.wv-lore-snip{font-size:13px;color:var(--sub);margin-top:3px;line-height:1.5}
+/* 世界书多选 */
+.wv-lore-item .wv-check{width:20px;height:20px;border:1.5px solid var(--sub);border-radius:50%;flex-shrink:0;display:none;align-items:center;justify-content:center;font-size:12px;color:#fff;margin-top:1px}
+.wv-sel .wv-lore-item .wv-check{display:flex}
+.wv-sel .wv-lore-item .wv-lore-dot{display:none}
+.wv-lore-item .wv-check.on{background:var(--theme);border-color:var(--theme)}
+.wv-selbar{position:sticky;bottom:0;display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--nav);border-top:1px solid var(--line)}
+.wv-selbar .sb-all{font-size:14px;color:var(--text);cursor:pointer}
+.wv-selbar .sb-del{margin-left:auto;font-size:14px;color:#fff;background:#fa5151;padding:8px 20px;border-radius:20px;cursor:pointer}
+.wv-selbar .sb-del.dim{background:var(--sub);opacity:.5}
 
 </style>
 </head>
@@ -1135,7 +1192,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026824';
+const APP_VER = 'v2026825';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1972,6 +2029,7 @@ const _needReset = localStorage.getItem('preset_reset_ver') !== APP_VER;
 if (_needReset || !d.settings.onlineStyle) d.settings.onlineStyle = DEFAULT_ONLINE;
 if (_needReset || !d.settings.offlineStyle) d.settings.offlineStyle = DEFAULT_OFFLINE;
   d.contacts=d.contacts||[];d.chats=d.chats||{};d.moments=d.moments||[];d.stickers=d.stickers||[];
+    if (!Array.isArray(d.lorebook)) d.lorebook = [];
   if (d.memoUnread === undefined) d.memoUnread = {};  // 备忘录自动记忆·未读记录
 
   // ===== 群聊新增：群聊数组 =====
@@ -2208,6 +2266,20 @@ function blankChar(id){
 const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:'', allowStickers:true, myExtra:'', autoMemo:true, giftLog:[]};
   CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;
 }
+function blankLore(worldId) {
+  return {
+    id: 'lore_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+    worldId: worldId,
+    name: '',          // 关键词，多个用逗号、顿号或空格隔开
+    content: '',       // 要注入给AI的设定内容
+    enabled: true,     // 开关
+    mode: 'selective', // selective=提到才注入 / constant=每次都注入
+    order: 50,         // 优先级，暂时不用管
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+}
+
 function seedAiChan(d){
   const id='c_aichan';
   const c=blankChar(id);
@@ -5548,13 +5620,22 @@ function renderWorlds() {
     return;
   }
 
-  var html = '<div style="padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+  var html = '<div class="wv-list">';
   worlds.forEach(function(w) {
-    html += '<div onclick="openWorldDetail(\'' + w.id + '\')" style="background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--line);cursor:pointer;">' +
-      '<div style="font-size:32px;text-align:center;">' + (w.icon || '🌍') + '</div>' +
-      '<div style="font-size:15px;font-weight:600;text-align:center;margin-top:6px;color:var(--text)">' + esc(w.name) + '</div>' +
-      '<div style="font-size:12px;color:var(--sub);text-align:center;margin-top:2px;">' + esc(w.desc || '').slice(0, 20) + (w.desc && w.desc.length > 20 ? '…' : '') + '</div>' +
-      '</div>';
+    var loreCount = (DB.lorebook || []).filter(function(e){ return e.worldId === w.id; }).length;
+    var wt = w.weather;
+    var meta = '<span>📖 ' + loreCount + '</span>';
+    if (wt && wt.temp !== undefined && wt.temp !== null) {
+      meta += '<span>' + (wt.icon || '🌤') + ' ' + wt.temp + '°</span>';
+    }
+    var descLine = esc((w.desc || '').replace(/[#\-*>]/g, ' ').replace(/\s+/g, ' ').trim()).slice(0, 30);
+    html += '<div class="wv-item" onclick="openWorldDetail(\'' + w.id + '\')">' +
+      '<div class="wv-icon">' + (w.icon || '🌍') + '</div>' +
+      '<div class="wv-info">' +
+      '<div class="wv-name">' + esc(w.name) + '</div>' +
+      '<div class="wv-desc">' + (descLine || '暂无描述') + '</div>' +
+      '<div class="wv-meta">' + meta + '</div>' +
+      '</div></div>';
   });
   html += '</div>';
   content.innerHTML = html;
@@ -6376,14 +6457,31 @@ function openWorldEditor(worldId) {
 function openWorldDetail(worldId) {
   var w = (DB.worlds || []).find(function(x) { return x.id === worldId; });
   if (!w) { alert('世界观不存在'); return; }
-  var html = '<div style="padding:20px;">' +
-    '<div style="font-size:48px;text-align:center;">' + (w.icon || '🌍') + '</div>' +
-    '<div style="font-size:20px;font-weight:600;text-align:center;margin:10px 0 4px;color:var(--text)">' + esc(w.name) + '</div>' +
-    '<div style="font-size:14px;color:var(--sub);white-space:pre-wrap;line-height:1.6;margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;">' + esc(w.desc || '暂无描述') + '</div>' +
-    '<button class="btn" style="margin-top:16px;" onclick="openWorldEditor(\'' + w.id + '\')">✏️ 编辑</button>' +
-    '<button class="btn gray" style="margin-top:6px;" onclick="deleteWorld(\'' + w.id + '\')">🗑️ 删除</button>' +
-    '<button class="btn gray" style="margin-top:6px;" onclick="goWorlds()">‹ 返回列表</button>' +
-    '</div>';
+  var loreCount = (DB.lorebook || []).filter(function(e){ return e.worldId === worldId; }).length;
+  var wt = w.weather;
+  var isLong = (w.desc || '').length > 120;
+
+  var html = '';
+  html += '<div class="wv-d-head"><span class="wv-d-ico">' + (w.icon || '🌍') + '</span>' +
+          '<div class="wv-d-title">' + esc(w.name) + '</div></div>';
+  if (wt && wt.temp !== undefined && wt.temp !== null) {
+    html += '<div class="wv-weather">' + (wt.icon || '🌤') + ' <b>' + wt.temp + '°</b> ' + esc(wt.state || '') + '</div>';
+  }
+  html += '<div class="wv-sec-t">世界观描述</div>';
+  html += '<div class="wv-desc-box' + (isLong ? ' fold' : '') + '" id="wvDesc">' + esc(w.desc || '暂无描述') + '</div>';
+  if (isLong) {
+    html += '<div class="wv-toggle" onclick="toggleWvDesc(this)">展开全文 ↓</div>';
+  }
+  html += '<div class="wv-sec-t">拓展设定</div>';
+  html += '<div class="wv-entry" onclick="openLorebook(\'' + w.id + '\')">' +
+          '<span class="wv-entry-t">📖 世界书</span>' +
+          '<span class="wv-entry-c">' + loreCount + ' 条</span>' +
+          '<span class="wv-entry-a">›</span></div>';
+  html += '<div class="wv-foot">' +
+          '<span class="wv-fbtn" onclick="openWorldEditor(\'' + w.id + '\')">✎ 编辑</span>' +
+          '<span class="wv-fbtn del" onclick="deleteWorld(\'' + w.id + '\')">🗑 删除</span>' +
+          '</div>';
+
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = w.name || '世界观';
@@ -6392,6 +6490,346 @@ function openWorldDetail(worldId) {
   tbRight.textContent = '';
   tbRight.onclick = null;
   content.innerHTML = html;
+}
+
+function toggleWvDesc(el) {
+  var d = document.getElementById('wvDesc');
+  if (!d) return;
+  if (d.classList.contains('fold')) {
+    d.classList.remove('fold');
+    el.textContent = '收起 ↑';
+  } else {
+    d.classList.add('fold');
+    el.textContent = '展开全文 ↓';
+  }
+}
+// ===== 世界书：列表页 =====
+function openLorebook(worldId){
+  var w = (DB.worlds||[]).find(function(x){return x.id===worldId;});
+  if(!w){alert('世界观不存在');return;}
+  var list = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId;});
+  var selMode = window._loreSelMode || false;
+  window._loreSelSet = window._loreSelSet || {};
+
+  var html = '<div class="'+(selMode?'wv-sel':'')+'">';
+  if(!selMode){
+    html += '<div class="wv-lore-tip">为世界观添加设定卡片，聊天中提到关键词时会自动作为背景注入给 AI。</div>';
+    html += '<div class="wv-lore-acts">' +
+            '<span class="wv-btn primary" onclick="aiGenLore(\''+worldId+'\')">✨ AI自动生成</span>' +
+            '<span class="wv-btn" onclick="openLoreEditor(\''+worldId+'\',null)">＋ 添加</span>' +
+            '</div>';
+  }
+  if(!list.length){
+    html += '<div class="empty" style="margin-top:30px;">还没有世界书条目<br>点上面的按钮添加或生成</div>';
+  }else{
+    html += '<div class="wv-sec-t">共 '+list.length+' 个条目'+(selMode?'（点击选择）':'')+'</div>';
+    list.forEach(function(e){
+      var on = e.enabled!==false;
+      var snip = esc((e.content||'').replace(/\n/g,' ')).slice(0,42);
+      if(e.content && e.content.length>42) snip += '…';
+      var checked = !!window._loreSelSet[e.id];
+      var click = selMode ? 'toggleLoreSel(\''+worldId+'\',\''+e.id+'\')' : 'openLoreEditor(\''+worldId+'\',\''+e.id+'\')';
+      html += '<div class="wv-lore-item" onclick="'+click+'">' +
+        '<span class="wv-check'+(checked?' on':'')+'">'+(checked?'✓':'')+'</span>' +
+        '<span class="wv-lore-dot'+(on?'':' off')+'">'+(on?'●':'○')+'</span>' +
+        '<div class="wv-lore-c">' +
+        '<div class="wv-lore-kw">'+esc(e.name||'（未命名）')+'</div>' +
+        '<div class="wv-lore-snip">'+(snip||'（空）')+'</div>' +
+        '</div></div>';
+    });
+  }
+  html += '</div>';
+
+  if(selMode){
+    var selCount = list.filter(function(e){return window._loreSelSet[e.id];}).length;
+    html += '<div class="wv-selbar">' +
+      '<span class="sb-all" onclick="toggleLoreSelAll(\''+worldId+'\')">全选</span>' +
+      '<span class="sb-del'+(selCount?'':' dim')+'" onclick="deleteLoreSelected(\''+worldId+'\')">删除 '+(selCount?('('+selCount+')'):'')+'</span>' +
+      '</div>';
+  }
+
+  showChrome(true,false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = '📖 '+(w.name||'世界书');
+  tbLeft.textContent = selMode ? '取消' : '‹';
+  tbLeft.onclick = selMode
+    ? function(){ window._loreSelMode=false; window._loreSelSet={}; openLorebook(worldId); }
+    : function(){ openWorldDetail(worldId); };
+  tbRight.textContent = list.length ? (selMode ? '' : '管理') : '';
+  tbRight.onclick = (list.length && !selMode)
+    ? function(){ window._loreSelMode=true; window._loreSelSet={}; openLorebook(worldId); }
+    : null;
+  content.innerHTML = html;
+}
+// 选中/取消单条
+function toggleLoreSel(worldId, loreId){
+  window._loreSelSet = window._loreSelSet || {};
+  if(window._loreSelSet[loreId]) delete window._loreSelSet[loreId];
+  else window._loreSelSet[loreId] = true;
+  openLorebook(worldId);
+}
+// 全选/取消全选
+function toggleLoreSelAll(worldId){
+  var list = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId;});
+  var allSel = list.length && list.every(function(e){return window._loreSelSet[e.id];});
+  window._loreSelSet = {};
+  if(!allSel){ list.forEach(function(e){ window._loreSelSet[e.id]=true; }); }
+  openLorebook(worldId);
+}
+// 删除选中
+function deleteLoreSelected(worldId){
+  var ids = Object.keys(window._loreSelSet||{}).filter(function(k){return window._loreSelSet[k];});
+  if(!ids.length){ return; }
+  popConfirm('确定删除选中的 '+ids.length+' 个条目？', function(){
+    DB.lorebook = (DB.lorebook||[]).filter(function(e){ return ids.indexOf(e.id)<0; });
+    save();
+    window._loreSelMode = false;
+    window._loreSelSet = {};
+    openLorebook(worldId);
+  });
+}
+
+// ===== 世界书：编辑/新增单条 =====
+function openLoreEditor(worldId, loreId){
+  var e = loreId ? (DB.lorebook||[]).find(function(x){return x.id===loreId;}) : null;
+  var isEdit = !!e;
+  var nameVal = e ? e.name : '';
+  var contentVal = e ? e.content : '';
+  var enabled = e ? (e.enabled!==false) : true;
+  var html = '<div style="padding:16px;">';
+  html += '<div class="field"><label>🏷️ 关键词（聊天提到它就触发）</label>'+
+    '<input id="lore_name" value="'+esc(nameVal)+'" placeholder="例如：老张、酒馆老板"></div>';
+  html += '<div style="font-size:12px;color:var(--sub);margin:-4px 0 12px;">多个关键词用逗号、顿号或空格隔开，任意一个被提到都会触发。</div>';
+  html += '<div class="field"><label>📝 内容（要悄悄告诉 AI 的设定）</label>'+
+    '<textarea id="lore_content" rows="8" placeholder="例如：老张，55岁，独臂，年轻时是佣兵，现在开酒馆，嘴硬心软，讨厌贵族。">'+esc(contentVal)+'</textarea></div>';
+  html += '<label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text);margin:8px 0;"><input type="checkbox" id="lore_enabled" '+(enabled?'checked':'')+'> 启用这个条目</label>';
+html += '<div style="margin:8px 0;font-size:14px;color:var(--text);">注入方式：'+
+  '<label style="margin-left:12px;"><input type="radio" name="lore_mode" value="selective" '+((!e||e.mode!=='constant')?'checked':'')+'> 提到关键词才触发</label>'+
+  '<label style="margin-left:12px;"><input type="radio" name="lore_mode" value="constant" '+(e&&e.mode==='constant'?'checked':'')+'> 每次对话都注入</label>'+
+  '</div>';
+  html += '<button class="btn" onclick="saveLore(\''+worldId+'\','+(loreId?('\''+loreId+'\''):'null')+')">💾 保存</button>';
+  if(isEdit){
+    html += '<button class="btn gray" style="margin-top:6px;" onclick="deleteLore(\''+loreId+'\',\''+worldId+'\')">🗑️ 删除</button>';
+  }
+  html += '<button class="btn gray" style="margin-top:6px;" onclick="openLorebook(\''+worldId+'\')">‹ 返回世界书</button>';
+  html += '</div>';
+  showChrome(true,false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = isEdit ? '编辑条目' : '新增条目';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = function(){ openLorebook(worldId); };
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+  content.innerHTML = html;
+}
+
+// ===== 世界书：保存 =====
+function saveLore(worldId, loreId){
+var nameVal = document.getElementById('lore_name').value.trim();
+var contentVal = document.getElementById('lore_content').value.trim();
+var enabled = document.getElementById('lore_enabled').checked;
+var modeVal = document.querySelector('input[name="lore_mode"]:checked');
+modeVal = modeVal ? modeVal.value : 'selective';
+  if(!nameVal && !contentVal){ alert('关键词和内容至少填一个'); return; }
+if(loreId){
+    var e = (DB.lorebook||[]).find(function(x){return x.id===loreId;});
+    if(e){ e.name=nameVal; e.content=contentVal; e.enabled=enabled; e.mode=modeVal; e.updatedAt=Date.now(); }
+  }else{
+    var ne = blankLore(worldId);
+    ne.name=nameVal; ne.content=contentVal; ne.enabled=enabled; ne.mode=modeVal;
+    DB.lorebook = DB.lorebook || [];
+    DB.lorebook.push(ne);
+  }
+  save();
+  openLorebook(worldId);
+}
+
+// ===== 世界书：删除 =====
+function deleteLore(loreId, worldId){
+  popConfirm('确定删除这个世界书条目？', function(){
+    DB.lorebook = (DB.lorebook||[]).filter(function(x){return x.id!==loreId;});
+    save();
+    openLorebook(worldId);
+  });
+}
+
+// ===== 世界书：AI 自动生成条目 =====
+async function aiGenLore(worldId){
+  if(window._loreGenLock) return;
+  var w = (DB.worlds||[]).find(function(x){return x.id===worldId;});
+  if(!w){alert('世界观不存在');return;}
+  var model = DB.settings.auxModel || DB.settings.chatModel;
+  if(!model){ alert('请先在设置里选择模型'); return; }
+
+  window._loreGenLock = true;
+  var tip = tbTitle.textContent;
+  tbTitle.textContent = '✨ 生成中…';
+
+  try{
+    // —— 1. 收集角色：已有角色(有角色卡,不建条目) + 社会关系里的NPC(可建条目) ——
+    var chars = (DB.contacts||[]).filter(function(c){ return c.worldId===worldId; });
+    var charNames = chars.map(function(c){return c.name;}).filter(Boolean).join('、');
+    var npcInfo = '';
+    chars.forEach(function(c){
+      (c.relations||[]).forEach(function(r){
+        if(r.targetName){
+          npcInfo += '- ' + r.targetName +
+            (r.relationType?('（'+r.relationType+'）'):'') +
+            (r.description?('：'+r.description):'') + '\n';
+        }
+      });
+    });
+
+    // —— 2. 已有条目关键词（避免重复）——
+    var existed = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId;})
+      .map(function(e){return e.name;}).filter(Boolean).join('、');
+
+    // —— 3. 拼 Prompt ——
+    var prompt = '你是一个世界观设定挖掘助手。请阅读下面的世界观资料，挖掘并补全其中"提到了但没展开"的设定，生成一批"世界书条目"。\n\n';
+    prompt += '【什么是世界书条目】每个条目由"关键词"和"设定内容"组成。聊天中提到关键词时，设定内容会被悄悄注入给AI作为背景知识。\n\n';
+    prompt += '【世界观】' + (w.name||'') + '\n' + (w.desc||'（暂无描述）') + '\n\n';
+    if(w._places){ prompt += '【已有地点参考】' + w._places + '\n\n'; }
+    if(charNames){ prompt += '【本世界已有的主要角色 —— 他们已有独立设定，禁止为他们生成条目】' + charNames + '\n\n'; }
+    if(npcInfo){ prompt += '【提到过的次要人物/NPC —— 这些没有独立设定，可以为其生成条目并补全细节】\n' + npcInfo + '\n'; }
+    if(DB.me && (DB.me.realName || DB.me.name)){
+      prompt += '【用户本人 —— 禁止为用户生成条目】' + (DB.me.realName||DB.me.name) + '\n\n';
+    }
+    if(existed){ prompt += '【已存在的条目关键词 —— 禁止重复这些】' + existed + '\n\n'; }
+
+    // ===== 核心任务 =====
+    prompt += '【核心任务·最重要】\n';
+    prompt += '你的任务是把这个世界"填充完整、变得可玩、方便展开剧情"，而不是复述或总结已有描述。请先判断世界观的详略，采取对应策略：\n';
+    prompt += '· 世界观很简略（甚至只有一个名字/类型，如"现代都市"）：主动从零建设，根据这个世界的类型和常识，补全它理应存在的一切，让空世界变得有血有肉。\n';
+    prompt += '· 世界观已有较多描述：在已有设定基础上向外发散、向深挖掘，脑补原文没写但符合逻辑的新内容。\n';
+    prompt += '· 无论哪种情况，判断标准只有一个：这个条目能不能让世界更具体、更好玩、更方便展开对话。\n\n';
+
+    // ===== 生成方向 =====
+    prompt += '【应该生成哪些内容】\n';
+    prompt += '围绕下面这些方面，生成"有名有姓、具体"的设定条目（给出具体名称，不要泛泛而谈）：\n';
+    prompt += '· 关键地点：具体的街道、店铺、区域、建筑、秘境等，要有名字和特征。\n';
+    prompt += '· 组织与势力：公司、帮派、机构、门派、家族，说明它们做什么、什么来头。\n';
+    prompt += '· 社会秩序与规则：世界怎么运转、有什么法律/禁忌/潜规则/等级制度。\n';
+    prompt += '· 特殊设定：力量或能量体系、种族、周期性事件（满月/节日/异变）、独特行业或习俗。\n';
+    prompt += '· 物品与传说：标志性道具、历史事件、都市传说、坊间流言。\n';
+    prompt += '举例：世界观只写了"现代都市"，你就应主动生成如"星港商业区""老城区夜市""晨曦地产公司""本地黑帮·青龙会""24小时便利店文化"这类具体条目。\n\n';
+
+    // ===== NPC 全覆盖 =====
+    var npcCount = npcInfo ? (npcInfo.match(/\n/g)||[]).length : 0;
+    if(npcInfo){
+      prompt += '【NPC 处理·硬性要求】\n';
+      prompt += '前面【提到过的次要人物/NPC】列表里，每一个都必须单独生成一个条目，一个都不许遗漏（共 '+npcCount+' 个）。在其现有简介基础上，发散补全外貌、性格、说话方式、来历、秘密、与主角的纠葛等具体细节。\n\n';
+    }
+
+    // ===== 禁止事项 =====
+    prompt += '【禁止事项】\n';
+    prompt += '· 不要把世界观原文已写清楚的内容原样搬进条目（那是复述，没意义）。\n';
+    prompt += '· 禁止为"已有主要角色"和"用户本人"生成条目（他们有独立设定）。\n\n';
+
+    // ===== 关键词 =====
+    prompt += '【关键词要求】\n';
+    prompt += '- 每个条目请提供 2-4 个关键词，用顿号隔开，把这个设定"可能被说到的各种叫法"都写上。\n';
+    prompt += '- 人物：本名、外号、身份称呼都算（如"沈清欢、沈医生、心理医生"）；地点：全称、简称、俗称都算。\n';
+    prompt += '- 这样聊天里无论用哪种叫法都能触发条目。\n\n';
+
+    // ===== 语言风格 =====
+    prompt += '【语言风格·必须严格遵守】\n';
+    prompt += '这是给AI看的"设定说明书"，不是文学作品。请务必：\n';
+    prompt += '1. 说人话！用平实、直白、清楚的现代口语，像跟朋友解释设定一样。\n';
+    prompt += '2. 严禁堆砌华丽辞藻、诗意化表达、玄乎抽象的形容。一句话能说清就不要绕。\n';
+    prompt += '3. 严禁生造读者看不懂的黑话/术语（如"灵核过热""隐形话语权"）。确需专有名词时，必须紧跟一句大白话解释它是什么、有什么用。\n';
+    prompt += '4. 优先写"是什么、能做什么、有什么规则、会发生什么"这类具体、可操作的信息，而不是营造氛围。\n';
+    prompt += '5. 检验标准：第一次看到的人能不能一眼看懂。看不懂就是失败。\n\n';
+    prompt += '【正反示例】\n';
+    prompt += '× 反例（华丽但看不懂）：她利用深层催眠协助妖怪缓解因压抑妖力产生的"灵核过热"，在高层妖族中拥有极高的隐形地位。\n';
+    prompt += '√ 正例（平实好懂）：沈清欢，人类心理医生，开了家咨询室。她其实知道妖怪存在，还偷偷帮情绪失控、快暴走的妖怪做心理疏导，所以不少大妖怪都欠她人情、很给她面子。\n\n';
+
+    // ===== 数量与篇幅 =====
+    prompt += '【数量与篇幅】\n';
+    prompt += '- 除了必须覆盖的 NPC，再额外发散生成 5 到 10 条世界设定类条目。\n';
+    prompt += '- 每条 3-5 句话，要具体、有画面、有信息量，能直接拿来指导对话。\n\n';
+
+    // ===== 输出格式 =====
+    prompt += '【输出格式】严格按下面的JSON数组输出，不要任何多余文字、不要markdown代码块：\n';
+    prompt += '[{"name":"关键词1、关键词2","content":"设定内容"},{"name":"关键词","content":"设定内容"}]';
+
+    // —— 4. 调 AI ——
+    var result = await callAI([{role:'user', content:prompt}], model);
+
+    // —— 5. 解析 JSON ——
+    var jsonStr = result.trim();
+    jsonStr = jsonStr.replace(/^```(json)?/i,'').replace(/```$/,'').trim();
+    var s = jsonStr.indexOf('['), en = jsonStr.lastIndexOf(']');
+    if(s>=0 && en>s){ jsonStr = jsonStr.slice(s, en+1); }
+    var arr;
+    try{ arr = JSON.parse(jsonStr); }catch(err){
+      alert('AI 返回的内容无法解析，请再试一次。\n\n原始返回：\n' + result.slice(0,200));
+      return;
+    }
+    if(!Array.isArray(arr) || !arr.length){ alert('这次没有生成有效条目，请再试一次。'); return; }
+
+    // —— 6. 写入 ——
+    var added = 0;
+    arr.forEach(function(item){
+      if(!item || (!item.name && !item.content)) return;
+      var ne = blankLore(worldId);
+      ne.name = (item.name||'').toString().trim();
+      ne.content = (item.content||'').toString().trim();
+      DB.lorebook = DB.lorebook || [];
+      DB.lorebook.push(ne);
+      added++;
+    });
+    save();
+    alert('✅ 成功生成 ' + added + ' 个条目！你可以逐个查看、编辑或删除。');
+    openLorebook(worldId);
+
+  }catch(e){
+    alert('生成失败：' + (e && e.message ? e.message : e));
+  }finally{
+    window._loreGenLock = false;
+    if(tbTitle.textContent==='✨ 生成中…') tbTitle.textContent = tip;
+  }
+}
+// ===== 世界书：扫描命中并生成注入文本 =====
+function buildLoreInject(c, currentMsg){
+  if(!c || !c.worldId) return '';
+  var entries = (DB.lorebook||[]).filter(function(e){
+    return e.worldId===c.worldId && e.enabled!==false;
+  });
+  if(!entries.length) return '';
+
+  // 取最近若干条对话文本作为扫描范围（默认最近6条）
+  var msgs = (DB.chats[c.id]||[]);
+  var scanDepth = 6;
+  var recent = msgs.slice(-scanDepth);
+var scanText = recent.map(function(m){
+    return (m && typeof m.content==='string') ? m.content : '';
+}).join('\n');
+if(currentMsg) scanText += '\n' + currentMsg;
+  var hits = [];
+  entries.forEach(function(e){
+    // 常驻条目：每次都注入
+    if(e.mode==='constant'){ hits.push(e); return; }
+    // 选择性条目：命中关键词才注入
+    if(!e.name) return;
+    var keys = e.name.split(/[,，、\s]+/).filter(Boolean);
+    var matched = keys.some(function(k){ return scanText.indexOf(k)>=0; });
+    if(matched) hits.push(e);
+  });
+
+  if(!hits.length) return '';
+
+  // 按 order 升序（数字小的优先），限制总条数与总长度，避免撑爆上下文
+  hits.sort(function(a,b){ return (a.order||50)-(b.order||50); });
+  var MAX_ITEMS = 12, MAX_CHARS = 3000, used = 0;
+  var out = '\n【世界设定补充（背景知识，请自然融入，不要主动复述这些设定）】\n';
+  var count = 0;
+  for(var i=0;i<hits.length;i++){
+    if(count>=MAX_ITEMS) break;
+    var seg = '· ' + (hits[i].content||'') + '\n';
+    if(used+seg.length>MAX_CHARS) break;
+    out += seg; used += seg.length; count++;
+  }
+  return count ? out : '';
 }
 
 function goWorlds() {
@@ -12702,7 +13140,7 @@ function openStickerPicker(){
     return '<div class="p-st" onclick="sendSticker('+i+')"><img src="'+s.img+'"><div class="nm">'+esc(s.name)+'</div></div>';
   }).join('');
   var mo=document.createElement('div');
-  mo.className='modal';
+  mo.className='modal sticker-modal';
   mo.id='modal';
   mo.innerHTML='<div class="modal-box">'+
     '<div class="picker-head">选择表情</div>'+
@@ -13790,8 +14228,7 @@ let allh = (DB.chats[c.id] || []).map(function(m){ return toApiMsg(m, _withTime)
     const transferNote = pendingTransfer ? (lastMsg.content || '') : '';
 
     // ---- 3. 构建消息体 ----
-    const messages = [
-      { role: 'system', content: buildSystem(c, (function(){
+    var _sysContent = buildSystem(c, (function(){
         var msgs = DB.chats[c.id] || [];
         var lastUser = null;
         for(var i = msgs.length-1; i >= 0; i--){
@@ -13812,11 +14249,15 @@ let allh = (DB.chats[c.id] || []).map(function(m){ return toApiMsg(m, _withTime)
         } else {
           timeStr = diffDays+'天前';
         }
-var nowH = nowD.getHours();
-var nowP = nowH<6?'凌晨':nowH<9?'清晨':nowH<12?'上午':nowH<14?'中午':nowH<18?'下午':nowH<23?'晚上':'深夜';
-var nowTimeStr = String(nowH).padStart(2,'0')+':'+String(nowD.getMinutes()).padStart(2,'0');
-return '【时间提示】对方上一条消息发于' + timeStr + '，而现在是' + nowP + ' ' + nowTimeStr + '，中间已过去较长时间，请完全基于【当前时间】来感知此刻的状态。';
-      })()) },
+        var nowH = nowD.getHours();
+        var nowP = nowH<6?'凌晨':nowH<9?'清晨':nowH<12?'上午':nowH<14?'中午':nowH<18?'下午':nowH<23?'晚上':'深夜';
+        var nowTimeStr = String(nowH).padStart(2,'0')+':'+String(nowD.getMinutes()).padStart(2,'0');
+        return '【时间提示】对方上一条消息发于' + timeStr + '，而现在是' + nowP + ' ' + nowTimeStr + '，中间已过去较长时间，请完全基于【当前时间】来感知此刻的状态。';
+      })());
+    var _loreInject = buildLoreInject(c);
+    if(_loreInject) _sysContent += _loreInject;
+    const messages = [
+      { role: 'system', content: _sysContent },
       ...hist
     ];
 
