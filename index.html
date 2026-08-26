@@ -7475,9 +7475,9 @@ bar.innerHTML =
     '<div class="voice-btn" id="voiceMsgBtn">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
     '</div>' +
-    '<button class="reply-btn" id="actBtn" onclick="groupActBtnClick()" onmousedown="event.preventDefault()">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
-    '</button>' +
+'<button class="reply-btn" id="actBtn" onclick="groupActBtnClick()">' +
+'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
+'</button>' +
 	'</div>' +
   '<div id="chatPanel" style="display:none"></div>';
   phone.appendChild(bar);
@@ -12613,10 +12613,10 @@ function renderChat(keepScroll) {
     '<div class="voice-btn" id="voiceMsgBtn">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
     '</div>' +
-    '<button class="reply-btn" id="actBtn" onclick="groupActBtnClick()" onmousedown="event.preventDefault()">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
-    '</button>' +
-	'</div>' +
+'<button class="reply-btn" id="actBtn" onclick="groupActBtnClick()">' +
+'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
+'</button>' +
+  '</div>' +
   '<div id="chatPanel">' +
     '<div class="pnl" onclick="togglePanel();watchNow(view.id,{fromChat:true})">' +
       '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8M12 18v4"/></svg></div>' +
@@ -13035,7 +13035,14 @@ function actBtnClick() {
     }, 550);
 }
 function onChatKey(e) {
-    return true;
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        var el = document.getElementById('chatInput');
+        var text = el ? el.value.trim() : '';
+        if (text) {
+            sendMsg();
+        }
+    }
 }
 function togglePanel(){const p=document.getElementById('chatPanel');if(p)p.classList.toggle('on');scrollBottom();}
 function toggleMode() {
@@ -13271,10 +13278,6 @@ function sendMsg(){
   el.style.height = 'auto';
   updateActBtn();
 
-  // 关键新增：发送后让输入框重新聚焦，保持光标闪烁，键盘不收起
-  el.focus();
-
-  // 如果气泡还在，用户直接打字发了新消息，则默认留在当前线下模式并移除气泡
   var _c = getC(view.id);
   if (_c && _c.mode === 'offline' && _c._waitingBackOnlineChoice) {
     _c._waitingBackOnlineChoice = false;
@@ -13283,9 +13286,8 @@ function sendMsg(){
     if (_bar) _bar.remove();
   }
 
-  // 如果是"你自己"主动提见面 → 临时解除今天的冷却，让AI能正常回应你
   if (_c && hasMeetIntent(t)) { _c.meetCd = 0; }
-  pushMy({type:'text', content:t});   // ← 消息入队 + 渲染 + 保存
+  pushMy({type:'text', content:t});
 }
 function sendImage(){const p=document.getElementById('chatPanel');if(p)p.classList.remove('on');pickImage(d=>pushMy({type:'image',content:d}),800);}
 function openInputSheet(title,fields,cb){closeModal();const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="sheet-box"><h3>${title}</h3>${fields.map((f,i)=>`<input id="sf_${i}" placeholder="${f.ph}" ${f.num?'inputmode="decimal"':''}>`).join('')}<button class="btn" style="width:100%;margin:4px 0 8px" onclick="submitSheet()">确定</button><button class="btn gray" style="width:100%;margin:0" onclick="closeModal()">取消</button></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);setTimeout(()=>{const el=document.getElementById('sf_0');if(el)el.focus();},50);window._sheetCb=cb;window._sheetN=fields.length;}
