@@ -13007,29 +13007,20 @@ function updateActBtn(){
 // ---------- 发送按钮点击 ----------
 function actBtnClick() {
     var btn = document.getElementById('actBtn');
-    var el = document.getElementById('chatInput');
-    var text = el ? el.value.trim() : '';
-
-    // 1. 立即点亮并触发完整动画
     if (btn) {
         btn.classList.remove('sending');
-        void btn.offsetWidth; // 强制刷新重启动画
+        void btn.offsetWidth;
         btn.classList.add('sending');
     }
 
-    // 2. 正常发送消息
+    var el = document.getElementById('chatInput');
+    var text = el ? el.value.trim() : '';
+
     if (text) {
         sendMsg();
     } else {
         aiReply();
     }
-
-    // 3. 关键：在 0.55 秒动画完全播完后，再清理 sending 状态，防止被中途打断
-    setTimeout(function() {
-        if (btn) {
-            btn.classList.remove('sending');
-        }
-    }, 550);
 }
 function onChatKey(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
