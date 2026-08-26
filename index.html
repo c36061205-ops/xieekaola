@@ -13206,12 +13206,21 @@ function askUnblock(){
 
 function actBtnClick() {
     var el = document.getElementById('chatInput');
-    // 先让输入框失去焦点，键盘收起
-    if (el) el.blur();
-    
     var text = el ? el.value.trim() : '';
+    if (el) el.blur(); // 先收起键盘
     if (text) {
-        sendMsg();
+        var _c = getC(view.id);
+        if (_c && _c.mode === 'offline' && _c._waitingBackOnlineChoice) {
+            _c._waitingBackOnlineChoice = false;
+            _c._lastProposeAt = Date.now();
+            var _bar = document.getElementById('backOnlineBar');
+            if (_bar) _bar.remove();
+        }
+        if (_c && hasMeetIntent(text)) { _c.meetCd = 0; }
+        el.value = '';
+        el.style.height = 'auto';
+        updateActBtn();
+        pushMy({type:'text', content:text});
     } else {
         aiReply();
     }
