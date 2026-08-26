@@ -363,42 +363,11 @@ textarea {
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    position: relative;
-    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s, transform 0.1s;
 }
-
-/* 按下瞬间明显下陷 */
 .reply-btn:active {
-    transform: scale(0.80) !important;
-}
-
-/* 弹跳动画：时间加长到 0.55 秒，回弹更清晰 */
-.reply-btn.sending {
-    animation: clearPop 0.55s cubic-bezier(0.25, 1.4, 0.5, 1) forwards !important;
-}
-
-/* 扩散光晕：清晰的半透明光环向外炸开 */
-.reply-btn.sending::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    background: var(--theme);
-    opacity: 0.5;
-    animation: clearGlow 0.55s ease-out forwards !important;
-    pointer-events: none;
-}
-
-@keyframes clearPop {
-    0% { transform: scale(0.80); }
-    40% { transform: scale(1.20); } /* 明显变大 */
-    70% { transform: scale(0.95); } /* 微收缩 */
-    100% { transform: scale(1); }   /* 完美复原 */
-}
-
-@keyframes clearGlow {
-    0% { transform: scale(0.85); opacity: 0.6; }
-    100% { transform: scale(1.7); opacity: 0; }
+    opacity: 0.8;
+    transform: scale(0.93);
 }
 .reply-btn svg{width:16px;height:16px;}
 #chatPanel{display:none;grid-template-columns:repeat(4,1fr);gap:16px;}
@@ -7664,14 +7633,6 @@ function onGroupKey(e){
 }
 
 function groupActBtnClick(){
-  // 动效
-  var btn = document.getElementById('actBtn');
-  if (btn) {
-    btn.classList.remove('sending');
-    void btn.offsetWidth;
-    btn.classList.add('sending');
-  }
-
   var el = document.getElementById('chatInput');
   var text = el ? el.value.trim() : '';
   if (text) {
@@ -12610,7 +12571,7 @@ function renderChat(keepScroll) {
     '<div class="voice-btn" id="voiceMsgBtn">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
     '</div>' +
-'<button class="reply-btn" id="actBtn" onclick="groupActBtnClick()">' +
+'<button class="reply-btn" id="actBtn" onclick="actBtnClick()">' +
 '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
 '</button>' +
   '</div>' +
@@ -13006,16 +12967,8 @@ function updateActBtn(){
 }
 // ---------- 发送按钮点击 ----------
 function actBtnClick() {
-    var btn = document.getElementById('actBtn');
-    if (btn) {
-        btn.classList.remove('sending');
-        void btn.offsetWidth;
-        btn.classList.add('sending');
-    }
-
     var el = document.getElementById('chatInput');
     var text = el ? el.value.trim() : '';
-
     if (text) {
         sendMsg();
     } else {
@@ -13023,14 +12976,7 @@ function actBtnClick() {
     }
 }
 function onChatKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        var el = document.getElementById('chatInput');
-        var text = el ? el.value.trim() : '';
-        if (text) {
-            sendMsg();
-        }
-    }
+    // 回车键直接换行，不发送
 }
 function togglePanel(){const p=document.getElementById('chatPanel');if(p)p.classList.toggle('on');scrollBottom();}
 function toggleMode() {
@@ -13258,24 +13204,16 @@ function askUnblock(){
   }, { icon: '🔒', title: '解除拉黑', ok: '立即解锁', cancel: '算了' });
 }
 
-function sendMsg(){
-  const el = document.getElementById('chatInput');
-  const t = el.value.trim();
-  if (!t) return;
-  el.value = '';
-  el.style.height = 'auto';
-  updateActBtn();
-
-  var _c = getC(view.id);
-  if (_c && _c.mode === 'offline' && _c._waitingBackOnlineChoice) {
-    _c._waitingBackOnlineChoice = false;
-    _c._lastProposeAt = Date.now();
-    var _bar = document.getElementById('backOnlineBar');
-    if (_bar) _bar.remove();
-  }
-
-  if (_c && hasMeetIntent(t)) { _c.meetCd = 0; }
-  pushMy({type:'text', content:t});
+function actBtnClick() {
+    var el = document.getElementById('chatInput');
+    var text = el ? el.value.trim() : '';
+    if (text) {
+        sendMsg();
+    } else {
+        aiReply();
+    }
+    // 发送后输入框保持焦点，键盘不收起
+    if (el) el.focus();
 }
 function sendImage(){const p=document.getElementById('chatPanel');if(p)p.classList.remove('on');pickImage(d=>pushMy({type:'image',content:d}),800);}
 function openInputSheet(title,fields,cb){closeModal();const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="sheet-box"><h3>${title}</h3>${fields.map((f,i)=>`<input id="sf_${i}" placeholder="${f.ph}" ${f.num?'inputmode="decimal"':''}>`).join('')}<button class="btn" style="width:100%;margin:4px 0 8px" onclick="submitSheet()">确定</button><button class="btn gray" style="width:100%;margin:0" onclick="closeModal()">取消</button></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);setTimeout(()=>{const el=document.getElementById('sf_0');if(el)el.focus();},50);window._sheetCb=cb;window._sheetN=fields.length;}
@@ -14324,6 +14262,7 @@ function extractMarkers(line) {
 }
 let replying=false,lastActivity=Date.now();
 async function aiReply(nudge) {
+  console.log('aiReply触发，replying状态=', replying);
   if (replying) return;
 
   const c = getC(view.id);
