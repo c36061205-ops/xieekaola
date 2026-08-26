@@ -351,8 +351,55 @@ textarea {
 .voice-btn.recording::before{animation:voicePulse 1s ease-out infinite;}
 .voice-btn.recording{border-color:var(--theme);}
 @keyframes voicePulse{0%{transform:scale(1);opacity:0.5;}100%{transform:scale(2.2);opacity:0;}}
-.reply-btn{width:34px;height:34px;border-radius:50%;background:var(--theme);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:opacity 0.15s,transform 0.1s;}
-.reply-btn:active{opacity:0.8;transform:scale(0.93);}
+/* ===== 发送按钮：饱满发光弹动 ===== */
+.reply-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--theme);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 按下瞬间明显下陷 */
+.reply-btn:active {
+    transform: scale(0.80) !important;
+}
+
+/* 弹跳动画：时间加长到 0.55 秒，回弹更清晰 */
+.reply-btn.sending {
+    animation: clearPop 0.55s cubic-bezier(0.25, 1.4, 0.5, 1) forwards !important;
+}
+
+/* 扩散光晕：清晰的半透明光环向外炸开 */
+.reply-btn.sending::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: var(--theme);
+    opacity: 0.5;
+    animation: clearGlow 0.55s ease-out forwards !important;
+    pointer-events: none;
+}
+
+@keyframes clearPop {
+    0% { transform: scale(0.80); }
+    40% { transform: scale(1.20); } /* 明显变大 */
+    70% { transform: scale(0.95); } /* 微收缩 */
+    100% { transform: scale(1); }   /* 完美复原 */
+}
+
+@keyframes clearGlow {
+    0% { transform: scale(0.85); opacity: 0.6; }
+    100% { transform: scale(1.7); opacity: 0; }
+}
 .reply-btn svg{width:16px;height:16px;}
 #chatPanel{display:none;grid-template-columns:repeat(4,1fr);gap:16px;}
 #chatPanel.on{display:grid;padding:14px 16px 20px 16px;background:var(--nav);border-top:1px solid var(--line);}
@@ -1098,6 +1145,56 @@ margin-bottom:4px;}
     border: 1.5px dashed rgba(122, 168, 153, 0.4) !important; /* 虚线手账缝线感 */
     box-shadow: 0 4px 12px rgba(50, 56, 53, 0.04) !important;
 }
+/* ============================================================
+   红日森谣 · 主题专属样式
+   ============================================================ */
+
+/* 1. AI 聊天气泡：毛玻璃质感，融入背景 */
+#phone[data-theme="redsun_forest"] .msg:not(.me) .mbody {
+  background: rgba(250, 248, 243, 0.72) !important;
+  backdrop-filter: blur(8px) saturate(1.4);
+  -webkit-backdrop-filter: blur(8px) saturate(1.4);
+  border: 1px solid rgba(105, 122, 94, 0.25);
+  box-shadow: 0 4px 12px rgba(33, 51, 40, 0.08);
+  color: var(--text);
+}
+
+/* 2. 用户自己的气泡：使用主题色（落日朱红） */
+#phone[data-theme="redsun_forest"] .msg.me .mbody {
+  background: var(--theme);
+  color: #FAF8F3;
+}
+
+/* 3. 桌面时钟字体颜色微调（让冷杉墨绿更清晰） */
+#phone[data-theme="redsun_forest"] .clock-starry .time {
+  color: var(--text);
+}
+#phone[data-theme="redsun_forest"] .clock-starry .date {
+  color: var(--sub);
+}
+#phone[data-theme="redsun_forest"] .clock-starry .greet {
+  color: var(--theme);
+}
+
+/* 4. 底栏选中状态：使用落日朱红 */
+#phone[data-theme="redsun_forest"] .tab.active {
+  color: var(--theme);
+}
+#phone[data-theme="redsun_forest"] .tab.active .ic svg {
+  stroke: var(--theme);
+}
+
+/* 5. 桌面应用图标文字：使用冷杉墨绿，阴影更柔和 */
+#phone[data-theme="redsun_forest"] .app-nm {
+  color: var(--text);
+  text-shadow: 0 1px 3px rgba(250, 248, 243, 0.5);
+}
+
+/* 6. 纪念日/天气小组件的边框使用古铜暗金 */
+#phone[data-theme="redsun_forest"] .anniv-widget,
+#phone[data-theme="redsun_forest"] .weather-widget {
+  border-color: #CD9452 !important;
+}
 /* ===== 世界观APP · 杂志排版风 ===== */
 .wv-list{padding:8px 16px}
 .wv-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer}
@@ -1192,7 +1289,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026825';
+const APP_VER = 'v2026826';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1713,7 +1810,29 @@ wallpaper: `
     radial-gradient(circle at 15% 85%, rgba(122, 168, 153, 0.07) 0%, transparent 20%),
     linear-gradient(180deg, #F8F7F2 0%, #EAE7DF 100%)
   `
-}
+},
+{
+  id: 'redsun_forest',
+  name: '🌲 红日森谣',
+  color: '#BD3A21',            // 落日朱红作为主题色
+  '--theme': '#BD3A21',
+  '--bg': '#EADFC9',            // 羊皮纸米黄作为背景
+  '--nav': '#EADFC9',
+  '--card': '#FAF8F3',          // 比背景稍白一点的卡片色
+  '--text': '#213328',          // 冷杉墨绿作为文字
+  '--sub': '#697A5E',           // 苔藓青绿作为次要文字
+  '--line': '#C7CFBE',          // 迷雾淡绿作为分割线
+  // 壁纸：模拟森林阳光洒落的效果
+  wallpaper: `
+    radial-gradient(circle at 20% 30%, rgba(205, 148, 82, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(189, 58, 33, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 50% 100%, rgba(105, 122, 94, 0.10) 0%, transparent 30%),
+    repeating-linear-gradient(45deg, transparent, transparent 80px, rgba(199, 207, 190, 0.15) 80px, rgba(199, 207, 190, 0.15) 81px),
+    repeating-linear-gradient(-45deg, transparent, transparent 80px, rgba(199, 207, 190, 0.15) 80px, rgba(199, 207, 190, 0.15) 81px),
+    #EADFC9
+  `
+},
+
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -1891,8 +2010,29 @@ flora_notebook: {
   tabDiscover: 'https://s1.imagehub.cc/images/2026/08/18/ef1e04a12bc7a9b8b4649dcbf00314e1.png',
   tabMe:       'https://s1.imagehub.cc/images/2026/08/18/043ee585956884c8986f6e895a945124.png',
   discoverMoments: 'https://s1.imagehub.cc/images/2026/08/18/8f87b5296b34b54d786124e71bfa320f.png'
-}
-
+},
+redsun_forest: {
+  // 桌面应用图标
+  wechat:   'https://s1.imagehub.cc/images/2026/08/26/383a1c42a485f3d7034f965dde558e71.png',
+  notes:    'https://s1.imagehub.cc/images/2026/08/26/69715371a0fd8b3b4459aa5b70c168a3.png',
+  focus:    'https://s1.imagehub.cc/images/2026/08/26/9e3d005ac092115be06027504f2061da.png',
+  settings: 'https://s1.imagehub.cc/images/2026/08/26/6bd5b3296e942ce9670f14840dce217a.png',
+  album:    'https://s1.imagehub.cc/images/2026/08/26/935d48601c04b7263b27f1ec5099422c.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/08/26/54ebf52799ca74609638901648db5adb.png',
+  music:    'https://s1.imagehub.cc/images/2026/08/26/e3653ba4733718068d7a3f7f8cbf8ca7.png',
+  preset:   'https://s1.imagehub.cc/images/2026/08/26/faceaa10272509e2ff060d1b9e59d33a.png',
+  floating: 'https://s1.imagehub.cc/images/2026/08/26/3d4eca47696611d62803c75e810923d3.png',
+  shop:     'https://s1.imagehub.cc/images/2026/08/26/f6c3abae913b884d1fde54b72b40aa0a.png',
+  world:    'https://s1.imagehub.cc/images/2026/08/26/cbe44ba935c63f427e5e5782737cb911.png',
+  game:     'https://s1.imagehub.cc/images/2026/08/26/26e3d752b563898bd244d071907aec55.png',
+  // 底栏图标
+  tabChats:    'https://s1.imagehub.cc/images/2026/08/26/4387e2548fbddac9d2cdf26b0f43af79.png',  // ← 已更新
+  tabContacts: 'https://s1.imagehub.cc/images/2026/08/26/93c08ca7e13d17cc5ef15835f095a98f.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/26/0f0361e5e6623e706a933d6ab9a9fb51.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/08/26/e65b4ebb4dc8d305953ce56eaedaca54.png',
+  // 发现页 - 朋友圈入口
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/26/907f0bf5df8c8ccac8d350921a797902.png'
+},
 };
 // =====================================
 function applySkin(id) {
@@ -11771,15 +11911,25 @@ function jumpToMemo(cid) {
 function openChat(id){
   const c=getC(id);
   if(c){
-  ensureTodayMood(c);
+    ensureTodayMood(c);
     c.inChatList=true;
     c.unread=0;
     // ===== 新增：更新最后互动时间 + 检查时间衰减 =====
     c.lastActive = Date.now();
     checkTimeDecay(c);
     // =============================================
-        // ===== 新增：跨天/久别自动询问回线上 =====
-    if (c.mode === 'offline') {
+
+    // ===== 恢复逻辑：如果之前有未选择的气泡，进入时立刻恢复显示 =====
+    if (c.mode === 'offline' && c._waitingBackOnlineChoice) {
+      setTimeout(function(){
+        if (c.mode === 'offline' && c._waitingBackOnlineChoice) {
+          proposeBackOnline(c, true);
+        }
+      }, 300);
+    }
+
+    // ===== 新增：跨天/久别自动询问回线上 =====
+    if (c.mode === 'offline' && !c._waitingBackOnlineChoice) {
       var _msgs = DB.chats[id] || [];
       var _last = _msgs[_msgs.length - 1];
       if (_last && (Date.now() - _last.time > 6 * 3600000)) {   // 距上条消息超过6小时
@@ -11908,20 +12058,29 @@ function buildSystem(c, gapInfo){
     s += `\n【过往剧情记忆】\n` + c.chapters.map(ch => ch.date + '：' + ch.content).join('\n') + `\n`;
   }
 
-  // 朋友圈
-  try {
-    const mine = DB.moments.filter(m => m.author === 'me').slice(0,3);
-    const theirs = DB.moments.filter(m => m.author === c.id).slice(0,2);
-    let fc = '';
-    mine.forEach(m => {
-      const cmt = (m.comments || []).some(x => x.by === c.id);
-      fc += '· 对方在【' + fmtTime(m.time) + '】发的朋友圈：「' + (m.text || '(图片)') + '」' + (cmt ? '（你评论/互动过）' : '') + '\n';
-    });
-    theirs.forEach(m => {
-      fc += '· 你自己发过的朋友圈：「' + (m.text || '(图片)') + '」\n';
-    });
-    if(fc) s += `\n【最近朋友圈动态（仅作背景了解）】\n${fc}【关于朋友圈的分寸】这些只是你恰好知道的近况，聊天时绝不要主动、频繁或生硬地提起；只有当话题极其自然地滑到相关内容、或对方主动说起时，才可像真人一样随口带一句。绝不要为了"显得知道"而刻意cue。\n`;
-  } catch(e) {}
+// 朋友圈
+try {
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  const nowTs = Date.now();
+  
+  const mine = (DB.moments || []).filter(m => 
+    String(m.author) === 'me' && (nowTs - (m.time || 0) <= ONE_DAY_MS)
+  );
+  
+  const theirs = (DB.moments || []).filter(m => 
+    String(m.author) === String(c.id) && (nowTs - (m.time || 0) <= ONE_DAY_MS)
+  );
+
+  let fc = '';
+  mine.forEach(m => {
+    const cmt = (m.comments || []).some(x => String(x.by) === String(c.id));
+    fc += '· 对方在【' + fmtTime(m.time) + '】发的朋友圈：「' + (m.text || '(图片)') + '」' + (cmt ? '（你评论/互动过）' : '') + '\n';
+  });
+  theirs.forEach(m => {
+    fc += '· 你自己发过的朋友圈：「' + (m.text || '(图片)') + '」\n';
+  });
+  if(fc) s += `\n【最近朋友圈动态】\n${fc}【关于朋友圈的说明】以上是你与对方24小时内真实发过的朋友圈记录。如果对方主动质问或提起相关内容，请如实承认并作解释，切勿装作没发过；若对方未提及，则保持自然，无需刻意提起。\n`;
+} catch(e) {}
 
   // ===== 第4层：关于聊天对象 =====
   s += `\n【关于聊天对象】\n`;
@@ -12848,34 +13007,35 @@ function updateActBtn(){
   b.innerHTML = SEND_BTN_SVG;
   b.className = 'reply-btn';
 }
-function actBtnClick(){
-  // 动效
-  var btn = document.getElementById('actBtn');
-  if (btn) {
-    btn.classList.remove('sending');
-    void btn.offsetWidth;
-    btn.classList.add('sending');
-  }
-
-  var el = document.getElementById('chatInput');
-  var text = el ? el.value.trim() : '';
-  
-  if (text) {
-    sendMsg();
-  } else {
-    aiReply();
-  }
-}
-function onChatKey(e){
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
+// ---------- 发送按钮点击 ----------
+function actBtnClick() {
+    var btn = document.getElementById('actBtn');
     var el = document.getElementById('chatInput');
     var text = el ? el.value.trim() : '';
-    if (text) {
-      // 回车只发送消息，不触发 AI
-      sendMsg();
+
+    // 1. 立即点亮并触发完整动画
+    if (btn) {
+        btn.classList.remove('sending');
+        void btn.offsetWidth; // 强制刷新重启动画
+        btn.classList.add('sending');
     }
-  }
+
+    // 2. 正常发送消息
+    if (text) {
+        sendMsg();
+    } else {
+        aiReply();
+    }
+
+    // 3. 关键：在 0.55 秒动画完全播完后，再清理 sending 状态，防止被中途打断
+    setTimeout(function() {
+        if (btn) {
+            btn.classList.remove('sending');
+        }
+    }, 550);
+}
+function onChatKey(e) {
+    return true;
 }
 function togglePanel(){const p=document.getElementById('chatPanel');if(p)p.classList.toggle('on');scrollBottom();}
 function toggleMode() {
@@ -13110,11 +13270,21 @@ function sendMsg(){
   el.value = '';
   el.style.height = 'auto';
   updateActBtn();
-  // 如果是"你自己"主动提见面 → 临时解除今天的冷却，让AI能正常回应你
+
+  // 如果气泡还在，用户直接打字发了新消息，则默认留在当前线下模式并移除气泡
   var _c = getC(view.id);
+  if (_c && _c.mode === 'offline' && _c._waitingBackOnlineChoice) {
+    _c._waitingBackOnlineChoice = false;
+    _c._lastProposeAt = Date.now();
+    var _bar = document.getElementById('backOnlineBar');
+    if (_bar) _bar.remove();
+  }
+
+  // 如果是"你自己"主动提见面 → 临时解除今天的冷却，让AI能正常回应你
   if (_c && hasMeetIntent(t)) { _c.meetCd = 0; }
   pushMy({type:'text', content:t});   // ← 消息入队 + 渲染 + 保存
 }
+
 function sendImage(){const p=document.getElementById('chatPanel');if(p)p.classList.remove('on');pickImage(d=>pushMy({type:'image',content:d}),800);}
 function openInputSheet(title,fields,cb){closeModal();const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="sheet-box"><h3>${title}</h3>${fields.map((f,i)=>`<input id="sf_${i}" placeholder="${f.ph}" ${f.num?'inputmode="decimal"':''}>`).join('')}<button class="btn" style="width:100%;margin:4px 0 8px" onclick="submitSheet()">确定</button><button class="btn gray" style="width:100%;margin:0" onclick="closeModal()">取消</button></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);setTimeout(()=>{const el=document.getElementById('sf_0');if(el)el.focus();},50);window._sheetCb=cb;window._sheetN=fields.length;}
 function submitSheet(){const vals=[];for(let i=0;i<window._sheetN;i++)vals.push(document.getElementById('sf_'+i).value.trim());closeModal();window._sheetCb(vals);}
@@ -14835,29 +15005,41 @@ function enterOffline(cid,place){
   aiReply(nudge);
 }
 
-function proposeBackOnline(c){
+function proposeBackOnline(c, isRestore){
   if(!c || c.mode !== 'offline') return;
-  // 节流：10分钟内不重复显示
-  if(c._lastProposeAt && (Date.now() - c._lastProposeAt) < 10*60*1000) return;
+  // 节流：非恢复模式下，10分钟内不重复显示
+  if(!isRestore && c._lastProposeAt && (Date.now() - c._lastProposeAt) < 10*60*1000) return;
   if(document.getElementById('backOnlineBar')) return;
-  c._lastProposeAt = Date.now(); save();
+
+  // 记录持久化状态：正在等待用户做选择
+  c._waitingBackOnlineChoice = true;
+  c._lastProposeAt = Date.now(); 
+  save();
+
+  var content = document.getElementById('chatContent') || document.querySelector('.chat-content') || document.getElementById('content');
+  if(!content) return;
 
   var bar = document.createElement('div');
   bar.id = 'backOnlineBar';
   bar.style.cssText = 'text-align:center;margin:15px auto;padding:10px 14px;background:rgba(0,0,0,0.06);border-radius:12px;font-size:12px;color:#888;max-width:85%;';
   bar.innerHTML = '<span>📱 这次见面告一段落了</span>' +
     '<div style="margin-top:8px;display:flex;justify-content:center;gap:10px;">' +
-      '<button class="btn" style="font-size:12px;padding:4px 10px;height:auto;" onclick="document.getElementById(\'backOnlineBar\').remove();backOnline(\'' + c.id + '\')">💬 回到微信</button>' +
+      '<button class="btn" style="font-size:12px;padding:4px 10px;height:auto;" onclick="backOnline(\'' + c.id + '\')">💬 回到微信</button>' +
       '<button class="btn gray" style="font-size:12px;padding:4px 10px;height:auto;" onclick="stayOffline(\'' + c.id + '\')">📖 继续待着</button>' +
     '</div>';
 
   content.appendChild(bar);
   content.scrollTop = content.scrollHeight;
 }
+
 // 新增：用户选择"继续留在线下"，刷新节流时间戳，10分钟内不再打扰
 function stayOffline(cid){
   var c = getC(cid);
-  if(c){ c._lastProposeAt = Date.now(); save(); }
+  if(c){ 
+    c._waitingBackOnlineChoice = false; // 用户已做选择，清除等待状态
+    c._lastProposeAt = Date.now(); 
+    save(); 
+  }
   var bar = document.getElementById('backOnlineBar');
   if(bar) bar.remove();
   var m = document.getElementById('backOnlineModal');
@@ -14866,6 +15048,12 @@ function stayOffline(cid){
 function backOnline(cid){
   var c = getC(cid);
   if (!c) return;
+
+  // 清除等待状态与移除气泡
+  c._waitingBackOnlineChoice = false;
+  var bar = document.getElementById('backOnlineBar');
+  if(bar) bar.remove();
+
   c.mode = 'online';
   c._backOnlineHint = true; // 标记：刚切回线上
 
@@ -14894,7 +15082,6 @@ function backOnline(cid){
   save();
   if (view.type === 'chat' && view.id === cid) renderChat();
 }
-
 setInterval(()=>{if(view.type!=='chat'||replying)return;const c=getC(view.id);if(!c||c.activity==='关')return;const gap={低:600000,中:300000,高:120000}[c.activity]||300000;const msgs=DB.chats[c.id]||[];if(!msgs.length||msgs[msgs.length-1].role==='assistant')return;if(Date.now()-lastActivity>gap){lastActivity=Date.now();aiReply('（对方已经有一会儿没说话了，请根据你的性格自然地主动发一条消息）');}},20000);
 document.addEventListener('pointerdown',()=>{lastActivity=Date.now();});
 
