@@ -1114,53 +1114,6 @@ margin-bottom:4px;}
     border: 1.5px dashed rgba(122, 168, 153, 0.4) !important; /* 虚线手账缝线感 */
     box-shadow: 0 4px 12px rgba(50, 56, 53, 0.04) !important;
 }
-/* ============================================================
-   红日森谣 · 主题专属样式
-   ============================================================ */
-
-/* 1. AI 聊天气泡：毛玻璃质感，融入背景 */
-#phone[data-theme="redsun_forest"] .msg:not(.me) .mbody {
-  background: rgba(250, 248, 243, 0.92) !important;
-  border: 1px solid rgba(105, 122, 94, 0.25);
-  box-shadow: 0 4px 12px rgba(33, 51, 40, 0.08);
-  color: var(--text);
-}
-/* 2. 用户自己的气泡：使用主题色（落日朱红） */
-#phone[data-theme="redsun_forest"] .msg.me .mbody {
-  background: var(--theme);
-  color: #FAF8F3;
-}
-
-/* 3. 桌面时钟字体颜色微调（让冷杉墨绿更清晰） */
-#phone[data-theme="redsun_forest"] .clock-starry .time {
-  color: var(--text);
-}
-#phone[data-theme="redsun_forest"] .clock-starry .date {
-  color: var(--sub);
-}
-#phone[data-theme="redsun_forest"] .clock-starry .greet {
-  color: var(--theme);
-}
-
-/* 4. 底栏选中状态：使用落日朱红 */
-#phone[data-theme="redsun_forest"] .tab.active {
-  color: var(--theme);
-}
-#phone[data-theme="redsun_forest"] .tab.active .ic svg {
-  stroke: var(--theme);
-}
-
-/* 5. 桌面应用图标文字：使用冷杉墨绿，阴影更柔和 */
-#phone[data-theme="redsun_forest"] .app-nm {
-  color: var(--text);
-  text-shadow: 0 1px 3px rgba(250, 248, 243, 0.5);
-}
-
-/* 6. 纪念日/天气小组件的边框使用古铜暗金 */
-#phone[data-theme="redsun_forest"] .anniv-widget,
-#phone[data-theme="redsun_forest"] .weather-widget {
-  border-color: #CD9452 !important;
-}
 /* ===== 世界观APP · 杂志排版风 ===== */
 .wv-list{padding:8px 16px}
 .wv-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer}
@@ -1780,25 +1733,18 @@ wallpaper: `
 {
   id: 'redsun_forest',
   name: '🌲 红日森谣',
-  color: '#BD3A21',            // 落日朱红作为主题色
-  '--theme': '#BD3A21',
-  '--bg': '#EADFC9',            // 羊皮纸米黄作为背景
-  '--nav': '#EADFC9',
-  '--card': '#FAF8F3',          // 比背景稍白一点的卡片色
-  '--text': '#213328',          // 冷杉墨绿作为文字
-  '--sub': '#697A5E',           // 苔藓青绿作为次要文字
-  '--line': '#C7CFBE',          // 迷雾淡绿作为分割线
-  // 壁纸：模拟森林阳光洒落的效果
-  wallpaper: `
-    radial-gradient(circle at 20% 30%, rgba(205, 148, 82, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(189, 58, 33, 0.08) 0%, transparent 35%),
-    radial-gradient(circle at 50% 100%, rgba(105, 122, 94, 0.10) 0%, transparent 30%),
-    repeating-linear-gradient(45deg, transparent, transparent 80px, rgba(199, 207, 190, 0.15) 80px, rgba(199, 207, 190, 0.15) 81px),
-    repeating-linear-gradient(-45deg, transparent, transparent 80px, rgba(199, 207, 190, 0.15) 80px, rgba(199, 207, 190, 0.15) 81px),
-    #EADFC9
-  `
-},
-
+  color: '#D45A3A',
+  '--theme': '#D45A3A',
+  '--bg': '#F7EDE4',
+  '--nav': '#FBF3EA',
+  '--card': '#FFFFFF',
+  '--text': '#2D2A26',
+  '--sub': '#8E7A6B',
+  '--line': '#E5D6C8',
+wallpaper: `
+  linear-gradient(180deg, #F7EDE4 50%, #F0E0D4 100%)
+`
+}
 ];
 // ========== 主题图标集 ==========
 let currentThemeId = 'fusion'; // 默认主题
@@ -1992,9 +1938,9 @@ redsun_forest: {
   world:    'https://s1.imagehub.cc/images/2026/08/26/cbe44ba935c63f427e5e5782737cb911.png',
   game:     'https://s1.imagehub.cc/images/2026/08/26/26e3d752b563898bd244d071907aec55.png',
   // 底栏图标
-  tabChats:    'https://s1.imagehub.cc/images/2026/08/26/4387e2548fbddac9d2cdf26b0f43af79.png',  // ← 已更新
+  tabChats:    'https://s1.imagehub.cc/images/2026/08/27/7e1e7d90ae31118d758437a9c767c1e4.png',
   tabContacts: 'https://s1.imagehub.cc/images/2026/08/26/93c08ca7e13d17cc5ef15835f095a98f.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/26/0f0361e5e6623e706a933d6ab9a9fb51.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/27/c5a2af392047ef7cdf3440b98f4e0472.png',
   tabMe:       'https://s1.imagehub.cc/images/2026/08/26/e65b4ebb4dc8d305953ce56eaedaca54.png',
   // 发现页 - 朋友圈入口
   discoverMoments: 'https://s1.imagehub.cc/images/2026/08/26/907f0bf5df8c8ccac8d350921a797902.png'
@@ -2039,7 +1985,7 @@ if (phone) phone.dataset.theme = id;
 
   // ===== 主题适配（浅色/深色） =====
 
-var isLight = (id === 'flora_notebook' || id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi' || id === 'sunset_parfait');if (isLight) {
+var isLight = (id === 'flora_notebook' || id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest');if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
   root.style.setProperty('--clock-sub-color', 'var(--sub)');
   
@@ -13207,7 +13153,6 @@ function askUnblock(){
 function actBtnClick() {
     var el = document.getElementById('chatInput');
     var text = el ? el.value.trim() : '';
-    if (el) el.blur(); // 先收起键盘
     if (text) {
         var _c = getC(view.id);
         if (_c && _c.mode === 'offline' && _c._waitingBackOnlineChoice) {
@@ -13221,6 +13166,7 @@ function actBtnClick() {
         el.style.height = 'auto';
         updateActBtn();
         pushMy({type:'text', content:text});
+        el.focus();
     } else {
         aiReply();
     }
