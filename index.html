@@ -13871,6 +13871,73 @@ function resetModePreset() {
     presetCount('ps_ex', 'cnt_ex');
   }, { icon: '⚙️', title: '恢复默认预设？' });
 }
+/* 消息菜单 SVG 图标 */
+var MMICON={
+  recall:'<svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>',
+  regen:'<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>',
+  edit:'<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  copy:'<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  del:'<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>',
+  delA:'<svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M12 10v6"/><path d="M9.5 13.5 12 16l2.5-2.5"/></svg>'
+};
+/* 显示浮动小气泡菜单 */
+function showBubbleMenu(items, el){
+  closeBubbleMenu(); // 先清掉旧的
+
+  var pop=document.createElement('div');
+  pop.id='popmenu';
+  var html='<div class="pop-arrow"></div>';
+  items.forEach(function(it,i){
+    html+='<div class="pop-item'+(it.danger?' danger':'')+'" data-i="'+i+'">'+
+          '<span class="pop-ico">'+it.ico+'</span><span>'+it.txt+'</span></div>';
+  });
+  pop.innerHTML=html;
+  phone.appendChild(pop);
+
+  pop.querySelectorAll('.pop-item').forEach(function(node){
+    var run=function(e){
+      e.stopPropagation(); e.preventDefault();
+      var i=+node.dataset.i;
+      closeBubbleMenu();
+      items[i].fn();
+    };
+    node.addEventListener('click', run);
+  });
+
+  // 找到气泡本体：群聊在 .msg-slide 里，私聊直接是非头像的子元素
+  var bodyEl = el.querySelector('.msg-slide');
+  if(!bodyEl){
+    var kids = el.children;
+    for(var _k=0;_k<kids.length;_k++){
+      var cl = kids[_k].classList;
+      if(cl && (cl.contains('cavatar') || cl.contains('avatar'))) continue;
+      bodyEl = kids[_k]; break;
+    }
+  }
+  if(!bodyEl) bodyEl = el;
+  var b=bodyEl.getBoundingClientRect(), p=phone.getBoundingClientRect();
+  var mw=pop.offsetWidth, mh=pop.offsetHeight;
+  var left=(b.left-p.left)+b.width/2-mw/2;
+  left=Math.max(8,Math.min(left,phone.clientWidth-mw-8));
+  var top=(b.top-p.top)-mh-10;
+  if(top<8){ top=(b.bottom-p.top)+10; pop.classList.add('arrow-up'); }
+  var arrow=pop.querySelector('.pop-arrow');
+  var aL=(b.left-p.left)+b.width/2-left-6;
+  arrow.style.left=Math.max(10,Math.min(aL,mw-22))+'px';
+  pop.style.left=left+'px'; pop.style.top=top+'px';
+  requestAnimationFrame(function(){ pop.classList.add('show'); });
+
+  // 关闭监听：点到菜单内部不关，点外面才关（手机/电脑通用）
+  var closer=function(e){
+    if(e.target && e.target.closest && e.target.closest('#popmenu')) return;
+    closeBubbleMenu();
+  };
+  window._popCloser=closer;
+  setTimeout(function(){
+    document.addEventListener('touchstart', closer, true);
+    document.addEventListener('mousedown', closer, true);
+  },0);
+}
 
 /* 关闭浮动菜单 */
 function closeBubbleMenu(){
