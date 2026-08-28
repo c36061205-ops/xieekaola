@@ -167,6 +167,11 @@
 .voice-bubble.expanded .voice-text {
   display: block;
 }
+.mood-list{display:flex;flex-direction:column;gap:8px;}
+.mood-btn{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
+          background:var(--bg);color:var(--text);font-size:15px;cursor:pointer;text-align:center;}
+.mood-btn:active{background:var(--line);}
+
 #chatBottom { 
     padding: 10px 14px 24px 14px; 
     box-sizing: border-box; 
@@ -702,202 +707,159 @@ margin-bottom:4px;}
   align-content: start;
   padding: 0 4px;
 }
-/* ===== 纪念日小组件 · 方案B ===== */
-.anniv-widget {
-  position: relative;
-  border: 1.5px solid var(--line);
-  border-radius: 24px;
-  background: transparent;
-  padding: 18px 18px 16px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  min-height: 0;
-}
+/* ==================== 纪念日小组件（轻盈手帐版） ==================== */
+
 .anniv-widget.widget-2x2 {
   grid-column: 3 / span 2;
   grid-row: 3 / span 2;
+  position: relative;
+  border: 1px solid var(--line);
   border-radius: 24px;
-  padding: 18px 18px 16px;
   background: transparent;
-  border: 1.5px solid var(--line);
+  padding: 16px 18px 14px;
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  overflow: visible;
+  overflow: hidden;
   min-height: 0;
-  box-shadow:
-    0 0 14px 2px color-mix(in srgb, var(--theme) 25%, transparent),
-    0 0 4px 1px color-mix(in srgb, var(--theme) 15%, transparent);
+  /* 去掉强发光，改成极淡阴影，若有若无 */
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--theme) 10%, transparent);
+  transition: all 0.25s ease;
 }
+
 .anniv-widget.widget-2x2:hover {
-  border-color: var(--theme);
+  border-color: color-mix(in srgb, var(--theme) 50%, var(--line));
 }
+
 .anniv-widget.widget-2x2:active {
   transform: scale(0.98);
   transition: transform 0.12s ease;
 }
 
-/* ---- 星点装饰（保留，但删掉所有opacity） ---- */
-.anniv-widget .star {
-  position: absolute;
-  color: var(--theme);
-  pointer-events: none;
-  font-size: 8px;
-}
-.anniv-widget .star:nth-child(1) { top: 10%; left: 6%; font-size: 7px; }
-.anniv-widget .star:nth-child(2) { top: 8%; right: 16%; font-size: 10px; }
-.anniv-widget .star:nth-child(3) { bottom: 16%; left: 10%; font-size: 9px; }
-.anniv-widget .star:nth-child(4) { bottom: 24%; right: 8%; font-size: 7px; }
-.anniv-widget .star:nth-child(5) { top: 44%; left: 88%; font-size: 6px; }
-
-.anniv-widget .corner-stars {
-  position: absolute;
-  top: 10px;
-  right: 14px;
-  font-size: 7px;
-  letter-spacing: 3px;
-  color: var(--theme);
-  pointer-events: none;
-}
-
-/* ---- 上半：置顶纪念日 ---- */
+/* ---- 上半：纪念日 ---- */
 .anniv-widget .anniv-top {
-  padding-bottom: 18px;
-  border-bottom: 0.5px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   flex-shrink: 0;
-  position: relative;
-  z-index: 1;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
 }
+
 .anniv-widget .anniv-title {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 400;
   color: var(--sub);
   display: flex;
   align-items: center;
-  gap: 5px;
-  letter-spacing: 0.5px;
-  margin-bottom: 2px;
+  gap: 4px;
 }
+
 .anniv-widget .anniv-title .icon {
-  font-size: 12px;
+  font-size: 11px;
 }
+
+/* 数字轻盈不粗重 */
 .anniv-widget .anniv-days {
-  font-size: 40px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 300; /* 细体，轻盈 */
   color: var(--text);
   line-height: 1.1;
   display: flex;
   align-items: baseline;
   gap: 4px;
   font-variant-numeric: tabular-nums;
-}
-.anniv-widget .anniv-days small {
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--sub);
-  margin-left: 4px;
+  letter-spacing: -0.5px;
 }
 
-/* 呼吸点（保留，去掉透明度，改用实色+缩放） */
+.anniv-widget .anniv-days small {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--sub);
+  margin-left: 2px;
+}
+
+.anniv-prefix {
+  font-size: 12px;
+  color: var(--sub);
+  font-weight: 400;
+}
+
+/* 呼吸点 */
 .breath-dot {
   display: inline-block;
   width: 5px;
   height: 5px;
   border-radius: 50%;
   background: var(--theme);
-  margin-left: 5px;
-  animation: breathe 2.8s ease-in-out infinite;
+  margin-left: auto;
+  animation: pulse 2.8s ease-in-out infinite;
   flex-shrink: 0;
-  box-shadow: 0 0 0 1px var(--bg);
-}
-@keyframes breathe {
-  0%, 100% { transform: scale(0.7); }
-  50% { transform: scale(1.2); }
+  opacity: 0.7;
 }
 
-/* ---- 下半：日程列表 ---- */
+@keyframes pulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.35; }
+  50%       { transform: scale(1.2); opacity: 0.8;  }
+}
+
+/* ---- 下半：时间轴日程 ---- */
 .anniv-widget .anniv-events {
   flex: 1;
-  margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 7px;
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 1px dashed color-mix(in srgb, var(--theme) 25%, var(--line));
+  margin-left: 4px;
   overflow: hidden;
-  position: relative;
-  z-index: 1;
-  min-height: 30px;
 }
+
 .anniv-widget .anniv-event {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--text);
+  position: relative;
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  padding: 1px 0;
+  gap: 6px;
 }
+
+/* 时间轴节点圆点 */
+.anniv-widget .anniv-event::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--theme) 60%, var(--line));
+}
+
 .anniv-widget .anniv-event .ev-date {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--theme);
   flex-shrink: 0;
-  min-width: 42px;
   font-variant-numeric: tabular-nums;
+  opacity: 0.85;
 }
-.anniv-widget .anniv-event .ev-bullet {
-  color: var(--sub);
-  font-size: 10px;
-  flex-shrink: 0;
-  opacity: 0.4;
-}
+
 .anniv-widget .anniv-event .ev-text {
+  font-size: 11px;
   font-weight: 400;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.anniv-widget .anniv-empty {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--sub);
-  margin-top: 2px;
-}
-.anniv-widget .anniv-days small {
-  font-size: 13px;
-  color: var(--sub);
-  margin-left: 3px;
-}
-/* 下半：日程列表 */
-.anniv-widget .anniv-events {
-  flex: 1;
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  overflow: hidden;
-}
-.anniv-widget .anniv-event {
-  font-size: 12px;
-  color: var(--text);
-  display: flex;
-  gap: 6px;
-  align-items: baseline;
-}
-.anniv-widget .anniv-event .ev-date {
-  color: var(--theme);
-  flex-shrink: 0;
-  font-size: 11px;
-}
-.anniv-widget .anniv-empty {
-  font-size: 11px;
-  color: var(--sub);
-  opacity: 0.6;
-  margin-top: 6px;
+  opacity: 0.75;
 }
 
-/* ===== 咪思异想主题专用样式 ===== */
+.anniv-widget .anniv-empty {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--sub);
+  opacity: 0.5;
+}/* ===== 咪思异想主题专用样式 ===== */
 #phone[data-theme="misi"] .clock-starry .ring {
   opacity: var(--ring-opacity, 0.4);
 }
@@ -1208,7 +1170,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026827';
+const APP_VER = 'v2026828';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -3945,11 +3907,10 @@ function fmtEventDate(dateStr) {
   return (d.getMonth() + 1) + '月' + d.getDate() + '日';
 }
 
-// ===== 重写 annivWidgetHtml（全保护版本） =====
+// ===== 替换后的 annivWidgetHtml（手帐时间轴新版） =====
 function annivWidgetHtml() {
   cleanExpiredEvents();
 
-  // 确保 DB.events 存在
   if (!DB.events) DB.events = [];
 
   // ---- 上半：纪念日 ----
@@ -3967,7 +3928,7 @@ function annivWidgetHtml() {
       showDays = Math.abs(daysBetween(nextBirthday(pin.date)));
       icon = '🎂';
       if (showDays === 0) {
-        prefix = '生日就是';  // 特判：今天生日
+        prefix = '生日就是';
         suffix = '';
       } else {
         prefix = '距离生日还有';
@@ -3980,19 +3941,21 @@ function annivWidgetHtml() {
       suffix = '天';
     }
     var daysHtml = (pin.type === '生日' && showDays === 0)
-      ? '<div class="anniv-days"><span style="font-size:18px">今天 🎉</span><span class="breath-dot"></span></div>'
-      : '<div class="anniv-days"><span class="anniv-prefix">' + prefix + '</span> ' + showDays + '<small>' + suffix + '</small><span class="breath-dot"></span></div>';
+      ? '<div class="anniv-days"><span style="font-size:18px">今天 🎉</span></div>'
+      : '<div class="anniv-days"><span class="anniv-prefix">' + prefix + '</span> ' + showDays + '<small>' + suffix + '</small></div>';
 
     topHtml = '<div class="anniv-top">' +
-      '<div class="anniv-title"><span class="icon">' + icon + '</span> ' + esc(pin.title || '纪念日') + '</div>' +
+      '<div class="anniv-title"><span class="icon">' + icon + '</span> ' + esc(pin.title || '纪念日') + '<span class="breath-dot"></span></div>' +
       daysHtml +
       '</div>';
   } else {
-    topHtml = '<div class="anniv-top"><div class="anniv-title">📅 纪念日</div>' +
-      '<div class="anniv-empty">还没有纪念日</div></div>';
+    topHtml = '<div class="anniv-top">' +
+      '<div class="anniv-title">📅 纪念日<span class="breath-dot"></span></div>' +
+      '<div class="anniv-empty">还没有纪念日</div>' +
+      '</div>';
   }
 
-  // ---- 下半：日程列表（最多2条） ----
+  // ---- 下半：日程列表 ----
   var events = DB.events.slice().sort(function(a, b) {
     var da = new Date(a.date || '2000-01-01');
     var db = new Date(b.date || '2000-01-01');
@@ -4008,26 +3971,19 @@ function annivWidgetHtml() {
       var titleStr = e.title || '未命名日程';
       var dateDisplay = fmtEventDate(dateStr);
       items.push(
-        '<div class="anniv-event" style="display:flex;align-items:baseline;gap:4px;">' +
-          '<span class="ev-date" style="flex-shrink:0;font-size:13px;color:var(--theme);font-weight:600;">' + esc(dateDisplay) + '</span>' +
-          '<span class="ev-bullet" style="color:var(--sub);font-size:10px;flex-shrink:0;opacity:0.4;margin:0 2px;">•</span>' +
-          '<span class="ev-text" style="font-size:13px;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;word-break:break-word;line-height:1.4;">' + esc(titleStr) + '</span>' +
+        '<div class="anniv-event">' +
+          '<span class="ev-date">' + esc(dateDisplay) + '</span>' +
+          '<span class="ev-text">' + esc(titleStr) + '</span>' +
         '</div>'
       );
-	  }
+    }
     evHtml = items.join('');
   } else {
     evHtml = '<div class="anniv-empty">暂无日程安排</div>';
   }
 
-  // ---- 组装 ----
+  // ---- 组装（已去除机械感星点） ----
   return '<div class="anniv-widget widget-2x2" onclick="openAnniversary()">' +
-    '<span class="star">✦</span>' +
-    '<span class="star">✦</span>' +
-    '<span class="star">✦</span>' +
-    '<span class="star">✦</span>' +
-    '<span class="star">✦</span>' +
-    '<span class="corner-stars">✦ ✦</span>' +
     topHtml +
     '<div class="anniv-events">' + evHtml + '</div>' +
   '</div>';
@@ -4989,7 +4945,36 @@ function updateTemperatureOnly(worldId, callback) {
       pushCount: 0
     };
   }
+// ✅ 优先从真实 API 缓存中取当前小时的温度
+var cache = world.weather.realWeatherCache;
+var cacheDate = world.weather.realWeatherDate;
+var todayStr = new Date().toISOString().slice(0, 10); // 格式：2025-01-15
 
+if (cache && cacheDate === todayStr && cache.time && cache.temperature_2m) {
+  var currentHour = new Date().getHours(); // 当前是几点（0~23）
+  var times = cache.time; // 时间数组
+  var temps = cache.temperature_2m; // 温度数组
+
+  // 在时间数组里找匹配当前小时的那个位置
+  var matchedIdx = -1;
+  for (var i = 0; i < times.length; i++) {
+    // 时间格式是 "2025-01-15T14:00"，取T后面的小时数字
+    var itemHour = parseInt(times[i].split('T')[1].split(':')[0]);
+    if (itemHour === currentHour) {
+      matchedIdx = i;
+      break;
+    }
+  }
+
+  if (matchedIdx !== -1 && temps[matchedIdx] !== undefined && temps[matchedIdx] !== null) {
+    world.weather.temp = Math.round(temps[matchedIdx]);
+    world.weather.tempUpdatedAt = Date.now();
+    save();
+    if (callback) callback(true);
+    return; // ✅ 取到真实温度，直接返回，不调用 AI
+  }
+}
+// ↓ 缓存没有或取不到时，才继续往下走（AI 兜底）
   // 用轻量模型
   var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
   if (!model) {
@@ -7999,6 +7984,7 @@ if (c.giftLog && c.giftLog.length) {
   s += '10. 发语音格式必须是单独一行：[语音|说话内容]，例如 [语音|我今天真的好累啊不想说话了]。\n';
   s += '11. 禁止惯性连发语音：每条独立判断，不满足条件就发纯文字。\n';
   s += '12. 禁止用文字描述代替语音：绝不写"（语音）..."或"我发条语音说..."，要发就直接输出 [语音|内容]。\n';
+s += '13. 用户的语音消息可能带语气提示（如"夹子音""带哭腔""台湾腔"等）。你要读懂语气背后的情绪，自然地调整你的回应态度和口吻，但【绝对禁止】在回复里点破或提及对方用了什么声音/语气（例如不能说"你刚才用夹子音说话吧"）。语气只是帮你理解，不能变成聊天话题。\n';
 
   // ===== 末尾强化：牢记说话方式（利用末尾高注意力） =====
   if (c.sampleLines) {
@@ -10515,7 +10501,7 @@ async function doAutoGreet(c, slot) {
   if (c.mode === 'offline') return;
   // ===== 1. 前置检查 =====
   if (c.isBlockedByChar || c.isBlockedByUser) return;
-  const model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+  const model = DB.settings.chatModel || DB.settings.auxModel || DB.settings.lightModel;
   if (!model) {
     console.warn('自动问候：没有可用模型，跳过');
     return;
@@ -12443,7 +12429,11 @@ function toApiMsg(m, withTime){
   if(m.type==='transfer')return{role:m.role,content:_tp+`（${m.role==='user'?'对方向你':'你向对方'}转账¥${m.amount}，备注：${m.content||'无'}）`};
   if(m.type==='redpacket')return{role:m.role,content:_tp+`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};
   if(m.type==='shop_item'){var _gf=m.from||(m.role==='assistant'?'ai':'user');return{role:m.role,content:_tp+`（${_gf==='ai'?'你送给对方一件礼物':'对方送给你一件礼物'}：${m.content||''}${m.desc?'——'+m.desc:''}${m.rare&&m.story?'。'+m.story:''}）`};}
-  if(m.type==='voice')return{role:m.role,content:_tp+`（语音消息）${m.content}`};
+  if(m.type==='voice'){
+    var _mood = (m.mood && VOICE_MOOD_DESC[m.mood]) ? VOICE_MOOD_DESC[m.mood] : '';
+    return {role:m.role, content:_tp+'（语音消息'+_mood+'）'+m.content};
+  }
+
   if(m.type==='sticker')return{role:m.role,content:_tp+`（发了个表情：${m.content}）`};
   if(m.type==='callLog'){
     var _txt = _tp+'（你和对方进行了一次语音通话，时长'+(m.duration||'')+'。通话内容如下：\n';
@@ -12693,11 +12683,11 @@ function renderChat(keepScroll) {
   // ===== 10. 底部输入栏 =====
   var bar = document.createElement('div');
   bar.id = 'chatBottom';
-<!---->
+
   // 拉黑横幅：单独插在 chatBottom 上方，不混入底栏内部
   var oldBanner = document.getElementById('chatBanner');
   if (oldBanner) oldBanner.remove();
-<!---->
+
   if (c.isBlockedByChar) {
     var remainHours = c.blockedType === '小情绪' ? '8' : '24';
     var banner = document.createElement('div');
@@ -12706,10 +12696,25 @@ function renderChat(keepScroll) {
     banner.innerHTML = '<span style="flex:1;">🔇 ' + esc(c.nick || c.name) + ' 拉黑了你（' + c.blockedType + '，约 ' + remainHours + ' 小时后自动解除）</span>' +
       '<button class="cbtn send" style="height:28px;font-size:12px;flex-shrink:0;" onclick="unblockChar(\'' + c.id + '\')">💗 解锁</button>';
     phone.appendChild(banner);
-<!---->
+
   } else if (c.isBlockedByUser) {
-    var deliveredBox = (c.interceptBox || []).filter(function(i) { return i.content; });
-<!---->
+    // ★兜底：被拉黑但从没生成过拦截数据 → 自动补生成一次
+    if (!c.blockEventData && !c._schedulingBlock) {
+      scheduleBlockEvents(c);   // 后台生成，好了之后你再进来就有了
+    }
+
+var _now = Date.now();
+var _ints = (c.blockEventData && c.blockEventData.intercepts) || [];
+// ★每条拦截消息再用 splitToBubbles 拆成微信式短气泡
+var deliveredBox = [];
+_ints.filter(function(i){ return i.content && i.triggerAt <= _now; })
+  .forEach(function(i){
+    splitToBubbles(i.content).forEach(function(line){
+      if (line && line.trim()) deliveredBox.push({ content: line.trim(), time: i.triggerAt });
+    });
+  });
+var _pendingCount = _ints.filter(function(i){ return i.content && i.triggerAt > _now; }).length;
+
     var interceptHtml = '';
     if (deliveredBox.length) {
       var msgItems = deliveredBox.map(function(item) {
@@ -12955,15 +12960,19 @@ function flushBlockEvents() {
         if (!item.delivered && nowTs >= item.triggerAt) {
           item.delivered = true;
           if (!DB.chats['c_aichan']) DB.chats['c_aichan'] = [];
-          DB.chats['c_aichan'].push({
-            id: 'msg_aichan_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
-            role: 'assistant',
-            type: 'text',
-            content: item.content,
-            time: item.triggerAt
+          // ★把AI酱这条也拆成微信式短气泡，逐条 push
+          splitToBubbles(item.content).forEach(function(line, k){
+            if (!line || !line.trim()) return;
+            DB.chats['c_aichan'].push({
+              id: 'msg_aichan_' + Date.now() + '_' + k + '_' + Math.random().toString(36).slice(2, 5),
+              role: 'assistant',
+              type: 'text',
+              content: line.trim(),
+              time: item.triggerAt + k * 1000   // 每条差1秒，保证顺序
+            });
+            aiChan.unread = (aiChan.unread || 0) + 1;
           });
           aiChan.inChatList = true;
-          aiChan.unread = (aiChan.unread || 0) + 1;
           anyChange = true;
         }
       });
@@ -12977,11 +12986,11 @@ function flushBlockEvents() {
   }
 }
 async function scheduleBlockEvents(c) {
-  // 防重入：如果上一次调度还没完成，直接跳过
   if (c._schedulingBlock) return;
   c._schedulingBlock = true;
 
-  var model = DB.settings.auxModel || DB.settings.chatModel;
+  // ★改动1：用主模型（角色专属模型，没有就用全局主模型），不再用辅助模型
+  var model = getEffectiveChatModel(c) || DB.settings.chatModel;
   if (!model) { c._schedulingBlock = false; return; }
 
   var arr = DB.chats[c.id] || [];
@@ -13014,14 +13023,16 @@ async function scheduleBlockEvents(c) {
     '【你和对方此刻的关系状态】' + relDesc + '\n' +
     (moodDesc ? '【你今天的心情底色】' + moodDesc + '\n' : '') +
     '\n【刚刚发生、导致你被拉黑的对话】\n' + convo + '\n\n' +
-    '请完全代入你自己此刻的真实情绪和上面的关系状态，绝不跳出角色、不套模板。\n\n' +
+    '请先在心里分析：这次对方为什么会气到拉黑你？问题到底出在哪？（只在心里想，不要写出分析过程。）\n' +
+    '然后完全代入你此刻的真实情绪，绝不跳出角色、不套模板。\n\n' +
+
     '【任务一：被拦截的消息】\n' +
-    '写出你被拉黑后忍不住想发、但其实发不出去的消息。\n' +
-    '条数由你的性格决定（0~5条）——有骨气/傲娇的可能一条都不发、或只丢一句冷话；真在乎对方的可能发好几条。\n' +
-    '【最重要·情绪必须无缝衔接】这些消息要紧紧接住刚才那段对话的情绪和当前关系：如果刚才在吵架、你理亏在认错，就延续那份卑微和着急；如果你是被冤枉、带着委屈或火气，就延续那份委屈。绝不能突然变强势、变无所谓、或像什么都没发生过。\n' +
-    '【情绪要有层次】多条之间用 offsetMs（距现在的毫秒数）拉开时间差，让情绪随时间自然发酵、变化——比如 急切解释 → 患得患失 → 赌气或失落 → 最后一句沉默式的自语。绝不要几条都是同一句"对不起"在复读。\n' +
-    '【别只会道歉】就算在认错，也要有血有肉、符合你的性格：可以解释、可以委屈、可以小心翼翼试探、可以嘴硬心软、可以突然的沉默。让对方看到的是一个活人在情绪里挣扎，而不是道歉机器。\n' +
-    '每条要结合这段对话的具体细节，别泛泛而谈。\n\n' +
+    '写出你被拉黑后忍不住想发、但其实发不出去的消息，3~5条，用 offsetMs（距现在的毫秒数）拉开时间，呈现一条【自然的情绪变化曲线】：\n' +
+        '【格式】像发微信一样，想到一句发一句：每条 intercepts 都是一句短话（不超过20字），别把好几句塞进同一条。禁止句号和逗号，可用问号叹号省略号。\n' +
+	'· 开头1~2条：你还没完全反应过来发生了什么，带着被拉黑的错愕、不解、或下意识的强硬。但【绝对不要】刻薄、嘲讽、说狠话、放威胁——那只会把对方推得更远。\n' +
+    '· 中间几条：你开始回想刚才那段对话，【慢慢】意识到自己可能哪里做得不对。要有一个"逐渐醒悟"的过程，不要一上来就把错误点破，结合对话里的具体细节自然过渡。\n' +
+    '· 最后1~2条：放下姿态，用你自己的方式表达在乎、想和好、甚至笨拙地道歉。可以嘴硬心软、可以别扭，但内核必须是真诚的、想修复关系的。\n' +
+    '始终保持你的人设和说话口吻，但整段的底色是"我想把她哄回来"，不是"我要赢这场架"。每条都要具体，别泛泛而谈。\n\n' +
 
     '【任务二：浮光论坛帖子】\n' +
     (worldId
@@ -15453,6 +15464,31 @@ function restoreFocusState(){
    ====================================================== */
 
 function c2cShuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+// 【新增】读取"发布者与用户"的当前关系 + 最近聊天，供C2C互动参考
+function c2cPosterUserContext(poster){
+  var st = poster.status || {};
+  var fav = (typeof st.好感度 === 'number') ? st.好感度 : 50;
+  var tension = (typeof st.紧张感 === 'number') ? st.紧张感 : 0;
+  var rel = st.当前关系 || '普通';
+
+  // 判断此刻是不是"刚闹别扭/关系紧张"
+  var strained = (tension >= 55) || (fav <= 35);
+
+  // 取最近几条和用户的聊天（只取文字，最多6条）
+  var recent = '';
+  try{
+    var msgs = (DB.chats[poster.id] || []).filter(function(m){
+      return !m.hidden && !m.recalled && (m.type==='text'||!m.type) && m.content;
+    });
+    var last = msgs.slice(-6);
+    recent = last.map(function(m){
+      var who = (m.role==='user') ? '用户' : (poster.nick||poster.name);
+      return who + '：' + String(m.content).slice(0,40);
+    }).join('\n');
+  }catch(e){}
+
+  return { fav:fav, tension:tension, rel:rel, strained:strained, recent:recent };
+}
 
 function collectC2CCommenters(poster){
   var list=[];
@@ -15477,13 +15513,13 @@ function collectC2CCommenters(poster){
 // 根据关系标签计算评论概率
 function c2cShouldComment(commenter, moment){
   var type = (commenter.rel.relationType || '').trim();
-  var p = 0.2;  // 基础概率提升至 20%
-  if(/暧昧|喜欢|暗恋|追求/.test(type)) p = 0.45;          // 暧昧/喜欢阶段互动最积极 → 45%
-  else if(/恋人|夫妻|情侣|男女朋友/.test(type)) p = 0.4;  // 恋人 → 40%
-  else if(/闺蜜|挚友|兄弟|好友/.test(type)) p = 0.35;     // 闺蜜/挚友 → 35%
-  else if(/家人|父|母|哥|弟|姐|妹|亲/.test(type)) p = 0.3; // 家人 → 30%
+  var p = 0.2;  // 基础概率
+  if(/恋人|夫妻|情侣|男女朋友/.test(type)) p = 0.3;        // 恋人 → 30%
+  else if(/闺蜜|挚友|兄弟|好友/.test(type)) p = 0.3;      // 闺蜜/挚友 → 30%
+  else if(/家人|父|母|哥|弟|姐|妹|亲/.test(type)) p = 0.28;// 家人 → 28%
   else if(/朋友|同学|同事|同伴/.test(type)) p = 0.25;      // 朋友/同事 → 25%
-  else if(/敌|仇|前任|讨厌/.test(type)) p = 0.15;          // 敌对/讨厌 → 15%
+  else if(/暧昧|喜欢|暗恋|追求/.test(type)) p = 0.22;      // 暧昧 → 22%（不再是最高）
+  else if(/敌|仇|前任|讨厌/.test(type)) p = 0.12;          // 敌对/讨厌 → 12%
   if(moment.images && moment.images.length) p += 0.05;
   return Math.random() < p;
 }
@@ -15495,17 +15531,42 @@ function c2cBrief(char,fallbackName){
   return s;
 }
 
-async function c2cGenerateBundle(commenter,poster,moment){
+async function c2cGenerateBundle(commenter,poster,moment,puCtx){
   var model=DB.settings.auxModel||DB.settings.chatModel;
   if(!model) return null;
   var relType=commenter.rel.relationType||'朋友';
   var relDesc=commenter.rel.description||'';
   var commenterBrief=(commenter.kind==='char')?c2cBrief(commenter.char,commenter.name):commenter.name+(commenter.rel.targetJob?'（'+commenter.rel.targetJob+'）':'');
-  var task='【微信朋友圈评论区，请分别扮演两个人各说一句】\n'
-    +'发布者：'+c2cBrief(poster)+'，发了动态：“'+(moment.text||'（一张图片）')+'”\n'
-    +'评论者：'+commenterBrief+'，与发布者的关系是【'+relType+'】。'+(relDesc?'关系补充：'+relDesc+'。':'')+'\n\n'
-    +'请生成：\n1) 评论者以自己性格和这段关系为基调，对这条动态写一句自然简短的评论（15字左右）。\n'
-    +'2) 发布者是否回复：合适就回一句简短的（20字内），不回复则留空。\n'
+
+  // 【新增】把"发布者与用户"的关系近况拼成一段提示
+  var userNote = '';
+  if(puCtx){
+    userNote = '\n【发布者与"用户"的当前状态·很重要】\n'
+      + '发布者和用户目前的关系是【'+puCtx.rel+'】，好感度'+puCtx.fav+'/100，紧张感'+puCtx.tension+'/100。\n';
+    if(puCtx.recent){
+      userNote += '两人最近的聊天片段（供你判断此刻气氛）：\n'+puCtx.recent+'\n';
+    }
+    if(puCtx.strained){
+      userNote += '⚠️ 注意：发布者此刻正和用户闹别扭/关系紧张。这条评论区互动务必收敛克制——'
+        + '发布者绝不能表现得和别人（尤其暧昧对象）亲密腻歪、秀恩爱，那会显得很没心没肺、非常伤用户的心。'
+        + '发布者的回复应冷淡、简短、有距离感，甚至可以不回复（reply留空）。\n';
+    } else {
+      userNote += '（发布者和用户关系正常，互动自然即可，但依然别和别人过分暧昧。）\n';
+    }
+  }
+
+  var task='【微信朋友圈评论区，模拟真实自然的互动，请分别扮演两个人各说一句】\n'
+    +'发布者：'+c2cBrief(poster)+'，发了动态："'+(moment.text||'（一张图片）')+'"\n'
+    +'评论者：'+commenterBrief+'，与发布者的关系是【'+relType+'】。'+(relDesc?'关系补充：'+relDesc+'。':'')+'\n'
+    +userNote+'\n'
+    +'请生成：\n'
+    +'1) 评论者以自己性格和这段关系为基调，对这条动态写一句评论。像真人随手一评：自然、简短（15字左右）、口语化，别端着、别硬凑。\n'
+    +'2) 发布者是否回复：合适就回一句简短的（20字内），不回复则留空。\n\n'
+    +'【底线·必须遵守】\n'
+    +'- 这是公开朋友圈评论区，人人可见。哪怕关系暧昧/亲密，也要有分寸，点到为止。\n'
+    +'- 严禁露骨、性暗示、"过来一起睡""想抱抱"这类越界肉麻内容，别把评论区当私聊调情。\n'
+    +'- 暧昧关系最多稍微打趣关心，绝不腻歪、不秀恩爱、不刷屏甜言蜜语。\n'
+    +'- 各自保持人设口吻，别写成千篇一律的客套或情话。\n'
     +'严格只输出JSON：{"comment":"评论内容","reply":"回复内容或空字符串"}，不要任何多余文字。';
   var messages=[{role:'system',content:'你在模拟朋友圈评论区的自然互动，只输出要求的JSON。'},{role:'user',content:task}];
   try{
@@ -15564,13 +15625,29 @@ async function triggerC2CInteractions(moment){
     if(!poster) return;
     moment._c2cDone=true;
 
+    // 【新增】先看发布者此刻跟用户的关系近况
+    var puCtx = c2cPosterUserContext(poster);
+
+    // ★★★ 从社会关系网中收集潜在评论者 ★★★
     var pool=c2cShuffle(collectC2CCommenters(poster));
     var chosen=null;
-    for(var i=0;i<pool.length;i++){ if(c2cShouldComment(pool[i],moment)){ chosen=pool[i]; break; } }
+    for(var i=0;i<pool.length;i++){
+      var cand = pool[i];
+      // 【新增】如果发布者刚跟用户闹别扭，就大幅降低"暧昧对象"出场的机会
+      var candType = (cand.rel && cand.rel.relationType || '');
+      if(puCtx.strained && /暧昧|喜欢|暗恋|追求|恋人|情侣/.test(candType)){
+        if(Math.random() < 0.7) continue;   // 70%概率直接跳过这个暧昧对象
+      }
+      if(c2cShouldComment(cand,moment)){
+        chosen=cand;
+        break;
+      }
+    }
     if(!chosen) return;
 
     DB._c2cLastRun=Date.now();
-    var bundle=await c2cGenerateBundle(chosen,poster,moment);
+    // ★★★ 调用 AI 生成评论 + 回复（把关系近况一起传进去）★★★
+    var bundle=await c2cGenerateBundle(chosen,poster,moment,puCtx);
     if(!bundle||!bundle.comment) return;
 
     moment.comments=moment.comments||[];
@@ -15854,6 +15931,55 @@ ov.innerHTML = '<div class="vrec-box"><div class="vrec-mic"><svg viewBox="0 0 24
   document.body.appendChild(ov);
 }
 function voiceHideRecordingOverlay(){ var o=document.getElementById('voiceRecOverlay'); if(o) o.remove(); }
+// 情绪标签清单（label 是给用户看的按钮文字）
+var VOICE_MOODS = [
+  { key:'normal',  label:'正常' },
+  { key:'sad',     label:'委屈巴巴（带哭腔）' },
+  { key:'jiazi',   label:'夹子音撒娇' },
+  { key:'taiwan',  label:'台湾腔' },
+  { key:'xiaoxin', label:'蜡笔小新' },
+  { key:'angry',   label:'气鼓鼓' }
+];
+
+// 情绪 → 偷偷塞给 AI 的语气描述
+var VOICE_MOOD_DESC = {
+  normal:  '',
+  sad:     '，用委屈、带着哭腔的语气',
+  jiazi:   '，用嗲嗲撒娇的夹子音',
+  taiwan:  '，用软糯的台湾腔',
+  xiaoxin: '，用蜡笔小新那种搞怪、幼稚、贱萌的语气',
+  angry:   '，气鼓鼓、闹别扭的语气'
+};
+// 弹出情绪面板（msgId = 这条语音消息的 id）
+function openMoodPanel(msgId){
+  closeMoodPanel();
+  var btns = VOICE_MOODS.map(function(mo){
+    return '<button class="mood-btn" onclick="pickMood(\''+msgId+'\',\''+mo.key+'\')">'+mo.label+'</button>';
+  }).join('');
+  var html = '<div id="moodModal" class="modal">'+
+    '<div class="sheet-box">'+
+      '<h3>这条语音是什么语气？</h3>'+
+      '<div class="mood-list">'+btns+'</div>'+
+      '<button class="btn gray" style="width:100%;margin-top:6px" onclick="pickMood(\''+msgId+'\',\'normal\')">跳过（默认正常）</button>'+
+    '</div></div>';
+  phone.insertAdjacentHTML('beforeend', html);
+}
+
+// 用户选中某个情绪 → 存进消息
+function pickMood(msgId, key){
+  var c = getC(view.id);
+  if(c && DB.chats[c.id]){
+    var m = DB.chats[c.id].find(function(x){ return x.id===msgId; });
+    if(m){ m.mood = key; save(); }
+  }
+  closeMoodPanel();
+}
+
+// 关闭面板
+function closeMoodPanel(){
+  var el = document.getElementById('moodModal');
+  if(el) el.remove();
+}
 
 async function voiceSendMessage(blob){
   var c = getC(view.id);
@@ -15865,6 +15991,8 @@ async function voiceSendMessage(blob){
   DB.chats[c.id].push(placeholder);
   save();
   appendBubble(c, placeholder);
+  openMoodPanel(placeholderId);   // ★ 发完语音立刻弹情绪面板
+
   // 2. 后台识别，识别完把文字填回去
   try{
     var b64 = await voiceBlobToWavBase64(blob);
