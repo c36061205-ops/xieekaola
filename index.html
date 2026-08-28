@@ -167,10 +167,6 @@
 .voice-bubble.expanded .voice-text {
   display: block;
 }
-.mood-list{display:flex;flex-direction:column;gap:8px;}
-.mood-btn{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
-          background:var(--bg);color:var(--text);font-size:15px;cursor:pointer;text-align:center;}
-.mood-btn:active{background:var(--line);}
 
 #chatBottom { 
     padding: 10px 14px 24px 14px; 
@@ -707,6 +703,37 @@ margin-bottom:4px;}
   align-content: start;
   padding: 0 4px;
 }
+/* ===== 情绪面板样式（独立命名，不影响项目其他弹窗）===== */
+:root{ --_moodSoft: color-mix(in srgb, var(--theme) 12%, var(--card)); }
+
+.mood-mask{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:9999;
+  display:flex;align-items:flex-end;justify-content:center;
+  border-radius:inherit;overflow:hidden;animation:moodFadeIn .25s ease;backdrop-filter:blur(2px);}
+@keyframes moodFadeIn{from{opacity:0;}to{opacity:1;}}
+.mood-sheet{background:var(--card);width:100%;border-radius:26px 26px 0 0;
+  padding:8px 18px 22px;box-sizing:border-box;animation:moodSlideUp .3s cubic-bezier(.2,.9,.25,1);}
+@keyframes moodSlideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.mood-grabber{width:38px;height:5px;border-radius:3px;background:var(--line);margin:10px auto 14px;}
+.mood-sheet h3{font-size:17px;margin:0 0 4px;text-align:center;color:var(--text);font-weight:700;}
+.mood-sheet .mood-sub{font-size:12px;color:var(--sub);text-align:center;margin-bottom:18px;}
+.mood-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.mood-btn{display:flex;align-items:center;gap:10px;padding:12px;border:none;border-radius:16px;
+  background:var(--bg);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;
+  text-align:left;transition:.15s;}
+.mood-btn .emo{width:34px;height:34px;flex-shrink:0;border-radius:50%;background:var(--card);
+  display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.mood-btn:active{background:var(--_moodSoft);transform:scale(.97);}
+.mood-btn.custom{grid-column:1 / -1;justify-content:center;text-align:center;
+  background:var(--_moodSoft);color:var(--theme);font-weight:600;}
+.mood-btn.custom .emo{background:var(--card);color:var(--theme);}
+.mood-foot-btn{display:block;width:100%;border:none;border-radius:16px;padding:14px;font-size:15px;
+  cursor:pointer;text-align:center;margin-top:14px;box-sizing:border-box;font-weight:500;}
+.mood-foot-btn.gray{background:var(--bg);color:var(--sub);}
+.mood-foot-btn.main{background:var(--theme);color:#fff;box-shadow:0 4px 14px color-mix(in srgb,var(--theme) 40%,transparent);}
+.mood-input{width:100%;border:2px solid var(--line);border-radius:16px;padding:13px;font-size:15px;
+  background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;}
+.mood-input:focus{border-color:var(--theme);background:var(--card);}
+
 /* ==================== 纪念日小组件（轻盈手帐版） ==================== */
 
 .anniv-widget.widget-2x2 {
@@ -12430,7 +12457,7 @@ function toApiMsg(m, withTime){
   if(m.type==='redpacket')return{role:m.role,content:_tp+`（${m.role==='user'?'对方':'你'}发来红包¥${m.amount}：${m.content||'恭喜发财'}）`};
   if(m.type==='shop_item'){var _gf=m.from||(m.role==='assistant'?'ai':'user');return{role:m.role,content:_tp+`（${_gf==='ai'?'你送给对方一件礼物':'对方送给你一件礼物'}：${m.content||''}${m.desc?'——'+m.desc:''}${m.rare&&m.story?'。'+m.story:''}）`};}
   if(m.type==='voice'){
-    var _mood = (m.mood && VOICE_MOOD_DESC[m.mood]) ? VOICE_MOOD_DESC[m.mood] : '';
+    var _mood = getMoodDesc(m);
     return {role:m.role, content:_tp+'（语音消息'+_mood+'）'+m.content};
   }
 
@@ -15931,48 +15958,90 @@ ov.innerHTML = '<div class="vrec-box"><div class="vrec-mic"><svg viewBox="0 0 24
   document.body.appendChild(ov);
 }
 function voiceHideRecordingOverlay(){ var o=document.getElementById('voiceRecOverlay'); if(o) o.remove(); }
-// 情绪标签清单（label 是给用户看的按钮文字）
+// ===== 语音情绪标签 =====
 var VOICE_MOODS = [
-  { key:'normal',  label:'正常' },
-  { key:'sad',     label:'委屈巴巴（带哭腔）' },
-  { key:'jiazi',   label:'夹子音撒娇' },
-  { key:'taiwan',  label:'台湾腔' },
-  { key:'xiaoxin', label:'蜡笔小新' },
-  { key:'angry',   label:'气鼓鼓' }
+  { key:'normal',  emo:'😊', label:'正常',       desc:'' },
+  { key:'sad',     emo:'😢', label:'委屈哭腔',   desc:'，用委屈、带着哭腔的语气' },
+  { key:'jiazi',   emo:'🎀', label:'夹子音',     desc:'，用嗲嗲撒娇的夹子音' },
+  { key:'aojiao',  emo:'😾', label:'傲娇凶巴巴', desc:'，嘴上凶巴巴、故意装凶，其实是口是心非在撒娇的傲娇语气' },
+  { key:'taiwan',  emo:'🌸', label:'台湾腔',     desc:'，用软糯的台湾腔' },
+  { key:'xiaoxin', emo:'🖍️', label:'蜡笔小新',   desc:'，用蜡笔小新那种搞怪、幼稚、贱萌的语气' },
+  { key:'lazy',    emo:'😴', label:'懒洋洋',     desc:'，懒洋洋、有气无力刚睡醒的语气' },
+  { key:'shy',     emo:'🤭', label:'害羞小声',   desc:'，害羞、小小声不好意思的语气' },
+  { key:'excited', emo:'🎉', label:'超激动',     desc:'，超级激动兴奋、语速飞快的语气' },
+  { key:'angry',   emo:'😤', label:'气鼓鼓',     desc:'，气鼓鼓、真的在闹别扭生气的语气' }
 ];
 
-// 情绪 → 偷偷塞给 AI 的语气描述
-var VOICE_MOOD_DESC = {
-  normal:  '',
-  sad:     '，用委屈、带着哭腔的语气',
-  jiazi:   '，用嗲嗲撒娇的夹子音',
-  taiwan:  '，用软糯的台湾腔',
-  xiaoxin: '，用蜡笔小新那种搞怪、幼稚、贱萌的语气',
-  angry:   '，气鼓鼓、闹别扭的语气'
-};
-// 弹出情绪面板（msgId = 这条语音消息的 id）
+// 根据消息取语气描述（自定义优先）
+function getMoodDesc(m){
+  if(!m || !m.mood) return '';
+  if(m.mood==='custom') return m.moodCustom ? ('，'+m.moodCustom) : '';
+  var f = VOICE_MOODS.find(function(x){ return x.key===m.mood; });
+  return f ? f.desc : '';
+}
+
+// 弹出情绪面板
 function openMoodPanel(msgId){
   closeMoodPanel();
   var btns = VOICE_MOODS.map(function(mo){
-    return '<button class="mood-btn" onclick="pickMood(\''+msgId+'\',\''+mo.key+'\')">'+mo.label+'</button>';
+    return '<button class="mood-btn" onclick="pickMood(\''+msgId+'\',\''+mo.key+'\')">'+
+           '<span class="emo">'+mo.emo+'</span><span>'+mo.label+'</span></button>';
   }).join('');
-  var html = '<div id="moodModal" class="modal">'+
-    '<div class="sheet-box">'+
-      '<h3>这条语音是什么语气？</h3>'+
-      '<div class="mood-list">'+btns+'</div>'+
-      '<button class="btn gray" style="width:100%;margin-top:6px" onclick="pickMood(\''+msgId+'\',\'normal\')">跳过（默认正常）</button>'+
+  var html = '<div id="moodModal" class="mood-mask"><div class="mood-sheet">'+
+    '<div class="mood-grabber"></div><h3>这条语音是什么语气？</h3>'+
+    '<div class="mood-sub">选一个，AI 会读懂你的心情～</div>'+
+    '<div class="mood-grid">'+btns+
+    '<button class="mood-btn custom" onclick="openCustomMood(\''+msgId+'\')">'+
+    '<span class="emo">✏️</span><span>自定义语气</span></button></div>'+
+    '<button class="mood-foot-btn gray" onclick="pickMood(\''+msgId+'\',\'normal\')">跳过</button>'+
     '</div></div>';
   phone.insertAdjacentHTML('beforeend', html);
 }
 
-// 用户选中某个情绪 → 存进消息
+// 自定义语气输入
+function openCustomMood(msgId){
+  closeMoodPanel();
+  var html = '<div id="moodModal" class="mood-mask"><div class="mood-sheet">'+
+    '<div class="mood-grabber"></div><h3>描述一下你的语气</h3>'+
+    '<div class="mood-sub">比如：嘴上凶巴巴其实在撒娇</div>'+
+    '<input id="customMoodInput" class="mood-input" placeholder="打几个字，AI 就懂啦～" maxlength="30">'+
+    '<button class="mood-foot-btn main" onclick="saveCustomMood(\''+msgId+'\')">确定</button>'+
+    '<button class="mood-foot-btn gray" onclick="openMoodPanel(\''+msgId+'\')">返回</button>'+
+    '</div></div>';
+  phone.insertAdjacentHTML('beforeend', html);
+  setTimeout(function(){ var i=document.getElementById('customMoodInput'); if(i)i.focus(); }, 100);
+}
+
+// 保存自定义语气
+function saveCustomMood(msgId){
+  var i = document.getElementById('customMoodInput');
+  var txt = i ? i.value.trim() : '';
+  var c = getC(view.id);
+  if(c && DB.chats[c.id]){
+    var m = DB.chats[c.id].find(function(x){ return x.id===msgId; });
+    if(m){
+      if(txt){ m.mood='custom'; m.moodCustom=txt; }
+      else   { m.mood='normal'; m.moodCustom=''; }
+      save();
+    }
+  }
+  closeMoodPanel();
+}
+
+// 选中预设语气
 function pickMood(msgId, key){
   var c = getC(view.id);
   if(c && DB.chats[c.id]){
     var m = DB.chats[c.id].find(function(x){ return x.id===msgId; });
-    if(m){ m.mood = key; save(); }
+    if(m){ m.mood=key; m.moodCustom=''; save(); }
   }
   closeMoodPanel();
+}
+
+// 关闭面板
+function closeMoodPanel(){
+  var el = document.getElementById('moodModal');
+  if(el) el.remove();
 }
 
 // 关闭面板
