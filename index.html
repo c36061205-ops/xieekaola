@@ -2315,6 +2315,73 @@ var STATUS_POOL = {
   // —— 破防/脆弱 ——
   soft:   ['🫧 今天有点玻璃心','🥺 需要抱抱','🎐 一戳就碎','🌧️ 破防了','🧸 想被哄','🍃 有点想哭又忍住']
 };
+// ===== 收集"昨天"发生的事，整理成给 AI 的素材 =====
+function _localDateStr(t){
+  var d = new Date(t);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function buildYesterdaySummary(c){
+  var y = new Date(); y.setDate(y.getDate()-1);
+  var yStr = _localDateStr(y);
+
+  var parts = [];
+
+  // ⭐ 优先：昨天自动生成的记忆（浓缩、精炼、超省 token）
+  var mems = (c.memories||[]).filter(function(m){
+    return m.time && _localDateStr(m.time)===yStr;
+  });
+  if(mems.length){
+    var ml = mems.map(function(m){ return '· '+(m.content||''); });
+    parts.push('【昨天的记忆（已总结好的经历）】\n'+ml.join('\n'));
+  }
+
+  // 兜底：昨天没有记忆时，才读一点点聊天记录（按字数控制，不按气泡数）
+  if(!mems.length){
+    var msgs = (DB.chats && DB.chats[c.id]) || [];
+    var CHAR_BUDGET = 800;   // 只读一点点，够感知昨天聊了啥就行
+    var picked = [], used = 0;
+    for(var i=msgs.length-1;i>=0;i--){
+      var m = msgs[i];
+      if(!m || !m.time) continue;
+      if(_localDateStr(m.time)!==yStr) continue;
+      if(m.hidden || m.type==='silent' || m.type==='system') continue;
+      var txt='';
+      switch(m.type){
+        case 'image':    txt='[图片]'; break;
+        case 'voice':    txt = m.content ? ('[语音]'+m.content) : '[语音]'; break;
+        case 'sticker':  txt='[表情]'; break;
+        case 'transfer': txt='[转账 '+(m.amount||'')+']'; break;
+        case 'shop_item':txt='[礼物 '+(m.emoji||'')+(m.desc||'')+']'; break;
+        case 'callLog':  txt='[通话 '+(m.duration||'')+']'; break;
+        default:         txt = m.recalled ? '[撤回]' : (m.content||'');
+      }
+      if(!txt) continue;
+      used += txt.length;
+      if(used>CHAR_BUDGET) break;
+      picked.push({role:m.role, txt:txt});
+    }
+    picked.reverse();
+    var meN=(DB.me.realName||DB.me.name)||'对方', youN=c.nick||c.name||'TA';
+    var lines=[], last=null;
+    for(var j=0;j<picked.length;j++){
+      var who=(picked[j].role==='assistant')?youN:meN;
+      if(who===last){ lines[lines.length-1]+=' '+picked[j].txt; }
+      else{ lines.push(who+'：'+picked[j].txt); last=who; }
+    }
+    if(lines.length) parts.push('【昨天和'+meN+'的聊天片段】\n'+lines.join('\n'));
+  }
+
+  // 补充：昨天的行程（很短、信息密度高，一起带上）
+  var sch = (c.schedules||[]).find(function(s){return s.date===yStr;});
+  if(sch && sch.items && sch.items.length){
+    var sl = sch.items.map(function(it){
+      return (it.start||'')+(it.end?('-'+it.end):'')+' '+(it.location?('@'+it.location+' '):'')+(it.content||'');
+    });
+    parts.push('【昨天的行程】\n'+sl.join('\n'));
+  }
+
+  return parts.join('\n\n'); // 昨天啥都没有 → 返回空字符串
+}
 
 function pickStatus(c){
   if(!c.todayMood) return '';
@@ -3468,13 +3535,19 @@ async function generateMemoryForChar(c, mode = 'auto') {
 
   // 4) 组装提示词
   var prompt = '你是一个专业的故事总结师。请阅读下面「' + (c.name || c.nick) + '」和「' + (DB.me.name || '我') + '」**' + periodWord + '**的聊天记录，完成以下任务。\n\n' +
-    '【任务一：提炼记忆（带具体时间线）】提炼出 1~3 条值得长期记住的记忆，每条附带优先级（priority）：\n' +
+    '【任务一：提炼记忆（必须具体、有细节）】提炼出 1~3 条值得长期记住的记忆，每条附带优先级（priority）：\n' +
     '- core（核心）：涉及关系本质、身份定义、无法改变的事实（例如：确立了关系、坦白身世、重要承诺）\n' +
     '- important（重要）：重要共同经历、情感转折、影响关系的关键对话\n' +
-    '- temp（临时）：日常琐事、短期状态、可随时间淡化的小事\n' +
-    '【🔴 时间与细节要求】\n' +
-    '1. 记忆描述中必须带上【事件发生的真实时间或时段】（例如：“8月14日上午 10:30 两人见面”、“8月14日中午 一起吃了日料”、“8月14日晚上 共同看了电影”），形成清晰的时间线。\n' +
-    '2. 视角要求：用第三人称描述，将对方称为「用户」，不要用「我」指代用户。\n' +
+    '- temp（临时）：日常琐事、短期状态、可随时间淡化的小事\n\n' +
+    '【🔴 具体度要求 · 最重要】这些记忆是给用户日后回看用的，必须让人一看就能立刻想起当时发生了什么。因此每条记忆【必须】做到：\n' +
+    '1. 【时间/时段】写清事件发生或约定的具体日期、时间（例如"8月14日晚上8点"，而不是"某天晚上"）。\n' +
+    '2. 【地点】如果对话里提到了地点，必须写出来（例如"在学校南门"、"那家日料店"）。\n' +
+    '3. 【人物】用对方的名字「' + (c.name || c.nick) + '」，把用户称为「用户」；如果对话里聊到了其他人（NPC），也要写出他们的名字。\n' +
+    '4. 【事件/约定的完整内容】约好了什么、承诺了什么、发生了什么，要写完整，绝对不能只写"聊了一些事""说了些话"这种空话。\n' +
+    '5. 【情绪/关系变化】写清重要的情绪或关系变化（谁因为什么开心/难过/生气，两人关系有没有变近或变远）。\n' +
+    '【✅ 正确示范】"8月14日晚上，用户和' + (c.name || c.nick) + '约好第二天（8月15日）晚上8点在学校南门见面一起看电影，' + (c.name || c.nick) + '显得很期待。"\n' +
+    '【❌ 错误示范（严禁这样写！）】"两人聊了一些关于见面的事情。" —— 没时间、没地点、没约定内容，太模糊，绝对禁止！\n' +
+    '【时间线依据】每条聊天记录最前面方括号里的 [YYYY-MM-DD HH:mm]，是这句话被说出来的真实时间。换算"明天/后天/周末"等相对说法时，要以【说这句话那条记录方括号里的日期】为基准（例如 [2026-08-14] 里说的"明天"就是 2026-08-15）。该段聊天的主基准日期是：' + realChatDateStr + '（周' + realWeekdayStr + '）。\n\n' +
     '【重要·区分已知设定与新事件】下面是这个角色的既定设定（属于已知背景，不是这段时间新发生的事）：\n' + known + '\n' +
     '提炼记忆时，绝对不要把上述既定设定当成新记忆记录。只记录聊天中【新发生的事、新的情感变化、新的约定或承诺、关系的新进展、双方之间的互动细节】。\n\n' +
     '【任务二：判定当前关系】\n' +
@@ -3483,32 +3556,8 @@ async function generateMemoryForChar(c, mode = 'auto') {
     '- 目前的关系称谓：' + relNow + '\n' +
     '【参考词表】陌生人、普通朋友、好朋友、暧昧对象、喜欢的人、恋人、亲密恋人、异地恋人、青梅竹马、冷战中、破冰阶段、分手后、前任、单恋对象——你可以直接使用这些词，也可以在此基础上小幅调整，但禁止使用脱离日常语言的文学化表达。\n' +
     '要求：①用词必须是日常口语，普通人能一眼看懂 ②若发生了明确的关系转折，称谓据此更新 ③若只是日常聊天，保持原有称谓或仅做微调 ④控制在8字以内。\n\n' +
-    // ===== 任务三：提取约定日程（核心规则） =====
-    '【任务三：提取用户本人的待办日程 · 绝对铁律】\n' +
-    '这是写在【用户本人的手机待办备忘录】里的日程提醒，主体必须且只能是「' + (DB.me.name || '用户') + '」本人接下来要做的事。\n\n' +
-    '【🔴 判定与过滤原则（不符合则直接忽略，不要提取）】\n' +
-    '1. 只提取【' + (DB.me.name || '用户') + '】亲自参与的未来约定（如双方约好一起吃饭、对方要来找用户等）。\n' +
-    '2. ⛔ 绝对不提取与用户无关的事：他人之间的安排（如“B和C明天去做苦力”）、角色自己的私事（如角色自己去办护照且未邀请用户），直接忽略，绝对不要提取！\n' +
-    '3. 聊过去的事、没有定下明确未来时间安排的，不要提取。\n\n' +
-    '【🔴 日期铁律（最高优先级 · 违规直接丢弃）】\n' +
-    '1. 每条聊天记录最前面方括号里的 [YYYY-MM-DD HH:mm]，是这句话被说出来的真实日期和具体时间。\n' +
-    '2. 换算“明天/后天/下周三/周末”等相对时间时，必须以【说这句话那一条记录方括号里的日期】为基准换算，绝对不能用其他时间。\n' +
-    '   例如：[2026-08-14 20:00] 这句里说的“明天”＝2026-08-15，“后天”＝2026-08-16。\n' +
-    '3. 该段聊天发生的主基准日期是：' + realChatDateStr + '（周' + realWeekdayStr + '）。\n' +
-    '4. ⛔ 绝对禁止在 date 字段里写“明天”“后天”“下周”“改天”“周末”等任何中文词，只允许输出 YYYY-MM-DD 格式。若无法准确换算，events 返回空数组 []。\n\n' +
-    '【📝 标题写法 · 严格遵守以下规则】\n' +
-    '1. 视角要求：用户自己的待办备忘。默认主体就是用户，因此【严禁出现】“用户”、“我”、“二人”、“双方”等词汇。\n' +
-    '2. 称呼要求：提及对方时，直接使用对方的名字「' + (c.name || c.nick) + '」或具体称呼，不能写成“用户”。\n' +
-    '3. 格式规范：时间时段描述（如明晚/下午/周末） + 和谁 + 事项。\n' +
-    '【对照示例】\n' +
-    '✅ 对话“明晚我们一起去看花” ➔ title: "明晚和' + (c.name || c.nick) + '一起去看花"\n' +
-    '❌ 错误标题（严禁！）："明晚和用户一起去看花"、"我和' + (c.name || c.nick) + '明晚去看花"\n' +
-    '✅ 对话“B和C明天一起去做苦力” ➔ 与用户无关，events 返回 []（不提取）\n' +
-    '❌ 错误处理（严禁！）：提取成 "明天和C一起做苦力" 或 "B和C去做苦力"\n\n' +
-
-    // ===== 输出格式定义（JSON Schema） =====
     '【输出格式】只输出一个 JSON 对象，不要任何其他文字：\n' +
-    '{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓","events":[{"date":"YYYY-MM-DD","title":"明晚和' + (c.name || c.nick) + '一起去看花"}]}\n\n' +
+    '{"memories":[{"content":"...","priority":"..."}],"relation":"关系称谓"}\n\n' +
     '聊天记录：\n' + convo + extraBlock;
 
   // 5) 调 AI 并写回
@@ -3544,30 +3593,7 @@ async function generateMemoryForChar(c, mode = 'auto') {
       anyAdded = true;
     });
 
-    var eventAdded = false;
-    try {
-      if (data && Array.isArray(data.events)) {
-        DB.events = DB.events || [];
-        data.events.forEach(function(ev){
-          if (!ev || !ev.date || !ev.title) return;
-          if (!/^\d{4}-\d{1,2}-\d{1,2}$/.test(ev.date)) { console.warn('⚠️ 日期格式不对，已丢弃：', ev.date); return; }
-          var d = new Date(ev.date);
-          if (isNaN(d.getTime())) { console.warn('⚠️ 日期无效，已丢弃：', ev.date); return; }
-          var dup = DB.events.some(function(e){ return e.date===ev.date && e.title===ev.title; });
-          if (dup) return;
-          DB.events.push({
-            id: 'e' + Date.now() + Math.random().toString(36).slice(2,5),
-            title: String(ev.title).slice(0, 20),
-            date: ev.date,
-            from: 'ai',
-            createdAt: Date.now()
-          });
-          eventAdded = true;
-        });
-      }
-    } catch(e) { console.warn('提取约定日程失败', e); }
-
-    if (anyAdded || eventAdded || (data.relation && data.relation.trim())) {
+    if (anyAdded || (data.relation && data.relation.trim())) {
       save();
       return true;
     }
@@ -5634,7 +5660,7 @@ function listenHeart(c, passive) {
         { role: 'user', content: prompt }
       ];
 
-      var out = await callAI(messages, model);
+      var out = await callAI(messages, model, 0, { temperature: 1.05 });
       out = out.trim().replace(/^["「”]+|["」”]+$/g, '').replace(/<state>[\s\S]*?<\/state>/g, '').trim();
 
       if (!out || out.length < 3) {
@@ -10606,6 +10632,7 @@ async function doAutoGreet(c, slot) {
       return;
     }
     out = applyState(c, out);
+    out = out.replace(/\[\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\]\s*/g, '');
 
     // ===== 5. 使用新解析器整段解析（不要自己 split 行） =====
     const parts = parseAIMessage(out);
@@ -11236,9 +11263,23 @@ popLoading('正在调取 ' + displayName + ' 此刻的画面…');
     else if (chat.gapMin <= 5) gapHint = '你们此刻正聊得火热（' + chat.gapMin + '分钟前还在说话）。';
     else if (chat.gapMin <= 60) gapHint = '大约 ' + chat.gapMin + ' 分钟前你们聊过，对话刚告一段落。';
     else gapHint = '已经 ' + Math.round(chat.gapMin / 60) + ' 小时没联系了，用户有阵子没理 TA 了。';
+    // 把最近拍过的场景当"黑名单"，让 AI 避开
+    var recentScenes = (c.watchLogs || []).slice(0, 5)
+      .map(function(w){ return w.scene; })
+      .filter(function(s){ return s && s !== '某处'; });
+    var avoidHint = recentScenes.length
+      ? '【避免重复】最近这几张已经拍过：' + recentScenes.join('、') +
+        '。这次务必换一个不同的地点或明显不同的动作，不要和它们雷同。\n\n'
+      : '';
+
+    // 每次随机挑一个"镜头关注点"，逼 AI 换角度
+    var focusPool = ['光线明暗的变化','一种具体的声音','空气里的某种气味',
+      'TA 手上一个不经意的小动作','一件不起眼的小物件','窗外或门外的动静','TA 脸上一闪而过的表情'];
+    var randomFocus = focusPool[Math.floor(Math.random() * focusPool.length)];
+
 
     var prompt =
-      '【这是一段"偷拍监控画面"，请你作为镜头，描写此刻「' + (c.nick || c.name) + '」正在做什么。】\n\n' +
+      '【这是一段"偷拍监控画面"，请你作为镜头，描写此刻「' + (c.name || c.nick) + '」正在做什么。】\n\n' +
       '现在时间：' + timeText + '\n' +
       (item
         ? ('根据 TA 今天的行程，此刻 TA 本应：' + (item.location ? '在「' + item.location + '」，' : '') + item.content + '\n\n')
@@ -11250,7 +11291,9 @@ popLoading('正在调取 ' + displayName + ' 此刻的画面…');
 '1. 第一步：确定场景。根据当前时间、角色身份/职业、今日行程（如有），想一个**此刻角色最可能身处的地方和正在做的事情**。\n' +
 '   例如：上班族下午可能在工位；深夜可能在床上或客厅；有行程则按行程来。\n' +
 '2. 第二步：确定动作。描述 TA 此刻正在做的具体事情——必须是一个有画面感的动作，不是“坐着/站着/待着”。\n' +
-'   可以是：翻东西、吃东西、写字、擦东西、抽烟、看书、刷碗、换衣服、叠衣服、发呆（要有具体姿态）、听歌、泡茶……\n' +
+'   动作要贴合 TA 此刻的身份、地点、时间——可能在工作/开会、做家务、吃喝、休闲娱乐（看电视/刷视频/打游戏）、外出走动、独处放空等，方向不限，自己合理发挥，不要每次都雷同。\n' +
+'   TA 完全可以「一边忙自己的事、一边心里念着用户」，而不是停下一切只顾着用户。\n' +
+
 '   【关键】动作必须由角色身份和时间合理推导，不同身份、不同时间做不同的事。\n' +
 '3. 第三步：把用户带进来。在前两步的基础上，根据最近聊天氛围，在动作中轻轻带一点“心不在焉”或“想着某件事”的状态。\n' +
 '   例如：翻东西的动作有点机械、翻到一半停下来看了眼手机、手里做着事但眼睛没焦距。\n' +
@@ -11258,6 +11301,8 @@ popLoading('正在调取 ' + displayName + ' 此刻的画面…');
 '4. 写环境细节：光线、声音、气味、周围动静，至少写一项。\n' +
 '5. 字数控制 120~150 字，第三人称“TA/角色名”，有镜头感，不报流水账。\n' +
 '6. 只输出画面文字，不要标题、不要解释。\n\n' +
+      avoidHint +
+      '【本次镜头特别捕捉】这一张请重点带出：' + randomFocus + '。\n\n' +
       '角色人设参考：\n' + persona;
 
     var messages = [
@@ -11615,17 +11660,30 @@ async function viewTodayMood(cid){
 
   try{
     var persona = buildSystem(c); // 已含今日心情
-var prompt =
-  '【任务】你是「'+(c.nick||c.name)+'」本人。现在写一段你今天的"心迹"，就像你自己在心情日记里的碎碎念。\n' +
-  '你今天的心情底色是：'+mood.label+'（'+mood.hint+'）。\n\n' +
-  '【最重要·你是个有独立生活的人】\n' +
-  '- 你有自己的工作、爱好、烦恼、小确幸。碎碎念请写【你自己今天的生活和心情】——发生了什么事、遇到了什么人、在忙什么、心里在想什么。\n' +
-  '- 绝【不要】通篇围着'+((DB.me.realName||DB.me.name)||'对方')+'转，不要满脑子都是TA。你今天的心情大多来自你自己的生活，而不是因为对方。\n' +
-  '- whisper（藏在心里的话）大部分时候也应该是【你自己的事】：一个没跟人说的烦恼、一个私心、一个小愿望；只有大约三次里有一次，才可以和'+((DB.me.realName||DB.me.name)||'对方')+'隐约有关。\n\n' +
-  '【风格】第一人称，真实具体、有生活质感，像随手记的，不要空洞抒情、不要卖惨、不要刻意撩人。\n\n' +
-  '【输出格式】只输出一个 JSON 对象，不要任何解释：\n' +
-  '{"note":"2到3句碎碎念，写你今天自己的生活和心情","whisper":"一句你此刻埋在心里、没对人说出口的话（多数是你自己的事）"}\n\n' +
-  '人设参考：\n'+persona;
+    var meName = (DB.me.realName||DB.me.name) || '对方';
+    var _y = new Date(); _y.setDate(_y.getDate()-1);
+    var yStr = (_y.getMonth()+1)+'月'+_y.getDate()+'日';
+    var yInfo = buildYesterdaySummary(c);
+
+    var prompt =
+      '【任务】你是「'+(c.nick||c.name)+'」本人。现在是清晨，你歇口气，回想【昨天（'+yStr+'）】发生的事，写一段"心迹"，像心情日记里的碎碎念。\n' +
+      '【时间设定·很重要】只写【昨天发生的事】，不要写"今天"还没经历的事（用户可能凌晨或清晨查看，今天你还没开始呢）。\n' +
+      '你此刻的心情底色是：'+mood.label+'（'+mood.hint+'）。\n\n' +
+      '【怎么让心情和昨天自然衔接·很重要】\n' +
+      '- 你今天的心情是随机的，不一定由昨天的事直接造成。真实的人，心情起伏常常没有大理由。\n' +
+      '- 如果今天心情和昨天氛围一致（昨天开心今天也好），顺着写即可。\n' +
+      '- 如果今天心情和昨天【相反】（比如昨天很甜、今天却低落/烦躁），【不要】硬编坏事来解释，也【不要】生硬跳转。可用这几种真实方式过渡：①承认反差本身（"昨天明明挺开心，今早却莫名有点闷"）；②归因于小事或生理（没睡好、天气阴、生物钟、说不上为什么）；③昨天的余味（昨天太忙→今早累但不烦躁；昨天太甜→今早有种空落落的失重感）。\n' +
+      '- 记住：一句"也说不上为什么"比硬编一场悲剧更真实、更打动人。\n\n' +
+      (yInfo
+        ? ('【下面是你昨天真实发生的事，请务必据此来写，不要凭空捏造没发生的事】\n'+yInfo+'\n\n')
+        : ('（昨天没有具体记录，请根据人设，合理想象你昨天作为一个有独立生活的人度过的普通一天。）\n\n')) +
+      '【你是个有独立生活的人】\n' +
+      '- 碎碎念主要写【你昨天自己的生活】：忙了什么、遇到什么、心里在想什么。不要通篇围着'+meName+'转。\n' +
+      '- whisper（藏在心里的话）大部分是【你自己的事】：没说的烦恼、私心、小愿望；大约三次里一次才和'+meName+'隐约有关。\n\n' +
+      '【风格】第一人称，真实具体、有生活质感，像随手记的，不要空洞抒情、不要卖惨、不要刻意撩人。\n\n' +
+      '【输出格式】只输出一个 JSON 对象，不要任何解释：\n' +
+      '{"note":"2到3句碎碎念，基于昨天真实发生的事，并带出此刻的心情","whisper":"一句你此刻埋在心里、没对人说出口的话（多数是你自己的事）"}\n\n' +
+      '人设参考：\n'+persona;
 
     var messages = [
       { role:'system', content:'你在扮演角色写第一人称心情日记。只输出 JSON 对象，不要任何其他文字。' },
@@ -16584,10 +16642,11 @@ function stripImages(messages){
 
 /* ===== API / 备份 ===== */
 // 函数名: callAI
-async function callAI(messages, model, _retry){
+async function callAI(messages, model, _retry, opts){
   const s = DB.settings;
   if(!s.apiUrl || !s.apiKey) throw new Error('请先在设置里填写API');
   _retry = _retry || 0;
+  opts = opts || {};
 
   try{
     const res = await fetch(s.apiUrl + '/chat/completions', {
@@ -16596,7 +16655,13 @@ async function callAI(messages, model, _retry){
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + s.apiKey
       },
-      body: JSON.stringify({ model: model || s.chatModel, messages })
+      body: JSON.stringify(
+        Object.assign(
+          { model: model || s.chatModel, messages },
+          opts.temperature != null ? { temperature: opts.temperature } : {}
+        )
+      )
+
     });
 
     // ★ body 只读这一次，成功/失败都复用 rawText
@@ -16607,12 +16672,13 @@ async function callAI(messages, model, _retry){
       // ★ 图片不支持 → 剥掉图片、原样重试一次（不占用 5xx 的重试次数）
       if(/image/i.test(rawText) &&
          messages.some(function(m){ return Array.isArray(m.content); })){
-        return callAI(stripImages(messages), model, _retry);
+        return callAI(stripImages(messages), model, _retry, opts);
+
       }
       // 5xx（服务器抽风）或 429（限流）→ 自动重试，最多3次
       if((res.status >= 500 || res.status === 429) && _retry < 2){
         await sleep(1500 * (_retry + 1));   // 等一下再重试（越试越久）
-        return callAI(messages, model, _retry + 1);
+        return callAI(messages, model, _retry + 1, opts);
       }
       throw new Error('HTTP ' + res.status + (rawText ? '：' + rawText.slice(0,300) : ''));
     }
@@ -16627,7 +16693,7 @@ async function callAI(messages, model, _retry){
     // 网络层面的错误（断网、超时等）也重试
     if(_retry < 2 && /fetch|network|timeout|Failed/i.test(e.message||'')){
       await sleep(1500 * (_retry + 1));
-      return callAI(messages, model, _retry + 1);
+      return callAI(messages, model, _retry + 1, opts);
     }
     throw e;
   }
