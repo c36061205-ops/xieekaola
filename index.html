@@ -1197,7 +1197,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026828';
+const APP_VER = 'v2026829';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -10467,6 +10467,8 @@ async function checkAutoGreet() {
     if (c.mode === 'offline') continue;
     // 时间衰减检查
     checkTimeDecay(c);
+    if (isFighting(c)) continue;   // ← 新增：吵架角色交给 checkFightGreet
+
     // 被角色拉黑或用户拉黑，跳过
     if (c.isBlockedByChar || c.isBlockedByUser) continue;
     // 基本过滤：草稿、不在聊天列表、活跃度关、关闭主动问候
@@ -10731,6 +10733,254 @@ case 'sticker': {
     console.warn('doAutoGreet 出错:', e);
   }
 }
+/* ============================================================
+   🔥 吵架追命模块（独立，不影响正常聊天/正常打招呼）
+   ============================================================ */
+
+// 吵架关键词 & 判定
+var FIGHT_WORDS = ['分手','冷战','前任','濒临','破冰','闹别扭','闹分手'];
+function isFighting(c){
+  if(!c || !c.status) return false;
+  var rel = c.status.当前关系 || '';
+  if(FIGHT_WORDS.some(function(k){ return rel.indexOf(k) >= 0; })) return true;
+  if((c.status.紧张感 || 0) >= 50) return true;
+  return false;
+}
+
+// 主动度(1-5) → 频率/条数/闭嘴阈值
+var FIGHT_FREQ = {
+  5: { gap: 20*60*1000,  maxBubbles: 4, noReplyLimit: 5 },
+  4: { gap: 30*60*1000,  maxBubbles: 3, noReplyLimit: 4 },
+  3: { gap: 45*60*1000,  maxBubbles: 2, noReplyLimit: 3 },
+  2: { gap: 90*60*1000,  maxBubbles: 1, noReplyLimit: 2 },
+  1: { gap: 180*60*1000, maxBubbles: 1, noReplyLimit: 1 }
+};
+
+// 防PUA铁律（判定 & 生成 共用的核心措辞）
+var PUA_GUARD =
+  '【最高铁律·违反即失败】'+
+  '① 绝不许把角色写成霸道总裁、大男子主义、爹味说教、PUA、自恋、居高临下；'+
+  '禁止"我都是为你好""你就是想太多""是你逼我的"这类话；禁止翻旧账贬低对方、把责任甩给对方。'+
+  '② 若这次矛盾是角色自己的错，必须符合人设地心虚、别扭、笨拙地在意——该服软就服软，绝不死嘴硬到底、更不许倒打一耙。'+
+  '③ 角色是会犯错、会心虚的普通人，不是完美男主。';
+
+var _fpLoading = {}; // 内存标志，不持久化
+
+function defaultFightProfile(){
+  return { 起因:'', 责任方:'', 侧写:'按人设自然反应', 主动度:3, 时间:Date.now() };
+}
+
+function parseFightJSON(raw){
+  if(!raw) return defaultFightProfile();
+  var t = raw.replace(/```(json)?/gi,'').replace(/```/g,'').trim();
+  var m = t.match(/\{[\s\S]*\}/);
+  if(!m) return defaultFightProfile();
+  try{
+    var o = JSON.parse(m[0]);
+    var lvl = parseInt(o.主动度,10);
+    if(isNaN(lvl)||lvl<1||lvl>5) lvl = 3;
+    return {
+      起因:  (o.起因  || '').toString().slice(0,120),
+      责任方:(o.责任方|| '').toString().slice(0,120),
+      侧写:  (o.侧写  || '按人设自然反应').toString().slice(0,120),
+      主动度: lvl,
+      时间: Date.now()
+    };
+  }catch(e){ return defaultFightProfile(); }
+}
+
+// 第一次进入吵架：用轻量模型判一次“吵架档案”，存进 c._fightProfile（只判一次）
+async function detectFightProfile(c){
+  if(!c || c._fightProfile) return;
+  if(_fpLoading[c.id]) return;
+  var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+  if(!model) return;
+
+  var recent = (DB.chats[c.id]||[])
+    .filter(function(m){ return m.type==='text' && m.content && m.content.trim(); })
+    .slice(-100)
+    .map(function(m){ return (m.role==='user'?'对方：':'角色：') + m.content.trim(); })
+    .join('\n');
+  if(!recent) return;
+
+  var persona = [
+    c.pKeywords ? ('性格：'+c.pKeywords) : '',
+    c.pBehavior ? ('行为模式：'+c.pBehavior) : '',
+    c.pStyle    ? ('说话风格：'+c.pStyle) : '',
+    c.sampleLines ? ('事例台词：'+c.sampleLines) : ''
+  ].filter(Boolean).join('\n');
+
+  var prompt =
+    '【任务】下面是一对亲密关系中的两人在吵架/冷战的聊天记录。冷静客观分析，输出一份"吵架反应档案"。\n\n'+
+    PUA_GUARD + '\n'+
+    '（分析责任方时同样适用：若记录里是角色先说了贬低/控制/PUA的话，必须如实判"责任方：角色"，不许反过来说对方矫情/无理取闹。）\n\n'+
+    '【角色人设】\n'+ (persona||'（无）') +'\n\n'+
+    '【最近吵架记录】（对方=用户本人，角色=你要分析的人）\n'+ recent +'\n\n'+
+    '【只输出JSON，不要任何多余文字】\n'+
+    '{"起因":"为什么吵，一句话客观","责任方":"角色/对方/双方，并简述谁做错什么",'+
+    '"侧写":"这个角色接下来会怎么反应，30字内，贴人设别脸谱化","主动度":1到5的整数（5=放不下拼命追，1=高冷倔强几乎不主动）}';
+
+  _fpLoading[c.id] = true;
+  try{
+    var out = await callAI([{role:'user', content:prompt}], model);
+    c._fightProfile = parseFightJSON(out);
+    save();
+  }catch(e){ console.warn('detectFightProfile失败', e); }
+  finally{ delete _fpLoading[c.id]; }
+}
+
+// 和好了就清空档案（关系恢复正常 + 紧张感<50）
+function clearFightIfReconciled(c){
+  if(c && c._fightProfile && !isFighting(c)){
+    delete c._fightProfile;
+    c._fightLog = null;
+    save();
+  }
+}
+
+// 判断此刻该不该追命
+function shouldFightGreet(c){
+  if(replying) return false;
+  if(!c || c._draft || !c.inChatList) return false;
+  if(c.activity==='关' || c.allowAutoGreet===false) return false;
+  if(c.isBlockedByChar || c.isBlockedByUser) return false;
+  if(c.mode==='offline') return false;
+  if(!c._fightProfile) return false;
+
+  var freq = FIGHT_FREQ[c._fightProfile.主动度] || FIGHT_FREQ[3];
+  if(!c._fightLog) c._fightLog = { lastTime:0, noReplyCount:0 };
+
+  var msgs = DB.chats[c.id]||[];
+  var last = msgs.length ? msgs[msgs.length-1] : null;
+
+  if(last && last.role==='assistant'){
+    if((c._fightLog.noReplyCount||0) >= freq.noReplyLimit) return false; // 追够了，暂歇
+  } else {
+    c._fightLog.noReplyCount = 0; // 你回话了，重置闭门羹计数
+  }
+
+  if(last && Date.now()-last.time < 3*60*1000) return false;              // 刚有消息，等等
+  if(c._fightLog.lastTime && Date.now()-c._fightLog.lastTime < freq.gap) return false; // 频率未到
+  return true;
+}
+
+// 执行一次追命
+async function doFightGreet(c){
+  if(!c || c.mode==='offline' || c.isBlockedByChar || c.isBlockedByUser) return;
+  var model = (typeof getEffectiveChatModel==='function' ? getEffectiveChatModel(c) : (c.model||DB.settings.chatModel))
+              || DB.settings.chatModel || DB.settings.auxModel;
+  if(!model) return;
+
+  var fp   = c._fightProfile || defaultFightProfile();
+  var freq = FIGHT_FREQ[fp.主动度] || FIGHT_FREQ[3];
+  var rel  = c.status.当前关系 || '闹别扭';
+
+  var msgs0 = DB.chats[c.id]||[];
+  var last0 = msgs0.length ? msgs0[msgs0.length-1] : null;
+  var lastFromUser = last0 && last0.role==='user';
+
+  var nudge =
+    '（现在你和对方正在冷战/闹矛盾，当前关系是"'+rel+'"。\n'+
+    '这次起因：'+(fp.起因||'你们最近的争执')+'\n'+
+    '这次主要是谁的问题：'+(fp.责任方||'需你据记录判断')+'\n'+
+    '你此刻的反应基调：'+(fp.侧写||'按人设自然反应')+'\n'+
+    '★最重要：以上是这场架的背景，但你必须以【最近几条对话的最新氛围】为准——'+
+    '如果刚才你们已经在缓和、对方已经软下来、或你自己上一条已经在服软/示弱，'+
+    '就顺着这个最新状态继续（继续和好、继续服软、或小心翼翼试探），'+
+    '绝对不许倒退回去重新嘴硬、威胁、翻旧账、把已经缓和的气氛又搞僵。\n'+
+    '对方'+(lastFromUser?'说完就没再理你':'一直没理你')+'，你主动给对方发微信。\n'+
+    PUA_GUARD + '\n'+
+    '④ 用短句，像真人吵架/冷战时发微信，一次最多'+freq.maxBubbles+'条，每条一两句，多条换行分隔。\n'+
+    '⑤ 禁止括号里的动作/神态/心理描写，禁止旁白小作文。\n'+
+    '⑥ 紧扣你们刚才吵的具体内容，别扯无关的。只输出要发的话本身。）';
+
+  var baseLen = (DB.chats[c.id]||[]).length;
+  var baseLastId = baseLen ? DB.chats[c.id][baseLen-1].id : null;
+  var showTyping = (view.type==='chat' && view.id===c.id);
+  if(showTyping && typeof setChatTitle==='function') setChatTitle(c, '正在输入…');
+
+  try{
+    var _fWithTime = (c.mode !== 'offline');
+    var _fAll = (DB.chats[c.id]||[]).map(function(m){ return toApiMsg(m, _fWithTime); });
+    var _fLim = parseInt(DB.settings.ctxLimit);
+    var hist = (_fLim > 0 && _fAll.length > _fLim) ? _fAll.slice(-_fLim) : _fAll;
+
+    var messages = [
+      { role:'system', content: buildSystem(c, null) },
+      { role:'system', content: '【立即生效·最高优先级·吵架护栏】现在是微信线上吵架/冷战：只输出口语短句，禁止括号动作神态心理描写、禁止旁白。'+PUA_GUARD },
+      ...hist,
+      { role:'user', content: nudge }
+    ];
+
+    var out = await callAI(messages, model);
+
+    // 竞态校验：生成期间历史变了（你回话/主模型落库/正在回复）就丢弃
+    var nowLen = (DB.chats[c.id]||[]).length;
+    var nowLastId = nowLen ? DB.chats[c.id][nowLen-1].id : null;
+    if(nowLen!==baseLen || nowLastId!==baseLastId || replying){
+      console.warn('吵架追命：上下文已变，丢弃'); return;
+    }
+
+    out = applyState(c, out);
+    var parts = parseAIMessage(out);
+
+    DB.chats[c.id] = DB.chats[c.id]||[];
+    var cnt = 0;
+    for(var k=0;k<parts.length;k++){
+      if(cnt >= freq.maxBubbles) break;
+      var part = parts[k], msgObj = null;
+      if(part.type==='text'){
+        var txt = part.recalled ? (part.recalledContent||'') : (part.content||'');
+        if(txt.trim()) msgObj = { id:newId(), role:'assistant', type:'text', content:txt.trim(), time:Date.now() };
+      } else if(part.type==='voice'){
+        msgObj = { id:newId(), role:'assistant', type:'voice', content:part.content, time:Date.now(), voiceExpanded:false };
+      } else if(part.type==='sticker'){
+        if(DB.stickers.some(function(s){return s.name===part.content;}))
+          msgObj = { id:newId(), role:'assistant', type:'sticker', content:part.content, time:Date.now() };
+      }
+      if(msgObj){
+        DB.chats[c.id].push(msgObj);
+        if(showTyping && typeof appendBubble==='function') appendBubble(c, msgObj);
+        cnt++;
+      }
+    }
+    if(cnt===0) return;
+
+    c.inChatList = true;
+    if(!c._fightLog) c._fightLog = { lastTime:0, noReplyCount:0 };
+    c._fightLog.lastTime = Date.now();
+    c._fightLog.noReplyCount = (c._fightLog.noReplyCount||0) + 1;
+    save();
+
+    if(showTyping){ if(typeof scrollBottom==='function') scrollBottom(); }
+    else if(typeof markChatUnread==='function'){ markChatUnread(c.id, cnt); }
+
+  }catch(e){ console.warn('doFightGreet出错', e); }
+  finally{
+    if(showTyping && typeof setChatTitle==='function') setChatTitle(c);
+  }
+}
+
+// 总调度：遍历所有吵架角色
+async function checkFightGreet(){
+  if(replying) return;
+  if(!DB.settings.chatModel) return;
+  for(var i=0;i<DB.contacts.length;i++){
+    var c = DB.contacts[i];
+    if(!c || c._draft) continue;
+    clearFightIfReconciled(c);        // 先看是否和好
+    if(!isFighting(c)) continue;
+    if(!c._fightProfile){
+      await detectFightProfile(c);    // 首次：先判性格，本轮不发，下轮再追
+      continue;
+    }
+    if(shouldFightGreet(c)){
+      await doFightGreet(c);
+      break;                          // 一次只追一个，防刷屏
+    }
+  }
+}
+
 /* ===== 心动值（每个角色独立） ===== */
 function addHeart(c,n,reason){if(!c)return;c.hearts=(c.hearts||0)+n;if(n>0)c.heartsTotal=(c.heartsTotal||0)+n;c.heartLog=c.heartLog||[];c.heartLog.unshift({t:Date.now(),n,reason});if(c.heartLog.length>200)c.heartLog.pop();checkMile(c);save();}
 function checkMile(c){c.heartMile=c.heartMile||{};[[50,30],[100,50],[150,100]].forEach(([need,bonus])=>{if((c.heartsTotal||0)>=need&&!c.heartMile[need]){c.heartMile[need]=1;c.hearts+=bonus;c.heartLog.unshift({t:Date.now(),n:bonus,reason:`💗累计达成${need}奖励`});setTimeout(()=>popTip(`🎉 与${c.name||c.nick}的心动值累计突破 ${need}！奖励 ${bonus}`, {icon:'🎉', title:'突破奖励'}),400);}});}
@@ -11597,7 +11847,7 @@ function renderMemoMain() {
       '<div class="avatar" style="width:64px;height:64px;border-radius:50%;flex-shrink:0;' + (c.avatar ? 'background-image:url(\'' + c.avatar + '\')' : '') + '">' + (c.avatar ? '' : (c.name || c.nick)[0]) + '</div>' +
       (isNew ? '<span style="position:absolute;top:-2px;right:-2px;background:#f43;color:#fff;font-size:10px;font-weight:600;padding:1px 5px;border-radius:8px;border:1.5px solid var(--card);">NEW</span>' : '') +
       '</div>' +
-      '<div style="margin-top:10px;font-size:16px;font-weight:600;color:var(--text);">' + esc(c.nick || c.name) + '</div>' +
+      '<div style="margin-top:10px;font-size:16px;font-weight:600;color:var(--text);">' + esc(c.name || c.nick) + '</div>' +
       '<div style="font-size:13px;color:var(--sub);margin-top:4px;">' + count + ' 条记忆</div>' +
     '</div>';
   });
@@ -11820,7 +12070,7 @@ function renderMemoDetail(cid, tab) {
 
   html += '<div style="display:flex;align-items:center;gap:16px;padding:14px 24px 18px;">' +
     av +
-    '<div><div style="font-size:22px;font-weight:700;color:var(--text);">' + esc(c.nick || c.name) + '</div>' +
+    '<div><div style="font-size:22px;font-weight:700;color:var(--text);">' + esc(c.name || c.nick) + '</div>' +
     '<div style="font-size:13px;color:var(--sub);margin-top:5px;">' + mems.length + ' 条记忆 · ' + gifts.length + ' 件礼物往来</div></div>' +
   '</div>';
 
@@ -11918,7 +12168,7 @@ function renderMemoDetail(cid, tab) {
       gifts.forEach(function(g) {
         var toTa = (g.from !== 'ai');
         var dirColor = toTa ? 'var(--theme)' : '#e5484d';
-        var dirText = toTa ? ('你送给' + esc(c.nick || c.name) + '的') : (esc(c.nick || c.name) + '送给你的');
+        var dirText = toTa ? ('你送给' + esc(c.name || c.nick) + '的') : (esc(c.name || c.nick) + '送给你的');
         var priceStr = (g.from === 'ai') ? '心意' : ((g.currency === 'heart') ? (g.price + ' 心动值') : (g.price + ' 金币'));
         var badgeBg = g.rare ? 'linear-gradient(135deg,#fdf1c9,#f5df8e)' : themeSoft;
         html += '<div style="position:relative;display:flex;align-items:center;gap:13px;background:var(--card);border-radius:14px;padding:13px 14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);' + (g.rare ? 'border:1.5px solid #E6B422;box-shadow:0 0 12px rgba(230,180,34,0.22);' : '') + '">' +
@@ -15065,7 +15315,7 @@ if (c.ideaOn && _pendingIdeas && _pendingIdeas.length) {
 
     // ---- 10. 更新状态 & 处理见面/回线上 ----
     lastActivity = Date.now();
-    addHeart(c, 1, '和' + (c.nick || c.name) + '聊天');
+    addHeart(c, 1, '和' + (c.name || c.nick) + '聊天');
     // 购物系统：完成一轮对话静默发放金币（不提示、不告诉AI）
     var _favor = (c.status && c.status.好感度) || 0;
     var _reward = _favor >= 80 ? (2 + Math.floor(Math.random() * 2)) : 2;
@@ -16435,11 +16685,14 @@ DB.settings.sfApiKey = (document.getElementById('sfApiKey')||{value:''}).value.t
 
 document.querySelectorAll('#tabbar .tab').forEach(t=>t.onclick=function(){wechatPage=t.dataset.page;render();});
 // 启动 AI 主动问候：每 3 分钟检查一次（内部有时段限一次+连吃两次闭门羹闭嘴，不会刷屏）
-setInterval(function(){ checkAutoGreet(); }, 3 * 60 * 1000);
+setInterval(function(){ checkAutoGreet(); checkFightGreet(); }, 3 * 60 * 1000);
+
 // 当用户从后台切回页面时，立刻补一次检查（解决手机切后台定时器被冻住的问题）
 document.addEventListener('visibilitychange', function(){
   if (!document.hidden) {
     checkAutoGreet();
+    checkFightGreet();   // ← 新增
+
     // 切回页面时，距上次检查超过10分钟才真正摇一次，避免频繁切换空转
     var lastCheck = DB.settings._lastVisCheck || 0;
     if (Date.now() - lastCheck > 10 * 60 * 1000) {
@@ -16775,6 +17028,7 @@ function openExportModal() {
 function doExport() {
   var data = {};
 
+  // ===== 原有模块 =====
   if (document.getElementById('exp_contacts').checked) data.contacts = DB.contacts;
   if (document.getElementById('exp_chats').checked) data.chats = DB.chats;
   if (document.getElementById('exp_worlds').checked) data.worlds = DB.worlds;
@@ -16783,11 +17037,32 @@ function doExport() {
   if (document.getElementById('exp_stickers').checked) data.stickers = DB.stickers;
 
   if (document.getElementById('exp_settings').checked) {
-    data.settings = DB.settings;
+    data.settings = DB.settings;   // ← 改成完整导出，不再截断
     data.me = DB.me;
   }
 
-  // API Key 单独控制
+  // ===== 🆕 新增：全局独立数据（始终随 settings 一起导出，无需额外勾选） =====
+  if (document.getElementById('exp_settings').checked) {
+    data.lorebook = DB.lorebook || [];
+    data.events = DB.events || [];
+    data.anniversaries = DB.anniversaries || [];
+    data.floating = DB.floating || {};
+    data.floatingUnread = DB.floatingUnread || 0;
+    data.memoUnread = DB.memoUnread || {};
+    data.customNotes = DB.customNotes || [];
+    data.imgQuota = DB.imgQuota || {};
+    data.imgUsage = DB.imgUsage || { date: '', counts: {} };
+    data.shopItems = DB.shopItems || [];
+    data.shopLastGenerated = DB.shopLastGenerated || 0;
+    data.shopLastSent = DB.shopLastSent || {};
+    data.coins = DB.coins || 0;
+    data.desktop = DB.desktop || { wallpaper: '', apps: [], _activeWorld: null };
+    data.momentUnread = DB.momentUnread || 0;
+    data.momentReplyUnread = DB.momentReplyUnread || 0;
+    data._c2cRecent = DB._c2cRecent || [];
+  }
+
+  // ===== API Key 单独控制 =====
   var includeKey = document.getElementById('exp_apikey').checked;
   if (data.settings && !includeKey) {
     data.settings = JSON.parse(JSON.stringify(data.settings));
@@ -16801,13 +17076,12 @@ function doExport() {
     return;
   }
 
-  // 添加一个版本标记，用于导入时校验
-  data._exportVersion = '1.0';
+  data._exportVersion = '2.0';
   data._exportTime = new Date().toISOString();
 
-var jsonStr = JSON.stringify(data, null, 2);
-var dateStr = new Date().toISOString().slice(0, 10);
-downloadJSON(jsonStr, 'backup_' + dateStr + '.json');
+  var jsonStr = JSON.stringify(data, null, 2);
+  var dateStr = new Date().toISOString().slice(0, 10);
+  downloadJSON(jsonStr, 'backup_' + dateStr + '.json');
   closeModal();
   popTip('导出成功！共导出 ' + keys.length + ' 个模块', { icon: '✅', title: '完成' });
 }
@@ -16823,13 +17097,11 @@ function importData() {
       try {
         var imported = JSON.parse(ev.target.result);
 
-        // 简单校验：至少要有 contacts 或 chats 或 worlds 之一
         if (!imported.contacts && !imported.chats && !imported.worlds && !imported.moments && !imported.groups && !imported.stickers && !imported.settings && !imported.me) {
           alert('这不是一个有效的备份文件（没有识别到任何数据模块）');
           return;
         }
 
-        // 统计将要导入哪些模块
         var modules = [];
         if (imported.contacts) modules.push('角色卡');
         if (imported.chats) modules.push('聊天记录');
@@ -16838,14 +17110,24 @@ function importData() {
         if (imported.groups) modules.push('群聊');
         if (imported.stickers) modules.push('表情包');
         if (imported.settings) modules.push('系统配置');
-        if (imported.me) modules.push('个人信息（微信名/头像）');
+        if (imported.me) modules.push('个人信息');
+        // 🆕 新增模块检测
+        if (imported.lorebook) modules.push('世界书');
+        if (imported.events) modules.push('日程');
+        if (imported.anniversaries) modules.push('纪念日');
+        if (imported.floating) modules.push('浮光');
+        if (imported.customNotes) modules.push('自定义小纸条');
+        if (imported.imgQuota) modules.push('生图限额');
+        if (imported.shopItems) modules.push('商店缓存');
+        if (imported.coins !== undefined) modules.push('金币');
+        if (imported.desktop) modules.push('桌面配置');
 
         var msg = '即将导入以下模块：\n\n• ' + modules.join('\n• ') + '\n\n';
         msg += '⚠️ 这将覆盖当前设备上「' + modules.join('」、「') + '」的现有数据。\n';
-        msg += '备份文件中没有的模块（如你本次未导出）将原样保留，不受影响。\n\n确定继续吗？';
+        msg += '备份文件中没有的模块将原样保留。\n\n确定继续吗？';
 
         popConfirm(msg, function() {
-          // 方案 A：只覆盖 imported 里有的字段
+          // ===== 原有模块 =====
           if (imported.contacts) DB.contacts = imported.contacts;
           if (imported.chats) DB.chats = imported.chats;
           if (imported.worlds) DB.worlds = imported.worlds;
@@ -16854,6 +17136,25 @@ function importData() {
           if (imported.stickers) DB.stickers = imported.stickers;
           if (imported.settings) DB.settings = imported.settings;
           if (imported.me) DB.me = imported.me;
+
+          // ===== 🆕 新增：全局独立数据 =====
+          if (imported.lorebook) DB.lorebook = imported.lorebook;
+          if (imported.events) DB.events = imported.events;
+          if (imported.anniversaries) DB.anniversaries = imported.anniversaries;
+          if (imported.floating) DB.floating = imported.floating;
+          if (imported.floatingUnread !== undefined) DB.floatingUnread = imported.floatingUnread;
+          if (imported.memoUnread) DB.memoUnread = imported.memoUnread;
+          if (imported.customNotes) DB.customNotes = imported.customNotes;
+          if (imported.imgQuota) DB.imgQuota = imported.imgQuota;
+          if (imported.imgUsage) DB.imgUsage = imported.imgUsage;
+          if (imported.shopItems) DB.shopItems = imported.shopItems;
+          if (imported.shopLastGenerated) DB.shopLastGenerated = imported.shopLastGenerated;
+          if (imported.shopLastSent) DB.shopLastSent = imported.shopLastSent;
+          if (imported.coins !== undefined) DB.coins = imported.coins;
+          if (imported.desktop) DB.desktop = imported.desktop;
+          if (imported.momentUnread !== undefined) DB.momentUnread = imported.momentUnread;
+          if (imported.momentReplyUnread !== undefined) DB.momentReplyUnread = imported.momentReplyUnread;
+          if (imported._c2cRecent) DB._c2cRecent = imported._c2cRecent;
 
           save();
           render();
