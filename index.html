@@ -15,6 +15,76 @@
 <title>XieEKaoLa</title>
 <style>
   :root{--theme:#07c160;--bg:#ededed;--nav:#f7f7f7;--card:#fff;--text:#111;--sub:#888;--line:#e5e5e5;}
+  #bootLoading{
+  position:fixed; inset:0; z-index:99999;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  overflow:hidden;
+  background:linear-gradient(160deg,
+    color-mix(in srgb, var(--theme) 8%, var(--bg)) 0%,
+    #ffffff 55%,
+    color-mix(in srgb, var(--theme) 8%, var(--bg)) 100%);
+  transition:opacity .9s ease;
+}
+#bootLoading.boot-hide{ opacity:0; pointer-events:none; }
+
+.boot-blob{ position:absolute; border-radius:50%; z-index:0; background:var(--theme); }
+.boot-blob.b1{ width:280px;height:280px; top:12%; left:-8%; opacity:.55;
+  filter:blur(50px) hue-rotate(0deg) brightness(1.05);
+  animation:bootDrift1 14s ease-in-out infinite alternate; }
+.boot-blob.b2{ width:240px;height:240px; bottom:10%; right:-6%; opacity:.42;
+  filter:blur(50px) hue-rotate(40deg) brightness(1.1);
+  animation:bootDrift2 16s ease-in-out infinite alternate; }
+.boot-blob.b3{ width:200px;height:200px; top:42%; right:22%; opacity:.38;
+  filter:blur(50px) hue-rotate(-40deg) brightness(1.1);
+  animation:bootDrift1 18s ease-in-out infinite alternate-reverse; }
+@keyframes bootDrift1{ 0%{transform:translate(0,0);} 100%{transform:translate(30px,40px);} }
+@keyframes bootDrift2{ 0%{transform:translate(0,0);} 100%{transform:translate(-40px,-30px);} }
+
+.boot-sparks{ position:absolute; inset:0; z-index:1; pointer-events:none; }
+.boot-sparks span{ position:absolute; top:-20px; opacity:0; color:var(--theme);
+  animation:bootFall linear infinite; }
+@keyframes bootFall{
+  0%{ transform:translateY(0) rotate(0); opacity:0; }
+  10%{ opacity:.85; } 90%{ opacity:.85; }
+  100%{ transform:translateY(105vh) rotate(360deg); opacity:0; }
+}
+
+.boot-core{ position:relative; z-index:2; margin-bottom:38px;
+  display:flex; gap:12px; align-items:flex-end; height:40px; }
+.boot-core .d{ width:12px; height:12px; border-radius:50%; background:var(--theme);
+  box-shadow:0 4px 10px color-mix(in srgb, var(--theme) 45%, transparent);
+  animation:bootJump 1.4s ease-in-out infinite; }
+.boot-core .d:nth-child(1){ filter:hue-rotate(-30deg) brightness(1.05); }
+.boot-core .d:nth-child(2){ animation-delay:.2s; }
+.boot-core .d:nth-child(3){ filter:hue-rotate(30deg) brightness(1.05); animation-delay:.4s; }
+@keyframes bootJump{ 0%,100%{ transform:translateY(0); opacity:.7; } 50%{ transform:translateY(-16px); opacity:1; } }
+
+.boot-quote{
+  color:color-mix(in srgb, var(--theme) 75%, #5a3a44);
+  font-size:16px; letter-spacing:2px; line-height:1.7;
+  padding:0 40px; text-align:center;
+  min-height:26px; position:relative; z-index:2;
+  margin-bottom:34px; font-weight:400;
+}
+.boot-quote.show{ animation:bootQin 1.1s cubic-bezier(.2,.7,.2,1); }
+@keyframes bootQin{
+  0%{ opacity:0; transform:translateY(12px) scale(.96); filter:blur(3px); }
+  100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); }
+}
+
+.boot-bar{ width:160px; height:6px; border-radius:6px;
+  background:color-mix(in srgb, var(--theme) 18%, transparent);
+  overflow:hidden; position:relative; z-index:2; }
+.boot-bar-fill{ height:100%; width:0%; border-radius:6px;
+  background:var(--theme); transition:width .25s ease;
+  position:relative; overflow:hidden; }
+.boot-bar-fill::after{ content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg, transparent,
+    color-mix(in srgb,#fff 60%, transparent), transparent);
+  animation:bootShine 1.8s linear infinite; }
+@keyframes bootShine{ 0%{transform:translateX(-100%);} 100%{transform:translateX(200%);} }
+
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   body{font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "HarmonyOS Sans", system-ui, sans-serif;background:#000;display:flex;justify-content:center;align-items:flex-start;height:100vh;height:100dvh;overflow:hidden;}
 #phone{width:400px;height:100vh;height:100dvh;max-height:880px;max-width:100vw;transform-origin: top center;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:32px;border:2px solid rgba(255,255,255,0.06);}  @media(max-width:420px){#phone{width:100vw;height:100vh;height:100dvh;max-height:none;}}
@@ -1149,10 +1219,52 @@ margin-bottom:4px;}
 .wv-selbar .sb-all{font-size:14px;color:var(--text);cursor:pointer}
 .wv-selbar .sb-del{margin-left:auto;font-size:14px;color:#fff;background:#fa5151;padding:8px 20px;border-radius:20px;cursor:pointer}
 .wv-selbar .sb-del.dim{background:var(--sub);opacity:.5}
+/* ===== 模型配置 新版样式 ===== */
+.m-title{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub);letter-spacing:.5px;margin:26px 6px 12px;font-weight:600;}
+.m-title:first-child{margin-top:0;}
+.m-title .bar{width:3px;height:13px;border-radius:2px;background:var(--theme);}
+
+.m-card{background:var(--card);border-radius:16px;padding:4px 16px;border:1px solid var(--line);box-shadow:0 4px 16px color-mix(in srgb,var(--text) 5%,transparent);}
+
+.m-row{display:flex;align-items:center;padding:13px 0;gap:12px;border-bottom:1px solid var(--line);}
+.m-row:last-child{border-bottom:none;}
+
+.m-ic{flex-shrink:0;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--theme) 13%,var(--card));color:var(--theme);}
+.m-ic svg{width:17px;height:17px;display:block;}
+
+.m-label{flex-shrink:0;width:76px;}
+.m-label .t{font-size:14px;color:var(--text);font-weight:500;}
+.m-label .d{font-size:11px;color:var(--sub);margin-top:2px;line-height:1.35;}
+
+.m-input,.m-select{flex:1;min-width:0;border:1.5px solid var(--line);background:var(--bg);color:var(--text);border-radius:11px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;text-align:left;}
+.m-input::placeholder{color:var(--sub);}
+.m-input:focus,.m-select:focus{border-color:var(--theme);box-shadow:0 0 0 3px color-mix(in srgb,var(--theme) 16%,transparent);}
+.m-select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:30px;background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' fill='gray' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+
+.m-btns{margin-top:24px;display:flex;flex-direction:column;gap:11px;}
+.m-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:13px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:transform .12s,filter .2s,background .2s;}
+.m-btn:active{transform:scale(.98);}
+.m-btn svg{width:16px;height:16px;display:block;}
+.m-btn.solid{border:none;background:var(--theme);color:#fff;box-shadow:0 5px 15px color-mix(in srgb,var(--theme) 30%,transparent);}
+.m-btn.solid:hover{filter:brightness(1.05);}
+.m-btn.soft{background:var(--card);color:var(--theme);border:1.5px solid color-mix(in srgb,var(--theme) 40%,var(--line));}
+.m-btn.soft:hover{background:color-mix(in srgb,var(--theme) 8%,var(--card));}
 
 </style>
 </head>
 <body>
+<!-- ===== 启动加载页 ===== -->
+<div id="bootLoading">
+  <div class="boot-blob b1"></div>
+  <div class="boot-blob b2"></div>
+  <div class="boot-blob b3"></div>
+  <div class="boot-sparks" id="bootSparks"></div>
+
+  <div class="boot-core"><div class="d"></div><div class="d"></div><div class="d"></div></div>
+  <div id="bootQuote" class="boot-quote"></div>
+  <div class="boot-bar"><div id="bootBarFill" class="boot-bar-fill"></div></div>
+</div>
+
 <script>
 
 window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整）：\n'+m+'\n第'+l+'行\n请检查该段是否复制完整。');};</script>
@@ -1197,7 +1309,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026829';
+const APP_VER = 'v2026830';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -7006,6 +7118,11 @@ async function aiGenLore(worldId){
   if(!w){alert('世界观不存在');return;}
   var model = DB.settings.auxModel || DB.settings.chatModel;
   if(!model){ alert('请先在设置里选择模型'); return; }
+  // —— 询问本次要生成多少条 ——
+  var target = window.prompt('本次想额外生成多少条【世界设定】条目？\n（列表里的 NPC 会自动全部覆盖，不算在这个数里）\n建议填 20 ~ 30', '25');
+  if(target === null) return;              // 点了"取消"就不生成
+  target = parseInt(target, 10);
+  if(!target || target < 1) target = 25;   // 乱填或没填就用默认 25
 
   window._loreGenLock = true;
   var tip = tbTitle.textContent;
@@ -7050,14 +7167,17 @@ async function aiGenLore(worldId){
     prompt += '· 无论哪种情况，判断标准只有一个：这个条目能不能让世界更具体、更好玩、更方便展开对话。\n\n';
 
     // ===== 生成方向 =====
-    prompt += '【应该生成哪些内容】\n';
-    prompt += '围绕下面这些方面，生成"有名有姓、具体"的设定条目（给出具体名称，不要泛泛而谈）：\n';
-    prompt += '· 关键地点：具体的街道、店铺、区域、建筑、秘境等，要有名字和特征。\n';
-    prompt += '· 组织与势力：公司、帮派、机构、门派、家族，说明它们做什么、什么来头。\n';
-    prompt += '· 社会秩序与规则：世界怎么运转、有什么法律/禁忌/潜规则/等级制度。\n';
-    prompt += '· 特殊设定：力量或能量体系、种族、周期性事件（满月/节日/异变）、独特行业或习俗。\n';
-    prompt += '· 物品与传说：标志性道具、历史事件、都市传说、坊间流言。\n';
-    prompt += '举例：世界观只写了"现代都市"，你就应主动生成如"星港商业区""老城区夜市""晨曦地产公司""本地黑帮·青龙会""24小时便利店文化"这类具体条目。\n\n';
+prompt += '【应该生成哪些内容·尽量每个维度都覆盖到】\n';
+prompt += '围绕下面这些方面，生成"有名有姓、具体"的设定条目（给出具体名称，不要泛泛而谈），尽量让每一类都至少有 1~2 条：\n';
+prompt += '· 地理环境：具体的街道、店铺、区域、建筑、地标、秘境、地形气候等，要有名字和特征。\n';
+prompt += '· 历史事件：这个世界过去发生过的大事、战争、灾难、转折点，以及它留下的影响。\n';
+prompt += '· 组织与势力：公司、帮派、机构、门派、家族，说明它们做什么、什么来头、彼此什么关系。\n';
+prompt += '· 关键人物：除已有主要角色外，有名有姓的次要人物（如某店主、某老大、某传奇人物），交代身份和特点。\n';
+prompt += '· 社会秩序与规则：世界怎么运转、有什么法律/禁忌/潜规则/等级制度/用什么货币。\n';
+prompt += '· 文化与习俗：节日、饮食、流行、黑话、禁忌、老百姓的日常生活方式。\n';
+prompt += '· 特殊设定：力量或能量体系、种族、周期性事件（满月/节日/异变）、独特行业或习俗。\n';
+prompt += '· 物品与传说：标志性道具、都市传说、坊间流言、没解开的悬案谜团。\n';
+prompt += '举例：世界观只写了"现代都市"，你就应主动生成如"星港商业区""老城区夜市""晨曦地产公司""本地黑帮·青龙会""24小时便利店文化"这类具体条目。\n\n';
 
     // ===== NPC 全覆盖 =====
     var npcCount = npcInfo ? (npcInfo.match(/\n/g)||[]).length : 0;
@@ -7090,13 +7210,20 @@ async function aiGenLore(worldId){
     prompt += '√ 正例（平实好懂）：沈清欢，人类心理医生，开了家咨询室。她其实知道妖怪存在，还偷偷帮情绪失控、快暴走的妖怪做心理疏导，所以不少大妖怪都欠她人情、很给她面子。\n\n';
 
     // ===== 数量与篇幅 =====
-    prompt += '【数量与篇幅】\n';
-    prompt += '- 除了必须覆盖的 NPC，再额外发散生成 5 到 10 条世界设定类条目。\n';
-    prompt += '- 每条 3-5 句话，要具体、有画面、有信息量，能直接拿来指导对话。\n\n';
+prompt += '【数量与篇幅·硬性要求】\n';
+prompt += '- 除了必须覆盖的 NPC，你必须再额外生成至少 ' + target + ' 条世界设定类条目，低于这个数量视为不合格。\n';
+prompt += '- 这些条目要尽量分散到下面【生成方向】的各个维度，不要全挤在一两个方面。\n';
+prompt += '- 每条 3-5 句话，要具体、有画面、有信息量，能直接拿来指导对话。宁可多写，不要偷懒省事。\n\n';
+// ===== 注入模式判断 =====
+prompt += '【每条的注入模式·请你自己判断】\n';
+prompt += '给每个条目再标一个 "mode" 字段，值只能是 "selective" 或 "constant"，二选一：\n';
+prompt += '· selective（默认，绝大多数条目都用这个）：具体的地点、人物、组织、物品、事件等。只有聊天里提到它时才有用。\n';
+prompt += '· constant（每次都注入，要非常克制）：只有"影响整个世界、时时刻刻都成立、聊什么都绕不开"的核心底层设定才用，比如世界的时代背景、最基本的世界铁律。\n';
+prompt += '· 重要：标成 constant 的条目最多 1~3 条，绝大部分请标 selective。拿不准就标 selective。\n\n';
 
     // ===== 输出格式 =====
-    prompt += '【输出格式】严格按下面的JSON数组输出，不要任何多余文字、不要markdown代码块：\n';
-    prompt += '[{"name":"关键词1、关键词2","content":"设定内容"},{"name":"关键词","content":"设定内容"}]';
+prompt += '【输出格式】严格按下面的JSON数组输出，不要任何多余文字、不要markdown代码块：\n';
+prompt += '[{"name":"关键词1、关键词2","content":"设定内容","mode":"selective"},{"name":"关键词","content":"设定内容","mode":"constant"}]';
 
     // —— 4. 调 AI ——
     var result = await callAI([{role:'user', content:prompt}], model);
@@ -7120,6 +7247,8 @@ async function aiGenLore(worldId){
       var ne = blankLore(worldId);
       ne.name = (item.name||'').toString().trim();
       ne.content = (item.content||'').toString().trim();
+      // 按 AI 的判断设置注入模式，只认 constant，其余一律 selective（安全兜底）
+      ne.mode = (item.mode === 'constant') ? 'constant' : 'selective';
       DB.lorebook = DB.lorebook || [];
       DB.lorebook.push(ne);
       added++;
@@ -8793,40 +8922,76 @@ ${settingsCell(ICO_DATA,'数据管理','导入 · 导出','data','#3ac07a')}
   // ===== 模型配置 =====
   if(tab==='model'){
     tbTitle.textContent = '模型配置';
-    content.innerHTML = `
-<div class="section-title">AI 接口</div>
-<div class="section">
-  <div class="row"><label>API地址</label><input id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1"></div>
-  <div class="row"><label>密钥Key</label><input id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off"></div>
-</div>
-<button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button>
-<div class="section-title">语音识别（SiliconFlow · Whisper）</div>
-<div class="section">
-  <div class="row">
-    <label>SF密钥Key<br><span style="font-size:11px;color:var(--sub);font-weight:400;">无额度自动降级语音模型</span></label>
-    <input id="sfApiKey" value="${s.sfApiKey||''}" type="text" placeholder="sk-..." autocomplete="off">
+content.innerHTML = `
+<div class="m-title"><span class="bar"></span>AI 接口</div>
+<div class="m-card">
+  <div class="m-row">
+    <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg></div>
+    <div class="m-label"><div class="t">API地址</div></div>
+    <input class="m-input" id="apiUrl" value="${s.apiUrl}" placeholder="https://api.openai.com/v1">
+  </div>
+  <div class="m-row">
+    <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.5 12.5 20 3"/><path d="m16 7 3 3"/><path d="m14 9 2 2"/></svg></div>
+    <div class="m-label"><div class="t">密钥Key</div></div>
+    <input class="m-input" id="apiKey" value="${s.apiKey}" type="text" placeholder="sk-..." autocomplete="off">
   </div>
 </div>
-      <button class="btn gray" onclick="fetchModels()">🔄 连接并拉取模型</button>
-      <div class="section">
-        <div class="row"><label>主聊天模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">角色对话 · 深度推理</span></label>
-          <select id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select></div>
-        <div class="row"><label>辅助模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">润色 · 生成 · 推演</span></label>
-          <select id="auxModel"><option>${s.auxModel||'请先拉取'}</option></select></div>
-        <div class="row"><label>轻量模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">高频后台 · 快速响应</span></label>
-          <select id="lightModel"><option>${s.lightModel||'请先拉取'}</option></select></div>
-        <div class="row"><label>生图模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">朋友圈配图 · 角色随手拍</span></label>
-          <select id="imageModel"><option>${s.imageModel||'请先拉取'}</option></select></div>
-        <div class="row"><label>语音模型<br><span style="font-size:11px;color:var(--sub);font-weight:400;">语音转文字 · 通话听写</span></label>
-          <select id="voiceModel"><option>${s.voiceModel||'请先拉取'}</option></select></div>
 
-	  </div>
+<div class="m-title"><span class="bar"></span>语音识别 · Whisper</div>
+<div class="m-card">
+  <div class="m-row">
+    <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4"/></svg></div>
+    <div class="m-label"><div class="t">SF密钥</div><div class="d">无额度自动降级</div></div>
+    <input class="m-input" id="sfApiKey" value="${s.sfApiKey||''}" type="text" placeholder="sk-..." autocomplete="off">
+  </div>
+</div>
 
-      <button class="btn" onclick="saveApi()">保存接口设置</button>
-	  <button class="btn" onclick="openImgQuota()">🖼️ 生图限额管理</button>
+<div class="m-title"><span class="bar"></span>模型分配</div>
+<div class="m-card">
+  <div class="m-row">
+    <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+    <div class="m-label"><div class="t">主聊天</div><div class="d">对话 · 推理</div></div>
+    <select class="m-select" id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select>
+  </div>
+  <div class="m-row">
+    <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg></div>
+    <div class="m-label"><div class="t">辅助</div><div class="d">润色 · 生成</div></div>
+    <select class="m-select" id="auxModel"><option>${s.auxModel||'请先拉取'}</option></select>
+  </div>
+  <div class="m-row">
+    <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
+    <div class="m-label"><div class="t">轻量</div><div class="d">高频 · 快速</div></div>
+    <select class="m-select" id="lightModel"><option>${s.lightModel||'请先拉取'}</option></select>
+  </div>
+  <div class="m-row">
+    <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5L9 20"/></svg></div>
+    <div class="m-label"><div class="t">生图</div><div class="d">配图 · 随手拍</div></div>
+    <select class="m-select" id="imageModel"><option>${s.imageModel||'请先拉取'}</option></select>
+  </div>
+  <div class="m-row">
+    <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2-7 4 16 3-11 2 5h6"/></svg></div>
+    <div class="m-label"><div class="t">语音</div><div class="d">转文字 · 听写</div></div>
+    <select class="m-select" id="voiceModel"><option>${s.voiceModel||'请先拉取'}</option></select>
+  </div>
+</div>
 
-      <div style="height:20px"></div>
-    `;
+<div class="m-btns">
+  <button class="m-btn soft" onclick="fetchModels()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
+    连接并拉取模型
+  </button>
+  <button class="m-btn solid" onclick="saveApi()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+    保存接口设置
+  </button>
+  <button class="m-btn soft" onclick="openImgQuota()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5L9 20"/></svg>
+    生图限额管理
+  </button>
+</div>
+
+<div style="height:20px"></div>
+`;
     return;
   }
 
@@ -10556,7 +10721,7 @@ async function doAutoGreet(c, slot) {
   if (c.mode === 'offline') return;
   // ===== 1. 前置检查 =====
   if (c.isBlockedByChar || c.isBlockedByUser) return;
-  const model = DB.settings.chatModel || DB.settings.auxModel || DB.settings.lightModel;
+  const model = getEffectiveChatModel(c) || DB.settings.chatModel || DB.settings.auxModel || DB.settings.lightModel;
   if (!model) {
     console.warn('自动问候：没有可用模型，跳过');
     return;
@@ -10890,12 +11055,20 @@ function shouldFightGreet(c){
   if(c._fightLog.lastTime && Date.now()-c._fightLog.lastTime < freq.gap) return false; // 频率未到
   return true;
 }
+function stripTimeStr(s){
+  if(!s) return s;
+  // 删掉 [03:12] 或 03:12 这种
+  s = s.replace(/\[?\d{1,2}[:：]\d{2}\]?/g, '');
+  // 删掉 凌晨3点12分 / 下午3点 / 3点 这种
+  s = s.replace(/(凌晨|清晨|早上|上午|中午|下午|傍晚|晚上|深夜|半夜)?\s*\d{1,2}\s*点(\s*\d{1,2}\s*分)?/g, '');
+  // 清掉删完后开头多余的标点空格
+  return s.replace(/^[\s，,。.、\-]+/, '').trim();
+}
 
 // 执行一次追命
 async function doFightGreet(c){
   if(!c || c.mode==='offline' || c.isBlockedByChar || c.isBlockedByUser) return;
-  var model = (typeof getEffectiveChatModel==='function' ? getEffectiveChatModel(c) : (c.model||DB.settings.chatModel))
-              || DB.settings.chatModel || DB.settings.auxModel;
+var model = getEffectiveChatModel(c) || DB.settings.chatModel || DB.settings.auxModel || DB.settings.lightModel;
   if(!model) return;
 
   var fp   = c._fightProfile || defaultFightProfile();
@@ -10919,7 +11092,8 @@ async function doFightGreet(c){
     PUA_GUARD + '\n'+
     '④ 用短句，像真人吵架/冷战时发微信，一次最多'+freq.maxBubbles+'条，每条一两句，多条换行分隔。\n'+
     '⑤ 禁止括号里的动作/神态/心理描写，禁止旁白小作文。\n'+
-    '⑥ 紧扣你们刚才吵的具体内容，别扯无关的。只输出要发的话本身。）';
+    '⑥ 紧扣你们刚才吵的具体内容，别扯无关的。只输出要发的话本身。\n'+
+    '⑦ 记录里每句话前面的时间只是给你参考的，你自己发的消息里【绝对不要】写出任何具体时间，比如"03:12""凌晨3点12分""3点""半夜两点"这类都不行，像真人一样直接说话即可。）';
 
   var baseLen = (DB.chats[c.id]||[]).length;
   var baseLastId = baseLen ? DB.chats[c.id][baseLen-1].id : null;
@@ -10958,6 +11132,7 @@ async function doFightGreet(c){
       var part = parts[k], msgObj = null;
       if(part.type==='text'){
         var txt = part.recalled ? (part.recalledContent||'') : (part.content||'');
+		txt = stripTimeStr(txt);
         if(txt.trim()) msgObj = { id:newId(), role:'assistant', type:'text', content:txt.trim(), time:Date.now() };
       } else if(part.type==='voice'){
         msgObj = { id:newId(), role:'assistant', type:'voice', content:part.content, time:Date.now(), voiceExpanded:false };
@@ -16718,7 +16893,9 @@ var imgList = list.filter(function(id){
   return /image|flux|dall|banana|grok.*image|sd|stable|draw|paint|midjourney|mj|imagen/i.test(id);
 });
 fillSelect('imageModel', imgList.length ? imgList : list, DB.settings.imageModel);
-fillSelect('voiceModel', list, DB.settings.voiceModel);
+// 只显示谷歌 gemini 相关的语音模型
+var voiceList = list.filter(function(id){ return /gemini/i.test(id); });
+fillSelect('voiceModel', voiceList, DB.settings.voiceModel);
 
     // ===== 新增：保存模型列表到全局设置 =====
     DB.settings.availableModels = list;
@@ -16788,12 +16965,145 @@ setInterval(function() {
   maybeAutoPost();
 }, 30 * 60 * 1000);
 function bootStartup(){
-  applySkin(DB.settings.skin || 'fusion');   // ✅ 新增：DB 就绪后无条件应用已保存主题
-  render();        // ← 第一次渲染
+  applySkin(DB.settings.skin || 'fusion');
+  render();
   tick();
   restoreFocusState();
   setTimeout(updateAllIcons, 100);
   if(focusPhase==='work'&&view.type==='focus') render();
+
+  runBootLoading();   // ✅ 新增
+}
+// ============================================================
+// 启动加载过渡
+// ============================================================
+function runBootLoading(){
+  var loading = document.getElementById('bootLoading');
+  if(!loading) return;
+
+  var quoteEl = document.getElementById('bootQuote');
+  var barEl   = document.getElementById('bootBarFill');
+  var sparkBox= document.getElementById('bootSparks');
+
+  // ===== 文案库 =====
+  // A 类·氛围句
+  var quotesFixed = [
+    '嘘，世界刚醒','深呼吸，你到了','光来了','门开了一条缝',
+    '月亮还没来得及下班','风把窗帘吹得很轻','桌上的茶还温着','有人给你留了灯',
+    '云正慢慢走过屋顶','时钟走得比平时慢','要不要进来坐坐？','听见了吗，故事在响',
+    '猜猜今天会发生什么','别怕，慢慢来','把外面的吵闹关在门外','这里只剩下你和故事',
+    '今天也偷偷为你留了位置','一切刚刚好','欢迎回到这个小世界'
+  ];
+  // B 类·角色句模板（{name} 会被替换成随机角色名）
+  var quotesCharTemplates = [
+    '{name}正在偷吃你藏的零食','{name}正把想你写进日记',
+    '{name}刚刚抬头看了眼门口','{name}又把那句话咽了回去','{name}今天起得比你早',
+    '{name}的咖啡凉了第三次','{name}好像有话想说','{name}在等谁呢？',
+    '猜猜{name}今天心情如何','{name}：装作不在意','{name}假装没在等你',
+    '{name}偷偷占了靠窗的位置','{name}给你留了最后一块蛋糕','{name}把秘密说给了月亮',
+    '{name}练习了很多遍第一句话','{name}数着你上线的脚步声'
+  ];
+
+  // ===== 生成一句文案 =====
+  function pickBootQuote(){
+    var names = [];
+    try{
+      (DB.contacts || []).forEach(function(c){
+        if(c && c.name && c.inChatList) names.push(c.name);
+      });
+    }catch(e){}
+
+    var h = new Date().getHours();
+    var timed;
+    if(h >= 5 && h < 9)        timed = ['太阳刚打了个哈欠','清晨踮着脚走近','昨夜的梦还挂在窗边','早，世界刚睁眼'];
+    else if(h >= 9 && h < 12)  timed = ['阳光正好，风也温柔','上午在慢慢舒展','这个点最适合开始'];
+    else if(h >= 12 && h < 14) timed = ['吃饱了吗？','正午打了个盹','阳光懒懒地趴在桌上'];
+    else if(h >= 14 && h < 18) timed = ['午后的风有点困','阳光斜斜地照进来','喝杯茶再继续吧'];
+    else if(h >= 18 && h < 23) timed = ['华灯初上','夜色温柔地漫过来','每扇窗都亮起了灯','星星开始上班了'];
+    else                       timed = ['月亮值夜班中','全世界都睡了，除了想你的人','夜深了，故事更浓','嘘，别吵醒星星'];
+
+    var r = Math.random();
+    if(names.length && r < 0.5){
+      var tpl = quotesCharTemplates[Math.floor(Math.random() * quotesCharTemplates.length)];
+      var name = names[Math.floor(Math.random() * names.length)];
+      return tpl.replace('{name}', name);
+    }else if(r < 0.78){
+      return timed[Math.floor(Math.random() * timed.length)];
+    }else{
+      return quotesFixed[Math.floor(Math.random() * quotesFixed.length)];
+    }
+  }
+
+  // ===== 显示文案（带淡入动画） =====
+  function showRandomQuote(){
+    if(!quoteEl) return;
+    quoteEl.classList.remove('show');
+    void quoteEl.offsetWidth;
+    quoteEl.textContent = pickBootQuote();
+    quoteEl.classList.add('show');
+  }
+
+  // ===== 生成飘落小元素（颜色跟主题走） =====
+  if(sparkBox){
+    var icons = ['✦','·','❁','✿','♡','✧','•'];
+    for(var i=0;i<16;i++){
+      var s = document.createElement('span');
+      s.textContent = icons[Math.floor(Math.random()*icons.length)];
+      s.style.left = Math.random()*100 + '%';
+      s.style.fontSize = (10 + Math.random()*12) + 'px';
+      s.style.animationDuration = (7 + Math.random()*7) + 's';
+      s.style.animationDelay = (Math.random()*8) + 's';
+      s.style.filter = 'hue-rotate(' + (Math.floor(Math.random()*100)-50) + 'deg) brightness(1.05)';
+      sparkBox.appendChild(s);
+    }
+  }
+
+  // ===== 首次显示 + 每 2 秒换一句 =====
+  showRandomQuote();
+  var quoteTimer = setInterval(showRandomQuote, 2000);
+
+  var MIN_MS = 4000;   // 最少显示 4 秒
+  var MAX_MS = 5000;   // 最多显示 5 秒
+  var startTime = Date.now();
+  var finished = false;
+
+  function hide(){
+    if(finished) return;
+    finished = true;
+    clearInterval(quoteTimer);
+    clearInterval(progressTimer);
+    loading.classList.add('boot-hide');
+    setTimeout(function(){
+      if(loading && loading.parentNode) loading.remove();
+    }, 900);
+  }
+
+  // ===== 后台任务：更新天气 + 自动打招呼 =====
+  var tasksDone = false;
+  Promise.resolve()
+    .then(function(){ try{ autoCheckWeatherUpdate(); }catch(e){} })
+    .then(function(){ try{ return checkAutoGreet(); }catch(e){} })
+    .then(function(){ tasksDone = true; })
+    .catch(function(){ tasksDone = true; });
+
+  // ===== 进度条 + 提前结束判断 =====
+  var progressTimer = setInterval(function(){
+    var elapsed = Date.now() - startTime;
+    var p = Math.min(100, elapsed / MAX_MS * 100);
+    if(barEl) barEl.style.width = p + '%';
+
+    var weatherIdle = (typeof _weatherUpdating === 'undefined') || !_weatherUpdating;
+    if(tasksDone && weatherIdle && elapsed >= MIN_MS){
+      if(barEl) barEl.style.width = '100%';
+      hide();
+    }
+  }, 100);
+
+  // ===== 兜底：最多 5 秒强制结束 =====
+  setTimeout(function(){
+    if(barEl) barEl.style.width = '100%';
+    hide();
+  }, MAX_MS);
 }
 
 function exportCharacter(id) {
