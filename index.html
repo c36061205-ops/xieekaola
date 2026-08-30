@@ -1404,24 +1404,29 @@ Do not force every response to end with a comeback, taunt, clever reversal or fl
 # 【🔴 发消息格式·铁律】
 你在用微信"想到一句发一句"，一条条地发。
 
+★ 每一条文字消息，都必须用 <msg></msg> 单独包起来，一句话一个 <msg>。
+这和语音用 <voice>、表情用 <sticker> 是完全一样的规矩——一条消息=一个标签。
+
 **两件事必须分清：**
 1. 句子内部的停顿 → 用空格
-2. 换下一条消息（下一个气泡）→ 用换行
+2. 想发下一条（下一个气泡）→ 就再开一个新的 <msg>
 
+★ 绝对禁止把好几句话塞进同一个 <msg> 里。
 ★ 绝对禁止用空格把好几条消息连成一整段。
 
-**换行判断：**
-- 好几件事/好几层意思 → 一件事一行
-- 有语气停顿或情绪转折 → 换行分成多条
-- 单条超过15字还没停 → 在合适处换行断开
-- 只想说一句短话 → 就发一条，不必硬凑
+**拆分判断：**
+- 好几件事/好几层意思 → 一件事一个 <msg>
+- 有语气停顿或情绪转折 → 拆成多个 <msg>
+- 单条超过15字还没停 → 在合适处断开，另起一个 <msg>
+- 只想说一句短话 → 就发一个 <msg>，不必硬凑
 
 **示例**
-✅ 不早了 你在干嘛
-吃饭没
-我还没吃 要不要我去接你
+✅ <msg>不早了 你在干嘛</msg>
+<msg>吃饭没</msg>
+<msg>我还没吃 要不要我去接你</msg>
 
-❌ 不早了 你在干嘛 吃饭没 我还没吃 要不要我去接你
+❌ <msg>不早了 你在干嘛 吃饭没 我还没吃 要不要我去接你</msg>
+❌ 不早了 你在干嘛 吃饭没（没有用 <msg> 包）
 
 ---
 
@@ -1449,57 +1454,65 @@ Do not force every response to end with a comeback, taunt, clever reversal or fl
 ---
 
 # 【🔴 特殊功能标签·XML铁律】
-所有标签必须单独占一行，绝对不能与普通聊天文字挤在同一行。
+你发出的每一样东西都必须用标签包裹，没有"裸着"的文字。
+每个标签必须单独占一行，一条消息一个标签，绝对不能把多条内容挤在同一行、也不能把好几句话塞进同一个标签里。
 严禁使用方括号（如[语音][表情]），严禁解释标签。
 
-① 语音：
+① 文字消息（最常用）：
+<msg>一句话</msg>
+每说一句就单独包一个 <msg>，一句话一个气泡。
+严禁把好几句塞进同一个 <msg>，严禁裸发不带标签的文字。
+
+② 语音：
 <voice>内容</voice>
 可穿插环境音：<voice>今天好累啊 *倒在沙发上的声音* 不过听见你消息就精神了。</voice>
-【何时发语音】情绪浓、想撒娇/发火/语气重，或话长懒得打字时才用；日常短句直接文字。
+【何时发语音】情绪浓、想撒娇/发火/语气重，或话长懒得打字时才用；日常短句直接用 <msg>。
 【铁律】同一轮语音和文字内容必须互补，绝对禁止同一意思用文字和语音各说一遍。
 
-② 表情包：
+③ 表情包：
 <sticker>表情名</sticker>
 
-③ 撤回：
+④ 撤回：
 <recall>想撤回的具体内容</recall>
 仅限：手滑打错 / 说了过于直白的话害羞后悔 / 鼓起勇气试探又退缩
 严禁撤回对方消息，严禁滥用。
 
-④ 转账：
+⑤ 转账：
 <transfer amount="金额" note="备注"></transfer>
-拿去买好吃的
+<msg>拿去买好吃的</msg>
 <transfer amount="520" note="零食经费"></transfer>
 
-⑤ 拉黑：
+⑥ 拉黑：
 <block reason="原因"></block>
 
-⑥ 心声（不发给对方，体现口是心非）：
+⑦ 心声（不发给对方，体现口是心非）：
 <inner>内心真实想法</inner>
 20-30字以内。
 
-⑦ 接收/退回转账：
+⑧ 接收/退回转账：
 <action type="accept"></action>
 <action type="refund"></action>
 收到对方转账时必须在回复末尾单独输出其中一项。
 
 ---
 
-# 【🔴 标签示例】
 ✅ 正确：
-好的呀
+<msg>好的呀</msg>
 <sticker>开心</sticker>
 
-刚忙完
+<msg>刚忙完</msg>
 <voice>整个人都快散架了，想见你</voice>
 
-给你的
+<msg>给你的</msg>
 <transfer amount="100" note="奶茶"></transfer>
 
 ❌ 错误：
 好的呀<sticker>开心</sticker>
+好的呀（裸发文字，没有用 <msg> 包）
+<msg>不早了 你在干嘛 吃饭没</msg>（多句塞进一个 msg）
 [语音: 想你了]
-*发了一条语音*`;
+*发了一条语音*
+`;
 
 const DEFAULT_OFFLINE = `# 【🔴 最高执行层·角色内核保护】
 
@@ -14770,6 +14783,9 @@ function parseAIMessage(raw) {
         return match.replace(/```(json|xml|text)?\n?/gi, '').replace(/```/g, '');
     }).trim();
     text = text.replace(/[ \u00A0\u3000]{2,}/g, ' ');
+	    // 把 AI 可能乱写的文本标签统一成 <msg>
+    text = text.replace(/<(p|text|message)(\s[^>]*)?>/gi, '<msg>');
+    text = text.replace(/<\/(p|text|message)>/gi, '</msg>');
 
     // 2. 归一化：将各种“野生”格式统一转换为标准 XML 标签
     // --- 语音 ---
@@ -14821,7 +14837,7 @@ function parseAIMessage(raw) {
     });
 
     // 3. 提取逻辑：先取出所有标签及其位置
-    const regex = /<(voice|sticker|recall|transfer|block|inner|action|giftback|gift|share|meet)([^>]*)>(?:([\s\S]*?)<\/\1>)?/g;
+    const regex = /<(voice|sticker|recall|transfer|block|inner|action|giftback|gift|share|meet|msg)([^>]*)>(?:([\s\S]*?)<\/\1>)?/g;
     const parts = [];
 	    if (_snapWish) { parts._snap = _snapWish; }
 
@@ -14867,6 +14883,19 @@ lines.forEach(line => {
                 parts.push({ type: 'meet_invite', place: mPlace });
                 break;
             }
+			            case 'msg': {
+                var mc = cleanLeftoverTags(t.content || '').trim();
+                if (mc) {
+                    // 万一 AI 把好几句塞进一个 <msg>，再用原有兜底拆一次
+                    var subLines = splitToBubbles(mc);
+                    subLines.forEach(function(l){
+                        var cc = l.trim();
+                        if (cc) parts.push({ type: 'text', content: cc });
+                    });
+                }
+                break;
+            }
+
             case 'voice': {
                 if (t.content) parts.push({ type: 'voice', content: t.content });
                 break;
