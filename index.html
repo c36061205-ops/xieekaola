@@ -1896,6 +1896,23 @@ wallpaper: `
 wallpaper: `
   linear-gradient(180deg, #F7EDE4 50%, #F0E0D4 100%)
 `
+},
+// 在 SKINS 数组中添加以下新主题（放在现有主题后面即可）
+{
+  id: 'goose',
+  name: '🦆 大鹅来啦',
+  color: '#E8915A',
+  '--theme': '#E8915A',
+  '--bg': '#FFF8F3',
+  '--nav': '#FFF8F3',
+  '--card': '#FFFFFF',
+  '--text': '#4A2E1D',
+  '--sub': '#8C7364',
+  '--line': '#F0D5C0',
+  '--ring-opacity': '0.7',
+  wallpaper: `
+    linear-gradient(180deg, #FFF8F3 0%, #FFFFFF 40%, #FFF8F3 100%)
+  `
 }
 ];
 // ========== 主题图标集 ==========
@@ -2097,6 +2114,28 @@ redsun_forest: {
   // 发现页 - 朋友圈入口
   discoverMoments: 'https://s1.imagehub.cc/images/2026/08/26/907f0bf5df8c8ccac8d350921a797902.png'
 },
+goose: {
+  // 桌面应用图标
+  wechat:   'https://s1.imagehub.cc/images/2026/08/31/eadec62c0758ee052bd3dbb12fb94aed.png',
+  notes:    'https://s1.imagehub.cc/images/2026/08/31/dd477e4b544ae1fc86a746d87ba62fe0.png',
+  focus:    'https://s1.imagehub.cc/images/2026/08/31/3622b81e4cacedc7d76abd4b3fb3cda5.png',
+  settings: 'https://s1.imagehub.cc/images/2026/08/31/aa0cb6baea3c68a9604a9727826c132f.png',
+  album:    'https://s1.imagehub.cc/images/2026/08/31/b56b3478d3aa76e4f80824a467619263.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/08/31/ffe01b5b930cf9141130fd524557e08f.png',
+  music:    'https://s1.imagehub.cc/images/2026/08/31/31640296db24e00c76d7ee35ff6bc424.png',
+  preset:   'https://s1.imagehub.cc/images/2026/08/31/832e3cd0a2de7e28ef6e27ef66553d3d.png',
+  floating: 'https://s1.imagehub.cc/images/2026/08/31/e5f960ccf93e9635b842bad7341ad2cd.png',
+  shop:     'https://s1.imagehub.cc/images/2026/08/31/f65dc8465490f3187be202f767e81c1d.png',
+  world:    'https://s1.imagehub.cc/images/2026/08/31/8acaa56a25bf725c9ab4acf7adbcf3cb.png',
+  game:     'https://s1.imagehub.cc/images/2026/08/31/1765a94b9ce7e086b858e44652943d82.png',
+  // 底栏图标
+  tabChats:    'https://s1.imagehub.cc/images/2026/08/31/d18bc187a057235b64a0240c9f93f1ae.png',
+  tabContacts: 'https://s1.imagehub.cc/images/2026/08/31/b585598b44a99cc8b5358cfd58932830.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/31/03c04f4fbf503cc0314f7ebe56ca43cc.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/08/31/cd87cf349e8ed3f89d0adc699066c580.png',
+  // 发现页 - 朋友圈入口
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/31/f9a76eca144f167251c6d9965fcbf9d8.png'
+}
 };
 // =====================================
 function applySkin(id) {
@@ -2137,7 +2176,8 @@ if (phone) phone.dataset.theme = id;
 
   // ===== 主题适配（浅色/深色） =====
 
-var isLight = (id === 'flora_notebook' || id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest');if (isLight) {
+var isLight = (id === 'flora_notebook' || id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose');
+if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
   root.style.setProperty('--clock-sub-color', 'var(--sub)');
   
