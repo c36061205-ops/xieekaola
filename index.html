@@ -391,7 +391,8 @@ textarea {
   transform:rotate(45deg);bottom:-6px;}
 #popmenu.arrow-up .pop-arrow{bottom:auto;top:-6px;transform:rotate(225deg);}
 
-.mbody{max-width:76%;padding:7px 10px;border-radius:6px;background:var(--card);color:var(--text);font-size:15px;line-height:1.5;word-break:break-word;white-space:pre-wrap;box-shadow:0 1px 1px rgba(0,0,0,.05);}  .msg.me .mbody{background:var(--theme);color:#fff;}
+.mbody{max-width:76%;padding:7px 10px;border-radius:6px;background:var(--card);color:var(--text);font-size:15px;line-height:1.5;word-break:break-word;white-space:pre-wrap;box-shadow:0 1px 1px rgba(0,0,0,.05);border:1px solid var(--line);}  .msg.me .mbody{background:var(--theme);color:#fff;border:none;}
+
 #chatBottom{padding:10px 14px 24px 14px;box-sizing:border-box;}
 
 #bubbleRow{display:flex;gap:8px;margin-bottom:10px;}
@@ -1270,6 +1271,57 @@ margin-bottom:4px;}
 .m-btn.soft{background:var(--card);color:var(--theme);border:1.5px solid color-mix(in srgb,var(--theme) 40%,var(--line));}
 .m-btn.soft:hover{background:color-mix(in srgb,var(--theme) 8%,var(--card));}
 
+/* ============ 气泡风格系统 ============ */
+
+/* —— 风格一：sticker 贴纸尾巴 —— */
+#phone[data-bubble="sticker"] .cavatar{border-radius:50%;}
+#phone[data-bubble="sticker"] .mbody{
+  position:relative;          /* ★关键：没有这行三角会跑飞 */
+  border-radius:14px;
+  box-shadow:0 2px 6px rgba(0,0,0,.18);
+  overflow:visible;
+}
+/* 对方尾巴（左） */
+#phone[data-bubble="sticker"] .msg:not(.me) .mbody::before{
+  content:"";position:absolute;top:12px;left:-5px;z-index:1;
+  border-top:5px solid transparent;border-bottom:5px solid transparent;
+  border-right:6px solid var(--card);}
+/* 自己尾巴（右） */
+#phone[data-bubble="sticker"] .msg.me .mbody::before{
+  content:"";position:absolute;top:12px;right:-5px;z-index:1;
+  border-top:5px solid transparent;border-bottom:5px solid transparent;
+  border-left:6px solid var(--theme);}
+/* 自己气泡：右上角小星星贴纸 */
+#phone[data-bubble="sticker"] .msg.me .mbody::after{
+  content:"";position:absolute;width:20px;height:20px;left:-8px;top:-9px;z-index:2;
+  background-size:contain;background-repeat:no-repeat;pointer-events:none;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2 L13.8 8.8 L20.5 10.5 L14.5 14.2 L15.8 21 L11.2 16.5 L6 19.5 L8.5 13.5 L3 9.8 L9.8 9 Z" fill="%23FFE382" stroke="%23FFFFFF" stroke-width="0.8"/></svg>');}
+
+/* 对方气泡：右下角小爪印贴纸 */
+#phone[data-bubble="sticker"] .msg:not(.me) .mbody::after{
+  content:"";position:absolute;width:18px;height:18px;right:-7px;bottom:-7px;z-index:2;
+  background-size:contain;background-repeat:no-repeat;pointer-events:none;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><ellipse cx="7" cy="8.5" rx="2" ry="2.6" fill="%23E8DDE6"/><ellipse cx="12" cy="7" rx="2.1" ry="2.8" fill="%23E8DDE6"/><ellipse cx="17" cy="8.5" rx="2" ry="2.6" fill="%23E8DDE6"/><path d="M7 13.5 C7 11,17 11,17 13.5 C17 17,14.5 19,12 19 C9.5 19,7 17,7 13.5 Z" fill="%23E8DDE6"/></svg>');}
+
+/* —— 风格二：vintage 复古票据（不碰颜色版）—— */
+#phone[data-bubble="vintage"] .cavatar{border-radius:2px;}
+#phone[data-bubble="vintage"] .mbody{
+  position:relative;          /* ★同样必须 */
+  border-radius:2px;
+  border:1.5px solid var(--sub);
+  outline:1px dashed color-mix(in srgb, var(--sub) 55%, transparent);
+  outline-offset:-5px;
+  box-shadow:3px 3px 0 rgba(0,0,0,.35);
+}
+/* 四角十字/星标记（纯装饰，不改颜色） */
+#phone[data-bubble="vintage"] .msg:not(.me) .mbody::before{content:"＋";position:absolute;top:1px;left:3px;font-size:8px;color:var(--sub);opacity:.7;}
+#phone[data-bubble="vintage"] .msg:not(.me) .mbody::after{content:"＋";position:absolute;bottom:1px;right:3px;font-size:8px;color:var(--sub);opacity:.7;}
+#phone[data-bubble="vintage"] .msg.me .mbody::before{content:"＋";position:absolute;top:1px;left:3px;font-size:8px;color:#fff;opacity:.7;}
+#phone[data-bubble="vintage"] .msg.me .mbody::after{content:"＋";position:absolute;bottom:1px;right:3px;font-size:8px;color:#fff;opacity:.7;}
+/* ============ 气泡风格系统结束 ============ */
+
 </style>
 </head>
 <body>
@@ -1329,7 +1381,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026830';
+const APP_VER = 'v2026902';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -1917,7 +1969,7 @@ wallpaper: `
   linear-gradient(180deg, #F7EDE4 50%, #F0E0D4 100%)
 `
 },
-// 在 SKINS 数组中添加以下新主题（放在现有主题后面即可）
+
 {
   id: 'goose',
   name: '🦆 大鹅来啦',
@@ -1932,6 +1984,53 @@ wallpaper: `
   '--ring-opacity': '0.7',
   wallpaper: `
     linear-gradient(180deg, #FFF8F3 0%, #FFFFFF 40%, #FFF8F3 100%)
+  `
+},
+
+// 在 SKINS 数组中替换 sea_salt 的 wallpaper 字段
+{
+  id: 'sea_salt',
+  name: '🧂 海盐软糖',
+  color: '#FED7E2',
+  '--theme': '#E883A0',
+  '--bg': '#FCFDF7',
+  '--nav': '#FCFDF7',
+  '--card': '#FFFFFF',
+  '--text': '#2D3748',
+  '--sub': '#7A8A9E',
+  '--line': '#E8EEF5',
+  '--ring-opacity': '0.6',
+  // ★ 新壁纸：用径向渐变做马卡龙色泡泡
+  wallpaper: `
+    /* 大泡泡 - 浅粉 */
+    radial-gradient(circle at 12% 18%, rgba(254, 215, 226, 0.55) 0%, rgba(254, 215, 226, 0.1) 40%, transparent 55%),
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.6) 0%, transparent 20%),
+    /* 大泡泡 - 婴儿蓝 */
+    radial-gradient(circle at 85% 22%, rgba(214, 232, 250, 0.50) 0%, rgba(214, 232, 250, 0.08) 35%, transparent 50%),
+    radial-gradient(circle at 85% 22%, rgba(255, 255, 255, 0.5) 0%, transparent 18%),
+    /* 大泡泡 - 奶黄 */
+    radial-gradient(circle at 78% 82%, rgba(253, 241, 184, 0.45) 0%, rgba(253, 241, 184, 0.08) 35%, transparent 50%),
+    radial-gradient(circle at 78% 82%, rgba(255, 255, 255, 0.5) 0%, transparent 18%),
+    /* 中泡泡 - 薄荷 */
+    radial-gradient(circle at 32% 72%, rgba(200, 235, 220, 0.40) 0%, rgba(200, 235, 220, 0.06) 30%, transparent 45%),
+    radial-gradient(circle at 32% 72%, rgba(255, 255, 255, 0.5) 0%, transparent 15%),
+    /* 中泡泡 - 淡紫 */
+    radial-gradient(circle at 55% 48%, rgba(220, 210, 240, 0.35) 0%, rgba(220, 210, 240, 0.05) 30%, transparent 45%),
+    radial-gradient(circle at 55% 48%, rgba(255, 255, 255, 0.4) 0%, transparent 15%),
+    /* 小泡泡 - 粉橙 */
+    radial-gradient(circle at 22% 45%, rgba(255, 220, 200, 0.35) 0%, transparent 25%),
+    radial-gradient(circle at 22% 45%, rgba(255, 255, 255, 0.4) 0%, transparent 12%),
+    /* 小泡泡 - 天蓝 */
+    radial-gradient(circle at 68% 55%, rgba(200, 225, 245, 0.30) 0%, transparent 25%),
+    radial-gradient(circle at 68% 55%, rgba(255, 255, 255, 0.35) 0%, transparent 12%),
+    /* 极小点缀 - 奶黄 */
+    radial-gradient(circle at 45% 90%, rgba(253, 241, 184, 0.25) 0%, transparent 15%),
+    radial-gradient(circle at 45% 90%, rgba(255, 255, 255, 0.3) 0%, transparent 8%),
+    /* 极小点缀 - 粉 */
+    radial-gradient(circle at 92% 48%, rgba(254, 215, 226, 0.25) 0%, transparent 15%),
+    radial-gradient(circle at 92% 48%, rgba(255, 255, 255, 0.3) 0%, transparent 8%),
+    /* 纯白底 */
+    #FCFDF7
   `
 }
 ];
@@ -2155,6 +2254,30 @@ goose: {
   tabMe:       'https://s1.imagehub.cc/images/2026/08/31/cd87cf349e8ed3f89d0adc699066c580.png',
   // 发现页 - 朋友圈入口
   discoverMoments: 'https://s1.imagehub.cc/images/2026/08/31/f9a76eca144f167251c6d9965fcbf9d8.png'
+},
+
+sea_salt: {
+  // 桌面应用
+  wechat:   'https://s1.imagehub.cc/images/2026/09/02/f66f7b927342de5c3e46251447ed639a.png',
+  notes:    'https://s1.imagehub.cc/images/2026/09/02/93080aca39aa117358c30b318d7ecd3e.png',
+  focus:    'https://s1.imagehub.cc/images/2026/09/02/855ab716403700900ed756d0f2a400f0.png',
+  settings: 'https://s1.imagehub.cc/images/2026/09/02/c8fec7057ea2680e6326b77c073df5fb.png',
+  album:    'https://s1.imagehub.cc/images/2026/09/02/025abf19215b90b225e6b635a412888d.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/09/02/fa56af9d3ee1cbac417baf3636c7b251.png',
+  music:    'https://s1.imagehub.cc/images/2026/09/02/b29305e2d702702a51aac0dc1061521b.png',
+  preset:   'https://s1.imagehub.cc/images/2026/09/02/b8a76d6405329deade1ebefc485b262d.png',
+  floating: 'https://s1.imagehub.cc/images/2026/09/02/1b2e1cf9153d60daf8b7c59a32850a45.png',
+  shop:     'https://s1.imagehub.cc/images/2026/09/02/4f35c60297a6c5f40125e9de38c7e5b9.png',
+  world:    'https://s1.imagehub.cc/images/2026/09/02/40ec36185633c94e1dd6dd1726d680f0.png',
+  game:     'https://s1.imagehub.cc/images/2026/09/02/d9809b0ec2fa23e939237a4f3f398a88.png',
+  // 底栏
+  tabChats:    'https://s1.imagehub.cc/images/2026/09/02/45463f9387873999873f0e1d876d1e76.png',
+  // ★ 已替换为新的通讯录图标链接
+  tabContacts: 'https://s1.imagehub.cc/images/2026/09/02/c3ad2212abd7ca6043f48b4b01298628.png',
+  tabDiscover: 'https://s1.imagehub.cc/images/2026/09/02/7626b4d36c7309fbbfa855b368480ae7.png',
+  tabMe:       'https://s1.imagehub.cc/images/2026/09/02/36b57a9b74c9c080109eab104553eab4.png',
+  // 发现页 - 朋友圈入口
+  discoverMoments: 'https://s1.imagehub.cc/images/2026/09/02/acc1a76ecf981bc17754f8b4a6567b00.png'
 }
 };
 // =====================================
@@ -2196,7 +2319,7 @@ if (phone) phone.dataset.theme = id;
 
   // ===== 主题适配（浅色/深色） =====
 
-var isLight = (id === 'flora_notebook' || id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose');
+var isLight = (id === 'flora_notebook' || id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose' || id === 'sea_salt');
 if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
   root.style.setProperty('--clock-sub-color', 'var(--sub)');
@@ -2222,6 +2345,21 @@ if (isLight) {
     else if (wechatPage === 'me' && typeof renderWxMe === 'function') renderWxMe();
   }
 }
+/* ============ 气泡风格：清单 + 切换 ============ */
+// 以后加新风格，只要在这个数组里加一行 { id:'新名字', name:'显示名' }
+const BUBBLE_STYLES = [
+  { id: '',        name: '默认',     icon: '💬' },
+  { id: 'sticker', name: '贴纸尾巴', icon: '🐾' },
+  { id: 'vintage', name: '复古胶片', icon: '🎞' },
+];
+
+function applyBubbleStyle(id){
+  var phone = document.getElementById('phone');
+  if(phone) phone.setAttribute('data-bubble', id || '');
+  DB.settings.bubbleStyle = id || '';   // 存进设置
+  save();                                // 用你现成的保存机制
+}
+
 function updateAllIcons() {
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
 
@@ -8793,7 +8931,32 @@ function openGroupSet(gid){
   render();
 }
 
-function renderWxMe(){const ag=DB.settings.autoGreet!==false;content.innerHTML=`<div class="field" style="border-top:1px solid var(--line)"><label>我的微信头像（点击选择）</label><div class="avapick" style="--ava:${DB.me.avatar?`url('${DB.me.avatar}')`:'none'}" onclick="pickMeAvatar()">${DB.me.avatar?'':'点击上传'}</div></div><div class="section"><div class="row"><label>我的网名</label><input value="${esc(DB.me.name)}" onchange="DB.me.name=this.value;save()"></div><div class="row"><label>真实姓名</label><input value="${esc(DB.me.realName)}" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名"></div></div><div class="hint">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>`;}
+function renderWxMe(){const ag=DB.settings.autoGreet!==false;content.innerHTML=`<div class="field" style="border-top:1px solid var(--line)"><label>我的微信头像（点击选择）</label><div class="avapick" style="--ava:${DB.me.avatar?`url('${DB.me.avatar}')`:'none'}" onclick="pickMeAvatar()">${DB.me.avatar?'':'点击上传'}</div></div><div class="section"><div class="row"><label>我的网名</label><input value="${esc(DB.me.name)}" onchange="DB.me.name=this.value;save()"></div><div class="row"><label>真实姓名</label><input value="${esc(DB.me.realName)}" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名"></div></div>
+
+    <div class="hint">
+      这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。
+    </div>
+
+    <div class="section-title" style="margin-top:10px;">💬 聊天气泡样式</div>
+    <div style="padding:6px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      ${BUBBLE_STYLES.map(function(bs){
+        var isAct = (DB.settings.bubbleStyle || '') === bs.id;
+        var themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme').trim() || '#B34A6A';
+        return `
+        <div onclick="applyBubbleStyle('${bs.id}');renderWxMe()"
+             style="cursor:pointer;position:relative;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;border:1.5px solid ${isAct ? themeColor : 'var(--line)'};background:${isAct ? themeColor + '12' : 'var(--card)'};box-shadow:${isAct ? '0 2px 8px ' + themeColor + '28' : '0 1px 2px rgba(0,0,0,0.02)'};transition:all 0.2s;user-select:none;overflow:hidden;">
+<div style="width:24px;height:24px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;background:${isAct ? themeColor + '22' : 'var(--bg)'};border:1px solid ${isAct ? themeColor : 'var(--line)'};">${bs.icon || '💬'}</div>
+
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12.5px;font-weight:${isAct ? '600' : '500'};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;">${bs.name}</div>
+            <div style="font-size:9.5px;color:${isAct ? themeColor : 'var(--sub)'};opacity:${isAct ? '0.9' : '0.6'};margin-top:2px;">${isAct ? '使用中' : '点击应用'}</div>
+          </div>
+          ${isAct ? `<div style="position:absolute;top:0;right:0;width:18px;height:18px;background:${themeColor};border-bottom-left-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:bold;line-height:1;">✓</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
 function pickMeAvatar(){pickImage(d=>{DB.me.avatar=d;save();render();});}
 function attachSwipe() {
   var cells = document.querySelectorAll('.swipe-cell');
@@ -17076,14 +17239,15 @@ setInterval(function() {
 }, 30 * 60 * 1000);
 function bootStartup(){
   applySkin(DB.settings.skin || 'fusion');
+  applyBubbleStyle(DB.settings.bubbleStyle || '');   // ← 新增这一行
   render();
   tick();
   restoreFocusState();
   setTimeout(updateAllIcons, 100);
   if(focusPhase==='work'&&view.type==='focus') render();
-
   runBootLoading();   // ✅ 新增
 }
+
 // ============================================================
 // 启动加载过渡
 // ============================================================
