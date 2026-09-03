@@ -1280,60 +1280,10 @@ margin-bottom:4px;}
 .m-btn.solid:hover{filter:brightness(1.05);}
 .m-btn.soft{background:var(--card);color:var(--theme);border:1.5px solid color-mix(in srgb,var(--theme) 40%,var(--line));}
 .m-btn.soft:hover{background:color-mix(in srgb,var(--theme) 8%,var(--card));}
-
-/* ============ 气泡风格系统 ============ */
-
-/* —— 风格一：sticker 贴纸尾巴 —— */
-#phone[data-bubble="sticker"] .cavatar{border-radius:50%;}
-#phone[data-bubble="sticker"] .mbody{
-  position:relative;          /* ★关键：没有这行三角会跑飞 */
-  border-radius:14px;
-  box-shadow:0 2px 6px rgba(0,0,0,.18);
-  overflow:visible;
-}
-/* 对方尾巴（左） */
-#phone[data-bubble="sticker"] .msg:not(.me) .mbody::before{
-  content:"";position:absolute;top:12px;left:-5px;z-index:1;
-  border-top:5px solid transparent;border-bottom:5px solid transparent;
-  border-right:6px solid var(--card);}
-/* 自己尾巴（右） */
-#phone[data-bubble="sticker"] .msg.me .mbody::before{
-  content:"";position:absolute;top:12px;right:-5px;z-index:1;
-  border-top:5px solid transparent;border-bottom:5px solid transparent;
-  border-left:6px solid var(--theme);}
-/* 自己气泡：右上角小星星贴纸 */
-#phone[data-bubble="sticker"] .msg.me .mbody::after{
-  content:"";position:absolute;width:20px;height:20px;left:-8px;top:-9px;z-index:2;
-  background-size:contain;background-repeat:no-repeat;pointer-events:none;
-  filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2 L13.8 8.8 L20.5 10.5 L14.5 14.2 L15.8 21 L11.2 16.5 L6 19.5 L8.5 13.5 L3 9.8 L9.8 9 Z" fill="%23FFE382" stroke="%23FFFFFF" stroke-width="0.8"/></svg>');}
-
-/* 对方气泡：右下角小爪印贴纸 */
-#phone[data-bubble="sticker"] .msg:not(.me) .mbody::after{
-  content:"";position:absolute;width:18px;height:18px;right:-7px;bottom:-7px;z-index:2;
-  background-size:contain;background-repeat:no-repeat;pointer-events:none;
-  filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
-  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><ellipse cx="7" cy="8.5" rx="2" ry="2.6" fill="%23E8DDE6"/><ellipse cx="12" cy="7" rx="2.1" ry="2.8" fill="%23E8DDE6"/><ellipse cx="17" cy="8.5" rx="2" ry="2.6" fill="%23E8DDE6"/><path d="M7 13.5 C7 11,17 11,17 13.5 C17 17,14.5 19,12 19 C9.5 19,7 17,7 13.5 Z" fill="%23E8DDE6"/></svg>');}
-
-/* —— 风格二：vintage 复古票据（不碰颜色版）—— */
-#phone[data-bubble="vintage"] .cavatar{border-radius:2px;}
-#phone[data-bubble="vintage"] .mbody{
-  position:relative;          /* ★同样必须 */
-  border-radius:2px;
-  border:1.5px solid var(--sub);
-  outline:1px dashed color-mix(in srgb, var(--sub) 55%, transparent);
-  outline-offset:-5px;
-  box-shadow:3px 3px 0 rgba(0,0,0,.35);
-}
-/* 四角十字/星标记（纯装饰，不改颜色） */
-#phone[data-bubble="vintage"] .msg:not(.me) .mbody::before{content:"＋";position:absolute;top:1px;left:3px;font-size:8px;color:var(--sub);opacity:.7;}
-#phone[data-bubble="vintage"] .msg:not(.me) .mbody::after{content:"＋";position:absolute;bottom:1px;right:3px;font-size:8px;color:var(--sub);opacity:.7;}
-#phone[data-bubble="vintage"] .msg.me .mbody::before{content:"＋";position:absolute;top:1px;left:3px;font-size:8px;color:#fff;opacity:.7;}
-#phone[data-bubble="vintage"] .msg.me .mbody::after{content:"＋";position:absolute;bottom:1px;right:3px;font-size:8px;color:#fff;opacity:.7;}
 /* ============ 气泡风格系统结束 ============ */
-/* ===== 软萌卡片风 终极精炼版 ===== */
+/* ===== 软萌卡片风 终极完整版（无冗余） ===== */
 
-/* 1. 悬浮胶囊底栏 */
+/* 1. 悬浮胶囊底栏 (无文字、纯SVG、不常驻桌面) */
 body.wx-theme-card #tabbar {
   position: absolute;
   bottom: 16px;
@@ -1382,7 +1332,7 @@ body.wx-theme-card #tabbar .tab.active .tab-card-svg {
   stroke-width: 2.2 !important;
 }
 
-/* 2. 聊天列表大卡片 */
+/* 2. 聊天/通讯录 列表大白卡片 */
 body.wx-theme-card .card-theme-wrap {
   padding: 10px 16px 85px 16px !important;
   display: flex !important;
@@ -1411,7 +1361,7 @@ body.wx-theme-card .card-container .cell {
   user-select: none;
 }
 
-/* 3. 头像双层渐变光圈 */
+/* 3. 列表头像双层渐变光圈 */
 body.wx-theme-card .avatar-halo-wrap {
   position: relative !important;
   width: 44px !important;
@@ -1530,7 +1480,56 @@ body.wx-theme-card .avatar-inner-img {
   background: var(--card) !important;
   box-shadow: 0 1px 4px rgba(0,0,0,0.02) !important;
   display: inline-flex !important;
-  align-items: center !important;
+  align-items: center;
+}
+
+/* 6. 聊天界面：干净优雅的软萌气泡（无重叠双尾巴） */
+body.wx-theme-card .msg .mbody {
+  position: relative !important;
+  border-radius: 18px !important;
+  padding: 10px 14px !important;
+  font-size: 14.5px !important;
+  line-height: 1.5 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  word-break: break-word !important;
+}
+
+/* 彻底清除一切多余的伪元素尖角，杜绝双尾巴 */
+body.wx-theme-card .msg .mbody::before,
+body.wx-theme-card .msg .mbody::after,
+body.wx-theme-card .msg::before,
+body.wx-theme-card .msg::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* 左侧（对方）气泡：左上角微收 4px，其余三边大圆角，自然形成软萌微尾巴 */
+body.wx-theme-card .msg:not(.me) .mbody {
+  background: var(--card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-top-left-radius: 4px !important;
+}
+
+/* 右侧（我方）气泡：右上角微收 4px，其余三边大圆角 */
+body.wx-theme-card .msg.me .mbody {
+  background: var(--theme) !important;
+  color: #fff !important;
+  border: 1px solid var(--theme) !important;
+  border-top-right-radius: 4px !important;
+}
+
+/* 聊天界面头像圆角优化 */
+body.wx-theme-card .cavatar {
+  border-radius: 14px !important;
+  border: 1px solid var(--line) !important;
+}
+
+/* 群聊角色名 */
+body.wx-theme-card .msg-name {
+  font-size: 11px !important;
+  color: var(--sub) !important;
+  margin-bottom: 3px !important;
 }
 </style>
 </head>
