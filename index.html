@@ -473,20 +473,30 @@ textarea {
   .sheet-box{background:var(--card);width:100%;border-radius:14px 14px 0 0;padding:18px 16px;}
   .sheet-box h3{font-size:16px;margin-bottom:14px;text-align:center;color:var(--text);}
   .sheet-box input{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px;font-size:15px;margin-bottom:10px;background:var(--bg);color:var(--text);outline:none;}
-.popup{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;animation:popFade .2s ease;}
-.popup-box{background:var(--card);width:78%;max-width:300px;border-radius:16px;padding:20px 18px 14px;text-align:center;animation:popUp .25s ease;box-shadow:0 8px 30px rgba(0,0,0,.3);}
-.popup-icon{font-size:34px;margin-bottom:8px;}
-.popup-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;}
-.popup-msg{font-size:14px;color:var(--sub);line-height:1.7;white-space:pre-wrap;margin-bottom:16px;}
-.popup-btns{display:flex;gap:10px;justify-content:center;}
-.popup-btn{flex:0 1 auto;padding:8px 16px;border:none;border-radius:10px;font-size:13px;cursor:pointer;font-weight:600;min-width:70px;}
-.popup-btn.main{background:var(--theme);color:#fff;}
-.popup-btn.sub{background:var(--bg);color:var(--sub);border:1px solid var(--line);padding:8px 16px;}
-.popup-spin{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--theme);border-radius:50%;margin:6px auto 12px;animation:popSpin .8s linear infinite;}
-@keyframes watchBlink { 0%,100%{opacity:1} 50%{opacity:.25} }
+.popup{position:absolute;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:30px;box-sizing:border-box;
+  background:rgba(0,0,0,.28);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:popFade .2s ease;}
+.popup-box{width:270px;border-radius:16px;overflow:hidden;text-align:center;
+  background:color-mix(in srgb, var(--card) 82%, transparent);
+  backdrop-filter:blur(30px) saturate(1.6);-webkit-backdrop-filter:blur(30px) saturate(1.6);
+  box-shadow:0 10px 40px rgba(0,0,0,.25);animation:popUp .28s cubic-bezier(.2,.9,.3,1.05);}
+.popup-head{padding:20px 18px 17px;}
+.popup-icon{font-size:26px;line-height:1;margin-bottom:9px;}
+.popup-title{font-size:17px;font-weight:600;color:var(--text);margin-bottom:5px;letter-spacing:.2px;}
+.popup-msg{font-size:13px;color:var(--sub);line-height:1.5;white-space:pre-wrap;}
+.popup-btns{display:flex;border-top:.5px solid var(--line);}
+.popup-btn{flex:1;padding:12px 8px;border:none;background:transparent;font-size:17px;color:var(--theme);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s;}
+.popup-btn:active{background:color-mix(in srgb, var(--text) 8%, transparent);}
+.popup-btn.sub{color:var(--text);}
+.popup-btn.main{font-weight:600;}
+.popup-btn + .popup-btn{border-left:.5px solid var(--line);}
+.popup-spin{width:28px;height:28px;margin:22px auto 14px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--theme);animation:popSpin .7s linear infinite;}
+.popup-loadmsg{font-size:14px;color:var(--sub);padding:0 18px 22px;}
+.popup-input{width:calc(100% - 36px);box-sizing:border-box;margin:0 18px 18px;padding:9px 11px;font-size:14px;color:var(--text);background:color-mix(in srgb,var(--text) 5%, transparent);border:.5px solid var(--line);border-radius:9px;outline:none;transition:border-color .2s;}
+.popup-input:focus{border-color:var(--theme);}
 @keyframes popFade{from{opacity:0}to{opacity:1}}
-@keyframes popUp{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes popUp{from{transform:scale(1.08);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes popSpin{to{transform:rotate(360deg)}}
+
 /* ===== 设置页 · 表情卡片网格 ===== */
 .stgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start;}
 .st-card{position:relative;box-sizing:border-box;background:var(--card);border:2px solid transparent;border-radius:14px;padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.05);}
@@ -1321,7 +1331,207 @@ margin-bottom:4px;}
 #phone[data-bubble="vintage"] .msg.me .mbody::before{content:"＋";position:absolute;top:1px;left:3px;font-size:8px;color:#fff;opacity:.7;}
 #phone[data-bubble="vintage"] .msg.me .mbody::after{content:"＋";position:absolute;bottom:1px;right:3px;font-size:8px;color:#fff;opacity:.7;}
 /* ============ 气泡风格系统结束 ============ */
+/* ===== 软萌卡片风 终极精炼版 ===== */
 
+/* 1. 悬浮胶囊底栏 */
+body.wx-theme-card #tabbar {
+  position: absolute;
+  bottom: 16px;
+  left: 24px;
+  right: 24px;
+  height: 54px;
+  background: var(--card);
+  border-radius: 27px;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--line);
+  padding: 0;
+  z-index: 100;
+}
+body.wx-theme-card #tabbar[style*="display: none"] {
+  display: none !important;
+}
+body.wx-theme-card #tabbar .tab {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  font-size: 0 !important;
+  color: transparent !important;
+}
+body.wx-theme-card #tabbar .tab .ic,
+body.wx-theme-card #tabbar .tab img,
+body.wx-theme-card #tabbar .tab .tab-label {
+  display: none !important;
+}
+.tab-card-svg { display: none; }
+body.wx-theme-card #tabbar .tab .tab-card-svg {
+  display: block !important;
+  width: 22px !important;
+  height: 22px !important;
+  stroke: var(--sub) !important;
+  stroke-width: 1.8 !important;
+  fill: none !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+body.wx-theme-card #tabbar .tab.active .tab-card-svg {
+  stroke: var(--text) !important;
+  stroke-width: 2.2 !important;
+}
+
+/* 2. 聊天列表大卡片 */
+body.wx-theme-card .card-theme-wrap {
+  padding: 10px 16px 85px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+body.wx-theme-card .card-container {
+  background: var(--card) !important;
+  border-radius: 24px !important;
+  padding: 8px 16px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid var(--line) !important;
+  overflow: hidden !important;
+}
+body.wx-theme-card .card-container .cell {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 9px 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 3. 头像双层渐变光圈 */
+body.wx-theme-card .avatar-halo-wrap {
+  position: relative !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  background: linear-gradient(135deg, #ff7299, var(--theme)) !important;
+  border: none !important;
+  flex-shrink: 0 !important;
+  margin-right: 11px !important;
+}
+body.wx-theme-card .avatar-inner-img {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  background-color: var(--card) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1.5px solid var(--card) !important;
+  overflow: hidden !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+/* 4. 顶部名片卡片与小书签吊牌 */
+.user-banner-card {
+  background: var(--card) !important;
+  border-radius: 20px !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  position: relative !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.02) !important;
+}
+.banner-ribbon {
+  position: absolute !important;
+  top: 0 !important;
+  left: 18px !important;
+  width: 8px !important;
+  height: 20px !important;
+  background: var(--theme) !important;
+  border-radius: 0 0 3.5px 3.5px !important;
+  opacity: 0.85 !important;
+}
+.banner-left { 
+  margin-left: 18px !important; 
+  flex: 1 !important; 
+  min-width: 0 !important; 
+  padding-right: 8px !important; 
+}
+.banner-input-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  width: 100% !important;
+}
+.banner-input-sub {
+  font-size: 11px !important;
+  color: var(--sub) !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+}
+.banner-my-avatar {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  background-color: var(--bg) !important;
+  border: 1px solid var(--line) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+/* 5. 虚线胶囊 */
+.dash-deco { 
+  display: flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 5px !important; 
+  user-select: none !important; 
+  padding: 0 4px !important;
+}
+.dash-line { 
+  flex: 1 !important; 
+  border-bottom: 1px dashed var(--line) !important; 
+  opacity: 0.7 !important; 
+}
+.dash-dot { 
+  width: 3px !important; 
+  height: 3px !important; 
+  background: var(--sub) !important; 
+  border-radius: 50% !important; 
+  opacity: 0.5 !important; 
+}
+.dash-pill {
+  padding: 2.5px 11px !important;
+  border: 1px dashed var(--line) !important;
+  border-radius: 12px !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  color: var(--sub) !important;
+  background: var(--card) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.02) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
 </style>
 </head>
 <body>
@@ -1356,32 +1566,28 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   <div id="content"></div>
 <div id="tabbar" style="display:none">
   <div class="tab" data-page="chats">
-    <div class="ic">
-      <img id="tabIconChats" src="" style="width:40px;height:40px;display:block;">
-    </div>
-    聊天
+    <div class="ic"><img id="tabIconChats" src="" style="width:40px;height:40px;display:block;"></div>
+    <span class="tab-label">聊天</span>
+    <svg class="tab-card-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
   </div>
   <div class="tab" data-page="contacts">
-    <div class="ic">
-      <img id="tabIconContacts" src="" style="width:40px;height:40px;display:block;">
-    </div>
-    通讯录
+    <div class="ic"><img id="tabIconContacts" src="" style="width:40px;height:40px;display:block;"></div>
+    <span class="tab-label">通讯录</span>
+    <svg class="tab-card-svg" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
   </div>
   <div class="tab" data-page="discover">
-    <div class="ic">
-      <img id="tabIconDiscover" src="" style="width:40px;height:40px;display:block;">
-    </div>
-    发现
+    <div class="ic"><img id="tabIconDiscover" src="" style="width:40px;height:40px;display:block;"></div>
+    <span class="tab-label">发现</span>
+    <svg class="tab-card-svg" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
   </div>
   <div class="tab" data-page="me">
-    <div class="ic">
-      <img id="tabIconMe" src="" style="width:40px;height:40px;display:block;">
-    </div>
-    我
+    <div class="ic"><img id="tabIconMe" src="" style="width:40px;height:40px;display:block;"></div>
+    <span class="tab-label">我</span>
+    <svg class="tab-card-svg" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
   </div>
 </div>
 <script>
-const APP_VER = 'v2026902';
+const APP_VER = 'v2026903';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -2424,6 +2630,7 @@ d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: ''
   if (d.settings.imageModel === undefined) d.settings.imageModel = '';
 if (d.settings.voiceModel === undefined) d.settings.voiceModel = '';
 if (d.settings.sfApiKey === undefined) d.settings.sfApiKey = '';
+  if (d.settings.showBootAnim === undefined) d.settings.showBootAnim = true;  // 启动动画开关，默认开
 
   delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
     if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
@@ -2432,6 +2639,25 @@ if (_needReset || !d.settings.onlineStyle) d.settings.onlineStyle = DEFAULT_ONLI
 if (_needReset || !d.settings.offlineStyle) d.settings.offlineStyle = DEFAULT_OFFLINE;
   d.contacts=d.contacts||[];d.chats=d.chats||{};d.moments=d.moments||[];d.stickers=d.stickers||[];
     if (!Array.isArray(d.lorebook)) d.lorebook = [];
+if (!Array.isArray(d.lorebooks)) d.lorebooks = [];
+(function(){
+  var byWorld = {};
+  d.lorebook.forEach(function(e){
+    if(e.bookId) return; // 已经归过就跳过
+    if(!byWorld[e.worldId]){
+      var exist = d.lorebooks.find(function(b){return b.worldId===e.worldId;});
+      if(exist){ byWorld[e.worldId]=exist.id; }
+      else{
+        var nb = { id:'lbook_'+Date.now()+'_'+Math.floor(Math.random()*100000),
+                   worldId:e.worldId, name:'默认世界书', enabled:true, createdAt:Date.now() };
+        d.lorebooks.push(nb);
+        byWorld[e.worldId]=nb.id;
+      }
+    }
+    e.bookId = byWorld[e.worldId];
+  });
+})();
+
   if (d.memoUnread === undefined) d.memoUnread = {};  // 备忘录自动记忆·未读记录
 
   // ===== 群聊新增：群聊数组 =====
@@ -2736,18 +2962,75 @@ function blankChar(id){
 const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:'', allowStickers:true, myExtra:'', autoMemo:true, giftLog:[]};
   CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;
 }
-function blankLore(worldId) {
+function blankLore(worldId, bookId) {
   return {
     id: 'lore_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
     worldId: worldId,
-    name: '',          // 关键词，多个用逗号、顿号或空格隔开
-    content: '',       // 要注入给AI的设定内容
-    enabled: true,     // 开关
-    mode: 'selective', // selective=提到才注入 / constant=每次都注入
-    order: 50,         // 优先级，暂时不用管
+    bookId: bookId || '',
+    name: '',
+    content: '',
+    enabled: true,
+    mode: 'selective',
+    order: 50,
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
+}
+// 新建一个空的“书”
+function blankLoreBook(worldId, name){
+  return {
+    id:'lbook_'+Date.now()+'_'+Math.floor(Math.random()*100000),
+    worldId:worldId, name:name||'新的世界书', enabled:true,
+    createdAt:Date.now(), updatedAt:Date.now()
+  };
+}
+// 新建一套世界书
+function newLoreBook(worldId){
+  popPrompt('给这套世界书起个名字：', '例如：角色穿搭、世界观背景、人物关系', function(name){
+    name = (name||'').trim() || '新的世界书';
+    DB.lorebooks = DB.lorebooks || [];
+    DB.lorebooks.push(blankLoreBook(worldId, name));
+    save();
+    openLorebook(worldId);
+  }, { title:'新建世界书', icon:'📖' });
+}
+// 给某套改名
+function renameLoreBook(worldId, bookId){
+  var b = (DB.lorebooks||[]).find(function(x){return x.id===bookId;});
+  if(!b) return;
+  popPrompt('修改名字：', b.name, function(name){
+    b.name = (name||'').trim() || b.name;
+    b.updatedAt = Date.now();
+    save();
+    openLorebook(worldId);
+  }, { title:'重命名', icon:'✏️', ok:'保存' });
+}
+// 停用 / 启用某套（停用后聊天里就不生效了）
+function toggleLoreBook(worldId, bookId){
+  var b = (DB.lorebooks||[]).find(function(x){return x.id===bookId;});
+  if(!b) return;
+  var on = b.enabled!==false;
+  b.enabled = !on; b.updatedAt = Date.now();
+  save();
+  openLorebook(worldId);
+}
+// 删除某套（里面的条目也一起删）
+function delLoreBook(worldId, bookId){
+  var b = (DB.lorebooks||[]).find(function(x){return x.id===bookId;});
+  if(!b) return;
+  var cnt = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId && e.bookId===bookId;}).length;
+  if(!confirm('确定删除《'+b.name+'》吗？\n里面的 '+cnt+' 个条目会一起删掉，无法恢复。')) return;
+  DB.lorebook = (DB.lorebook||[]).filter(function(e){return e.bookId!==bookId;});
+  DB.lorebooks = (DB.lorebooks||[]).filter(function(x){return x.id!==bookId;});
+  save();
+  openLorebook(worldId);
+}
+// 编辑页删除单个条目后回到条目列表
+function delLoreEntry(loreId, worldId, bookId){
+  if(!confirm('确定删除这个条目吗？')) return;
+  DB.lorebook = (DB.lorebook||[]).filter(function(e){return e.id!==loreId;});
+  save();
+  openLoreEntries(worldId, bookId);
 }
 
 function seedAiChan(d){
@@ -3466,42 +3749,38 @@ function shopConfirmGift(itemId, charId) {
   var it = (DB.shopItems || []).find(function (x) { return x.id === itemId; });
   var c = getC(charId);
   if (!it || !c) return;
-
   var nm = c.nick || c.name;
 
-  // 珍稀商品若已售罄，拦截
   if (it.rare && it.soldOut) {
-    alert('这件珍稀商品今天已经被买走了，明天再来看看吧～');
+    popTip('这件珍稀商品今天已经被买走了，明天再来看看吧～', {icon:'😥', title:'来晚一步'});
     return;
   }
-
-  // 余额检查
   if (it.currency === 'heart') {
     if ((c.hearts || 0) < it.price) {
-      shopToast('你和 ' + nm + ' 的心动值不够哦（需要 ❤️' + it.price + '，当前 ❤️' + (c.hearts || 0) + '）。\n多和 TA 相处来积累心动值吧～');
+      popTip('你和 ' + nm + ' 的心动值不够哦（需要 ❤️' + it.price + '，当前 ❤️' + (c.hearts || 0) + '）。\n多和 TA 相处来积累心动值吧～', {icon:'❤️', title:'心动值不足'});
       return;
     }
   } else {
     if ((DB.coins || 0) < it.price) {
-      shopToast('金币不够哦（需要 💎' + it.price + '，当前 💎' + (DB.coins || 0) + '）。\n多和角色聊天来赚金币吧～');
+      popTip('金币不够哦（需要 💎' + it.price + '，当前 💎' + (DB.coins || 0) + '）。\n多和角色聊天来赚金币吧～', {icon:'💎', title:'金币不足'});
       return;
     }
   }
-
-  // 珍稀二次确认
   if (it.rare) {
-    if (!confirm('这份礼物很珍贵，确定要送给 ' + nm + ' 吗？')) return;
+    popConfirm('这份礼物很珍贵，确定要送给 ' + nm + ' 吗？', function () {
+      shopDoGift(it, c);
+    }, {icon:'🎁', title:'珍稀好礼', ok:'确定赠送', cancel:'再想想'});
+    return;
   }
-
   shopDoGift(it, c);
 }
-
 // ===== 送礼核心：扣币 + 翻译 + 插入聊天 =====
 async function shopDoGift(it, c) {
   var nm = c.nick || c.name;
 
-  // 关闭弹窗，给个"处理中"的过渡（跨世界观翻译可能要等一下）
-  shopShowPopup('<div style="text-align:center;padding:30px;color:var(--sub)">🎁 正在送出…</div>');
+  // 关闭角色选择器，用内置 loading 弹窗过渡
+  shopClosePopup();
+  popLoading('🎁 正在送出…');
 
   // 1) 扣货币
   if (it.currency === 'heart') {
@@ -3590,7 +3869,7 @@ async function shopDoGift(it, c) {
   c.inChatList = true;
   save();
   // 6) 关闭弹窗 → 跳进该角色聊天
-  shopClosePopup();
+  popClose();
   openChat(c.id);
 
   // 7) 珍稀彩蛋 A：金色特效（保留）
@@ -4166,6 +4445,10 @@ function pickImage(cb,max,png){max=max||256;
 const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=function(){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=function(){const img=new Image();img.onload=function(){let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max;}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);cb(cv.toDataURL(png?'image/png':'image/jpeg',0.9));};img.src=r.result;};r.readAsDataURL(f);};inp.click();}
 
 function render() {
+// 每次渲染前自动同步主题类名，解决刷新变四不像 Bug
+if (document.body) {
+  document.body.classList.toggle('wx-theme-card', !!(DB.settings && DB.settings.wxTheme === 'card'));
+}
   // ============================================================
   // 1️⃣ 强制清理所有可能残留的遮挡层
   // ============================================================
@@ -7175,22 +7458,71 @@ function toggleWvDesc(el) {
 }
 // ===== 世界书：列表页 =====
 function openLorebook(worldId){
+  // 兼容：正在多选删条目时，转发回条目页
+  if(window._loreSelMode && window._loreCurBook){
+    return openLoreEntries(worldId, window._loreCurBook);
+  }
   var w = (DB.worlds||[]).find(function(x){return x.id===worldId;});
   if(!w){alert('世界观不存在');return;}
-  var list = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId;});
+  window._loreCurBook = null;
+  var books = (DB.lorebooks||[]).filter(function(b){return b.worldId===worldId;});
+
+  var html = '<div>';
+  html += '<div class="wv-lore-tip">同一个世界观可以建多套世界书，每套单独管理、单独开关，服务不同场景（如穿搭风格、世界观背景、人物关系等）。</div>';
+  html += '<div class="wv-lore-acts">' +
+          '<span class="wv-btn primary" onclick="newLoreBook(\''+worldId+'\')">＋ 新建一套世界书</span>' +
+          '</div>';
+  if(!books.length){
+    html += '<div class="empty" style="margin-top:30px;">还没有世界书<br>点上面的按钮新建一套</div>';
+  }else{
+    html += '<div class="wv-sec-t">共 '+books.length+' 套世界书</div>';
+    books.forEach(function(b){
+      var cnt = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId && e.bookId===b.id;}).length;
+      var on = b.enabled!==false;
+      html += '<div class="wv-lore-item" onclick="openLoreEntries(\''+worldId+'\',\''+b.id+'\')">' +
+        '<span class="wv-lore-dot'+(on?'':' off')+'">'+(on?'●':'○')+'</span>' +
+        '<div class="wv-lore-c">' +
+        '<div class="wv-lore-kw">'+esc(b.name||'（未命名）')+'</div>' +
+        '<div class="wv-lore-snip">'+cnt+' 个条目 · '+(on?'✅ 聊天中生效':'⛔ 已停用')+'</div>' +
+        '</div><span style="color:var(--sub);font-size:18px;">›</span></div>';
+      html += '<div style="display:flex;gap:8px;margin:-2px 0 12px 12px;">' +
+        '<span class="wv-btn" onclick="toggleLoreBook(\''+worldId+'\',\''+b.id+'\')">'+(on?'停用':'启用')+'</span>' +
+        '<span class="wv-btn" onclick="renameLoreBook(\''+worldId+'\',\''+b.id+'\')">改名</span>' +
+        '<span class="wv-btn" onclick="delLoreBook(\''+worldId+'\',\''+b.id+'\')">删除</span>' +
+        '</div>';
+    });
+  }
+  html += '</div>';
+
+  showChrome(true,false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = '📖 '+(w.name||'世界书');
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = function(){ openWorldDetail(worldId); };
+  tbRight.textContent = '';
+  tbRight.onclick = null;
+  content.innerHTML = html;
+}
+function openLoreEntries(worldId, bookId){
+  var w = (DB.worlds||[]).find(function(x){return x.id===worldId;});
+  if(!w){alert('世界观不存在');return;}
+  var book = (DB.lorebooks||[]).find(function(b){return b.id===bookId;});
+  if(!book){ openLorebook(worldId); return; }
+  window._loreCurBook = bookId;
+  var list = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId && e.bookId===bookId;});
   var selMode = window._loreSelMode || false;
   window._loreSelSet = window._loreSelSet || {};
 
   var html = '<div class="'+(selMode?'wv-sel':'')+'">';
   if(!selMode){
-    html += '<div class="wv-lore-tip">为世界观添加设定卡片，聊天中提到关键词时会自动作为背景注入给 AI。</div>';
+    html += '<div class="wv-lore-tip">《'+esc(book.name)+'》：这套里的设定卡片。聊天中提到关键词时会作为背景注入给 AI。</div>';
     html += '<div class="wv-lore-acts">' +
-            '<span class="wv-btn primary" onclick="aiGenLore(\''+worldId+'\')">✨ AI自动生成</span>' +
-            '<span class="wv-btn" onclick="openLoreEditor(\''+worldId+'\',null)">＋ 添加</span>' +
+            '<span class="wv-btn primary" onclick="aiGenLore(\''+worldId+'\',\''+bookId+'\')">✨ AI自动生成</span>' +
+            '<span class="wv-btn" onclick="openLoreEditor(\''+worldId+'\',\''+bookId+'\',null)">＋ 添加</span>' +
             '</div>';
   }
   if(!list.length){
-    html += '<div class="empty" style="margin-top:30px;">还没有世界书条目<br>点上面的按钮添加或生成</div>';
+    html += '<div class="empty" style="margin-top:30px;">这套还没有条目<br>点上面的按钮添加或生成</div>';
   }else{
     html += '<div class="wv-sec-t">共 '+list.length+' 个条目'+(selMode?'（点击选择）':'')+'</div>';
     list.forEach(function(e){
@@ -7198,12 +7530,15 @@ function openLorebook(worldId){
       var snip = esc((e.content||'').replace(/\n/g,' ')).slice(0,42);
       if(e.content && e.content.length>42) snip += '…';
       var checked = !!window._loreSelSet[e.id];
-      var click = selMode ? 'toggleLoreSel(\''+worldId+'\',\''+e.id+'\')' : 'openLoreEditor(\''+worldId+'\',\''+e.id+'\')';
+      var click = selMode ? 'toggleLoreSel(\''+worldId+'\',\''+e.id+'\')' : 'openLoreEditor(\''+worldId+'\',\''+bookId+'\',\''+e.id+'\')';
+      var modeTag = (e.mode==='constant')
+        ? '<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(255,140,0,.15);color:#e67300;margin-left:6px;white-space:nowrap;">📌 常驻</span>'
+        : '<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(43,111,214,.12);color:#2b6fd6;margin-left:6px;white-space:nowrap;">🔑 关键词</span>';
       html += '<div class="wv-lore-item" onclick="'+click+'">' +
         '<span class="wv-check'+(checked?' on':'')+'">'+(checked?'✓':'')+'</span>' +
         '<span class="wv-lore-dot'+(on?'':' off')+'">'+(on?'●':'○')+'</span>' +
         '<div class="wv-lore-c">' +
-        '<div class="wv-lore-kw">'+esc(e.name||'（未命名）')+'</div>' +
+        '<div class="wv-lore-kw">'+esc(e.name||'（未命名）')+modeTag+'</div>' +
         '<div class="wv-lore-snip">'+(snip||'（空）')+'</div>' +
         '</div></div>';
     });
@@ -7220,34 +7555,37 @@ function openLorebook(worldId){
 
   showChrome(true,false);
   statusbar.classList.add('dark');
-  tbTitle.textContent = '📖 '+(w.name||'世界书');
+  tbTitle.textContent = '📖 '+(book.name||'世界书');
   tbLeft.textContent = selMode ? '取消' : '‹';
   tbLeft.onclick = selMode
-    ? function(){ window._loreSelMode=false; window._loreSelSet={}; openLorebook(worldId); }
-    : function(){ openWorldDetail(worldId); };
+    ? function(){ window._loreSelMode=false; window._loreSelSet={}; openLoreEntries(worldId, bookId); }
+    : function(){ window._loreCurBook=null; openLorebook(worldId); };
   tbRight.textContent = list.length ? (selMode ? '' : '管理') : '';
   tbRight.onclick = (list.length && !selMode)
-    ? function(){ window._loreSelMode=true; window._loreSelSet={}; openLorebook(worldId); }
+    ? function(){ window._loreSelMode=true; window._loreSelSet={}; openLoreEntries(worldId, bookId); }
     : null;
   content.innerHTML = html;
 }
+
 // 选中/取消单条
 function toggleLoreSel(worldId, loreId){
   window._loreSelSet = window._loreSelSet || {};
   if(window._loreSelSet[loreId]) delete window._loreSelSet[loreId];
   else window._loreSelSet[loreId] = true;
-  openLorebook(worldId);
+  openLoreEntries(worldId, window._loreCurBook);
 }
-// 全选/取消全选
+// 全选/取消全选（只针对当前这套）
 function toggleLoreSelAll(worldId){
-  var list = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId;});
+  var bookId = window._loreCurBook;
+  var list = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId && e.bookId===bookId;});
   var allSel = list.length && list.every(function(e){return window._loreSelSet[e.id];});
   window._loreSelSet = {};
   if(!allSel){ list.forEach(function(e){ window._loreSelSet[e.id]=true; }); }
-  openLorebook(worldId);
+  openLoreEntries(worldId, bookId);
 }
 // 删除选中
 function deleteLoreSelected(worldId){
+  var bookId = window._loreCurBook;
   var ids = Object.keys(window._loreSelSet||{}).filter(function(k){return window._loreSelSet[k];});
   if(!ids.length){ return; }
   popConfirm('确定删除选中的 '+ids.length+' 个条目？', function(){
@@ -7255,12 +7593,12 @@ function deleteLoreSelected(worldId){
     save();
     window._loreSelMode = false;
     window._loreSelSet = {};
-    openLorebook(worldId);
+    openLoreEntries(worldId, bookId);
   });
 }
 
 // ===== 世界书：编辑/新增单条 =====
-function openLoreEditor(worldId, loreId){
+function openLoreEditor(worldId, bookId, loreId){
   var e = loreId ? (DB.lorebook||[]).find(function(x){return x.id===loreId;}) : null;
   var isEdit = !!e;
   var nameVal = e ? e.name : '';
@@ -7273,45 +7611,45 @@ function openLoreEditor(worldId, loreId){
   html += '<div class="field"><label>📝 内容（要悄悄告诉 AI 的设定）</label>'+
     '<textarea id="lore_content" rows="8" placeholder="例如：老张，55岁，独臂，年轻时是佣兵，现在开酒馆，嘴硬心软，讨厌贵族。">'+esc(contentVal)+'</textarea></div>';
   html += '<label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text);margin:8px 0;"><input type="checkbox" id="lore_enabled" '+(enabled?'checked':'')+'> 启用这个条目</label>';
-html += '<div style="margin:8px 0;font-size:14px;color:var(--text);">注入方式：'+
-  '<label style="margin-left:12px;"><input type="radio" name="lore_mode" value="selective" '+((!e||e.mode!=='constant')?'checked':'')+'> 提到关键词才触发</label>'+
-  '<label style="margin-left:12px;"><input type="radio" name="lore_mode" value="constant" '+(e&&e.mode==='constant'?'checked':'')+'> 每次对话都注入</label>'+
-  '</div>';
-  html += '<button class="btn" onclick="saveLore(\''+worldId+'\','+(loreId?('\''+loreId+'\''):'null')+')">💾 保存</button>';
+  html += '<div style="margin:8px 0;font-size:14px;color:var(--text);">注入方式：'+
+    '<label style="margin-left:12px;"><input type="radio" name="lore_mode" value="selective" '+((!e||e.mode!=='constant')?'checked':'')+'> 提到关键词才触发</label>'+
+    '<label style="margin-left:12px;"><input type="radio" name="lore_mode" value="constant" '+(e&&e.mode==='constant'?'checked':'')+'> 每次对话都注入</label>'+
+    '</div>';
+  html += '<button class="btn" onclick="saveLore(\''+worldId+'\',\''+bookId+'\','+(loreId?('\''+loreId+'\''):'null')+')">💾 保存</button>';
   if(isEdit){
-    html += '<button class="btn gray" style="margin-top:6px;" onclick="deleteLore(\''+loreId+'\',\''+worldId+'\')">🗑️ 删除</button>';
+    html += '<button class="btn gray" style="margin-top:6px;" onclick="delLoreEntry(\''+loreId+'\',\''+worldId+'\',\''+bookId+'\')">🗑️ 删除</button>';
   }
-  html += '<button class="btn gray" style="margin-top:6px;" onclick="openLorebook(\''+worldId+'\')">‹ 返回世界书</button>';
+  html += '<button class="btn gray" style="margin-top:6px;" onclick="openLoreEntries(\''+worldId+'\',\''+bookId+'\')">‹ 返回</button>';
   html += '</div>';
   showChrome(true,false);
   statusbar.classList.add('dark');
   tbTitle.textContent = isEdit ? '编辑条目' : '新增条目';
   tbLeft.textContent = '‹';
-  tbLeft.onclick = function(){ openLorebook(worldId); };
+  tbLeft.onclick = function(){ openLoreEntries(worldId, bookId); };
   tbRight.textContent = '';
   tbRight.onclick = null;
   content.innerHTML = html;
 }
 
 // ===== 世界书：保存 =====
-function saveLore(worldId, loreId){
-var nameVal = document.getElementById('lore_name').value.trim();
-var contentVal = document.getElementById('lore_content').value.trim();
-var enabled = document.getElementById('lore_enabled').checked;
-var modeVal = document.querySelector('input[name="lore_mode"]:checked');
-modeVal = modeVal ? modeVal.value : 'selective';
+function saveLore(worldId, bookId, loreId){
+  var nameVal = document.getElementById('lore_name').value.trim();
+  var contentVal = document.getElementById('lore_content').value.trim();
+  var enabled = document.getElementById('lore_enabled').checked;
+  var modeVal = document.querySelector('input[name="lore_mode"]:checked');
+  modeVal = modeVal ? modeVal.value : 'selective';
   if(!nameVal && !contentVal){ alert('关键词和内容至少填一个'); return; }
-if(loreId){
+  if(loreId){
     var e = (DB.lorebook||[]).find(function(x){return x.id===loreId;});
     if(e){ e.name=nameVal; e.content=contentVal; e.enabled=enabled; e.mode=modeVal; e.updatedAt=Date.now(); }
   }else{
-    var ne = blankLore(worldId);
+    var ne = blankLore(worldId, bookId);
     ne.name=nameVal; ne.content=contentVal; ne.enabled=enabled; ne.mode=modeVal;
     DB.lorebook = DB.lorebook || [];
     DB.lorebook.push(ne);
   }
   save();
-  openLorebook(worldId);
+  openLoreEntries(worldId, bookId);
 }
 
 // ===== 世界书：删除 =====
@@ -7324,19 +7662,29 @@ function deleteLore(loreId, worldId){
 }
 
 // ===== 世界书：AI 自动生成条目 =====
-async function aiGenLore(worldId){
+function aiGenLore(worldId, bookId){
+  if(!bookId){ popTip('请先进入某一套世界书再生成', {icon:'📖', title:'提示'}); return; }
   if(window._loreGenLock) return;
   var w = (DB.worlds||[]).find(function(x){return x.id===worldId;});
-  if(!w){alert('世界观不存在');return;}
+  if(!w){ popTip('世界观不存在', {icon:'⚠️', title:'提示'}); return; }
   var model = DB.settings.auxModel || DB.settings.chatModel;
-  if(!model){ alert('请先在设置里选择模型'); return; }
-  // —— 询问本次要生成多少条 ——
-  var target = window.prompt('本次想额外生成多少条【世界设定】条目？\n（列表里的 NPC 会自动全部覆盖，不算在这个数里）\n建议填 20 ~ 30', '25');
-  if(target === null) return;              // 点了"取消"就不生成
-  target = parseInt(target, 10);
-  if(!target || target < 1) target = 25;   // 乱填或没填就用默认 25
+  if(!model){ popTip('请先在设置里选择模型', {icon:'⚙️', title:'提示'}); return; }
 
+  popPrompt(
+    '本次想额外生成多少条【世界设定】条目？\n（列表里的 NPC 会自动全部覆盖，不算在这个数里）\n建议填 20 ~ 30',
+    '例如 25',
+    function(v){
+      var target = parseInt(v, 10);
+      if(!target || target < 1) target = 25;
+      _aiGenLoreRun(worldId, bookId, w, model, target);
+    },
+    {icon:'✨', title:'AI 自动生成条目', ok:'开始生成'}
+  );
+}
+
+async function _aiGenLoreRun(worldId, bookId, w, model, target){
   window._loreGenLock = true;
+  popLoading('✨ AI 正在生成条目，请稍候…');
   var tip = tbTitle.textContent;
   tbTitle.textContent = '✨ 生成中…';
 
@@ -7356,7 +7704,8 @@ async function aiGenLore(worldId){
     });
 
     // —— 2. 已有条目关键词（避免重复）——
-    var existed = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId;})
+    var existed = (DB.lorebook||[]).filter(function(e){return e.worldId===worldId && e.bookId===bookId;})
+
       .map(function(e){return e.name;}).filter(Boolean).join('、');
 
     // —— 3. 拼 Prompt ——
@@ -7411,21 +7760,26 @@ prompt += '举例：世界观只写了"现代都市"，你就应主动生成如"
 
     // ===== 语言风格 =====
     prompt += '【语言风格·必须严格遵守】\n';
-    prompt += '这是给AI看的"设定说明书"，不是文学作品。请务必：\n';
+    prompt += '这是给AI看的"设定说明书"，不是文学作品，更不是网文。请务必：\n';
     prompt += '1. 说人话！用平实、直白、清楚的现代口语，像跟朋友解释设定一样。\n';
     prompt += '2. 严禁堆砌华丽辞藻、诗意化表达、玄乎抽象的形容。一句话能说清就不要绕。\n';
     prompt += '3. 严禁生造读者看不懂的黑话/术语（如"灵核过热""隐形话语权"）。确需专有名词时，必须紧跟一句大白话解释它是什么、有什么用。\n';
     prompt += '4. 优先写"是什么、能做什么、有什么规则、会发生什么"这类具体、可操作的信息，而不是营造氛围。\n';
-    prompt += '5. 检验标准：第一次看到的人能不能一眼看懂。看不懂就是失败。\n\n';
+    prompt += '5. 命名必须克制、接地气，像现实里真会有的叫法，宁可朴素也别炫技。严禁"碎星海湾""鲜血沙龙""时刻影迷记"这类只为好听、实际不知所云的名字。该叫"城西菜市场""老槐树茶馆""夜班出租车队"就这么叫。\n';
+    prompt += '6. 内容要落到日常、具体、琐碎的细节（价格、习惯、时间、地点、谁和谁的关系），不要写成史诗简介或宣传文案。\n';
+    prompt += '7. 检验标准：第一次看到的人能不能一眼看懂、能不能直接拿来聊天。看不懂或没法用，就是失败。\n\n';
     prompt += '【正反示例】\n';
-    prompt += '× 反例（华丽但看不懂）：她利用深层催眠协助妖怪缓解因压抑妖力产生的"灵核过热"，在高层妖族中拥有极高的隐形地位。\n';
-    prompt += '√ 正例（平实好懂）：沈清欢，人类心理医生，开了家咨询室。她其实知道妖怪存在，还偷偷帮情绪失控、快暴走的妖怪做心理疏导，所以不少大妖怪都欠她人情、很给她面子。\n\n';
+    prompt += '× 反例（华丽空洞）：碎星海湾，潮汐低语之地，无数追梦者在此仰望星辰、聆听命运的呢喃——读完根本不知道这地方是干嘛的。\n';
+    prompt += '× 反例（看不懂）：她利用深层催眠协助妖怪缓解因压抑妖力产生的"灵核过热"，在高层妖族中拥有极高的隐形地位。\n';
+    prompt += '√ 正例（平实好懂）：沈清欢，人类心理医生，开了家咨询室。她其实知道妖怪存在，还偷偷帮情绪失控、快暴走的妖怪做心理疏导，所以不少大妖怪都欠她人情、很给她面子。\n';
+    prompt += '√ 正例（平实好懂）：城西菜市场，本地人早上买菜的地方，六点就热闹。卖菜的王婶消息最灵通，谁家出了事她基本第一个知道。\n\n';
 
     // ===== 数量与篇幅 =====
-prompt += '【数量与篇幅·硬性要求】\n';
-prompt += '- 除了必须覆盖的 NPC，你必须再额外生成至少 ' + target + ' 条世界设定类条目，低于这个数量视为不合格。\n';
-prompt += '- 这些条目要尽量分散到下面【生成方向】的各个维度，不要全挤在一两个方面。\n';
-prompt += '- 每条 3-5 句话，要具体、有画面、有信息量，能直接拿来指导对话。宁可多写，不要偷懒省事。\n\n';
+    prompt += '【数量与篇幅】\n';
+    prompt += '- 请以“质量优先、宁缺毋滥”为原则。' + target + ' 条只是参考上限，不是必须凑满的硬指标。\n';
+    prompt += '- 如果世界观信息本来就少、实在挖不出这么多有价值的内容，就少生成几条，只写你真正有把握、具体可用的，绝对不要为了凑数硬编空洞条目。\n';
+    prompt += '- 每类维度有 1~2 条即可，同一方面不要反复灌水。\n';
+    prompt += '- 每条 2~4 句话，把一件事说清楚就行，不用展开成小作文。\n\n';
 // ===== 注入模式判断 =====
 prompt += '【每条的注入模式·请你自己判断】\n';
 prompt += '给每个条目再标一个 "mode" 字段，值只能是 "selective" 或 "constant"，二选一：\n';
@@ -7456,7 +7810,8 @@ prompt += '[{"name":"关键词1、关键词2","content":"设定内容","mode":"s
     var added = 0;
     arr.forEach(function(item){
       if(!item || (!item.name && !item.content)) return;
-      var ne = blankLore(worldId);
+      var ne = blankLore(worldId, bookId);
+
       ne.name = (item.name||'').toString().trim();
       ne.content = (item.content||'').toString().trim();
       // 按 AI 的判断设置注入模式，只认 constant，其余一律 selective（安全兜底）
@@ -7479,8 +7834,12 @@ prompt += '[{"name":"关键词1、关键词2","content":"设定内容","mode":"s
 // ===== 世界书：扫描命中并生成注入文本 =====
 function buildLoreInject(c, currentMsg){
   if(!c || !c.worldId) return '';
+  var enabledBooks = {};
+  (DB.lorebooks||[]).forEach(function(b){
+    if(b.worldId===c.worldId && b.enabled!==false) enabledBooks[b.id]=true;
+  });
   var entries = (DB.lorebook||[]).filter(function(e){
-    return e.worldId===c.worldId && e.enabled!==false;
+    return e.worldId===c.worldId && e.enabled!==false && (!e.bookId || enabledBooks[e.bookId]);
   });
   if(!entries.length) return '';
 
@@ -7700,22 +8059,27 @@ function setChatTitle(c, typing){
 }
 
 function renderChats(){
-  // 检查并释放所有到期的拉黑联动事件
+  if (document.body) {
+    document.body.classList.toggle('wx-theme-card', (DB.settings && DB.settings.wxTheme) === 'card');
+  }
+
   flushBlockEvents();
 
-  // 私聊条目
   var privateItems = DB.contacts.filter(function(c){ return !c._draft && c.inChatList; })
-  .map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
+    .map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
 
-  // 群聊条目（未隐藏的）
   var groupItems = (DB.groups||[]).filter(function(g){ return !g.hideInChats; })
     .map(function(g){ return { kind:'group', id:g.id, time:(g.lastMsg&&g.lastMsg.time)?g.lastMsg.time:(g.createdAt||0), g:g }; });
 
-  // 合并 + 按时间降序
   var all = privateItems.concat(groupItems).sort(function(a,b){ return b.time - a.time; });
+  var isCard = (DB.settings && DB.settings.wxTheme) === 'card';
 
   if (!all.length) {
-    content.innerHTML = '<div class="empty">还没有对话～<br>去「通讯录」点一个角色开始聊天</div>';
+    if (isCard) {
+      content.innerHTML = '<div class="card-theme-wrap"><div class="card-container" style="padding:30px 0;"><div class="empty">还没有对话～<br>去「通讯录」点一个角色开始聊天</div></div></div>';
+    } else {
+      content.innerHTML = '<div class="empty">还没有对话～<br>去「通讯录」点一个角色开始聊天</div>';
+    }
     refreshChatBadges();
     return;
   }
@@ -7734,9 +8098,30 @@ function renderChats(){
       }
       var un = c.unread || 0;
       var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
-      return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
-        avatarHtml(c) +
-        '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between">' + esc(c.nick || c.name) + badge + '</div><div class="cell-sub">' + esc(last).slice(0, 30) + '</div></div></div></div>';
+      var timeStr = item.time ? (typeof formatTime === 'function' ? formatTime(item.time) : '') : '';
+
+      if (isCard) {
+        // 卡片风：去除了 ARTIST，右侧放时间戳，长按弹出删除菜单
+        var cardBadge = un > 0 ? '<span style="position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;padding:0 4px;background:#f43;color:#fff;border-radius:8px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--card);">' + (un > 99 ? '99+' : un) + '</span>' : '';
+        var avaStyle = c.avatar ? 'background-image:url(\'' + c.avatar + '\');' : '';
+        var avaText = c.avatar ? '' : esc((c.nick || c.name || '?')[0]);
+
+        return '<div class="cell card-press-item" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')" oncontextmenu="event.preventDefault();cardChatMenu(\'' + c.id + '\', \'private\');">' +
+          '<div class="avatar-halo-wrap"><div class="avatar-inner-img" style="' + avaStyle + '">' + avaText + '</div>' + cardBadge + '</div>' +
+          '<div class="cell-body" style="flex:1;min-width:0;">' +
+            '<div class="cell-title" style="display:flex;align-items:center;justify-content:space-between;">' +
+              '<span style="font-weight:600;font-size:15px;color:var(--text);letter-spacing:0.3px;">' + esc(c.nick || c.name) + '</span>' +
+              '<span style="font-size:11px;color:var(--sub);font-weight:normal;opacity:0.8;">' + timeStr + '</span>' +
+            '</div>' +
+            '<div class="cell-sub" style="color:var(--sub);margin-top:3px;font-size:12px;opacity:0.85;">' + esc(last).slice(0, 30) + '</div>' +
+          '</div>' +
+        '</div>';
+      } else {
+        // 经典微信：完整保留原汁原味的左滑删除
+        return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeFromChats(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
+          avatarHtml(c) +
+          '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between"><span>' + esc(c.nick || c.name) + '</span><span style="font-size:11px;color:var(--sub);font-weight:normal;">' + timeStr + '</span>' + badge + '</div><div class="cell-sub">' + esc(last).slice(0, 30) + '</div></div></div></div>';
+      }
     } else {
       var g = item.g;
       var preview = '群聊已创建';
@@ -7748,34 +8133,140 @@ function renderChats(){
       }
       var un = g.unread || 0;
       var badge = un > 0 ? '<span style="min-width:18px;height:18px;padding:0 5px;background:#f43;color:#fff;border-radius:9px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:6px">' + (un > 99 ? '99+' : un) + '</span>' : '';
-return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeGroupFromChats(\'' + g.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + g.id + '" onclick="openGroupChat(\'' + g.id + '\')">' +
-  '<div class="avatar" style="background:transparent;padding:0;overflow:hidden;">' + groupIcon() + '</div>' +
-  '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between"><span>' + esc(g.name) + ' <span style="color:var(--sub);font-size:13px;">(' + (g.members.length+1) + ')</span></span>' + badge + '</div><div class="cell-sub">' + esc(preview).slice(0, 30) + '</div></div></div></div>';
+      var timeStr = (g.lastMsg && g.lastMsg.time) ? (typeof formatTime === 'function' ? formatTime(g.lastMsg.time) : '') : '';
+
+      if (isCard) {
+        var cardBadge = un > 0 ? '<span style="position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;padding:0 4px;background:#f43;color:#fff;border-radius:8px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--card);">' + (un > 99 ? '99+' : un) + '</span>' : '';
+        return '<div class="cell card-press-item" data-id="' + g.id + '" onclick="openGroupChat(\'' + g.id + '\')" oncontextmenu="event.preventDefault();cardChatMenu(\'' + g.id + '\', \'group\');">' +
+          '<div class="avatar-halo-wrap"><div class="avatar-inner-img" style="color:var(--theme);">' + groupIcon() + '</div>' + cardBadge + '</div>' +
+          '<div class="cell-body" style="flex:1;min-width:0;">' +
+            '<div class="cell-title" style="display:flex;align-items:center;justify-content:space-between;">' +
+              '<span style="font-weight:600;font-size:15px;color:var(--text);">' + esc(g.name) + ' <span style="color:var(--sub);font-size:12px;font-weight:normal;">(' + (g.members.length+1) + ')</span></span>' +
+              '<span style="font-size:11px;color:var(--sub);font-weight:normal;opacity:0.8;">' + timeStr + '</span>' +
+            '</div>' +
+            '<div class="cell-sub" style="color:var(--sub);margin-top:3px;font-size:12px;opacity:0.85;">' + esc(preview).slice(0, 30) + '</div>' +
+          '</div>' +
+        '</div>';
+      } else {
+        return '<div class="swipe-wrap"><div class="swipe-del" onclick="removeGroupFromChats(\'' + g.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + g.id + '" onclick="openGroupChat(\'' + g.id + '\')">' +
+          '<div class="avatar" style="background:transparent;padding:0;overflow:hidden;">' + groupIcon() + '</div>' +
+          '<div class="cell-body"><div class="cell-title" style="display:flex;align-items:center;justify-content:space-between"><span>' + esc(g.name) + ' <span style="color:var(--sub);font-size:13px;">(' + (g.members.length+1) + ')</span></span>' + badge + '</div><div class="cell-sub">' + esc(preview).slice(0, 30) + '</div></div></div></div>';
+      }
     }
   }).join('');
-  content.innerHTML = '<div style="flex:1;min-height:100%;padding-bottom:8px;">' + items + '</div>';
-  attachSwipe();
+
+  if (isCard) {
+    var myAvaStyle = DB.me.avatar ? 'background-image:url(\'' + DB.me.avatar + '\');' : '';
+    var banner =
+      '<div class="user-banner-card"><div class="banner-ribbon"></div><div class="banner-left">' +
+        '<input class="banner-input-title" value="' + esc(DB.me.cardTitle || 'usamaru') + '" onchange="DB.me.cardTitle=this.value;save()">' +
+        '<input class="banner-input-sub" value="' + esc(DB.me.cardBio || '[Slow down, everything will be fine]') + '" onchange="DB.me.cardBio=this.value;save()">' +
+      '</div><div class="banner-my-avatar" style="' + myAvaStyle + '" onclick="goWechat(\'me\')">' + (DB.me.avatar ? '' : '🧸') + '</div></div>' +
+      '<div class="dash-deco"><div class="dash-dot"></div><div class="dash-line"></div><div class="dash-pill">♡ Whisper</div><div class="dash-pill">✉ Memory</div><div class="dash-pill">✦ Moments</div><div class="dash-line"></div><div class="dash-dot"></div></div>';
+    content.innerHTML = '<div class="card-theme-wrap">' + banner + '<div class="card-container">' + items + '</div></div>';
+    bindCardLongPress(); // 绑定移动端长按弹出菜单
+  } else {
+    content.innerHTML = '<div style="flex:1;min-height:100%;padding-bottom:8px;">' + items + '</div>';
+    if (typeof attachSwipe === 'function') attachSwipe(); // 仅经典模式启用左滑删除
+  }
+
   refreshChatBadges();
 }
 
+// 卡片风专属：长按呼出删除选项
+function cardChatMenu(id, type) {
+  var name = type === 'private' ? (getC(id).nick || getC(id).name) : '该群聊';
+  if (confirm('是否将「' + name + '」从聊天列表中移除？')) {
+    if (type === 'private') removeFromChats(id);
+    else removeGroupFromChats(id);
+  }
+}
+
+// 兼容手机端触摸长按
+function bindCardLongPress() {
+  document.querySelectorAll('.card-press-item').forEach(function(el){
+    var timer = null;
+    var moved = false;
+    el.addEventListener('touchstart', function(e){
+      moved = false;
+      timer = setTimeout(function(){
+        if (!moved) {
+          cardChatMenu(el.dataset.id, el.dataset.id.startsWith('g') ? 'group' : 'private');
+        }
+      }, 600);
+    }, { passive: true });
+    el.addEventListener('touchmove', function(){ moved = true; clearTimeout(timer); }, { passive: true });
+    el.addEventListener('touchend', function(){ clearTimeout(timer); });
+  });
+}
 function lastMsgTime(cid){const arr=DB.chats[cid];if(!arr||!arr.length)return 0;return arr[arr.length-1].time||0;}
 function renderContacts(){
+  if (document.body) {
+    document.body.classList.toggle('wx-theme-card', (DB.settings && DB.settings.wxTheme) === 'card');
+  }
+
+  var isCard = (DB.settings && DB.settings.wxTheme) === 'card';
+  var cs = DB.contacts.filter(function(c){ return !c._draft; });
+  var groupCount = (DB.groups || []).length;
+  var groupSubText = groupCount ? (groupCount + ' 个群聊') : '还没有群聊';
+
+  // 1. 卡片主题渲染
+  if (isCard) {
+    var importSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:20px;height:20px;stroke:var(--theme);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+
+    var topCard = '<div class="card-container" style="margin-bottom:12px;">' +
+      '<div class="cell" onclick="importCharacter()" style="padding:10px 0;cursor:pointer;">' +
+        '<div class="avatar-halo-wrap"><div class="avatar-inner-img">' + importSvg + '</div></div>' +
+        '<div class="cell-body"><div class="cell-title" style="font-weight:600;font-size:15px;color:var(--text);">导入角色</div><div class="cell-sub" style="color:var(--sub);font-size:12px;margin-top:2px;">导入已有的角色数据文件</div></div>' +
+      '</div>' +
+      '<div class="cell" onclick="view={type:\'groupList\'};render();" style="padding:10px 0;cursor:pointer;">' +
+        '<div class="avatar-halo-wrap"><div class="avatar-inner-img" style="color:var(--theme);">' + groupIcon() + '</div></div>' +
+        '<div class="cell-body"><div class="cell-title" style="font-weight:600;font-size:15px;color:var(--text);">群聊</div><div class="cell-sub" style="color:var(--sub);font-size:12px;margin-top:2px;">' + groupSubText + '</div></div>' +
+      '</div>' +
+    '</div>';
+
+    if (!cs.length) {
+      content.innerHTML = '<div class="card-theme-wrap">' + topCard + '<div class="card-container" style="padding:20px 0;"><div class="empty">通讯录空空如也<br>点右上角 ＋ 新建角色</div></div></div>';
+      return;
+    }
+
+    var cardItems = cs.map(function(c){
+      var sign = c.signature || c.pKeywords || '这个人很神秘，什么都没留下';
+      var avaStyle = c.avatar ? 'background-image:url(\'' + c.avatar + '\');' : '';
+      var avaText = c.avatar ? '' : esc((c.nick || c.name || '?')[0]);
+
+      return '<div class="cell" onclick="openChat(\'' + c.id + '\')" style="padding:10px 0;cursor:pointer;">' +
+        '<div class="avatar-halo-wrap"><div class="avatar-inner-img" style="' + avaStyle + '">' + avaText + '</div></div>' +
+        '<div class="cell-body" style="flex:1;min-width:0;">' +
+          '<div class="cell-title" style="display:flex;align-items:center;justify-content:space-between;">' +
+            '<span style="font-weight:600;font-size:15px;color:var(--text);">' + esc(c.nick || c.name) + '</span>' +
+            '<span style="font-size:13px;color:var(--sub);cursor:pointer;padding:0 6px;opacity:0.6;" onclick="event.stopPropagation();exportCharacter(\'' + c.id + '\')">📤</span>' +
+          '</div>' +
+          '<div class="cell-sub" style="color:var(--sub);font-size:12px;margin-top:3px;font-style:italic;">' + esc(sign).slice(0, 26) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    content.innerHTML = '<div class="card-theme-wrap">' + topCard + '<div class="card-container">' + cardItems + '</div></div>';
+    return;
+  }
+
+  // 2. 原版经典微信渲染（完全原汁原味）
   var importHtml = '<div class="section" style="margin-top:0;background:var(--card);border-bottom:1px solid var(--line);padding:6px 16px;display:flex;justify-content:space-between;align-items:center;">' +
     '<span style="color:var(--sub);font-size:13px;">👥 通讯录</span>' +
     '<button class="btn gray" style="display:inline-block;width:auto;margin:0;padding:4px 14px;font-size:13px;" onclick="importCharacter()">📥 导入角色</button>' +
     '</div>' +
-    // ===== 群聊入口 =====
     '<div class="cell" style="border-bottom:1px solid var(--line);" onclick="view={type:\'groupList\'};render();">' +
       '<div class="avatar" style="background:transparent;padding:0;overflow:hidden;">' + groupIcon() + '</div>' +
       '<div class="cell-body"><div class="cell-title">群聊</div>' +
-      '<div class="cell-sub" style="color:var(--sub);">' + (DB.groups.length ? DB.groups.length + ' 个群聊' : '还没有群聊') + '</div></div>' +
+      '<div class="cell-sub" style="color:var(--sub);">' + groupSubText + '</div></div>' +
     '</div>';
 
-  var cs = DB.contacts.filter(function(c){ return !c._draft; });
   if (!cs.length) {
     content.innerHTML = importHtml + '<div class="empty">通讯录空空如也<br>点右上角 ＋ 新建角色</div>';
     return;
   }
+
   var items = cs.map(function(c){
     var sign = c.signature || c.pKeywords || '这个人很神秘，什么都没留下';
     return '<div class="swipe-wrap"><div class="swipe-del" onclick="delContactById(\'' + c.id + '\')">删除</div><div class="cell swipe-cell" data-id="' + c.id + '" onclick="openChat(\'' + c.id + '\')">' +
@@ -7785,51 +8276,54 @@ function renderContacts(){
       '<span style="float:right;font-size:14px;color:var(--sub);cursor:pointer;padding:0 6px" onclick="event.stopPropagation();exportCharacter(\'' + c.id + '\')">📤</span>' +
       '</div><div class="cell-sub" style="color:var(--sub);font-style:italic">' + esc(sign).slice(0, 26) + '</div></div></div></div>';
   }).join('');
+
   content.innerHTML = importHtml + '<div style="flex:1;min-height:100%;padding-bottom:8px;">' + items + '</div>';
   attachSwipe();
-}
-function renderDiscover() {
+}function renderDiscover() {
+  var isCard = (DB.settings && DB.settings.wxTheme) === 'card';
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
 
   var rightHtml = '';
   var hasUnread = (DB.momentUnread || 0) > 0 || (DB.momentReplyUnread || 0) > 0;
 
-  // 只有存在未读时，才显示头像和红点
   if (hasUnread) {
-    // 找最新一条非自己发的朋友圈的作者
-    var latestMoment = null;
     var latestAuthor = null;
     for (var i = 0; i < DB.moments.length; i++) {
       var m = DB.moments[i];
-      if (m.author !== 'me') {
-        latestMoment = m;
-        latestAuthor = getC(m.author);
-        break;
-      }
+      if (m.author !== 'me') { latestAuthor = getC(m.author); break; }
     }
-
-    // 头像
     if (latestAuthor) {
-      var avatarStyle = latestAuthor.avatar
-        ? 'background-image:url(\'' + latestAuthor.avatar + '\');background-size:cover;background-position:center;'
-        : '';
+      var avatarStyle = latestAuthor.avatar ? 'background-image:url(\'' + latestAuthor.avatar + '\');background-size:cover;background-position:center;' : '';
       var avatarText = latestAuthor.avatar ? '' : (latestAuthor.nick || latestAuthor.name || '?')[0];
-      rightHtml += '<span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:#ccc;text-align:center;line-height:28px;font-size:12px;color:#fff;flex-shrink:0;margin-right:4px;' + avatarStyle + '">' + avatarText + '</span>';
+      rightHtml += '<span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--bg);text-align:center;line-height:28px;font-size:12px;color:var(--text);flex-shrink:0;margin-right:4px;' + avatarStyle + '">' + avatarText + '</span>';
     }
-
-    // 数字圈（AI回复你的评论）
     var replyUnread = DB.momentReplyUnread || 0;
     if (replyUnread > 0) {
       rightHtml += '<span style="min-width:20px;height:20px;padding:0 6px;background:#f43;color:#fff;border-radius:10px;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">' + (replyUnread > 99 ? '99+' : replyUnread) + '</span>';
     }
   }
 
-  content.innerHTML = '<div class="section" style="margin-top:12px">' +
-    '<div class="cell" onclick="openMoments()">' +
-      '<div class="avatar" style="background:transparent; background-image: url(' + icons.discoverMoments + '); background-size: cover; background-position: center;"></div>' +
-      '<div class="cell-body"><div class="cell-title">朋友圈</div></div>' +
-      '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' + rightHtml + '</div>' +
-    '</div></div>';
+  if (isCard) {
+    // 纯精致几何花瓣 SVG 朋友圈入口图标
+    var flowerSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:20px;height:20px;stroke:var(--theme);"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>';
+
+    content.innerHTML = '<div class="card-theme-wrap">' +
+      '<div class="card-container">' +
+        '<div class="cell swipe-cell" style="cursor:pointer;" onclick="openMoments()">' +
+          '<div class="avatar-halo-wrap"><div class="avatar-inner-img">' + flowerSvg + '</div></div>' +
+          '<div class="cell-body"><div class="cell-title">朋友圈</div><div class="cell-sub" style="color:var(--sub);">查看好友最新发布的日常动态</div></div>' +
+          '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' + rightHtml + '<span style="color:var(--sub);font-size:16px;">›</span></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  } else {
+    content.innerHTML = '<div class="section" style="margin-top:12px">' +
+      '<div class="cell" onclick="openMoments()">' +
+        '<div class="avatar" style="background:transparent; background-image: url(' + icons.discoverMoments + '); background-size: cover; background-position: center;"></div>' +
+        '<div class="cell-body"><div class="cell-title">朋友圈</div></div>' +
+        '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' + rightHtml + '</div>' +
+      '</div></div>';
+  }
 
   refreshMomentBadge();
 }
@@ -8930,32 +9424,59 @@ function openGroupSet(gid){
   view = { type:'groupSet', id:gid };
   render();
 }
+function applyWxTheme(themeName) {
+  DB.settings = DB.settings || {};
+  DB.settings.wxTheme = themeName;
+  save();
+  if (themeName === 'card') {
+    document.body.classList.add('wx-theme-card');
+  } else {
+    document.body.classList.remove('wx-theme-card');
+  }
+}
+// 页面刚加载时自动同步一次状态
+if ((DB.settings && DB.settings.wxTheme) === 'card') {
+  document.body.classList.add('wx-theme-card');
+}
+function applyWxTheme(themeName) {
+  DB.settings = DB.settings || {};
+  DB.settings.wxTheme = themeName;
+  save();
+  if (themeName === 'card') {
+    document.body.classList.add('wx-theme-card');
+  } else {
+    document.body.classList.remove('wx-theme-card');
+  }
+}
 
-function renderWxMe(){const ag=DB.settings.autoGreet!==false;content.innerHTML=`<div class="field" style="border-top:1px solid var(--line)"><label>我的微信头像（点击选择）</label><div class="avapick" style="--ava:${DB.me.avatar?`url('${DB.me.avatar}')`:'none'}" onclick="pickMeAvatar()">${DB.me.avatar?'':'点击上传'}</div></div><div class="section"><div class="row"><label>我的网名</label><input value="${esc(DB.me.name)}" onchange="DB.me.name=this.value;save()"></div><div class="row"><label>真实姓名</label><input value="${esc(DB.me.realName)}" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名"></div></div>
+function renderWxMe(){
+  DB.settings = DB.settings || {};
+  var isCard = (DB.settings.wxTheme || 'default') === 'card';
 
-    <div class="hint">
-      这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。
-    </div>
+  content.innerHTML =
+    '<div class="field" style="border-top:1px solid var(--line)">' +
+      '<label>我的微信头像（点击选择）</label>' +
+      '<div class="avapick" style="--ava:' + (DB.me.avatar ? 'url(\'' + DB.me.avatar + '\')' : 'none') + '" onclick="pickMeAvatar()">' +
+        (DB.me.avatar ? '' : '点击上传') +
+      '</div>' +
+    '</div>' +
+    '<div class="section">' +
+      '<div class="row"><label>我的网名</label><input value="' + esc(DB.me.name||'') + '" onchange="DB.me.name=this.value;save()"></div>' +
+      '<div class="row"><label>真实姓名</label><input value="' + esc(DB.me.realName||'') + '" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名"></div>' +
+    '</div>' +
+    '<div class="hint">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>' +
 
-    <div class="section-title" style="margin-top:10px;">💬 聊天气泡样式</div>
-    <div style="padding:6px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      ${BUBBLE_STYLES.map(function(bs){
-        var isAct = (DB.settings.bubbleStyle || '') === bs.id;
-        var themeColor = getComputedStyle(document.documentElement).getPropertyValue('--theme').trim() || '#B34A6A';
-        return `
-        <div onclick="applyBubbleStyle('${bs.id}');renderWxMe()"
-             style="cursor:pointer;position:relative;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;border:1.5px solid ${isAct ? themeColor : 'var(--line)'};background:${isAct ? themeColor + '12' : 'var(--card)'};box-shadow:${isAct ? '0 2px 8px ' + themeColor + '28' : '0 1px 2px rgba(0,0,0,0.02)'};transition:all 0.2s;user-select:none;overflow:hidden;">
-<div style="width:24px;height:24px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;background:${isAct ? themeColor + '22' : 'var(--bg)'};border:1px solid ${isAct ? themeColor : 'var(--line)'};">${bs.icon || '💬'}</div>
-
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:12.5px;font-weight:${isAct ? '600' : '500'};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;">${bs.name}</div>
-            <div style="font-size:9.5px;color:${isAct ? themeColor : 'var(--sub)'};opacity:${isAct ? '0.9' : '0.6'};margin-top:2px;">${isAct ? '使用中' : '点击应用'}</div>
-          </div>
-          ${isAct ? `<div style="position:absolute;top:0;right:0;width:18px;height:18px;background:${themeColor};border-bottom-left-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:bold;line-height:1;">✓</div>` : ''}
-        </div>`;
-      }).join('')}
-    </div>
-  `;
+    '<div class="section-title" style="margin-top:14px;">🎨 微信主题与气泡套装</div>' +
+    '<div style="padding:6px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+      '<div onclick="applyWxTheme(\'card\');renderWxMe();" style="cursor:pointer;padding:12px;border-radius:14px;border:1.5px solid ' + (isCard ? 'var(--theme)' : 'var(--line)') + ';background:var(--card);display:flex;align-items:center;gap:10px;">' +
+        '<span style="font-size:20px;">🍬</span>' +
+        '<div><div style="font-size:13px;font-weight:600;color:var(--text);">软萌卡片风</div><div style="font-size:9.5px;color:' + (isCard ? 'var(--theme)' : 'var(--sub)') + ';">' + (isCard ? '当前使用中' : '点击切换') + '</div></div>' +
+      '</div>' +
+      '<div onclick="applyWxTheme(\'default\');renderWxMe();" style="cursor:pointer;padding:12px;border-radius:14px;border:1.5px solid ' + (!isCard ? 'var(--theme)' : 'var(--line)') + ';background:var(--card);display:flex;align-items:center;gap:10px;">' +
+        '<span style="font-size:20px;">🟩</span>' +
+        '<div><div style="font-size:13px;font-weight:600;color:var(--text);">经典微信原版</div><div style="font-size:9.5px;color:' + (!isCard ? 'var(--theme)' : 'var(--sub)') + ';">' + (!isCard ? '当前使用中' : '点击切换') + '</div></div>' +
+      '</div>' +
+    '</div>';
 }
 function pickMeAvatar(){pickImage(d=>{DB.me.avatar=d;save();render();});}
 function attachSwipe() {
@@ -9128,6 +9649,11 @@ function setIconSize(size){
   if(grid){ grid.className = 'icon-' + size; }  // 桌面还开着时立即变
   renderSettings('theme');         // 刷新按钮高亮
 }
+function toggleBootAnim(){
+  DB.settings.showBootAnim = (DB.settings.showBootAnim === false) ? true : false;
+  save();            // 保存到存档，刷新后记住
+  renderSettings();  // 重新画一下设置页，让开关动起来
+}
 
 function renderSettings(){
   showChrome(true,false);
@@ -9293,6 +9819,18 @@ if(tab==='theme'){
             +'font-weight:'+(cur?'600':'500')+';">'+labels[sz]+'</div>';
         }).join('')}
       </div>
+
+      <div class="section-title" style="margin-top:10px;">🚀 启动</div>
+      <div class="field" style="border-radius:12px;margin:0 14px;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);">
+        <div>
+          <div style="font-size:13.5px;color:var(--text);">播放开场动画</div>
+          <div style="font-size:11px;color:var(--sub);opacity:0.7;margin-top:2px;">关闭后刷新页面直接进入主界面</div>
+        </div>
+        <div onclick="toggleBootAnim()" style="cursor:pointer;width:46px;height:26px;border-radius:13px;flex-shrink:0;transition:background 0.2s;background:${DB.settings.showBootAnim !== false ? 'var(--theme)' : 'var(--line)'};position:relative;">
+          <div style="position:absolute;top:3px;left:${DB.settings.showBootAnim !== false ? '23px' : '3px'};width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+        </div>
+      </div>
+
       <div style="height:20px"></div>
     `;
     return;
@@ -14423,29 +14961,30 @@ function popTip(msg, opts){
   opts = opts || {};
   popClose();
   var p = document.createElement('div');
-  p.className = 'popup';
-  p.id = 'popup';
+  p.className = 'popup'; p.id = 'popup';
   p.innerHTML = '<div class="popup-box">' +
-    (opts.icon ? '<div class="popup-icon">' + opts.icon + '</div>' : '') +
-    (opts.title ? '<div class="popup-title">' + esc(opts.title) + '</div>' : '') +
-    '<div class="popup-msg">' + esc(msg) + '</div>' +
+    '<div class="popup-head">' +
+      (opts.icon ? '<div class="popup-icon">' + opts.icon + '</div>' : '') +
+      (opts.title ? '<div class="popup-title">' + esc(opts.title) + '</div>' : '') +
+      '<div class="popup-msg">' + esc(msg) + '</div>' +
+    '</div>' +
     '<div class="popup-btns"><button class="popup-btn main" onclick="popClose()">' + (opts.ok || '知道啦') + '</button></div>' +
     '</div>';
   phone.appendChild(p);
 }
 
-// 确认框（替换 confirm）：onYes 是点确定后执行的函数
 function popConfirm(msg, onYes, opts){
   opts = opts || {};
   popClose();
   window._popYes = onYes;
   var p = document.createElement('div');
-  p.className = 'popup';
-  p.id = 'popup';
+  p.className = 'popup'; p.id = 'popup';
   p.innerHTML = '<div class="popup-box">' +
-    (opts.icon ? '<div class="popup-icon">' + opts.icon + '</div>' : '') +
-    (opts.title ? '<div class="popup-title">' + esc(opts.title) + '</div>' : '') +
-    '<div class="popup-msg">' + esc(msg) + '</div>' +
+    '<div class="popup-head">' +
+      (opts.icon ? '<div class="popup-icon">' + opts.icon + '</div>' : '') +
+      (opts.title ? '<div class="popup-title">' + esc(opts.title) + '</div>' : '') +
+      '<div class="popup-msg">' + esc(msg) + '</div>' +
+    '</div>' +
     '<div class="popup-btns">' +
       '<button class="popup-btn sub" onclick="popClose()">' + (opts.cancel || '取消') + '</button>' +
       '<button class="popup-btn main" onclick="var f=window._popYes;popClose();if(f)f();">' + (opts.ok || '确定') + '</button>' +
@@ -14453,17 +14992,37 @@ function popConfirm(msg, onYes, opts){
   phone.appendChild(p);
 }
 
-// 加载框（替换"正在倾听…"这种）：用 popClose() 关闭
 function popLoading(msg){
   popClose();
   var p = document.createElement('div');
-  p.className = 'popup';
-  p.id = 'popup';
+  p.className = 'popup'; p.id = 'popup';
   p.innerHTML = '<div class="popup-box">' +
     '<div class="popup-spin"></div>' +
-    '<div class="popup-msg" style="margin-bottom:4px">' + esc(msg || '请稍候…') + '</div>' +
+    '<div class="popup-loadmsg">' + esc(msg || '请稍候…') + '</div>' +
     '</div>';
   phone.appendChild(p);
+}
+
+function popPrompt(msg, placeholder, onConfirm, opts) {
+  opts = opts || {};
+  popClose();
+  var p = document.createElement('div');
+  p.className = 'popup'; p.id = 'popup';
+  p.innerHTML = '<div class="popup-box">' +
+    '<div class="popup-head" style="padding-bottom:14px">' +
+      (opts.icon ? '<div class="popup-icon">' + opts.icon + '</div>' : '') +
+      (opts.title ? '<div class="popup-title">' + esc(opts.title) + '</div>' : '') +
+      '<div class="popup-msg" style="margin-bottom:0">' + esc(msg) + '</div>' +
+    '</div>' +
+    '<input id="popupInput" type="text" class="popup-input" placeholder="' + esc(placeholder || '') + '" onkeydown="if(event.key===\'Enter\'){document.querySelector(\'#popup .popup-btn.main\').click();}">' +
+    '<div id="popupInputError" style="color:#e34;font-size:12px;min-height:16px;margin:-12px 18px 10px;text-align:center;"></div>' +
+    '<div class="popup-btns">' +
+      '<button class="popup-btn sub" onclick="popClose()">' + (opts.cancel || '取消') + '</button>' +
+      '<button class="popup-btn main" onclick="var v=document.getElementById(\'popupInput\').value.trim();if(!v){document.getElementById(\'popupInputError\').textContent=\'请填写内容\';document.getElementById(\'popupInput\').style.borderColor=\'#e34\';return;}popClose();if(window._popPromptYes)window._popPromptYes(v);">' + (opts.ok || '确定') + '</button>' +
+    '</div></div>';
+  phone.appendChild(p);
+  window._popPromptYes = onConfirm;
+  setTimeout(function(){var i=document.getElementById('popupInput');if(i)i.focus();},100);
 }
 // ===== 让所有旧的 alert 自动变成漂亮弹窗 =====
 window.alert = function(msg){
@@ -17245,7 +17804,13 @@ function bootStartup(){
   restoreFocusState();
   setTimeout(updateAllIcons, 100);
   if(focusPhase==='work'&&view.type==='focus') render();
-  runBootLoading();   // ✅ 新增
+  if(DB.settings.showBootAnim === false){
+    // 开关关闭：直接把开场遮罩拿掉，秒进主界面
+    var _bl = document.getElementById('bootLoading');
+    if(_bl && _bl.parentNode) _bl.remove();
+  }else{
+    runBootLoading();
+  }
 }
 
 // ============================================================
