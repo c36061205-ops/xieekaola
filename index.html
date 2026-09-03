@@ -1531,20 +1531,56 @@ body.wx-theme-card .msg-name {
   color: var(--sub) !important;
   margin-bottom: 3px !important;
 }
-/* 7. 聊天底部输入栏：完美自适应手机宽度，防溢出 */
-body.wx-theme-card #chatInputArea,
-body.wx-theme-card .chat-foot,
-body.wx-theme-card .chat-input-bar,
-body.wx-theme-card .chat-bottom {
-  width: 100% !important;
+/* 7. 聊天界面与底部输入栏：彻底适配手机屏幕，绝不溢出 */
+
+/* 强制聊天主容器与手机视口等宽，严禁横向撑开 */
+body.wx-theme-card,
+body.wx-theme-card #phone,
+body.wx-theme-card .view,
+body.wx-theme-card #view-chat,
+body.wx-theme-card .chat-page {
   max-width: 100vw !important;
+  overflow-x: hidden !important;
   box-sizing: border-box !important;
-  padding-left: 12px !important;
-  padding-right: 12px !important;
 }
 
-body.wx-theme-card input,
-body.wx-theme-card textarea {
+/* 顶部与快捷功能胶囊栏（相册、表情、转账...）：自适应并支持横向平滑滑动 */
+body.wx-theme-card .chat-quick-actions,
+body.wx-theme-card .chat-tools,
+body.wx-theme-card .chat-plugins {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* 底部输入框容器与各级子元素：强制 100% 弹性收缩 */
+body.wx-theme-card .chat-foot,
+body.wx-theme-card .chat-input-bar,
+body.wx-theme-card .chat-bottom,
+body.wx-theme-card #chatInputArea,
+body.wx-theme-card .input-bar,
+body.wx-theme-card .foot-input {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* 核心输入框本体（input/textarea）：必须允许 flex 弹性缩小 */
+body.wx-theme-card .chat-foot input,
+body.wx-theme-card .chat-foot textarea,
+body.wx-theme-card .chat-input-bar input,
+body.wx-theme-card .chat-input-bar textarea,
+body.wx-theme-card #chatInput,
+body.wx-theme-card .input-box {
+  flex: 1 1 auto !important;
+  min-width: 0 !important; /* ★ 必须写 0，否则 flex 子元素不会缩小 */
+  max-width: 100% !important;
   box-sizing: border-box !important;
 }
 </style>
