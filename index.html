@@ -239,13 +239,16 @@
 }
 
 #chatBottom { 
-    padding: 10px 14px 24px 14px; 
-    box-sizing: border-box; 
-    background: var(--nav);
-    border-top: 1px solid var(--line);
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
+  padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 10px)) 14px; 
+  box-sizing: border-box; 
+  background: var(--nav);
+  border-top: 1px solid var(--line);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 #tabbar { height:68px; background:var(--nav); display:flex; border-top:1px solid var(--line); flex-shrink:0; padding:4px 4px 12px 4px; }
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;color:var(--sub);gap:3px;cursor:pointer;}
@@ -428,6 +431,26 @@ textarea {
   background:var(--nav); font-size:13px; color:var(--sub); cursor:pointer;
 }
 .idea-toggle b { color: var(--theme); }
+/* 默认主题：输入行防溢出保护 */
+#inputRow {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.input-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+#chatInput {
+  min-width: 0;
+}
 
 #chatInput{flex:1;border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:15px;font-family:inherit;resize:none;max-height:250px;outline:none;background:var(--card);color:var(--text);line-height:1.4;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;}
 #chatInput::placeholder{color:var(--sub);}
@@ -1311,13 +1334,13 @@ body.wx-theme-card #tabbar .tab {
   font-size: 0 !important;
   color: transparent !important;
 }
-body.wx-theme-card #tabbar .tab .ic,
-body.wx-theme-card #tabbar .tab img,
-body.wx-theme-card #tabbar .tab .tab-label {
+body[data-tab-icon-mode="svg"] #tabbar .tab .ic,
+body[data-tab-icon-mode="svg"] #tabbar .tab img,
+body[data-tab-icon-mode="svg"] #tabbar .tab .tab-label {
   display: none !important;
 }
 .tab-card-svg { display: none; }
-body.wx-theme-card #tabbar .tab .tab-card-svg {
+body[data-tab-icon-mode="svg"] #tabbar .tab .tab-card-svg {
   display: block !important;
   width: 22px !important;
   height: 22px !important;
@@ -1327,9 +1350,24 @@ body.wx-theme-card #tabbar .tab .tab-card-svg {
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
 }
-body.wx-theme-card #tabbar .tab.active .tab-card-svg {
+body[data-tab-icon-mode="svg"] #tabbar .tab.active .tab-card-svg {
   stroke: var(--text) !important;
   stroke-width: 2.2 !important;
+}
+/* 顶部标题栏：仅在"卡片风主题 + 正在看微信"时，换成跟卡片风统一的样子 */
+body.wx-theme-card #topbar.wx-topbar {
+  background: var(--card) !important;
+  border-bottom: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+}
+body.wx-theme-card #topbar.wx-topbar #tbTitle {
+  color: var(--text) !important;
+}
+body.wx-theme-card #topbar.wx-topbar .tb-btn {
+  color: var(--sub) !important;
+}
+body.wx-theme-card #topbar.wx-topbar .tb-btn.r {
+  color: var(--theme) !important;
 }
 
 /* 2. 聊天/通讯录 列表大白卡片 */
@@ -1546,7 +1584,7 @@ body.wx-theme-card #chatBottom {
   max-width: 100% !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
-  padding: 6px 8px !important;
+  padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 14px)) 8px !important;
 }
 
 /* 顶部快捷功能栏 (相册/表情/转账/小纸条) */
@@ -4510,9 +4548,11 @@ function pickImage(cb,max,png){max=max||256;
 const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=function(){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=function(){const img=new Image();img.onload=function(){let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max;}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);cb(cv.toDataURL(png?'image/png':'image/jpeg',0.9));};img.src=r.result;};r.readAsDataURL(f);};inp.click();}
 
 function render() {
-// 每次渲染前自动同步主题类名，解决刷新变四不像 Bug
 if (document.body) {
   document.body.classList.toggle('wx-theme-card', !!(DB.settings && DB.settings.wxTheme === 'card'));
+}
+if (topbar) {
+  topbar.classList.toggle('wx-topbar', view.type === 'wechat');
 }
   // ============================================================
   // 1️⃣ 强制清理所有可能残留的遮挡层
@@ -8124,10 +8164,6 @@ function setChatTitle(c, typing){
 }
 
 function renderChats(){
-  if (document.body) {
-    document.body.classList.toggle('wx-theme-card', (DB.settings && DB.settings.wxTheme) === 'card');
-  }
-
   flushBlockEvents();
 
   var privateItems = DB.contacts.filter(function(c){ return !c._draft && c.inChatList; })
@@ -8296,11 +8332,8 @@ function bindCardLongPress() {
 }
 function lastMsgTime(cid){const arr=DB.chats[cid];if(!arr||!arr.length)return 0;return arr[arr.length-1].time||0;}
 function renderContacts(){
-  if (document.body) {
-    document.body.classList.toggle('wx-theme-card', (DB.settings && DB.settings.wxTheme) === 'card');
-  }
-
   var isCard = (DB.settings && DB.settings.wxTheme) === 'card';
+
   var cs = DB.contacts.filter(function(c){ return !c._draft; });
   var groupCount = (DB.groups || []).length;
   var groupSubText = groupCount ? (groupCount + ' 个群聊') : '还没有群聊';
@@ -9519,6 +9552,14 @@ function openGroupSet(gid){
   view = { type:'groupSet', id:gid };
   render();
 }
+// ============ 微信主题配置表 ============
+// 以后想加新的微信主题，只需要在这个数组里新增一行，
+// 不需要去改其他任何函数！
+const WX_THEMES = [
+  { id: 'default', name: '经典微信原版', icon: '🟩', tabIconMode: 'img' },
+  { id: 'card',    name: '软萌卡片风',   icon: '🍬', tabIconMode: 'svg' },
+];
+
 function applyWxTheme(themeName) {
   DB.settings = DB.settings || {};
   DB.settings.wxTheme = themeName;
@@ -9528,26 +9569,70 @@ function applyWxTheme(themeName) {
   } else {
     document.body.classList.remove('wx-theme-card');
   }
+  // 根据主题配置表，记录这个主题的底部导航图标该用哪种模式（img图片 或 svg线条图标）
+  var themeConfig = WX_THEMES.find(function(t){ return t.id === themeName; });
+  document.body.setAttribute('data-tab-icon-mode', (themeConfig && themeConfig.tabIconMode) || 'img');
 }
-// 页面刚加载时自动同步一次状态
+
+// 页面刚加载时自动同步一次状态（用户上次选了卡片风，这次打开网页要记得恢复）
 if ((DB.settings && DB.settings.wxTheme) === 'card') {
   document.body.classList.add('wx-theme-card');
-}
-function applyWxTheme(themeName) {
-  DB.settings = DB.settings || {};
-  DB.settings.wxTheme = themeName;
-  save();
-  if (themeName === 'card') {
-    document.body.classList.add('wx-theme-card');
-  } else {
-    document.body.classList.remove('wx-theme-card');
-  }
 }
 
 function renderWxMe(){
   DB.settings = DB.settings || {};
-  var isCard = (DB.settings.wxTheme || 'default') === 'card';
+  var currentTheme = DB.settings.wxTheme || 'default';
+  var isCard = currentTheme === 'card';
 
+  var themeButtonsHtml = WX_THEMES.map(function(t){
+    var isActive = (currentTheme === t.id);
+    return '<div onclick="applyWxTheme(\'' + t.id + '\');renderWxMe();" style="cursor:pointer;padding:12px;border-radius:14px;border:1.5px solid ' + (isActive ? 'var(--theme)' : 'var(--line)') + ';background:var(--card);display:flex;align-items:center;gap:10px;">' +
+      '<span style="font-size:20px;">' + t.icon + '</span>' +
+      '<div><div style="font-size:13px;font-weight:600;color:var(--text);">' + t.name + '</div><div style="font-size:9.5px;color:' + (isActive ? 'var(--theme)' : 'var(--sub)') + ';">' + (isActive ? '当前使用中' : '点击切换') + '</div></div>' +
+    '</div>';
+  }).join('');
+
+  // ============ 卡片风：新样式 ============
+  if (isCard) {
+    var avaStyle = DB.me.avatar ? "background-image:url('" + DB.me.avatar + "');" : '';
+    var avaText = DB.me.avatar ? '' : '📷';
+
+    content.innerHTML =
+      '<div class="card-theme-wrap">' +
+
+        '<div class="card-container" style="display:flex;align-items:center;gap:14px;padding:16px;">' +
+          '<div class="avatar-halo-wrap" style="margin-right:0;cursor:pointer;" onclick="pickMeAvatar()">' +
+            '<div class="avatar-inner-img" style="' + avaStyle + 'font-size:18px;">' + avaText + '</div>' +
+          '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:16px;font-weight:700;color:var(--text);">' + esc(DB.me.name || '点击设置网名') + '</div>' +
+            '<div style="font-size:11px;color:var(--sub);margin-top:2px;">点击头像更换</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="card-container">' +
+          '<div class="cell">' +
+            '<label style="font-size:13px;color:var(--sub);width:80px;flex-shrink:0;">我的网名</label>' +
+            '<input value="' + esc(DB.me.name||'') + '" onchange="DB.me.name=this.value;save();renderWxMe();" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);text-align:right;">' +
+          '</div>' +
+          '<div class="cell">' +
+            '<label style="font-size:13px;color:var(--sub);width:80px;flex-shrink:0;">真实姓名</label>' +
+            '<input value="' + esc(DB.me.realName||'') + '" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);text-align:right;">' +
+          '</div>' +
+        '</div>' +
+
+        '<div style="font-size:11px;color:var(--sub);padding:0 4px 4px;">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>' +
+
+        '<div class="section-title" style="margin-top:6px;">🎨 微信主题</div>' +
+        '<div class="card-container" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;">' +
+          themeButtonsHtml +
+        '</div>' +
+
+      '</div>';
+    return;
+  }
+
+  // ============ 经典微信：原样保留，不做任何改动 ============
   content.innerHTML =
     '<div class="field" style="border-top:1px solid var(--line)">' +
       '<label>我的微信头像（点击选择）</label>' +
@@ -9561,16 +9646,9 @@ function renderWxMe(){
     '</div>' +
     '<div class="hint">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>' +
 
-    '<div class="section-title" style="margin-top:14px;">🎨 微信主题与气泡套装</div>' +
+    '<div class="section-title" style="margin-top:14px;">🎨 微信主题</div>' +
     '<div style="padding:6px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
-      '<div onclick="applyWxTheme(\'card\');renderWxMe();" style="cursor:pointer;padding:12px;border-radius:14px;border:1.5px solid ' + (isCard ? 'var(--theme)' : 'var(--line)') + ';background:var(--card);display:flex;align-items:center;gap:10px;">' +
-        '<span style="font-size:20px;">🍬</span>' +
-        '<div><div style="font-size:13px;font-weight:600;color:var(--text);">软萌卡片风</div><div style="font-size:9.5px;color:' + (isCard ? 'var(--theme)' : 'var(--sub)') + ';">' + (isCard ? '当前使用中' : '点击切换') + '</div></div>' +
-      '</div>' +
-      '<div onclick="applyWxTheme(\'default\');renderWxMe();" style="cursor:pointer;padding:12px;border-radius:14px;border:1.5px solid ' + (!isCard ? 'var(--theme)' : 'var(--line)') + ';background:var(--card);display:flex;align-items:center;gap:10px;">' +
-        '<span style="font-size:20px;">🟩</span>' +
-        '<div><div style="font-size:13px;font-weight:600;color:var(--text);">经典微信原版</div><div style="font-size:9.5px;color:' + (!isCard ? 'var(--theme)' : 'var(--sub)') + ';">' + (!isCard ? '当前使用中' : '点击切换') + '</div></div>' +
-      '</div>' +
+      themeButtonsHtml +
     '</div>';
 }
 function pickMeAvatar(){pickImage(d=>{DB.me.avatar=d;save();render();});}
@@ -17893,14 +17971,16 @@ setInterval(function() {
 }, 30 * 60 * 1000);
 function bootStartup(){
   applySkin(DB.settings.skin || 'fusion');
-  applyBubbleStyle(DB.settings.bubbleStyle || '');   // ← 新增这一行
+  applyBubbleStyle(DB.settings.bubbleStyle || '');
+  // 同步微信主题的图标模式（img图片 或 svg线条图标），确保刷新页面后图标不会显示错
+  var _initTheme = WX_THEMES.find(function(t){ return t.id === ((DB.settings && DB.settings.wxTheme) || 'default'); });
+  document.body.setAttribute('data-tab-icon-mode', (_initTheme && _initTheme.tabIconMode) || 'img');
   render();
   tick();
   restoreFocusState();
   setTimeout(updateAllIcons, 100);
   if(focusPhase==='work'&&view.type==='focus') render();
   if(DB.settings.showBootAnim === false){
-    // 开关关闭：直接把开场遮罩拿掉，秒进主界面
     var _bl = document.getElementById('bootLoading');
     if(_bl && _bl.parentNode) _bl.remove();
   }else{
