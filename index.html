@@ -1690,7 +1690,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026903';
+const APP_VER = 'v2026904';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -9610,15 +9610,15 @@ function renderWxMe(){
           '</div>' +
         '</div>' +
 
-        '<div class="card-container">' +
           '<div class="cell">' +
             '<label style="font-size:13px;color:var(--sub);width:80px;flex-shrink:0;">我的网名</label>' +
-            '<input value="' + esc(DB.me.name||'') + '" onchange="DB.me.name=this.value;save();renderWxMe();" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);text-align:right;">' +
+            '<input value="' + esc(DB.me.name||'') + '" onchange="DB.me.name=this.value;save();renderWxMe();" style="flex:1;min-width:0;box-sizing:border-box;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);text-align:right;">' +
           '</div>' +
           '<div class="cell">' +
             '<label style="font-size:13px;color:var(--sub);width:80px;flex-shrink:0;">真实姓名</label>' +
-            '<input value="' + esc(DB.me.realName||'') + '" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名" style="flex:1;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);text-align:right;">' +
+            '<input value="' + esc(DB.me.realName||'') + '" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名" style="flex:1;min-width:0;box-sizing:border-box;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);text-align:right;">' +
           '</div>' +
+
         '</div>' +
 
         '<div style="font-size:11px;color:var(--sub);padding:0 4px 4px;">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>' +
@@ -14037,27 +14037,27 @@ else if (m.type === 'shop_item') {
     var _foot = '';
     if (m.from === 'ai') {
       if (m.giftStatus === 'pending') {
-        _foot = '<div style="display:flex;border-top:1px solid rgba(0,0,0,0.06)">' +
-          '<div onclick="shopGiftRespond(\'' + m.id + '\',\'accept\')" style="flex:1;text-align:center;padding:9px 0;color:var(--theme);font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid rgba(0,0,0,0.06)">收下</div>' +
-          '<div onclick="shopGiftRespond(\'' + m.id + '\',\'decline\')" style="flex:1;text-align:center;padding:9px 0;color:#999;font-size:13px;cursor:pointer">婉拒</div>' +
+        _foot = '<div style="display:flex;border-top:1px solid var(--line)">' +
+          '<div onclick="shopGiftRespond(\'' + m.id + '\',\'accept\')" style="flex:1;text-align:center;padding:9px 0;color:var(--theme);font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid var(--line)">收下</div>' +
+          '<div onclick="shopGiftRespond(\'' + m.id + '\',\'decline\')" style="flex:1;text-align:center;padding:9px 0;color:var(--sub);font-size:13px;cursor:pointer">婉拒</div>' +
           '</div>';
       } else if (m.giftStatus === 'accepted') {
-        _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:#4caf50;border-top:1px solid rgba(0,0,0,0.06)">✔ 已收下</div>';
+        _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:#4caf50;border-top:1px solid var(--line)">✔ 已收下</div>';
       } else if (m.giftStatus === 'declined') {
-        _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:#999;border-top:1px solid rgba(0,0,0,0.06)">已婉拒</div>';
+        _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:var(--sub);border-top:1px solid var(--line)">已婉拒</div>';
       }
     } else {
-      var _st = '等待对方查收…', _cl = '#999';
+      var _st = '等待对方查收…', _cl = 'var(--sub)';
       if (m.giftStatus === 'ai_accepted') { _st = '❤ 对方收下了'; _cl = '#e0507a'; }
-      else if (m.giftStatus === 'ai_declined') { _st = '对方婉拒了'; _cl = '#999'; }
-      _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:' + _cl + ';border-top:1px solid rgba(0,0,0,0.06)">' + _st + '</div>';
+      else if (m.giftStatus === 'ai_declined') { _st = '对方婉拒了'; _cl = 'var(--sub)'; }
+      _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:' + _cl + ';border-top:1px solid var(--line)">' + _st + '</div>';
     }
-    body = '<div class="mbody" style="padding:0;width:186px;background:#fff;border-radius:14px;overflow:hidden;' + _cardStyle + '">' +
+    body = '<div class="mbody" style="padding:0;width:186px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;' + _cardStyle + '">' +
       '<div style="background:' + _topBg + ';padding:7px 0;text-align:center;color:#fff;font-size:12px;letter-spacing:1px">' + (_isRare ? '✨ 珍稀好礼 ✨' : '🎁 礼物') + '</div>' +
       '<div style="padding:14px 12px 12px;text-align:center">' +
       '<div style="font-size:44px;line-height:1">' + esc(m.emoji || '🎁') + '</div>' +
-      '<div style="font-size:15px;font-weight:700;margin-top:8px;color:#222">' + esc(m.content || '礼物') + '</div>' +
-      (m.desc ? '<div style="font-size:12px;color:#999;margin-top:3px">' + esc(m.desc) + '</div>' : '') +
+      '<div style="font-size:15px;font-weight:700;margin-top:8px;color:var(--text)">' + esc(m.content || '礼物') + '</div>' +
+      (m.desc ? '<div style="font-size:12px;color:var(--sub);margin-top:3px">' + esc(m.desc) + '</div>' : '') +
       (_isRare && m.story ? '<div style="font-size:11px;color:#B8860B;margin-top:8px;font-style:italic;line-height:1.5">「' + esc(m.story) + '」</div>' : '') +
       '</div>' + _foot +
       '</div>';
