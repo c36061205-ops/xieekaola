@@ -497,28 +497,50 @@ textarea {
   .sheet-box h3{font-size:16px;margin-bottom:14px;text-align:center;color:var(--text);}
   .sheet-box input{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px;font-size:15px;margin-bottom:10px;background:var(--bg);color:var(--text);outline:none;}
 .popup{position:absolute;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:30px;box-sizing:border-box;
-  background:rgba(0,0,0,.28);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:popFade .2s ease;}
-.popup-box{width:270px;border-radius:16px;overflow:hidden;text-align:center;
-  background:color-mix(in srgb, var(--card) 82%, transparent);
-  backdrop-filter:blur(30px) saturate(1.6);-webkit-backdrop-filter:blur(30px) saturate(1.6);
-  box-shadow:0 10px 40px rgba(0,0,0,.25);animation:popUp .28s cubic-bezier(.2,.9,.3,1.05);}
-.popup-head{padding:20px 18px 17px;}
-.popup-icon{font-size:26px;line-height:1;margin-bottom:9px;}
-.popup-title{font-size:17px;font-weight:600;color:var(--text);margin-bottom:5px;letter-spacing:.2px;}
-.popup-msg{font-size:13px;color:var(--sub);line-height:1.5;white-space:pre-wrap;}
-.popup-btns{display:flex;border-top:.5px solid var(--line);}
-.popup-btn{flex:1;padding:12px 8px;border:none;background:transparent;font-size:17px;color:var(--theme);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s;}
-.popup-btn:active{background:color-mix(in srgb, var(--text) 8%, transparent);}
-.popup-btn.sub{color:var(--text);}
-.popup-btn.main{font-weight:600;}
-.popup-btn + .popup-btn{border-left:.5px solid var(--line);}
-.popup-spin{width:28px;height:28px;margin:22px auto 14px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--theme);animation:popSpin .7s linear infinite;}
-.popup-loadmsg{font-size:14px;color:var(--sub);padding:0 18px 22px;}
-.popup-input{width:calc(100% - 36px);box-sizing:border-box;margin:0 18px 18px;padding:9px 11px;font-size:14px;color:var(--text);background:color-mix(in srgb,var(--text) 5%, transparent);border:.5px solid var(--line);border-radius:9px;outline:none;transition:border-color .2s;}
-.popup-input:focus{border-color:var(--theme);}
+  background:rgba(0,0,0,.32);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:popFade .2s ease;}
+
+.popup-box{
+  width:var(--pop-width);
+  border-radius:var(--pop-radius);
+  overflow:hidden;text-align:center;
+  background:var(--pop-bg);                                    /* 兜底：纯色，所有浏览器都认 */
+  background:color-mix(in srgb, var(--pop-bg) 92%, transparent);/* 支持的浏览器再叠磨砂 */
+  color:var(--pop-text);                                       /* 关键：给弹窗定默认文字色 */
+  backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);
+  box-shadow:0 12px 45px rgba(0,0,0,.28);
+  animation:popUp .28s cubic-bezier(.2,.9,.3,1.05);}
+
+.popup-head{padding:22px 20px 18px;}
+.popup-icon{font-size:28px;line-height:1;margin-bottom:10px;}
+.popup-title{font-size:17px;font-weight:600;color:var(--pop-text);margin-bottom:6px;letter-spacing:.2px;}
+.popup-msg{font-size:13.5px;color:var(--pop-sub);line-height:1.55;white-space:pre-wrap;}
+
+.popup-btns{display:flex;border-top:.5px solid var(--pop-line);}
+.popup-btn{flex:1;padding:13px 8px;border:none;background:transparent;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,opacity .15s;}
+.popup-btn + .popup-btn{border-left:.5px solid var(--pop-line);}
+.popup-btn:active{opacity:.6;}
+.popup-btn.sub{color:var(--pop-text);}                        /* 取消键：用文字色，永远看得清 */
+.popup-btn.main{color:var(--pop-accent);font-weight:600;}     /* 确定键：用强调色 */
+
+.popup-spin{width:28px;height:28px;margin:24px auto 14px;border-radius:50%;border:2.5px solid var(--pop-line);border-top-color:var(--pop-accent);animation:popSpin .7s linear infinite;}
+.popup-loadmsg{font-size:14px;color:var(--pop-sub);padding:0 18px 24px;}
+.popup-input{width:calc(100% - 40px);box-sizing:border-box;margin:0 20px 18px;padding:10px 12px;font-size:14px;color:var(--pop-text);background:color-mix(in srgb,var(--pop-text) 6%, transparent);border:.5px solid var(--pop-line);border-radius:10px;outline:none;transition:border-color .2s;}
+.popup-input:focus{border-color:var(--pop-accent);}
+
 @keyframes popFade{from{opacity:0}to{opacity:1}}
 @keyframes popUp{from{transform:scale(1.08);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes popSpin{to{transform:rotate(360deg)}}
+/* ===== 弹窗统一配色（以后想整体换风格，只改这一块就行）===== */
+:root{
+  --pop-bg:       var(--card);   /* 弹窗背景  */
+  --pop-text:     var(--text);   /* 标题/取消键文字 */
+  --pop-sub:      var(--sub);    /* 说明文字  */
+  --pop-line:     var(--line);   /* 分割线    */
+  --pop-accent:   var(--theme);  /* 确定键/强调色 */
+  --pop-on-accent:#fff;          /* （备用）填充按钮上的文字色 */
+  --pop-radius:   16px;          /* 圆角      */
+  --pop-width:    275px;         /* 宽度      */
+}
 
 /* ===== 设置页 · 表情卡片网格 ===== */
 .stgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start;}
@@ -1634,6 +1656,27 @@ body.wx-theme-card .voice-btn,
 body.wx-theme-card .reply-btn {
   flex-shrink: 0 !important;
 }
+/* ===== 软萌卡片风：顶栏改成透明清爽款（韩系空气感） ===== */
+body.wx-theme-card #topbar.wx-topbar {
+  background: transparent !important;   /* 白框消失，融进背景 */
+  border-bottom: none !important;       /* 去掉底部横线 */
+  box-shadow: none !important;
+  height: 52px !important;
+  padding: 0 8px !important;
+}
+
+body.wx-theme-card #topbar.wx-topbar #tbTitle {
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  letter-spacing: 1.5px !important;     /* 字间拉开，更精致 */
+  color: var(--text) !important;
+}
+
+body.wx-theme-card #topbar.wx-topbar .tb-btn {
+  font-weight: 300 !important;          /* 返回箭头变细 */
+  font-size: 20px !important;
+}
+
 </style>
 </head>
 <body>
@@ -1689,7 +1732,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026904';
+const APP_VER = 'v2026904_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -8127,7 +8170,9 @@ async function aiPolishWorld() {
 }
 // ===== 世界观 App 函数结束 =====
 const wxT={chats:'微信',contacts:'通讯录',discover:'发现',me:'我'};
-function renderWechat(){showChrome(true,true);statusbar.classList.add('dark');tbTitle.textContent=wxT[wechatPage];tbLeft.textContent='‹';tbLeft.onclick=goHome;if(wechatPage==='contacts'){tbRight.textContent='＋';tbRight.onclick=addContact;}else{tbRight.textContent='';tbRight.onclick=null;}document.querySelectorAll('#tabbar .tab').forEach(t=>t.classList.toggle('active',t.dataset.page===wechatPage));if(wechatPage==='chats')renderChats();else if(wechatPage==='contacts')renderContacts();else if(wechatPage==='discover')renderDiscover();else renderWxMe();refreshMomentBadge();}
+const wxTEn = {chats:'Message', contacts:'Contacts', discover:'Discover', me:'Profile'};
+
+function renderWechat(){showChrome(true,true);statusbar.classList.add('dark');tbTitle.textContent = document.body.classList.contains('wx-theme-card') ? wxTEn[wechatPage] : wxT[wechatPage];tbLeft.textContent='‹';tbLeft.onclick=goHome;if(wechatPage==='contacts'){tbRight.textContent='＋';tbRight.onclick=addContact;}else{tbRight.textContent='';tbRight.onclick=null;}document.querySelectorAll('#tabbar .tab').forEach(t=>t.classList.toggle('active',t.dataset.page===wechatPage));if(wechatPage==='chats')renderChats();else if(wechatPage==='contacts')renderContacts();else if(wechatPage==='discover')renderDiscover();else renderWxMe();refreshMomentBadge();}
 function avatarHtml(c){const bg=c.avatar?`background-image:url('${c.avatar}')`:'';return `<div class="avatar" style="${bg}">${c.avatar?'':(c.name?c.name[0]:'?')}</div>`;}
 function lastText(m){
   if(!m || m.hidden) return '';
@@ -9609,6 +9654,7 @@ function renderWxMe(){
           '</div>' +
         '</div>' +
 
+        '<div class="card-container">' +
           '<div class="cell">' +
             '<label style="font-size:13px;color:var(--sub);width:80px;flex-shrink:0;">我的网名</label>' +
             '<input value="' + esc(DB.me.name||'') + '" onchange="DB.me.name=this.value;save();renderWxMe();" style="flex:1;min-width:0;box-sizing:border-box;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);text-align:right;">' +
@@ -9617,7 +9663,6 @@ function renderWxMe(){
             '<label style="font-size:13px;color:var(--sub);width:80px;flex-shrink:0;">真实姓名</label>' +
             '<input value="' + esc(DB.me.realName||'') + '" onchange="DB.me.realName=this.value;save()" placeholder="AI会知道你的真名" style="flex:1;min-width:0;box-sizing:border-box;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);text-align:right;">' +
           '</div>' +
-
         '</div>' +
 
         '<div style="font-size:11px;color:var(--sub);padding:0 4px 4px;">这里是「通用的我」。针对某角色专属的身份/外貌/关系，在该角色编辑的「我方」里单独设。</div>' +
@@ -11375,28 +11420,25 @@ var model = DB.settings.chatModel || DB.settings.auxModel;
 
 var allowShare = Math.random() < 0.2; // 20% 概率允许发分享卡片
 
-var p = sys + '\n\n【任务】现在，以「' + (c.nick || c.name) + '」本人的身份，随手发一条微信朋友圈，就像真人某个瞬间突然想发点什么。\n\n' +
-  '【最重要·语气和长度完全跟着你的人设走】\n' +
-  '- 你是什么性格、平时怎么说话，发圈就是什么调性，参考上面你的性格关键词、说话风格和事例台词。\n' +
-  '- 高冷、话少的人：可能就几个字、一个词、甚至一个句号配张图就发了，不用凑字数。\n' +
-  '- 话多、外向的人：可以多说几句，但也别每条都写成小作文，点到为止、有留白反而更像真人随手发。\n' +
-  '- 绝不要所有角色都写成同一个长度、同一个腔调。你就是你。\n\n' +
-  '【内容可以是什么】此刻在做的事、突然的心情、一句吐槽、一个念头、看到的东西、随手记一笔……什么都行，真实随手不刻意。\n\n' +
-  '【硬性禁止】\n' +
-  '1. 禁止写天气/阳光/风/暖洋洋/软乎乎这类文艺矫情句（如"今天的风好温柔""阳光暖洋洋"），这是死规矩。\n' +
-  '2. 禁止清单式罗列（如"今天开了会、吃了饭、见了客户"）。想说事就只挑一件，带出细节。\n' +
-  '3. 别每次都用相似的句式和开头，换着花样来。\n' +
-  '4. 只输出朋友圈正文本身，不要引号、解释、旁白，禁止任何 <state> 标签。\n' +
-  '5. 现在是发【朋友圈】，不是发微信聊天。绝对不要一句一行、不要拆成好几条、不要换行，写成连贯的一整段。\n' +
-  '6. 忽略你线上聊天时"一句一发/拆句"的习惯，那只适用于私聊。\n' +
-  '7. 尽量别和你之前发过的朋友圈（若上文提到过）内容或句式重复。';
+// 随机抽一种"发圈形式"，让朋友圈有真人的随意感、经常是半条甚至没内容
+var forms = [
+  '【形式：一句话】只发一句话，短，像随口一说。可以是吐槽、一个念头、一句感慨，别超过25字。',
+  '【形式：几个字】只发几个字或一个词，甚至一个标点。比如"困了""无语""……""行吧"。不用解释，越少越好。',
+  '【形式：半夜没头没尾】此刻突然想发点什么，一句没头没尾、不解释的话，带点情绪但别点破。',
+  '【形式：转歌不多说】你此刻想分享一首歌。正文可以只有一个字、一个标点，或干脆留空，别写歌评。用下面格式在最后另起一行：\n分享歌曲：【分享·音乐|歌名|歌手|来源(如网易云音乐)|一两句歌词】',
+  '【形式：转文章不多说】你想转一篇符合你身份/心情的文章。正文留空或只写一两个字，别写读后感。用下面格式在最后另起一行：\n分享文章：【分享·文章|标题|来源(如公众号名)|一小段正文摘要】',
+  '【形式：吐槽一件小事】就今天遇到的一件具体小事发一句，别复述经过、别交代是谁几点在哪，只发这事让你冒出来的那一下反应。'
+];
+var pickForm = forms[Math.floor(Math.random() * forms.length)];
 
-if (allowShare) {
-  p += '\n\n【可选·分享】如果此刻你正好想分享一首歌或一篇文章（符合你心情或身份才分享，不符合就正常发文字，别硬来），可以在正文最后另起一行，用下面其中一种格式追加（只能选一种）：\n' +
-    '分享歌曲：【分享·音乐|歌名|歌手|来源(如网易云音乐)|一两句歌词】\n' +
-    '分享文章：【分享·文章|标题|来源(如公众号名)|一小段正文摘要】\n' +
-    '正文可以很短甚至不写（比如高冷的人转首歌只配一个句号）。不分享就完全不要出现这个标记。';
-}
+var p = sys + '\n\n【任务】以「' + (c.nick || c.name) + '」本人的身份，用你自己的性格，随手发一条微信朋友圈。真人发圈大多很随意、很短、经常什么都不解释——不是写作文。\n\n' +
+  pickForm + '\n\n' +
+  '【必须记住】\n' +
+  '- 朋友圈是发给一群朋友看的，是你自己的记录，不是在跟某个人私聊。别用私聊时对某人撒娇、威胁、命令、调戏的腔调。\n' +
+  '- 可以提到别人或跟某人有关的事，但别指名道姓、别复述来龙去脉，只发这件事给你的那一下感受（比如收到喜欢的礼物，发"太懂我了吧"，而不是"某人送了我喜欢的东西"）。\n' +
+  '- 宁可短、宁可残缺、宁可什么都不多说，也不要凑字数、不要写长、不要抒情。\n' +
+  '- 禁止天气/阳光/风/暖洋洋这类文艺矫情句。\n' +
+  '- 只输出朋友圈正文本身（若按形式要发分享卡片，就带上那一行），不要引号、不要解释、不要旁白，禁止 <state> 标签，不要换行分成好几条，正文写成连贯的一段。';
     var txt = await callAI([{ role: 'user', content: p }], model);
 	// 先从原文解析分享卡片（必须在 cleanMomentText 之前，否则标记会被清掉）
 var share = null;
@@ -14051,8 +14093,9 @@ else if (m.type === 'shop_item') {
       else if (m.giftStatus === 'ai_declined') { _st = '对方婉拒了'; _cl = 'var(--sub)'; }
       _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:' + _cl + ';border-top:1px solid var(--line)">' + _st + '</div>';
     }
-    body = '<div class="mbody" style="padding:0;width:186px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;' + _cardStyle + '">' +
-      '<div style="background:' + _topBg + ';padding:7px 0;text-align:center;color:#fff;font-size:12px;letter-spacing:1px">' + (_isRare ? '✨ 珍稀好礼 ✨' : '🎁 礼物') + '</div>' +
+    body = '<div class="mbody" style="padding:0 !important;width:186px;background:#fff !important;border-radius:14px !important;overflow:hidden;' + _cardStyle + '">' +
+      '<div style="' + (_isRare ? 'background:' + _topBg + ';color:#fff;' : 'color:var(--theme);border-bottom:1px solid var(--line);font-weight:600;') + 'padding:8px 0;text-align:center;font-size:12px;letter-spacing:1px">' + (_isRare ? '✨ 珍稀好礼 ✨' : '🎁 礼物') + '</div>' +
+
       '<div style="padding:14px 12px 12px;text-align:center">' +
       '<div style="font-size:44px;line-height:1">' + esc(m.emoji || '🎁') + '</div>' +
       '<div style="font-size:15px;font-weight:700;margin-top:8px;color:var(--text)">' + esc(m.content || '礼物') + '</div>' +
@@ -15128,51 +15171,70 @@ async function regenIdeas(){
   }
 }
 
-// 提示框（替换 alert）
-function popTip(msg, opts){
-  opts = opts || {};
+// ===== 弹窗工厂：所有弹窗都从这里出，改结构只改这一个函数 =====
+function _buildPopup(opts){
   popClose();
+  window._popYes = opts.onYes || null;
+
   var p = document.createElement('div');
   p.className = 'popup'; p.id = 'popup';
-  p.innerHTML = '<div class="popup-box">' +
-    '<div class="popup-head">' +
-      (opts.icon ? '<div class="popup-icon">' + opts.icon + '</div>' : '') +
-      (opts.title ? '<div class="popup-title">' + esc(opts.title) + '</div>' : '') +
-      '<div class="popup-msg">' + esc(msg) + '</div>' +
-    '</div>' +
-    '<div class="popup-btns"><button class="popup-btn main" onclick="popClose()">' + (opts.ok || '知道啦') + '</button></div>' +
-    '</div>';
+
+  var html = '<div class="popup-box">';
+  if (opts.loading) {
+    html += '<div class="popup-spin"></div>';
+    html += '<div class="popup-loadmsg">' + esc(opts.msg || '请稍候…') + '</div>';
+  } else {
+    html += '<div class="popup-head">';
+    if (opts.icon)  html += '<div class="popup-icon">' + opts.icon + '</div>';
+    if (opts.title) html += '<div class="popup-title">' + esc(opts.title) + '</div>';
+    if (opts.msg)   html += '<div class="popup-msg">' + esc(opts.msg) + '</div>';
+    html += '</div>';
+    if (opts.buttons && opts.buttons.length) {
+      html += '<div class="popup-btns">';
+      opts.buttons.forEach(function(b){
+        html += '<button class="popup-btn ' + (b.kind || 'main') + '" data-act="' + b.act + '">' + esc(b.label) + '</button>';
+      });
+      html += '</div>';
+    }
+  }
+  html += '</div>';
+  p.innerHTML = html;
+
+  // 绑定按钮点击
+  Array.prototype.forEach.call(p.querySelectorAll('.popup-btn'), function(btn){
+    btn.addEventListener('click', function(){
+      var act = btn.getAttribute('data-act');
+      popClose();
+      if (act === 'yes' && typeof window._popYes === 'function') window._popYes();
+    });
+  });
+
   phone.appendChild(p);
+  return p;
 }
 
+// 下面三个是「入口」，用法和参数跟以前完全一样，其它地方一行都不用改
 function popConfirm(msg, onYes, opts){
   opts = opts || {};
-  popClose();
-  window._popYes = onYes;
-  var p = document.createElement('div');
-  p.className = 'popup'; p.id = 'popup';
-  p.innerHTML = '<div class="popup-box">' +
-    '<div class="popup-head">' +
-      (opts.icon ? '<div class="popup-icon">' + opts.icon + '</div>' : '') +
-      (opts.title ? '<div class="popup-title">' + esc(opts.title) + '</div>' : '') +
-      '<div class="popup-msg">' + esc(msg) + '</div>' +
-    '</div>' +
-    '<div class="popup-btns">' +
-      '<button class="popup-btn sub" onclick="popClose()">' + (opts.cancel || '取消') + '</button>' +
-      '<button class="popup-btn main" onclick="var f=window._popYes;popClose();if(f)f();">' + (opts.ok || '确定') + '</button>' +
-    '</div></div>';
-  phone.appendChild(p);
+  _buildPopup({
+    icon: opts.icon, title: opts.title, msg: msg, onYes: onYes,
+    buttons: [
+      { label: opts.cancel || '取消', kind: 'sub',  act: 'no'  },
+      { label: opts.ok     || '确定', kind: 'main', act: 'yes' }
+    ]
+  });
+}
+
+function popTip(msg, opts){
+  opts = opts || {};
+  _buildPopup({
+    icon: opts.icon, title: opts.title, msg: msg,
+    buttons: [ { label: opts.ok || '知道啦', kind: 'main', act: 'no' } ]
+  });
 }
 
 function popLoading(msg){
-  popClose();
-  var p = document.createElement('div');
-  p.className = 'popup'; p.id = 'popup';
-  p.innerHTML = '<div class="popup-box">' +
-    '<div class="popup-spin"></div>' +
-    '<div class="popup-loadmsg">' + esc(msg || '请稍候…') + '</div>' +
-    '</div>';
-  phone.appendChild(p);
+  _buildPopup({ loading: true, msg: msg });
 }
 
 function popPrompt(msg, placeholder, onConfirm, opts) {
