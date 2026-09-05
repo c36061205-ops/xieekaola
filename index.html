@@ -515,9 +515,9 @@ textarea {
 .popup-title{font-size:17px;font-weight:600;color:var(--pop-text);margin-bottom:6px;letter-spacing:.2px;}
 .popup-msg{font-size:13.5px;color:var(--pop-sub);line-height:1.55;white-space:pre-wrap;}
 
-.popup-btns{display:flex;border-top:.5px solid var(--pop-line);}
+.popup-btns{display:flex;border-top:1px solid var(--pop-line);}
 .popup-btn{flex:1;padding:13px 8px;border:none;background:transparent;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,opacity .15s;}
-.popup-btn + .popup-btn{border-left:.5px solid var(--pop-line);}
+.popup-btn + .popup-btn{border-left:1px solid var(--pop-line);}
 .popup-btn:active{opacity:.6;}
 .popup-btn.sub{color:var(--pop-text);}                        /* 取消键：用文字色，永远看得清 */
 .popup-btn.main{color:var(--pop-accent);font-weight:600;}     /* 确定键：用强调色 */
@@ -535,7 +535,7 @@ textarea {
   --pop-bg:       var(--card);   /* 弹窗背景  */
   --pop-text:     var(--text);   /* 标题/取消键文字 */
   --pop-sub:      var(--sub);    /* 说明文字  */
-  --pop-line:     var(--line);   /* 分割线    */
+  --pop-line:     color-mix(in srgb, var(--pop-text) 16%, transparent);   /* 分割线（从文字色借16%，深浅主题都看得清）*/
   --pop-accent:   var(--theme);  /* 确定键/强调色 */
   --pop-on-accent:#fff;          /* （备用）填充按钮上的文字色 */
   --pop-radius:   16px;          /* 圆角      */
@@ -1547,9 +1547,9 @@ body.wx-theme-card .avatar-inner-img {
 body.wx-theme-card .msg .mbody {
   position: relative !important;
   border-radius: 18px !important;
-  padding: 10px 14px !important;
+  padding: 6px 14px !important;
   font-size: 14.5px !important;
-  line-height: 1.5 !important;
+  line-height: 1.4 !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
   word-break: break-word !important;
 }
@@ -1563,20 +1563,17 @@ body.wx-theme-card .msg::after {
   content: none !important;
 }
 
-/* 左侧（对方）气泡：左上角微收 4px，其余三边大圆角，自然形成软萌微尾巴 */
 body.wx-theme-card .msg:not(.me) .mbody {
   background: var(--card) !important;
   color: var(--text) !important;
   border: 1px solid var(--line) !important;
-  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
 }
-
-/* 右侧（我方）气泡：右上角微收 4px，其余三边大圆角 */
 body.wx-theme-card .msg.me .mbody {
   background: var(--theme) !important;
   color: #fff !important;
   border: 1px solid var(--theme) !important;
-  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
 }
 
 /* 聊天界面头像圆角优化 */
@@ -1610,19 +1607,16 @@ body.wx-theme-card #chatBottom {
 
 /* 顶部快捷功能栏 (相册/表情/转账/小纸条) */
 body.wx-theme-card #bubbleRow {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
   display: flex !important;
-  justify-content: space-between !important;
-  gap: 6px !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
   overflow-x: auto !important;
   padding: 4px 2px 8px 2px !important;
 }
 body.wx-theme-card .bubble-btn {
-  flex: 1 1 auto !important;
-  min-width: fit-content !important;
+  flex: 0 0 auto !important;
   box-sizing: border-box !important;
+  padding: 6px 13px !important;
 }
 
 /* 主输入行：强制居中对齐、弹性压缩 */
@@ -1732,7 +1726,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026904_1';
+const APP_VER = 'v2026905_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -11425,9 +11419,10 @@ var forms = [
   '【形式：一句话】只发一句话，短，像随口一说。可以是吐槽、一个念头、一句感慨，别超过25字。',
   '【形式：几个字】只发几个字或一个词，甚至一个标点。比如"困了""无语""……""行吧"。不用解释，越少越好。',
   '【形式：半夜没头没尾】此刻突然想发点什么，一句没头没尾、不解释的话，带点情绪但别点破。',
-  '【形式：转歌不多说】你此刻想分享一首歌。正文可以只有一个字、一个标点，或干脆留空，别写歌评。用下面格式在最后另起一行：\n分享歌曲：【分享·音乐|歌名|歌手|来源(如网易云音乐)|一两句歌词】',
-  '【形式：转文章不多说】你想转一篇符合你身份/心情的文章。正文留空或只写一两个字，别写读后感。用下面格式在最后另起一行：\n分享文章：【分享·文章|标题|来源(如公众号名)|一小段正文摘要】',
-  '【形式：吐槽一件小事】就今天遇到的一件具体小事发一句，别复述经过、别交代是谁几点在哪，只发这事让你冒出来的那一下反应。'
+  '【形式：吐槽一件小事】就今天遇到的一件具体小事发一句，别复述经过、别交代是谁几点在哪，只发这事让你冒出来的那一下反应。',
+  '【形式：发张照片】此刻拍到的一个画面。正文留空或只配一两个字，别解释照片。用上面人设里说明的 <share type="image"> 标签发（标签单独占一行、属性用双引号），别加任何前缀文字。',
+  '【形式：转首歌】你此刻想分享一首歌，别写歌评。正文留空或只一个字/一个标点。用上面人设里说明的 <share type="music"> 标签发（标签单独占一行、属性用双引号），别加"分享歌曲："这类前缀文字。',
+  '【形式：转篇文章】你想转一篇符合你身份或心情的文章，别写读后感。正文留空或只一两个字。用上面人设里说明的 <share type="link"> 标签发（标签单独占一行、属性用双引号），别加"分享文章："这类前缀文字。'
 ];
 var pickForm = forms[Math.floor(Math.random() * forms.length)];
 
@@ -11438,7 +11433,8 @@ var p = sys + '\n\n【任务】以「' + (c.nick || c.name) + '」本人的身�
   '- 可以提到别人或跟某人有关的事，但别指名道姓、别复述来龙去脉，只发这件事给你的那一下感受（比如收到喜欢的礼物，发"太懂我了吧"，而不是"某人送了我喜欢的东西"）。\n' +
   '- 宁可短、宁可残缺、宁可什么都不多说，也不要凑字数、不要写长、不要抒情。\n' +
   '- 禁止天气/阳光/风/暖洋洋这类文艺矫情句。\n' +
-  '- 只输出朋友圈正文本身（若按形式要发分享卡片，就带上那一行），不要引号、不要解释、不要旁白，禁止 <state> 标签，不要换行分成好几条，正文写成连贯的一段。';
+  '- 若按形式要发分享卡片，就严格用上面人设里教过的 <share ...> 标签格式，标签单独占一行，前面不要加任何说明文字。\n' +
+  '- 只输出朋友圈正文本身，不要引号、不要解释、不要旁白，禁止 <state> 标签，正文不要换行分成好几条。';
     var txt = await callAI([{ role: 'user', content: p }], model);
 	// 先从原文解析分享卡片（必须在 cleanMomentText 之前，否则标记会被清掉）
 var share = null;
@@ -18330,30 +18326,23 @@ function importCharacter(){
   };
   inp.click();
 }
-// ===== 全屏自适应缩放 =====
+// ============================================================
+// 全屏自适应缩放（电脑不做缩放，手机保留键盘适配）
+// ============================================================
+
 function applyPhoneScale() {
   var phone = document.getElementById('phone');
   if (!phone) return;
 
-  // 屏幕宽度小于 420px 时，手机已经自适应，不做缩放
+  // 手机端：不做缩放，让键盘适配逻辑接管
   if (window.innerWidth < 420) {
     phone.style.transform = 'scale(1)';
     return;
   }
 
-  var designWidth = 400;      // 与 CSS 中的 width 一致
-  var designHeight = 880;     // 与 CSS 中的 max-height 一致
-  var padding = 24;           // 四周留一点边距，不贴边
-
-  var availW = window.innerWidth - padding;
-  var availH = window.innerHeight - padding;
-
-  var scaleX = availW / designWidth;
-  var scaleY = availH / designHeight;
-  var scale = Math.min(scaleX, scaleY, 1); // 最大不超过 1，避免放大变模糊
-scale = Math.max(scale, 0.85); // 最小不低于 0.85，避免电脑窗口矮时缩得太小
-
-  phone.style.transform = 'scale(' + scale + ')';
+  // 电脑端：不做缩放，保持 CSS 定义的 400px 宽
+  phone.style.transform = 'none';
+  phone.style.height = '';
 }
 
 // 页面加载时执行
@@ -18361,27 +18350,30 @@ window.addEventListener('load', function() {
   applyPhoneScale();
 });
 
-// 窗口大小变化时重新计算（如旋转屏幕、调整窗口）
+// 窗口大小变化时重新计算
 window.addEventListener('resize', function() {
   applyPhoneScale();
 });
-// 手机键盘弹出时，让手机正好铺满可见区域，避免黑块和遮挡
+
+// ============================================================
+// 手机键盘适配：解决输入法遮挡输入框的问题
+// ============================================================
+
 if (window.visualViewport && window.innerWidth < 420) {
   var vv = window.visualViewport;
+
   function fitPhone() {
     var phone = document.getElementById('phone');
     if (!phone) return;
-    phone.style.height = vv.height + 'px';                 // 高度铺满可见区
+    phone.style.height = vv.height + 'px';                      // 高度铺满可见区
     phone.style.transform = 'translateY(' + vv.offsetTop + 'px)'; // 位置对齐顶部
   }
-  vv.addEventListener('resize', fitPhone);  // 键盘弹起/收起时触发
-  vv.addEventListener('scroll', fitPhone);  // 页面被顶动时触发
+
+  vv.addEventListener('resize', fitPhone);   // 键盘弹起/收起时触发
+  vv.addEventListener('scroll', fitPhone);   // 页面被顶动时触发
   fitPhone();
 }
 
-// 每次渲染页面后也执行一次（保证切换页面后重新适配）
-// 在 render 函数的最末尾加上这行：
-// applyPhoneScale();
 function openExportModal() {
   closeModal();
 
