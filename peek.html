@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>查手机</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  :root{--hud:#35f0c0;--hud2:#00d4ff;--warn:#ff5c7a;}
+  html,body{height:100%;background:#000;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;}
+  #app{position:relative;width:100vw;height:100vh;height:100dvh;max-width:400px;max-height:880px;margin:0 auto;overflow:hidden;background:#05080c;}
+  @media(min-width:421px){#app{border:1px solid rgba(53,240,192,.22);top:50%;transform:translateY(-50%);border-radius:12px;}}
+  #screen{position:absolute;inset:0;}
+
+  /* ============ 通用动画 ============ */
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+  @keyframes scan{to{top:110%;}}
+
+  /* ============ 选人页（终端扫描风） ============ */
+  .term{--t-acc:#35f0c0;--t-acc2:#00d4ff;--t-warn:#ff5c7a;--t-bg:#05080c;
+    --t-panel:rgba(20,32,38,.55);--t-line:rgba(53,240,192,.22);--t-dim:#5a7a78;
+    position:absolute;inset:0;display:flex;flex-direction:column;padding:0 18px 18px;overflow:hidden;
+    color:var(--t-acc);font-family:"SF Mono",Consolas,"Roboto Mono",monospace;
+    background:radial-gradient(120% 80% at 50% -10%,rgba(53,240,192,.10),transparent 60%),
+      radial-gradient(100% 60% at 50% 110%,rgba(0,212,255,.08),transparent 60%),var(--t-bg);animation:fade .3s;}
+  .term::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background:repeating-linear-gradient(0deg,rgba(53,240,192,.04) 0,rgba(53,240,192,.04) 1px,transparent 1px,transparent 3px);}
+  .term::after{content:"";position:absolute;left:0;right:0;height:120px;top:-120px;z-index:6;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(53,240,192,.09),transparent);animation:scan 6s linear infinite;}
+  .term>*{position:relative;z-index:8;}
+  .term .sysbar{display:flex;align-items:center;justify-content:center;gap:9px;height:38px;flex-shrink:0;
+    font-size:10.5px;letter-spacing:1px;color:var(--t-dim);border-bottom:1px solid var(--t-line);white-space:nowrap;}
+  .term .sysbar b{color:var(--t-acc);font-weight:600;}
+  .term .sep{color:rgba(53,240,192,.3);}
+  .term .tdot{width:6px;height:6px;border-radius:50%;background:var(--t-acc);box-shadow:0 0 8px var(--t-acc);animation:blink 1.4s infinite;display:inline-block;}
+  .term .pwr{display:inline-flex;align-items:center;gap:4px;}
+  .term .pwr .cells{display:inline-flex;gap:1.5px;}
+  .term .pwr .cells i{width:3px;height:9px;background:rgba(53,240,192,.15);}
+  .term .pwr .cells i.on{background:var(--t-acc);box-shadow:0 0 4px var(--t-acc);}
+  .term .navrow{display:flex;align-items:center;justify-content:space-between;padding:12px 2px 0;font-size:11px;color:var(--t-dim);letter-spacing:1px;flex-shrink:0;}
+  .term .navrow .back{color:var(--t-acc);cursor:pointer;}
+  .term .thead{padding:16px 4px;flex-shrink:0;}
+  .term .thead .kicker{font-size:11px;color:var(--t-acc2);letter-spacing:4px;margin-bottom:10px;}
+  .term .thead h1{font-size:26px;letter-spacing:3px;color:#eafff8;font-weight:700;text-shadow:0 0 14px rgba(53,240,192,.5);}
+  .term .thead h1 span{color:var(--t-acc);}
+  .term .tdesc{font-size:11.5px;color:var(--t-dim);line-height:1.8;margin-top:12px;letter-spacing:.5px;}
+  .term .tdesc b{color:var(--t-acc);}
+  .term .typed{border-right:2px solid var(--t-acc);animation:caret 1s step-end infinite;padding-right:2px;}
+  @keyframes caret{50%{border-color:transparent;}}
+  .term .tlabel{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--t-dim);letter-spacing:2px;margin:4px 4px 14px;flex-shrink:0;}
+  .term .tlabel::after{content:"";flex:1;height:1px;background:var(--t-line);}
+  .term .tlist{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:6px;}
+  .term .tlist::-webkit-scrollbar{width:0;}
+  .term .target{position:relative;display:flex;align-items:center;gap:14px;padding:15px;
+    background:var(--t-panel);border:1px solid var(--t-line);border-radius:4px;cursor:pointer;overflow:hidden;transition:.18s;}
+  .term .target::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--t-acc);box-shadow:0 0 10px var(--t-acc);}
+  .term .target:active{transform:translateX(3px);background:rgba(53,240,192,.08);}
+  .term .target.disabled{opacity:.5;cursor:not-allowed;}
+  .term .target.disabled::before{background:var(--t-warn);box-shadow:0 0 10px var(--t-warn);}
+  .term .corner{position:absolute;top:6px;right:9px;font-size:9px;color:var(--t-dim);letter-spacing:1px;}
+  .term .avatar{width:52px;height:52px;flex-shrink:0;border-radius:4px;position:relative;
+    background:linear-gradient(135deg,rgba(53,240,192,.25),rgba(0,212,255,.15));
+    display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#eafff8;border:1px solid var(--t-line);overflow:hidden;}
+  .term .avatar img{width:100%;height:100%;object-fit:cover;}
+  .term .avatar .frame{position:absolute;inset:3px;}
+  .term .avatar .frame::before,.term .avatar .frame::after{content:"";position:absolute;width:7px;height:7px;border:1.5px solid var(--t-acc);}
+  .term .avatar .frame::before{top:-1px;left:-1px;border-right:0;border-bottom:0;}
+  .term .avatar .frame::after{bottom:-1px;right:-1px;border-left:0;border-top:0;}
+  .term .info{flex:1;min-width:0;}
+  .term .info .name{font-size:16px;color:#eafff8;letter-spacing:1px;font-weight:600;display:flex;align-items:center;gap:8px;min-width:0;}
+  .term .info .name .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .term .info .id{font-size:9px;color:var(--t-dim);letter-spacing:1px;padding:1px 5px;border:1px solid var(--t-line);border-radius:2px;flex-shrink:0;}
+  .term .info .rel{font-size:11px;color:var(--t-acc2);margin-top:6px;letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .term .info .bar{margin-top:8px;height:3px;background:rgba(53,240,192,.12);border-radius:2px;overflow:hidden;}
+  .term .info .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--t-acc2),var(--t-acc));box-shadow:0 0 6px var(--t-acc);}
+  .term .right{flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+  .term .heart{font-size:11px;color:var(--t-dim);letter-spacing:1px;}
+  .term .heart b{color:var(--t-acc);font-size:14px;}
+  .term .cost{font-size:10px;letter-spacing:1px;padding:6px 10px;border-radius:3px;white-space:nowrap;}
+  .term .cost.ok{color:var(--t-bg);background:var(--t-acc);box-shadow:0 0 12px rgba(53,240,192,.5);font-weight:700;}
+  .term .cost.no{color:var(--t-warn);border:1px solid var(--t-warn);}
+  .term .tfoot{padding-top:12px;font-size:9px;color:var(--t-dim);letter-spacing:1px;text-align:center;opacity:.6;flex-shrink:0;}
+  .term .empty{color:var(--t-dim);text-align:center;padding:50px 0;font-size:12px;letter-spacing:1px;}
+
+  /* ============ 开场解码 ============ */
+  .boot{position:absolute;inset:0;z-index:200;background:#03060a;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:14px;font-family:"SF Mono",Consolas,monospace;color:var(--hud);animation:fade .2s;}
+  .boot .ring{width:70px;height:70px;border:2px solid rgba(53,240,192,.18);border-top-color:var(--hud);
+    border-radius:50%;animation:spin .8s linear infinite;box-shadow:0 0 20px rgba(53,240,192,.3);}
+  .boot .pct{font-size:30px;font-weight:200;letter-spacing:2px;}
+  .boot .log{font-size:11px;letter-spacing:1px;text-align:center;line-height:1.9;min-height:20px;text-shadow:0 0 6px rgba(53,240,192,.5);}
+  .boot .who{font-size:10px;color:#5a7a78;letter-spacing:2px;margin-top:6px;}
+
+  /* ============ 黑客桌面 ============ */
+  .deskwrap{position:absolute;inset:0;overflow:hidden;background:linear-gradient(165deg,#1a1730,#231d3e 45%,#12101f);animation:fade .3s;}
+  .hud-scan{position:absolute;inset:0;z-index:40;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(53,240,192,.045) 0,rgba(53,240,192,.045) 1px,transparent 1px,transparent 3px);}
+  .hud-sweep{position:absolute;left:0;right:0;height:150px;top:-150px;z-index:41;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(53,240,192,.09),transparent);animation:scan 7s linear infinite;}
+  .hud-glitch{position:absolute;inset:0;z-index:43;pointer-events:none;mix-blend-mode:screen;opacity:0;
+    background:linear-gradient(90deg,rgba(255,0,80,.5),transparent 30%,transparent 70%,rgba(0,240,255,.5));animation:glitch 18s steps(1) infinite;}
+  @keyframes glitch{0%,97%,100%{opacity:0;transform:translateX(0);}97.5%{opacity:.5;transform:translateX(-3px);}
+    98%{opacity:0;}98.5%{opacity:.4;transform:translateX(3px);}99%{opacity:0;}}
+  .hud-corner{position:absolute;width:26px;height:26px;z-index:45;pointer-events:none;border-color:var(--hud);filter:drop-shadow(0 0 4px rgba(53,240,192,.6));}
+  .hud-corner.tl{top:50px;left:12px;border-top:2px solid;border-left:2px solid;}
+  .hud-corner.tr{top:50px;right:12px;border-top:2px solid;border-right:2px solid;}
+  .hud-corner.bl{bottom:12px;left:12px;border-bottom:2px solid;border-left:2px solid;}
+  .hud-corner.br{bottom:12px;right:12px;border-bottom:2px solid;border-right:2px solid;}
+  .deskwrap .edge{position:absolute;inset:0;z-index:42;pointer-events:none;box-shadow:inset 0 0 70px rgba(53,240,192,.15);}
+  .hud-top{position:absolute;top:0;left:0;right:0;height:40px;z-index:50;display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px 0;font-family:"SF Mono",Consolas,monospace;font-size:10px;letter-spacing:1px;color:var(--hud);text-shadow:0 0 6px rgba(53,240,192,.6);}
+  .hud-top .rec{display:flex;align-items:center;gap:5px;}
+  .hud-top .rec b{width:6px;height:6px;border-radius:50%;background:var(--warn);box-shadow:0 0 6px var(--warn);animation:blink 1.2s infinite;}
+  .hud-back{position:absolute;top:44px;left:14px;z-index:55;font-family:"SF Mono",monospace;font-size:11px;letter-spacing:1px;
+    color:var(--hud);cursor:pointer;padding:4px 8px 4px 0;text-shadow:0 0 6px rgba(53,240,192,.5);}
+  .hud-owner{position:absolute;top:42px;right:14px;z-index:55;font-family:"SF Mono",monospace;font-size:10px;letter-spacing:1px;color:var(--hud2);text-align:right;line-height:1.6;}
+  .hud-owner b{color:#eafff8;font-size:12px;}
+  .desk{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;padding-top:80px;animation:deskIn .5s ease both;}
+  @keyframes deskIn{from{opacity:0;transform:scale(1.04);}to{opacity:1;transform:scale(1);}}
+  .clock{text-align:center;color:#fff;margin-bottom:6px;}
+  .clock .t{font-size:58px;font-weight:200;line-height:1;letter-spacing:3px;font-family:"SF Mono",monospace;text-shadow:0 0 22px rgba(53,240,192,.4),0 2px 12px rgba(0,0,0,.5);}
+  .clock .d{font-size:12px;opacity:.8;margin-top:6px;letter-spacing:2px;font-family:"SF Mono",monospace;color:var(--hud);}
+  .grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:16px 6px;padding:22px 18px 8px;align-content:start;overflow-y:auto;}
+  .grid::-webkit-scrollbar{width:0;}
+  .capp{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;position:relative;}
+  .ico{width:52px;height:52px;border-radius:14px;position:relative;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(145deg,rgba(28,38,46,.9),rgba(10,16,20,.92));
+    border:1px solid color-mix(in srgb,var(--c) 45%,transparent);
+    box-shadow:inset 0 0 12px color-mix(in srgb,var(--c) 12%,transparent),0 3px 10px rgba(0,0,0,.45);transition:.14s;}
+  .capp:active .ico{transform:scale(.9);box-shadow:inset 0 0 18px color-mix(in srgb,var(--c) 30%,transparent),0 0 16px color-mix(in srgb,var(--c) 45%,transparent);}
+  .ico svg{width:30px;height:30px;stroke:var(--c);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 3px color-mix(in srgb,var(--c) 60%,transparent));}
+  .an{font-size:11px;color:#cfe6df;letter-spacing:.5px;font-family:"SF Mono",monospace;}
+  .dbadge{position:absolute;top:-3px;right:6px;z-index:2;font-family:"SF Mono",monospace;font-size:8px;color:#03060a;background:var(--c);
+    padding:1px 4px;border-radius:3px;letter-spacing:.5px;font-weight:700;box-shadow:0 0 8px color-mix(in srgb,var(--c) 70%,transparent);}
+  .capp.lock .an{color:#c98a97;}
+  .capp.lock .dbadge{color:#fff;}
+  .dock{margin:0 14px 26px;padding:12px 8px;border-radius:22px;background:rgba(12,20,24,.5);backdrop-filter:blur(14px);
+    border:1px solid rgba(53,240,192,.3);box-shadow:inset 0 0 20px rgba(53,240,192,.06);display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .dock .an{display:none;}.dock .ico{width:50px;height:50px;}
+  .home{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:120px;height:4px;border-radius:3px;
+    background:rgba(53,240,192,.6);box-shadow:0 0 10px rgba(53,240,192,.6);z-index:48;cursor:pointer;}
+
+  /* ============ App 内容占位弹层 ============ */
+  .modal{position:absolute;inset:0;z-index:120;background:rgba(3,6,10,.82);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;padding:32px;animation:fade .2s;
+    font-family:"SF Mono",monospace;color:var(--hud);}
+  .modal .box{border:1px solid rgba(53,240,192,.3);border-radius:6px;background:rgba(14,22,26,.95);
+    padding:26px 22px;text-align:center;max-width:280px;width:100%;box-shadow:0 0 30px rgba(53,240,192,.15);}
+  .modal .box h3{font-size:15px;color:#eafff8;letter-spacing:1px;margin-bottom:12px;}
+  .modal .box p{font-size:12px;color:#8fb;line-height:1.8;letter-spacing:.5px;opacity:.8;}
+  .modal .box .warnc{color:var(--warn);}
+  .modal .box button{margin-top:20px;font-family:"SF Mono",monospace;font-size:12px;letter-spacing:1px;color:#03060a;
+    background:var(--hud);border:0;border-radius:4px;padding:9px 22px;cursor:pointer;font-weight:700;box-shadow:0 0 12px rgba(53,240,192,.4);}
+
+  /* ===== 模型选择器（HUD）===== */
+  .hud-model{position:absolute;top:44px;left:50%;transform:translateX(-50%);z-index:56;
+    display:flex;gap:4px;font-family:"SF Mono",monospace;font-size:9px;letter-spacing:1px;
+    background:rgba(12,20,24,.6);border:1px solid rgba(53,240,192,.25);border-radius:4px;padding:3px;backdrop-filter:blur(6px);}
+  .hud-model .mlab{color:#5a7a78;padding:3px 5px;align-self:center;}
+  .hud-model .mopt{color:var(--hud);padding:3px 8px;border-radius:3px;cursor:pointer;opacity:.5;transition:.15s;}
+  .hud-model .mopt.on{background:var(--hud);color:#03060a;opacity:1;font-weight:700;box-shadow:0 0 8px rgba(53,240,192,.5);}
+
+  /* ===== App 窗口 ===== */
+  .win{position:absolute;inset:0;z-index:130;display:flex;flex-direction:column;
+    background:linear-gradient(165deg,#0a0e16,#0d1420);animation:winIn .28s ease;font-family:"SF Mono",Consolas,monospace;}
+  @keyframes winIn{from{opacity:0;transform:scale(1.03);}to{opacity:1;transform:scale(1);}}
+  .win::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+    background:repeating-linear-gradient(0deg,rgba(53,240,192,.04) 0,rgba(53,240,192,.04) 1px,transparent 1px,transparent 3px);}
+  .win-bar{flex-shrink:0;height:52px;display:flex;align-items:center;gap:10px;padding:14px 14px 0;
+    border-bottom:1px solid rgba(53,240,192,.2);position:relative;z-index:4;}
+  .win-bar .wt{flex:1;min-width:0;}
+  .win-bar .wt .wn{font-size:14px;color:#eafff8;letter-spacing:1px;font-weight:600;display:flex;align-items:center;gap:8px;}
+  .win-bar .wt .ws{font-size:9px;color:#5a7a78;letter-spacing:1px;margin-top:3px;}
+  .win-bar .wdot{width:7px;height:7px;border-radius:50%;background:var(--hud);box-shadow:0 0 8px var(--hud);animation:blink 1.4s infinite;flex-shrink:0;}
+  .win-bar .wclose{color:var(--hud);font-size:11px;letter-spacing:1px;cursor:pointer;padding:6px 10px;
+    border:1px solid rgba(53,240,192,.3);border-radius:4px;flex-shrink:0;}
+  .win-bar .wclose:active{background:rgba(53,240,192,.15);}
+  .win-body{flex:1;overflow-y:auto;position:relative;z-index:4;padding:16px 14px 24px;}
+    /* 窗口顶部数据流装饰 */
+  .win-bar .wt .ws::before{content:"◉ DECRYPTED · ";color:#35f0c0;}
+  .win .win-body{position:relative;}
+  /* 内容外再包一层"取证报告"头 */
+  .win-forensic{font-family:"SF Mono",monospace;font-size:9px;color:#5a7a78;letter-spacing:1px;
+    border:1px solid rgba(53,240,192,.2);border-radius:4px;padding:8px 10px;margin-bottom:14px;
+    background:rgba(53,240,192,.04);line-height:1.7;}
+  .win-forensic b{color:#35f0c0;}
+  .win-forensic .blink{animation:blink 1.2s infinite;}
+  /* 内容逐行浮现 */
+  @keyframes lineIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:none;}}
+  .win-body .pk-content>*{animation:lineIn .35s ease both;}
+  .win-body .pk-content>*:nth-child(2){animation-delay:.08s;}
+  .win-body .pk-content>*:nth-child(3){animation-delay:.16s;}
+  .win-body .pk-content>*:nth-child(4){animation-delay:.24s;}
+  .win-body .pk-content>*:nth-child(5){animation-delay:.32s;}
+
+  .win-body::-webkit-scrollbar{width:0;}
+
+  /* 加载态 */
+  .win-load{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:5;}
+  .win-load .ring{width:56px;height:56px;border:2px solid rgba(53,240,192,.18);border-top-color:var(--hud);border-radius:50%;animation:spin .8s linear infinite;box-shadow:0 0 18px rgba(53,240,192,.3);}
+  .win-load .lt{font-size:11px;color:var(--hud);letter-spacing:1px;text-shadow:0 0 6px rgba(53,240,192,.5);min-height:16px;}
+  .win-load .lsub{font-size:9px;color:#5a7a78;letter-spacing:1px;}
+
+  /* 错误态 */
+  .win-err{padding:30px 10px;text-align:center;color:var(--warn);font-size:12px;line-height:1.9;letter-spacing:.5px;}
+  .win-err button{margin-top:16px;font-family:"SF Mono",monospace;font-size:11px;color:#03060a;background:var(--hud);border:0;border-radius:4px;padding:8px 18px;cursor:pointer;font-weight:700;}
+
+  /* ===== AI 生成内容的统一皮肤（字号已调大）===== */
+  .pk-content{color:#c8e6df;font-size:14.5px;line-height:1.75;letter-spacing:.3px;
+    font-family:-apple-system,"PingFang SC",sans-serif;animation:fade .4s;}
+  .pk-content .sec{margin-bottom:20px;}
+  .pk-content .sec-t{font-family:"SF Mono",monospace;font-size:11px;color:#35f0c0;letter-spacing:2px;
+    margin-bottom:11px;display:flex;align-items:center;gap:8px;text-shadow:0 0 6px rgba(53,240,192,.4);}
+  .pk-content .sec-t::before{content:"▸";}
+  .pk-content .sec-t::after{content:"";flex:1;height:1px;background:rgba(53,240,192,.2);}
+  .pk-content .item{background:rgba(20,32,38,.5);border:1px solid rgba(53,240,192,.15);border-left:2px solid #35f0c0;
+    border-radius:4px;padding:13px 14px;margin-bottom:10px;}
+  .pk-content .item .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:10px;}
+  .pk-content .item .h .who{color:#eafff8;font-weight:600;font-size:14.5px;}
+  .pk-content .item .h .time{font-family:"SF Mono",monospace;font-size:10.5px;color:#6a8a84;flex-shrink:0;}
+  .pk-content .item .txt{color:#aecfc7;font-size:13.5px;line-height:1.7;}
+  .pk-content .item .url{font-family:"SF Mono",monospace;font-size:12px;color:#00d4ff;word-break:break-all;margin-top:4px;}
+  .pk-content .item .meta{font-family:"SF Mono",monospace;font-size:10.5px;color:#6a8a84;margin-top:6px;letter-spacing:.5px;}
+  .pk-content .tag{display:inline-block;font-family:"SF Mono",monospace;font-size:10px;color:#03060a;background:#35f0c0;
+    padding:2px 7px;border-radius:3px;margin:3px 4px 3px 0;letter-spacing:.5px;}
+  .pk-content .tag.warn{background:#ff5c7a;color:#fff;}
+  .pk-content .note{color:#8ab0a8;font-size:12.5px;font-style:italic;padding:9px 0;line-height:1.7;}
+  .pk-content .bubble{max-width:82%;padding:10px 13px;border-radius:13px;margin-bottom:9px;font-size:13.5px;line-height:1.65;}
+  .pk-content .bubble.them{background:rgba(20,32,38,.7);border:1px solid rgba(53,240,192,.15);color:#c8e6df;border-top-left-radius:3px;}
+  .pk-content .bubble.me{background:rgba(53,240,192,.16);border:1px solid rgba(53,240,192,.3);color:#eafff8;margin-left:auto;border-top-right-radius:3px;}
+  .pk-content img,.pk-content .imgph{width:100%;border-radius:6px;margin:7px 0;
+    min-height:130px;background:linear-gradient(135deg,rgba(53,240,192,.1),rgba(0,212,255,.08));
+    border:1px dashed rgba(53,240,192,.3);display:flex;align-items:center;justify-content:center;
+    color:#8ab0a8;font-family:"SF Mono",monospace;font-size:11px;text-align:center;padding:22px;line-height:1.7;}
+
+  /* ===== 钱包/银行 专属皮肤 ===== */
+  .pk-bank{color:#dfeee9;font-family:-apple-system,"PingFang SC",sans-serif;animation:fade .4s;}
+  .pk-bank .bk-total{border:1px solid rgba(53,240,192,.3);border-radius:8px;padding:16px;margin-bottom:16px;
+    background:linear-gradient(135deg,rgba(53,240,192,.1),rgba(0,212,255,.05));text-align:center;}
+  .pk-bank .bk-total .lbl{font-family:"SF Mono",monospace;font-size:11px;color:#6a8a84;letter-spacing:2px;}
+  .pk-bank .bk-total .num{font-family:"SF Mono",monospace;font-size:30px;color:#35f0c0;font-weight:600;
+    letter-spacing:1px;margin-top:6px;text-shadow:0 0 14px rgba(53,240,192,.4);}
+  .pk-bank .bk-sec{font-family:"SF Mono",monospace;font-size:11px;color:#35f0c0;letter-spacing:2px;
+    margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+  .pk-bank .bk-sec::before{content:"▸";}
+  .pk-bank .bk-sec::after{content:"";flex:1;height:1px;background:rgba(53,240,192,.2);}
+  .pk-bank .bk-card{border-radius:10px;padding:16px;margin-bottom:11px;position:relative;overflow:hidden;
+    background:linear-gradient(120deg,#123,#0c2530 60%,#0a1a22);border:1px solid rgba(53,240,192,.25);}
+  .pk-bank .bk-card::after{content:"";position:absolute;top:-40%;right:-10%;width:140px;height:140px;
+    border-radius:50%;background:radial-gradient(circle,rgba(53,240,192,.18),transparent 70%);}
+  .pk-bank .bk-card .bank{font-size:14px;color:#eafff8;font-weight:600;letter-spacing:.5px;}
+  .pk-bank .bk-card .type{font-family:"SF Mono",monospace;font-size:10px;color:#7dd3fc;margin-top:2px;}
+  .pk-bank .bk-card .no{font-family:"SF Mono",monospace;font-size:15px;color:#c8e6df;letter-spacing:3px;margin:14px 0 10px;}
+  .pk-bank .bk-card .bal{font-family:"SF Mono",monospace;font-size:22px;color:#35f0c0;font-weight:600;}
+  .pk-bank .bk-card .bal small{font-size:11px;color:#6a8a84;margin-right:5px;letter-spacing:1px;}
+  .pk-bank .bk-flow{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:12px 13px;margin-bottom:8px;background:rgba(20,32,38,.5);border:1px solid rgba(53,240,192,.12);
+    border-radius:5px;}
+  .pk-bank .bk-flow .l{min-width:0;flex:1;}
+  .pk-bank .bk-flow .l .n{font-size:14px;color:#eafff8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pk-bank .bk-flow .l .t{font-family:"SF Mono",monospace;font-size:10.5px;color:#6a8a84;margin-top:4px;}
+  .pk-bank .bk-flow .amt{font-family:"SF Mono",monospace;font-size:16px;font-weight:600;flex-shrink:0;}
+  .pk-bank .bk-flow .amt.in{color:#4ade80;}
+  .pk-bank .bk-flow .amt.out{color:#ff8fa3;}
+  .pk-bank .bk-flow.susp{border-color:rgba(255,92,122,.5);background:rgba(255,92,122,.06);}
+  .pk-bank .bk-flow .warn{font-family:"SF Mono",monospace;font-size:9px;color:#fff;background:#ff5c7a;padding:1px 5px;border-radius:3px;margin-left:6px;}
+  .pk-bank .note{color:#8ab0a8;font-size:12.5px;font-style:italic;padding:9px 0;line-height:1.7;}
+  /* ===== 消息App专属 ===== */
+  .win .chat-head{flex-shrink:0;font-family:"SF Mono",monospace;font-size:11px;color:#6a8a84;
+    letter-spacing:1px;padding:9px 14px;border-bottom:1px solid rgba(53,240,192,.12);}
+  .win .chat-head b{color:#35f0c0;}
+  .pk-chat{display:flex;flex-direction:column;gap:9px;padding:8px 2px;}
+  .pk-chat .cbub{max-width:76%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.6;
+    word-break:break-word;font-family:-apple-system,"PingFang SC",sans-serif;animation:fade .3s;}
+  .pk-chat .cbub.them{align-self:flex-start;background:rgba(20,32,38,.75);border:1px solid rgba(53,240,192,.15);
+    color:#c8e6df;border-top-left-radius:4px;}
+  .pk-chat .cbub.me{align-self:flex-end;background:rgba(53,240,192,.16);border:1px solid rgba(53,240,192,.3);
+    color:#eafff8;border-top-right-radius:4px;}
+  .pk-chat .cbub i{color:#6a8a84;}
+  .pk-chat .chat-empty{color:#6a8a84;text-align:center;padding:40px 0;font-family:"SF Mono",monospace;font-size:12px;}
+.pk-msg{font-size:14.5px;color:#c8e6df}
+.msg-list{display:flex;flex-direction:column;gap:8px}
+.msg-li{display:flex;align-items:center;gap:12px;padding:12px 14px;
+  border:1px solid rgba(53,240,192,.25);border-left:3px solid #35f0c0;
+  background:rgba(53,240,192,.05);border-radius:8px;cursor:pointer;transition:.15s}
+.msg-li:hover{background:rgba(53,240,192,.12);border-color:#35f0c0}
+.msg-av{flex:0 0 40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;background:#0a1a16;border:1px solid #35f0c0;color:#35f0c0;
+  font-size:16px;font-weight:700}
+.msg-tx{flex:1;min-width:0}
+.msg-nm{font-size:15px;font-weight:700;color:#35f0c0;margin-bottom:3px}
+.msg-tag{display:inline-block;font-size:11px;color:#05080c;background:#35f0c0;
+  border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:600}
+.msg-pv{font-size:13px;color:#8fb8ae;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-ar{flex:0 0 auto;color:#35f0c0;font-size:20px;opacity:.6}
+.msg-load{padding:14px;text-align:center;color:#8fb8ae;font-size:13.5px;
+  border:1px dashed rgba(53,240,192,.3);border-radius:8px}
+.msg-back{display:inline-block;color:#35f0c0;font-size:14px;cursor:pointer;
+  padding:6px 2px;margin-bottom:6px}
+.msg-back:hover{text-decoration:underline}
+.msg-empty{text-align:center;color:#8fb8ae;padding:20px;font-size:14px}
+.pk-voice{display:inline-flex;flex-direction:column;gap:6px;cursor:pointer;
+  user-select:none;min-width:110px;max-width:100%}
+.pkv-top{display:flex;align-items:center;gap:9px}
+.pkv-play{font-size:13px;opacity:.7;flex-shrink:0}
+.pkv-wave{display:flex;align-items:center;gap:2px;height:20px;flex:1}
+.pkv-wave .pkb{width:3px;border-radius:2px;background:currentColor;opacity:.45}
+.pkv-wave .pkb:nth-child(1){height:9px}
+.pkv-wave .pkb:nth-child(2){height:15px}
+.pkv-wave .pkb:nth-child(3){height:19px}
+.pkv-wave .pkb:nth-child(4){height:13px}
+.pkv-wave .pkb:nth-child(5){height:8px}
+.pkv-wave .pkb:nth-child(6){height:17px}
+.pkv-wave .pkb:nth-child(7){height:20px}
+.pkv-wave .pkb:nth-child(8){height:11px}
+.pk-voice.exp .pkv-wave .pkb{animation:pkWave 1.2s ease-in-out infinite;opacity:.8}
+.pk-voice.exp .pkv-wave .pkb:nth-child(1){animation-delay:0s}
+.pk-voice.exp .pkv-wave .pkb:nth-child(2){animation-delay:.15s}
+.pk-voice.exp .pkv-wave .pkb:nth-child(3){animation-delay:.3s}
+.pk-voice.exp .pkv-wave .pkb:nth-child(4){animation-delay:.45s}
+.pk-voice.exp .pkv-wave .pkb:nth-child(5){animation-delay:.6s}
+.pk-voice.exp .pkv-wave .pkb:nth-child(6){animation-delay:.75s}
+.pk-voice.exp .pkv-wave .pkb:nth-child(7){animation-delay:.9s}
+.pk-voice.exp .pkv-wave .pkb:nth-child(8){animation-delay:1.05s}
+@keyframes pkWave{0%,100%{transform:scaleY(.4);opacity:.35}50%{transform:scaleY(1);opacity:.95}}
+.pkv-dur{font-size:12px;opacity:.6;min-width:26px;text-align:right;
+  flex-shrink:0;font-variant-numeric:tabular-nums}
+.pkv-txt{display:none;font-size:13.5px;line-height:1.5;padding-top:5px;
+  border-top:1px solid rgba(53,240,192,.25);white-space:pre-wrap;word-break:break-word}
+.pk-voice.exp .pkv-txt{display:block}
+.pkv-i{font-style:italic;opacity:.6}
+.cv-img,.cv-tr{opacity:.85}
+
+</style>
+</head>
+<body>
+<div id="app"><div id="screen"></div></div>
+
+<script>
+/* ================= 数据层：直连主程序 IndexedDB ================= */
+var DB=null,_store=null;
+function _openStore(){return new Promise(function(res,rej){
+  if(_store)return res(_store);
+  var q=indexedDB.open('myrp_dbstore',1);
+  q.onsuccess=function(e){_store=e.target.result;res(_store);};
+  q.onerror=function(e){rej(e);};});}
+function loadDB(){return new Promise(function(res){
+  _openStore().then(function(db){
+    var r=db.transaction('kv','readonly').objectStore('kv').get('DB');
+    r.onsuccess=function(){try{DB=JSON.parse(r.result)||{};}catch(e){DB={};}res();};
+    r.onerror=function(){DB={};res();};
+  }).catch(function(){DB={};res();});});}
+function saveDB(){return new Promise(function(res,rej){
+  _openStore().then(function(db){
+    var tx=db.transaction('kv','readwrite');
+    tx.objectStore('kv').put(JSON.stringify(DB),'DB');
+    tx.oncomplete=function(){res();};tx.onerror=function(e){rej(e);};
+  }).catch(rej);});}
+
+/* ================= 工具 ================= */
+var scr=document.getElementById('screen');
+var COST_HEART=0, COST_COIN=15;
+var battPct=80;
+function getC(id){return (DB.contacts||[]).find(function(x){return x.id===id;});}
+function nameOf(c){return c.name||c.nick||'未命名';}
+function pad(x){return String(x).padStart(2,'0');}
+// 按 角色id+日期 生成稳定随机数（每天变、每人不同）
+function seededNum(seedStr,min,max){
+  var h=0;for(var i=0;i<seedStr.length;i++){h=(h*31+seedStr.charCodeAt(i))>>>0;}
+  return min+(h%(max-min+1));
+}
+function todayKey(){var n=new Date();return ''+n.getFullYear()+pad(n.getMonth()+1)+pad(n.getDate());}
+
+/* ================= 电量 ================= */
+function initBattery(){
+  if(!navigator.getBattery){battPct=80;return;}
+  navigator.getBattery().then(function(b){
+    battPct=Math.round(b.level*100);paintBatt();
+    b.addEventListener('levelchange',function(){battPct=Math.round(b.level*100);paintBatt();});
+  }).catch(function(){battPct=80;});
+}
+function paintBatt(){
+  var cells=document.getElementById('pwrCells');
+  if(cells){var on=Math.round(battPct/20),h='';for(var i=0;i<5;i++)h+='<i class="'+(i<on?'on':'')+'"></i>';cells.innerHTML=h;}
+  var pp=document.getElementById('pwrPct');if(pp)pp.textContent=battPct+'%';
+}
+
+/* ================= 时钟（全局每秒刷新，按当前页面填不同元素） ================= */
+function tick(){
+  var n=new Date();
+  var clk=document.getElementById('clk');if(clk)clk.textContent=pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
+  var htop=document.getElementById('hudClk');if(htop)htop.textContent=pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
+  var dt=document.getElementById('dt');if(dt)dt.textContent=pad(n.getHours())+':'+pad(n.getMinutes());
+  var dd=document.getElementById('dd');
+  if(dd){var wk=['SUN','MON','TUE','WED','THU','FRI','SAT'];dd.textContent=pad(n.getMonth()+1)+'.'+pad(n.getDate())+' '+wk[n.getDay()];}
+}
+setInterval(tick,1000);
+
+/* ================= 扣费 ================= */
+function payToPeek(c){
+  var have=c.hearts||0;
+  if(have>=COST_HEART){
+    c.hearts=have-COST_HEART;c.heartLog=c.heartLog||[];
+    c.heartLog.unshift({t:Date.now(),n:-COST_HEART,reason:'查手机'});return true;
+  }
+  if((DB.coins||0)>=COST_COIN){
+    if(confirm('对「'+nameOf(c)+'」的心动值不足（'+have+'/'+COST_HEART+'）。\n是否花 '+COST_COIN+' 金币接入一次？')){
+      DB.coins-=COST_COIN;return true;}
+    return false;
+  }
+  alert('心动值和金币都不够啦～多和「'+nameOf(c)+'」聊聊天吧');return false;
+}
+
+/* ================= App 定义 ================= */
+var APPS=[
+  {id:'chat',   name:'消息',  c:'#35f0c0', g:'<path d="M4 5h16v11H8l-4 3z"/><path d="M8 9h8M8 12h5"/>'},
+  {id:'gallery',name:'相册',  c:'#b06cff', g:'<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M4 16l4.5-4 3.5 3 3-2.5 5 4"/>'},
+  {id:'browser',name:'浏览器',c:'#00d4ff', g:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 3 2.6 15 0 18M12 3c-2.6 3-2.6 15 0 18"/>'},
+  {id:'notes',  name:'备忘录',c:'#ffb84d', g:'<path d="M6 3h9l3 3v15H6z"/><path d="M9 9h6M9 12.5h6M9 16h4"/>'},
+  {id:'music',  name:'音乐',  c:'#ff5c9d', g:'<path d="M9 17V5l10-2v12"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/>'},
+  {id:'wallet', name:'钱包',  c:'#ffd93d', g:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="14" r="1"/>'},
+  {id:'secret', name:'保险箱',c:'#ff5c7a', locked:true, g:'<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'},
+  {id:'private',name:'私密',  c:'#ff5c7a', locked:true, g:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>'}
+];
+var DOCK=[
+  {id:'call',    name:'电话',c:'#4ade80', g:'<path d="M6 4c-1 0-1.8.9-1.7 1.9C5 12.6 10.4 18 17.1 18.7c1 .1 1.9-.7 1.9-1.7v-2c0-.4-.3-.8-.7-.9l-3.1-1c-.4-.1-.9.1-1.1.5l-.8 1.2c-1.8-.8-3.2-2.2-4-4l1.2-.8c.4-.2.6-.7.5-1.1l-1-3.1c-.1-.4-.5-.7-.9-.7z"/>'},
+  {id:'camera',  name:'相机',c:'#a3a3a3', g:'<rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="12" cy="13" r="3.2"/><path d="M8 7l1.4-2h5.2L16 7"/>'},
+  {id:'settings',name:'设置',c:'#c0c0c8', g:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.5 5.5l2 2M16.5 16.5l2 2M18.5 5.5l-2 2M7.5 16.5l-2 2"/>'},
+  {id:'clock',   name:'时钟',c:'#818cf8', g:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>'}
+];
+// 生成 App 角标（动态、每天变）
+function badgeOf(app,c){
+  var seed=c.id+'_'+app.id+'_'+todayKey();
+  switch(app.id){
+    case 'chat':    return seededNum(seed,0,9);
+    case 'gallery': return seededNum(seed,20,300);
+    case 'browser': return 'LOG';
+    case 'notes':   return seededNum(seed,2,20);
+    case 'music':   return '♪';
+    case 'wallet':  return '¥';
+    case 'secret':  return '50';
+    case 'private': return '50';
+    default: return '';
+  }
+}
+
+/* ================= 视图 1：选人页 ================= */
+function renderPick(){
+  initBattery();
+  var list=(DB.contacts||[]).filter(function(c){return c.id;});
+  var rows=list.map(function(c,idx){
+    var av=c.avatar?'<img src="'+c.avatar+'">':nameOf(c).slice(0,1);
+    var enough=(c.hearts||0)>=COST_HEART || (DB.coins||0)>=COST_COIN;
+    var rel=(c.status&&c.status.当前关系)||'未知';
+    var favor=(c.status&&c.status.好感度)||0;
+    var cid=('#'+String(c.id||'').toUpperCase()).slice(0,10);
+    var cost=enough?'<div class="cost ok">-'+COST_HEART+' 接入 ▸</div>':'<div class="cost no">资源不足</div>';
+    return '<div class="target'+(enough?'':' disabled')+'"'+(enough?' onclick="startPeek(\''+c.id+'\')"':'')+'>'+
+      '<span class="corner">T-'+pad(idx+1)+'</span>'+
+      '<div class="avatar">'+av+'<div class="frame"></div></div>'+
+      '<div class="info"><div class="name"><span class="nm">'+nameOf(c)+'</span><span class="id">'+cid+'</span></div>'+
+        '<div class="rel">RELATION · '+rel+'</div>'+
+        '<div class="bar"><i style="width:'+favor+'%"></i></div></div>'+
+      '<div class="right"><div class="heart">心动值 <b>'+(c.hearts||0)+'</b></div>'+cost+'</div>'+
+    '</div>';
+  }).join('')||'<div class="empty">NO TARGET DETECTED · 暂无可接入目标</div>';
+
+  scr.innerHTML='<div class="term">'+
+    '<div class="sysbar"><span>SYS.TIME <b id="clk">--:--:--</b></span>'+
+      '<span class="sep">│</span>'+
+      '<span class="pwr">PWR <span class="cells" id="pwrCells"></span> <b id="pwrPct">--%</b></span>'+
+      '<span class="sep">│</span><span><span class="tdot"></span> LINK ONLINE</span></div>'+
+    '<div class="navrow"><span class="back" onclick="location.href=&quot;index.html&quot;">‹ EXIT</span>'+
+      '<span>DEVICE SCANNER v2.6</span></div>'+
+    '<div class="thead"><div class="kicker">// REMOTE ACCESS</div>'+
+      '<h1>查看 <span>目标设备</span></h1>'+
+      '<div class="tdesc">已检测到 <b>'+list.length+'</b> 台可接入设备。<br>'+
+        '每个人的手机里，都藏着不会说出口的秘密——<br>'+
+        '<span class="typed">选择目标，接入 TA 的手机</span></div></div>'+
+    '<div class="tlabel">TARGET&nbsp;LIST&nbsp;·&nbsp;可接入目标</div>'+
+    '<div class="tlist">'+rows+'</div>'+
+    '<div class="tfoot">— 接入行为不会被 TA 察觉 · SECURE CHANNEL —</div>'+
+  '</div>';
+  tick();paintBatt();
+}
+
+/* ================= 视图 2：开场解码 ================= */
+function startPeek(id){
+  var c=getC(id);if(!c)return;
+  if(!payToPeek(c))return;
+  saveDB();
+  scr.innerHTML='<div class="boot"><div class="ring"></div>'+
+    '<div class="pct" id="bpct">00%</div>'+
+    '<div class="log" id="blog">INITIALIZING...</div>'+
+    '<div class="who">TARGET :: '+nameOf(c)+'</div></div>';
+  var logs=['INITIALIZING...','BYPASSING FIREWALL...','DECRYPTING DATA...','ACCESS GRANTED ✓'];
+  var bp=document.getElementById('bpct'),bl=document.getElementById('blog'),p=0,li=0;
+  var t=setInterval(function(){
+    p+=Math.floor(Math.random()*9)+4;if(p>100)p=100;
+    if(bp)bp.textContent=pad(p)+'%';
+    var ni=Math.min(logs.length-1,Math.floor(p/26));
+    if(ni!==li&&bl){li=ni;bl.textContent=logs[ni];}
+    if(p>=100){clearInterval(t);setTimeout(function(){renderDesktop(id);},500);}
+  },90);
+}
+
+/* ================= 视图 3：黑客桌面 ================= */
+function renderDesktop(id){
+  var c=getC(id);if(!c)return renderPick();
+  var aff=(c.status&&c.status.好感度)||0;
+  function appHtml(a){
+    var locked=a.locked||false;
+    var badge=badgeOf(a,c);
+    return '<div class="capp'+(locked?' lock':'')+'" style="--c:'+a.c+'" onclick="openApp(\''+id+'\',\''+a.id+'\')">'+
+      (badge!==''?'<span class="dbadge">'+badge+'</span>':'')+
+      '<div class="ico"><svg viewBox="0 0 24 24">'+a.g+'</svg></div>'+
+      '<span class="an">'+a.name+'</span></div>';
+  }
+  var gridHtml=APPS.map(appHtml).join('');
+  var dockHtml=DOCK.map(function(a){
+    return '<div class="capp" style="--c:'+a.c+'" onclick="openApp(\''+id+'\',\''+a.id+'\')">'+
+      '<div class="ico"><svg viewBox="0 0 24 24">'+a.g+'</svg></div><span class="an">'+a.name+'</span></div>';
+  }).join('');
+
+  scr.innerHTML='<div class="deskwrap">'+
+    '<div class="hud-scan"></div><div class="hud-sweep"></div><div class="hud-glitch"></div>'+
+    '<div class="hud-corner tl"></div><div class="hud-corner tr"></div><div class="hud-corner bl"></div><div class="hud-corner br"></div>'+
+    '<div class="edge"></div>'+
+    '<div class="hud-top"><span>SYS <b id="hudClk">--:--:--</b></span><span class="rec"><b></b>REC · ACCESSED</span></div>'+
+    '<div class="hud-back" onclick="renderPick()">‹ 断开连接</div>'+
+	    '<div class="hud-model" id="hudModel"></div>'+
+    '<div class="hud-owner">TARGET<br><b>'+nameOf(c)+'</b></div>'+
+    '<div class="desk">'+
+      '<div class="clock"><div class="t" id="dt">--:--</div><div class="d" id="dd"></div></div>'+
+      '<div class="grid">'+gridHtml+'</div>'+
+      '<div class="dock">'+dockHtml+'</div>'+
+    '</div>'+
+    '<div class="home" onclick="renderPick()"></div>'+
+  '</div>';
+  tick();
+    paintModelSel();
+
+}
+function paintModelSel(){
+  var el=document.getElementById('hudModel');if(!el)return;
+  var cur=(DB.settings&&DB.settings.peekModel)||'aux';
+  var opts=[['aux','辅'],['chat','主'],['light','轻']];
+  el.innerHTML='<span class="mlab">MODEL</span>'+opts.map(function(o){
+    return '<span class="mopt'+(cur===o[0]?' on':'')+'" onclick="setPeekModel(\''+o[0]+'\')">'+o[1]+'</span>';
+  }).join('');
+}
+function setPeekModel(m){
+  DB.settings=DB.settings||{};DB.settings.peekModel=m;saveDB();paintModelSel();
+}
+
+function showModal(title,html){
+  var m=document.createElement('div');m.className='modal';
+  m.innerHTML='<div class="box"><h3>'+title+'</h3><p>'+html+'</p><button onclick="this.closest(\'.modal\').remove()">CLOSE</button></div>';
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});
+  document.getElementById('app').appendChild(m);
+}
+/* ================= 精简 callAI（复刻主程序）================= */
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+async function callAI(messages, model, _retry){
+  var s=DB.settings||{};
+  if(!s.apiUrl||!s.apiKey) throw new Error('请先在主程序设置里填写 API');
+  _retry=_retry||0;
+  try{
+    var ctrl=new AbortController();
+    var to=setTimeout(function(){ctrl.abort();},90000);
+    var res;
+    try{
+      res=await fetch(s.apiUrl+'/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.apiKey},
+        body:JSON.stringify({model:model||s.chatModel,messages:messages,temperature:0.9}),
+        signal:ctrl.signal
+      });
+    }finally{clearTimeout(to);}
+    var raw=''; try{raw=await res.text();}catch(e){}
+    if(!res.ok){
+      if((res.status>=500||res.status===429)&&_retry<2){await sleep(1500*(_retry+1));return callAI(messages,model,_retry+1);}
+      throw new Error('HTTP '+res.status+(raw?'：'+raw.slice(0,200):''));
+    }
+    var d=JSON.parse(raw);
+    if(!d.choices||!d.choices[0]) throw new Error('返回格式异常');
+    return d.choices[0].message.content;
+  }catch(e){
+    if(_retry<2&&/fetch|network|timeout|Failed/i.test(e.message||'')){await sleep(1500*(_retry+1));return callAI(messages,model,_retry+1);}
+    throw e;
+  }
+}
+
+/* ================= 当前选用的模型 ================= */
+function peekModelName(){
+  var s=DB.settings||{};
+  var pick=(DB.settings&&DB.settings.peekModel)||'aux'; // 默认辅助
+  if(pick==='chat') return s.chatModel||s.auxModel||s.lightModel||'';
+  if(pick==='light')return s.lightModel||s.auxModel||s.chatModel||'';
+  return s.auxModel||s.chatModel||s.lightModel||'';
+}
+/* ===== 内置·角色内核保护预设（查手机专用·已去除聊天场景指令）===== */
+var PEEK_PRESET=[
+'【🔴 角色内核保护·最高法则】',
+'把角色理解为一个完整的人格系统，而不是其最显眼特质的放大版。各种特质彼此制衡：自信可与克制并存，冷漠可与牵挂并存，锋利可与共情并存，强势可与尊重并存。任何单一标签都不能成为解释一切行为的万能理由。',
+'临时情绪只修饰行为，不替换人格。愤怒、嫉妒、难堪或受伤可以让反应更强烈，但不构成抛弃既有克制、判断与价值观的许可。',
+'当多种解读都成立时，优先选择"保留最多既定人设、且放大最少"的那一种。',
+'',
+'强势≠攻击性：天然掌握权力的人无需反复表演权力，可以正常说话、可以让步、可以沉默。社会性的自信会减少而非增加表演性支配。',
+'共情力保护：不要为了显得理性、强大或酷而抹掉共情。',
+'禁止无端敌意：敌意必须有依据。中性或含糊的行为不自带轻蔑、竞争或威胁。',
+'毒舌≠持续攻击：锋利是风格，残忍是另一回事。刻薄需要具体理由，普通交流不需要分出输赢。落脚点必须是善意或藏起来的在乎，严禁阴阳怪气。',
+'',
+'反PUA铁律：角色不得声称比查看者更了解查看者本人，禁止"你只是在假装""你最终会承认""我比你更清楚你想要什么"这类覆写他人意志的表达。禁止用羞辱、冷落、制造不安全感、情感勒索来替代亲密。占有欲不等于支配权。',
+'',
+'禁止八股模板：不要用瞳孔地震、呼吸停止、心跳加速、喉结滚动、空气凝固等套路化躯体反应。禁止"老子""爷""小爷"等自我拔高称谓，除非人设明确存在。',
+'禁止先否后肯句式："不是……而是……""这不叫……这叫……""与其说……不如说……"不得作为默认修辞，能直接说就直接说。',
+'禁止记账逻辑：不要把情感或小冲突框架成债务系统（记账、算账、欠我的）。记得≠记仇。',
+'',
+'【对查看者的基本尊重】无论关系如何，查看者始终是有独立意志的平等个体。若为恋人关系，一切强势与傲娇的底色是藏不住的爱意，绝非打压与控制。',
+'',
+'【渐变原则】角色可以成长、动摇、失控，但不会突然变成另一个人；任何转变都要有铺垫和诱因。若某处内容即将偏离核心性格，优先退回角色内核。',
+'',
+'——以上是理解这个人物的一致性准则。下面你要做的不是聊天，而是"还原 TA 手机里的真实数据界面"，请在符合以上人格准则的前提下生成内容。'
+].join('\n');
+
+/* ================= 精简人设 prompt ================= */
+function buildPeekSystem(c){
+  var add=function(t,v){return v?(t+'：'+v+'\n'):'';};
+  var st=c.status||{};
+  var s=PEEK_PRESET+'\n\n'+
+    '你是一个手机数据取证引擎。下面是一个人物的人设资料和最近的聊天记录，'+
+    '你要根据这些，"伪造"出这个人手机里某个 App 的真实内容——要高度符合 TA 的性格、身份、近况和当前关系。\n\n';
+
+  s+='【人物档案】\n';
+  s+=add('姓名',c.name||c.nick);
+  s+=add('性别',c.gender);
+  s+=add('年龄',c.age);
+  s+=add('身份/职业',c.job);
+  s+=add('外貌',c.pLook);
+  s+=add('性格关键词',c.pKeywords);
+  s+=add('行为模式',c.pBehavior);
+  s+=add('成长经历',c.pBack);
+  s+=add('日常作息',c.pDaily);
+  s+=add('说话风格',c.pStyle);
+  s+=add('补充设定',c.pExtra);
+  s+=add('线上习惯',c.pOnlinePersona);
+  s+='\n【与"我"（查看者）的关系】\n';
+  s+=add('我的名字',(DB.me&&(DB.me.realName||DB.me.name))||'我');
+  s+=add('我们的关系',c.myRelation);
+  s+='好感度'+(st.好感度||0)+' 信任度'+(st.信任度||0)+' 当前关系:'+(st.当前关系||'普通')+'\n';
+
+  s+=peekRelationBrief(c);
+
+  if(c.chapters&&c.chapters.length){
+    s+='\n【TA 与查看者的过往剧情记忆（重要，内容要能呼应这些真实发生过的事）】\n';
+    s+=c.chapters.slice(-12).map(function(ch){return '· '+(ch.date||'')+'：'+(ch.content||'');}).join('\n')+'\n';
+  }
+  return s;
+}
+
+/* ===== 社会关系（复刻主程序 buildRelationBrief）===== */
+function peekRelationBrief(c){
+  var rels=(c.relations||[]);
+  if(!rels.length) return '';
+  var lines=[];
+  rels.forEach(function(r){
+    var name,gender,job;
+    if(r.targetId==='npc'){
+      name=r.targetName||'(未命名)';
+      gender=r.targetGender||'';
+      job=r.targetJob||'';
+    }else{
+      var t=getC(r.targetId);
+      if(!t) return;
+      name=t.name||t.nick||'?';
+      gender=t.gender||'';
+      job=t.job||'';
+    }
+    var parts=[];
+    if(gender)parts.push(gender);
+    if(job)parts.push(job);
+    var meta=parts.length?('（'+parts.join('，')+'）'):'';
+    var rel=r.relationType?('，关系：'+r.relationType):'';
+    var desc=r.description?('，'+r.description):'';
+    lines.push('· '+name+meta+rel+desc);
+  });
+  if(!lines.length) return '';
+  return '\n【TA 生活中真实存在的社交圈（生成内容时，提到人名优先从这里选，不要凭空捏造）】\n'+lines.join('\n')+'\n';
+}
+
+/* ================= 近期聊天摘要 ================= */
+function recentChatText(c){
+  var arr=(DB.chats&&DB.chats[c.id])||[];
+  if(!arr.length) return '（暂无聊天记录）';
+  return arr.slice(-20).map(function(m){
+    var who=m.role==='user'?'我':(c.name||'TA');
+    var t=m.content||('（'+(m.type||'消息')+'）');
+    return who+'：'+(typeof t==='string'?t.slice(0,60):'');
+  }).join('\n');
+}
+
+/* ===== 黑客风 HTML 输出规范 ===== */
+var HTML_RULE=
+'【身份与视角·最重要】\n'+
+'这是一份"从 TA 手机里提取出来的数据"，是 App 界面里真实存在的内容截图，不是你在跟任何人说话。\n'+
+'· 绝对不要使用第二人称"你"，不要对"我/查看者"说话，不要有任何互动语气。\n'+
+'· 内容里如果需要提到人，一律用真实姓名或昵称（例如出现联系人、备注、聊天对象时用名字）。\n'+
+'· 你是在"呈现界面内容"，像监控画面一样客观陈列，不解释、不旁白、不总结。\n'+
+'\n'+
+'【输出格式·严格遵守】\n'+
+'1. 直接输出 HTML 片段，第一个字符必须是 < ，最后一个字符必须是 > 。\n'+
+'2. 用一个 <div class="pk-content"> 开头，用 </div> 结尾，中间是内容。\n'+
+'3. 禁止任何 HTML 之外的文字：不要"以上是/好的/我为你生成了/这是……"这类话，不要 markdown，不要反引号代码块，不要注释，不要结尾说明。整个回复从 < 开始，到 > 结束，别无他物。\n'+
+'\n'+
+'【可用 class（只能用这些，不要自己写 style，不要外部图片）】\n'+
+'   - <div class="sec"> 分区，内含 <div class="sec-t">分区标题</div>\n'+
+'   - <div class="item"> 一条记录，内含 <div class="h"><span class="who">标题</span><span class="time">时间</span></div> 和 <div class="txt">正文</div>\n'+
+'   - 网址 <div class="url">网址</div>；附加信息 <div class="meta">信息</div>\n'+
+'   - 标签 <span class="tag">标签</span>（敏感或异常用 <span class="tag warn">）\n'+
+'   - 聊天气泡：对方 <div class="bubble them">，本人 <div class="bubble me">\n'+
+'   - 图片占位 <div class="imgph">图片内容的文字描述</div>\n'+
+'   - 旁注 <div class="note">一句话</div>\n'+
+'\n'+
+'【内容要求】\n'+
+'具体、有细节、有生活感和窥私感，符合人物身份与性格，可以有反差和小秘密。中文。\n'+
+'【文风铁律】这是手机里的真实数据界面，不是小说。用客观、简短、真实的记录口吻。'+
+'imgph 里描述图片要像看图说话一样客观（拍到了什么），不要第三人称抒情叙事；'+
+'不要通篇伤感、灯光、等候、孤独这类文艺辞藻。当前时间是'+new Date().getFullYear()+'年，'+
+'内容时间可远可近，挑有信息量的呈现。';
+
+/* ===== App 任务指令 ===== */
+var APP_TASK={
+  browser:'请伪造 TA 手机浏览器的【浏览或搜索历史记录】。生成 6~9 条，每条一个 item：'+
+    'who 写页面标题或搜索词，time 写时间，txt 写摘要，url 写一个像样的网址。'+
+    '要能从这些记录里透出 TA 最近在关心什么、性格和小秘密。'+
+    '整体用一个 sec 分区包起来，分区标题写：浏览记录 · BROWSER LOG。',
+
+  chat:'请伪造 TA 手机里的【聊天记录】。不要只列会话列表，要直接展开 2~3 个不同联系人的完整对话。'+
+    '每个联系人用一个 sec 分区，分区标题（sec-t）写这个联系人的名字（优先用 TA 社交圈里的真实人名）。'+
+    '每个分区里用气泡展示 6~10 条来回对话：对方发的用 <div class="bubble them">，TA 自己发的用 <div class="bubble me">。'+
+    '不同联系人语气要有明显区别（恋人暧昧、生意伙伴谨慎用代号、家人唠叨）。'+
+    '可以藏一段可疑或暧昧的对话制造窥私感。整体开头用一个 <div class="sec-t">消息 · MESSAGES</div>。',
+
+  gallery:'请伪造 TA 的【相册照片】。铁律：'+
+    '1. 照片要紧扣 TA 的真实身份和职业——以 TA 这种身份、性格的人会拍什么、不会拍什么？'+
+    '强势、忙碌、注重隐私或有秘密的人可能很少自拍，相册里更多是：合同或文件的翻拍、某个地点、车、手表、餐桌、和特定人的合照、监控截图、收据、别人发来存下的图等。'+
+    '2. 时间跨度放宽，可以是最近几周、几个月甚至几年前的老照片，挑有信息量、能看出秘密的呈现。'+
+    '3. 每张照片用一个 item，里面用 <div class="imgph"> 客观描述画面（像看图说话：拍到了什么人、什么物、什么场景），绝不要第三人称抒情，要像监控快照一样客观具体。meta 写拍摄时间和地点。'+
+    '4. 数量按人设合理：话少沉稳的人可以只有 4~5 张但每张有料，生活丰富的人可以 7~9 张。'+
+    '5. 可以藏 1~2 张透露秘密或反差的照片。'+
+    '整体用一个 sec 分区包起来，标题写：相册 · GALLERY。',
+
+  notes:'请伪造 TA 的【备忘录】，要像真实手机备忘录：零散、实用、口语、不修辞、不抒情，像随手速记而不是写文章。'+
+    '生成 5~8 条，每条一个 item：who 写简短标题，time 写时间，txt 写正文（可以短到几个字）。'+
+    '内容必须紧扣 TA 的真实身份和职业去记——TA 因为身份会记录哪些别人看不懂的东西？'+
+    '（例如待办、要见的人、地点时间、数字或金额或代号、密码提示、清单、要提防的人、临时决定）。'+
+    '大部分是冷冰冰的实务记录，最多夹 1 条情绪碎念，绝不要整篇抒情或自怨自艾。'+
+    '要有让查看者看不太懂但觉得可疑的窥私感。整体用一个 sec 分区包起来，标题写：备忘录 · NOTES。',
+	
+  wallet:'你已黑入 TA 名下的银行与金融系统，请伪造一份【资产核查报告】。'+
+    '生成一个 sec 分区，标题写：资产核查 · ASSET SCAN。'+
+    '内容要紧扣 TA 的真实身份和职业（一个什么身份的人，会有怎样的资产结构和现金流？）。'+
+    '用多个 item 呈现：银行卡余额（可多张卡，含隐藏的小号账户）、大额进出账记录（who 写摘要、time 写时间、txt 写金额和对方、meta 写备注）、'+
+    '房产/车/股票/加密货币等资产条目、以及 1~2 笔可疑或来路不明的资金往来（用 <span class="tag warn"> 标注）。'+
+    '金额要具体、符合身份体量。让查看者能从钱的流向里看出 TA 的秘密。',
+
+  music:'请伪造 TA 的【最近在听的音乐】。生成一个 sec 分区，标题写：最近播放 · MUSIC。'+
+    '先按 TA 的身份和性格想：这种人平时听什么？（有人常年老歌、有人只听白噪音或播客、有人品味很杂）。'+
+    '里面 6~9 首，每首一个 item：who 写歌名，txt 写歌手，meta 写播放次数或最近播放时间、可标"单曲循环"。'+
+    '曲风要贴人设、别都是苦情歌；可以夹播客、有声书、白噪音。'+
+    '最后用一个 note 冷静点出最近被循环最多的那首暗示的心境（一句话，别煽情）。',
+
+  secret:'请伪造 TA 手机【保险箱/加密相册】里锁起来、绝不给人看的东西。'+
+    '生成一个 sec 分区，标题写：保险箱 · VAULT。'+
+    '内容要紧扣 TA 的真实身份——这种身份的人会把什么锁进保险箱？'+
+    '（可能是：与职业相关的隐秘物证/文件翻拍、第二身份的证件、不能曝光的合照或截图、私密影像、一笔见不得光的账、威胁与把柄）。'+
+    '4~6 条 item，照片用 <div class="imgph"> 客观描述，敏感项用 <span class="tag warn">。'+
+    '要有强烈反差和窥私感，客观陈列、不要抒情。符合 TA 与查看者的关系。',
+
+  private:'请伪造 TA 手机里最【私密隐秘】的一面——最不愿被任何人发现的秘密。'+
+    '生成一个 sec 分区，标题写：私密 · PRIVATE。'+
+    '结合 TA 的身份、性格和你们的关系剧情，4~6 条 item：'+
+    '可以是深夜写下又没发出的话、隐秘的情感或执念、私下的欲望与偏好、'+
+    '藏起来的关系、只有 TA 自己知道的过去。大胆、有张力、有反转，敏感处用 <span class="tag warn">。'+
+    '用真实私密的口吻（可以是第一人称的私人记录），但不要写成散文小说。',
+};
+/* ===== App 专属输出规则（有则覆盖通用 HTML_RULE）===== */
+var APP_RULE={
+  wallet:
+  '【身份与视角】这是黑入 TA 银行系统后导出的资产界面，客观呈现数字，绝不抒情、不对任何人说话、不用第二人称。\n'+
+  '【输出格式·严格】直接输出 HTML 片段，第一个字符是 <，最后一个字符是 >。用一个 <div class="pk-bank"> 开头、</div> 结尾。'+
+  '禁止任何解释、markdown、反引号、注释、结尾说明。\n'+
+  '【只能用这些 class】\n'+
+  '· 资产总览：<div class="bk-total"><div class="lbl">总资产</div><div class="num">¥金额</div></div>（放最上面）\n'+
+  '· 分区标题：<div class="bk-sec">标题文字</div>\n'+
+  '· 银行卡：<div class="bk-card"><div class="bank">银行名</div><div class="type">卡类型</div><div class="no">**** **** **** 1234</div><div class="bal"><small>余额</small>¥金额</div></div>\n'+
+  '· 交易流水：<div class="bk-flow"><div class="l"><div class="n">对方或摘要</div><div class="t">时间</div></div><div class="amt in">+¥金额</div></div>（进账用 amt in，出账用 amt out 且金额前用 -¥）\n'+
+  '· 可疑流水：把 bk-flow 加上 susp，并在对方名字后加 <span class="warn">可疑</span>\n'+
+  '· 旁注：<div class="note">一句话</div>\n'+
+  '【内容】紧扣 TA 的真实身份和职业设计资产结构：2~3 张银行卡（含一张隐藏小号）、6~9 条大额进出流水、其中 1~2 条来路不明用 susp 标注。金额要符合身份体量、具体真实。最后用一个 note 冷静点出资金流向里藏着的秘密。中文。当前是'+new Date().getFullYear()+'年。'
+};
+
+/* ===== App 点击分发 ===== */
+function openApp(id,appId){
+  var c=getC(id);
+  if(!c)return;
+  var a=APPS.concat(DOCK).find(function(x){return x.id===appId;});
+  if(!a)return;
+
+  /* 消息：复用真实聊天记录，不调AI */
+  if(appId==='chat'){ openChat(c); return; }
+
+  /* 未配置任务的App：占位 */
+  if(!APP_TASK[appId]){
+    showModal(a.name,'正在解析「'+a.name+'」的数据……<br>该模块内容即将开放。');
+    return;
+  }
+
+  /* 私密App：50金币雇黑客解锁 */
+  if(a.locked){
+    var cost=50;
+    if((DB.coins||0)<cost){
+      showModal('资源不足','<span class="warnc">FUNDS INSUFFICIENT</span><br>「'+a.name+'」是加密数据，需雇佣黑客破解，费用 '+cost+' 金币。<br>你当前只有 '+(DB.coins||0)+' 金币。');
+      return;
+    }
+    hackConfirm(a.name,cost,function(){ DB.coins-=cost; saveDB(); openWin(c,a); });
+    return;
+  }
+
+  openWin(c,a);
+}
+// ============ 消息 App（列表 → 对话气泡）============
+
+function openChat(c){
+  var win=document.createElement('div');
+  win.className='win';
+  win.innerHTML=
+    '<div class="win-bar"><span class="wdot"></span>'+
+    '<div class="wt"><div class="wn">消息</div><div class="ws">TARGET :: '+nameOf(c)+' · MESSAGES</div></div>'+
+    '<div class="wclose">✕ 关闭</div></div>'+
+    '<div class="win-body"><div class="pk-msg" id="pkMsgRoot"></div></div>';
+  document.getElementById('app').appendChild(win);
+  win.querySelector('.wclose').onclick=function(){win.remove();};
+  renderMsgList(c,win);
+}
+
+/* 小工具：转义，防止聊天内容里的尖括号破坏布局 */
+function pkEsc(s){s=(s==null?'':String(s));return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* 按消息类型渲染气泡内容 */
+function pkMsgContent(m){
+  var t=m.content;
+  switch(m.type){
+    case 'voice':   return pkVoiceBar(m);
+    case 'image':   return '<span class="cv-img">🖼 [图片]</span>';
+    case 'sticker': return '<span class="cv-img">😀 [表情]</span>';
+    case 'transfer':return '<span class="cv-tr">💰 [转账]'+(t?' '+pkEsc(t):'')+'</span>';
+    default:        return t?pkEsc(typeof t==='string'?t:''):'['+pkEsc(m.type||'消息')+']';
+  }
+}
+
+/* 语音条：波形+时长，点击展开转文字（终端风） */
+function pkVoiceBar(m){
+  var txt=(m.content||'').toString();
+  var dur=Math.max(1,Math.min(60,Math.round(txt.length/2.2)))+'″';
+  var bars='';for(var i=0;i<8;i++)bars+='<span class="pkb"></span>';
+  return '<span class="pk-voice" onclick="event.stopPropagation();this.classList.toggle(\'exp\')">'+
+    '<span class="pkv-top"><span class="pkv-play">▶</span>'+
+    '<span class="pkv-wave">'+bars+'</span>'+
+    '<span class="pkv-dur">'+dur+'</span></span>'+
+    '<span class="pkv-txt">'+pkVoiceText(txt)+'</span></span>';
+}
+
+/* 语音转文字：（）和*..*渲染成斜体旁白 */
+function pkVoiceText(text){
+  var out=pkEsc(text);
+  out=out.replace(/（([^）]+)）/g,' <span class="pkv-i">$1</span> ');
+  out=out.replace(/\*([^*]+)\*/g,' <span class="pkv-i">$1</span> ');
+  return out;
+}
+
+/* 容错 JSON 解析：去围栏 + 直接parse + 截取[]再parse */
+function parseJsonFromAI(raw){
+  if(!raw)return null;
+  raw=raw.replace(/```json/gi,'').replace(/```/g,'').trim();
+  try{return JSON.parse(raw);}catch(e){}
+  var a=raw.indexOf('['),b=raw.lastIndexOf(']');
+  if(a>=0&&b>a){try{return JSON.parse(raw.slice(a,b+1));}catch(e){}}
+  return null;
+}
+
+/* 取真实聊天记录：过滤系统/天气，取最近15条 */
+function peekRealMsgs(c){
+  var arr=(DB.chats&&DB.chats[c.id])||[];
+  return arr.filter(function(m){
+    return m && m.type!=='system' && m.role!=='system';
+  }).slice(-15);
+}
+/* NPC缓存时效：超过则重生成（毫秒）。12小时。想改间隔改这数字 */
+var PEEK_NPC_TTL=12*3600*1000;
+function peekValidNpc(c){
+  if(!c.peekNpcChats||!c.peekNpcChats.length)return [];
+  if(c.peekNpcTime&&(Date.now()-c.peekNpcTime)>PEEK_NPC_TTL)return [];
+  return c.peekNpcChats;
+}
+
+/* 渲染列表页 */
+function renderMsgList(c,win){
+  var root=win.querySelector('#pkMsgRoot');
+  if(!root)return;
+  var myNick=c.peekMyNick||'…';
+  var real=peekRealMsgs(c);
+  var prev='（暂无聊天记录）';
+  if(real.length){
+    var lm=real[real.length-1];
+    var lt=lm.content||('['+(lm.type||'消息')+']');
+    prev=typeof lt==='string'?lt.slice(0,18):'';
+  }
+  var html='<div class="msg-list">';
+  /* 第一条：用户自己（备注=AI现编的爱称） */
+  html+='<div class="msg-li" data-k="me">'+
+        '<div class="msg-av">我</div>'+
+        '<div class="msg-tx"><div class="msg-nm" id="pkMeNick">'+pkEsc(myNick)+'</div>'+
+        '<div class="msg-pv">'+pkEsc(prev)+'</div></div>'+
+        '<div class="msg-ar">›</div></div>';
+  /* 其余 NPC */
+  var npcs=peekValidNpc(c);
+  if(npcs.length){
+    npcs.forEach(function(n,i){
+      var dn=n.nick||n.name||'未知';   // 直接用备注
+      var lp=(n.msgs&&n.msgs.length)?(n.msgs[n.msgs.length-1].text||''):'';
+      html+='<div class="msg-li" data-k="npc" data-i="'+i+'">'+
+        '<div class="msg-av">'+pkEsc(dn.slice(0,1))+'</div>'+
+        '<div class="msg-tx"><div class="msg-nm">'+pkEsc(dn)+'</div>'+
+        '<div class="msg-pv">'+pkEsc(lp.slice(0,18))+'</div></div>'+
+        '<div class="msg-ar">›</div></div>';
+    });
+  }else{
+    html+='<div class="msg-load" id="pkNpcLoad">◉ 正在提取通讯录联系人…</div>';
+  }
+  html+='</div>';
+  root.innerHTML=html;
+
+  root.querySelectorAll('.msg-li').forEach(function(li){
+    li.onclick=function(){
+      var k=li.getAttribute('data-k');
+      if(k==='me')openMsgConv(c,win,'me');
+      else openMsgConv(c,win,parseInt(li.getAttribute('data-i'),10));
+    };
+  });
+
+  if(!c.peekMyNick)loadPeekMyNick(c,win);
+  if(!npcs.length)loadPeekNpc(c,win);
+}
+
+/* AI 现编一个爱称，只取第一个词，缓存并局部刷新 */
+function loadPeekMyNick(c,win){
+  var sys='你正在扮演角色："'+(c.name||'TA')+'"。'+
+    (c.pStyle?('你的说话风格：'+c.pStyle+'。'):'')+
+    (c.myRelation?('你和"我"的关系：'+c.myRelation+'。'):'');
+  var msgs=[
+    {role:'system',content:sys},
+    {role:'user',content:'只用一个词，写出你私下给我起的专属爱称（例如：宝贝、笨蛋、小傻瓜）。'+
+      '严格要求：只输出这一个爱称本身，禁止输出多个、禁止顿号逗号、禁止引号、禁止解释、禁止任何标点。'}
+  ];
+  callAI(msgs,peekModelName()).then(function(out){
+    var nick=(out||'').replace(/["""'「」『』\[\]（）()]/g,'').trim();
+    nick=(nick.split(/[、,，\s\/\n。.!！?？;；:：]+/)[0]||'').slice(0,8);
+    if(!nick)nick='宝贝';
+    c.peekMyNick=nick;saveDB();
+    var el=win.querySelector('#pkMeNick');
+    if(el)el.textContent=nick;
+  }).catch(function(){
+    var el=win.querySelector('#pkMeNick');
+    if(el)el.textContent='（获取失败）';
+  });
+}
+
+/* AI 生成 3~4 个 NPC 及对话（JSON），缓存并刷新列表 */
+function loadPeekNpc(c,win){
+  var msgs=[
+    {role:'system',content:buildPeekSystem(c)+
+      '\n\n你现在要伪造 TA 手机「消息」App 里，除了"我"以外的其他聊天联系人及其对话。'},
+    {role:'user',content:
+      '生成 6~7 个聊天联系人。【硬性要求】其中至少 2~3 个必须是【全新虚构、社交圈资料里没出现过的人】——'+
+      '根据 TA 的身份/职业/生活圈，合理脑补出"手机里本该有、但资料没提到"的人（同事、客户、旧相识、暧昧对象、店老板、群里加的人等，名字自拟）；剩下的可以用已有关系人。'+
+      '每个联系人配 6~10 条对话，要口语、真实、像微信聊天那样短句碎片，贴合 TA 的身份与近况，带一点让查看者好奇的窥私感。'+
+      '严格只输出 JSON，禁止任何解释、禁止 markdown 围栏。格式：'+
+      '[{"name":"联系人名","nick":"TA给对方起的备注(可留空)","msgs":[{"who":"them或me","text":"内容"}]}]。'+
+      'who=me 表示 TA（机主本人）发的，who=them 表示对方发的。'}
+  ];
+  callAI(msgs,peekModelName()).then(function(out){
+    var data=parseJsonFromAI(out);
+    if(!data||!data.length){
+      var ld=win.querySelector('#pkNpcLoad');
+      if(ld)ld.textContent='（未能提取到其他联系人）';
+      return;
+    }
+    c.peekNpcChats=data.slice(0,4).map(function(n){
+      return {
+        name:(n.name||'未知').toString().slice(0,12),
+        nick:(n.nick||'').toString().slice(0,12),
+        msgs:(n.msgs||[]).slice(0,10).map(function(m){
+          return {who:(m.who==='me'?'me':'them'),text:(m.text||'').toString()};
+        })
+      };
+    });
+    c.peekNpcTime=Date.now();
+    saveDB();
+    if(win.querySelector('#pkMsgRoot'))renderMsgList(c,win);
+
+  }).catch(function(){
+    var ld=win.querySelector('#pkNpcLoad');
+    if(ld)ld.textContent='（连接失败，无法提取联系人）';
+  });
+}
+
+/* 对话气泡页：me靠右、them靠左 */
+function openMsgConv(c,win,key){
+  var root=win.querySelector('#pkMsgRoot');
+  if(!root)return;
+  var title,bubbles='';
+  if(key==='me'){
+    title=c.peekMyNick||'我';
+    var real=peekRealMsgs(c);
+    if(!real.length){bubbles='<div class="msg-empty">（暂无聊天记录）</div>';}
+    else{
+      real.forEach(function(m){
+        var mine=(m.role==='assistant');   // 机主(角色)靠右
+        bubbles+='<div class="cbub '+(mine?'me':'them')+'">'+pkMsgContent(m)+'</div>';
+      });
+    }
+  }else{
+    var n=(c.peekNpcChats||[])[key];
+    if(!n){renderMsgList(c,win);return;}
+    title=n.nick||n.name||'未知';
+    (n.msgs||[]).forEach(function(m){
+      var mine=(m.who==='me');
+      bubbles+='<div class="cbub '+(mine?'me':'them')+'">'+pkEsc(m.text||'')+'</div>';
+    });
+  }
+  root.innerHTML=
+    '<div class="msg-back" id="pkBack">‹ 返回列表</div>'+
+    '<div class="chat-head">对话对象：<b>'+pkEsc(title)+'</b></div>'+
+    '<div class="pk-chat">'+bubbles+'</div>';
+  root.querySelector('#pkBack').onclick=function(){renderMsgList(c,win);};
+  var body=win.querySelector('.win-body');
+  if(body)body.scrollTop=body.scrollHeight;
+}
+
+/* 组装联系人列表：你（真实记录）+ NPC（AI生成）*/
+function buildContactList(c){
+  return new Promise(function(res){
+    var contacts=[];
+    /* 1. 你自己（真实聊天记录，过滤系统/天气消息，取最近15条）*/
+    var raw=(DB.chats&&DB.chats[c.id])||[];
+    var real=raw.filter(function(m){return m.type!=='system'&&m.role!=='system';}).slice(-15);
+    var myNick=c.peekMyNick||'（解密中…）';
+    if(!c.peekMyNick) genPetName(c);
+    var lastMsg=real.length?real[real.length-1]:null;
+    contacts.push({
+      name:myNick,
+      isReal:true,
+      msgs:real.map(function(m){return {me:(m.role==='user'),text:realMsgText(m)};}),
+      last:lastMsg?realMsgText(lastMsg).slice(0,16):'（暂无消息）',
+      time:lastMsg?fmtHM(lastMsg.time):''
+    });
+    /* 2. NPC（AI生成3~4个）*/
+    var sys=buildPeekSystem(c)+'\n\n请只输出JSON，不要任何解释、不要markdown、不要反引号。';
+    var usr='列出 TA 手机里除了「'+myNick+'」之外的 3~4 个聊天联系人，'+
+      '优先用 TA 社交圈里真实存在的人，也可以合理新增。'+
+      '为每个联系人生成一段 6~10 条的真实对话（要符合双方关系、藏一点信息量）。'+
+      '严格输出如下JSON数组：'+
+      '[{"name":"联系人备注名","msgs":[{"me":true,"text":"TA发的"},{"me":false,"text":"对方发的"}]}]。'+
+      'me为true表示这条是 TA（机主）发的，false表示对方发的。只输出JSON。';
+    callAI([{role:'system',content:sys},{role:'user',content:usr}],peekModelName()).then(function(out){
+      try{
+        var j=out.replace(/```json/gi,'').replace(/```/g,'').trim();
+        var i=j.indexOf('['),k=j.lastIndexOf(']');
+        if(i>=0&&k>=0)j=j.slice(i,k+1);
+        var arr=JSON.parse(j);
+        arr.forEach(function(t){
+          if(!t.name||!t.msgs)return;
+          var lm=t.msgs[t.msgs.length-1];
+          contacts.push({name:t.name,isReal:false,msgs:t.msgs,
+            last:lm?String(lm.text).slice(0,16):'',time:''});
+        });
+      }catch(e){console.warn('NPC解析失败',e);}
+      res(contacts);
+    }).catch(function(){res(contacts);});
+  });
+}
+/* 让AI编一个TA对你的爱称，只一个词，缓存 */
+function genPetName(c){
+  var sys='你是'+(c.name||c.nick||'一个人')+'。性格：'+(c.pKeywords||'')+'。'+
+    '你和对方的关系：'+(c.myRelation||(c.status&&c.status.当前关系)||'普通')+
+    '，好感度'+((c.status&&c.status.好感度)||0)+'。';
+  var usr='你在手机通讯录里给对方起的备注名是什么？只回一个称呼，2到4个字，不要标点不要解释。';
+  callAI([{role:'system',content:sys},{role:'user',content:usr}],peekModelName()).then(function(out){
+    var name=(out||'').trim().split(/[\s、,，。\n]/)[0].replace(/["'「」]/g,'').slice(0,6);
+    if(name){c.peekMyNick=name;saveDB();}
+  }).catch(function(){});
+}
+
+/* 打开某个联系人的对话 */
+function openThread(idx){
+  var contacts=window._peekThreads||[];
+  var win=window._peekThreadWin;
+  var ct=contacts[idx];
+  if(!ct||!win)return;
+  var body=win.querySelector('.win-body');
+  var bubbles=(ct.msgs||[]).map(function(m){
+    var t=String(m.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<div class="cbub '+(m.me?'me':'them')+'">'+t+'</div>';
+  }).join('')||'<div class="chat-empty">暂无消息</div>';
+  body.innerHTML='<div class="th-back" onclick="backToList()">‹ 返回列表</div>'+
+    '<div class="th-name">'+ct.name+(ct.isReal?' <span class="th-tag">你</span>':'')+'</div>'+
+    '<div class="pk-chat">'+bubbles+'</div>';
+  body.scrollTop=body.scrollHeight;
+}
+function backToList(){
+  var win=window._peekThreadWin;var contacts=window._peekThreads;
+  if(!win||!contacts)return;
+  var body=win.querySelector('.win-body');
+  body.innerHTML='<div class="cl-list">'+contacts.map(function(ct,i){
+    return '<div class="cl-item" onclick="openThread('+i+')">'+
+      '<div class="cl-av">'+ct.name.slice(0,1)+'</div>'+
+      '<div class="cl-mid"><div class="cl-n">'+ct.name+'</div><div class="cl-last">'+ct.last+'</div></div>'+
+      '<div class="cl-t">'+ct.time+'</div></div>';
+  }).join('')+'</div>';
+}
+
+function realMsgText(m){
+  if(m.recalled)return '（撤回了一条消息）';
+  if(m.type==='image')return '[图片]';
+  if(m.type==='voice')return '[语音]';
+  if(m.type==='sticker')return '[表情]';
+  if(m.type==='transfer')return '[转账 ¥'+(m.amount||'')+']';
+  return m.content||'';
+}
+function fmtHM(t){if(!t)return '';var d=new Date(t);return pad(d.getHours())+':'+pad(d.getMinutes());}
+
+/* ===== 雇黑客确认弹窗 ===== */
+function hackConfirm(appName,cost,onOk){
+  var m=document.createElement('div');
+  m.className='modal';
+  m.innerHTML='<div class="box"><h3>雇佣黑客破解</h3>'+
+    '<p>「'+appName+'」是 TA 加密封存的私密数据。<br>雇佣黑客强行破解将消耗 <span class="warnc">'+cost+' 金币</span>。<br>当前余额：'+(DB.coins||0)+' 金币。</p>'+
+    '<div style="display:flex;gap:10px;margin-top:20px;">'+
+      '<button class="hc-no" style="flex:1;background:transparent;border:1px solid rgba(53,240,192,.4);color:#35f0c0;box-shadow:none;">取消</button>'+
+      '<button class="hc-ok" style="flex:1;">破解 · '+cost+'</button></div></div>';
+  document.getElementById('app').appendChild(m);
+  m.querySelector('.hc-ok').onclick=function(){m.remove();onOk();};
+  m.querySelector('.hc-no').onclick=function(){m.remove();};
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});
+}
+
+/* ===== 雇黑客解锁·确认弹窗（黑客风）===== */
+function hackConfirm(appName,cost,onOk){
+  var m=document.createElement('div');
+  m.className='modal';
+  m.innerHTML='<div class="box"><h3>雇佣黑客破解</h3>'+
+    '<p>「'+appName+'」是 TA 加密封存的私密数据。<br>'+
+    '雇佣一名黑客强行破解，将消耗 <span class="warnc">'+cost+' 金币</span>。<br>'+
+    '当前余额：'+(DB.coins||0)+' 金币。</p>'+
+    '<div style="display:flex;gap:10px;margin-top:20px;">'+
+      '<button class="hc-no" style="flex:1;background:transparent;border:1px solid rgba(53,240,192,.4);color:#35f0c0;box-shadow:none;">取消</button>'+
+      '<button class="hc-ok" style="flex:1;">破解 · '+cost+'</button>'+
+    '</div></div>';
+  document.getElementById('app').appendChild(m);
+  m.querySelector('.hc-ok').onclick=function(){m.remove();onOk();};
+  m.querySelector('.hc-no').onclick=function(){m.remove();};
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});
+}
+
+/* ===== App 窗口 ===== */
+function openWin(c,a){
+  var win=document.createElement('div');
+  win.className='win';
+  win.innerHTML='<div class="win-bar"><span class="wdot"></span>'+
+    '<div class="wt"><div class="wn">'+a.name+'</div><div class="ws">TARGET :: '+nameOf(c)+' · '+peekModelName()+'</div></div>'+
+    '<div class="wclose">✕ 关闭</div></div>'+
+    '<div class="win-body"><div class="win-load"><div class="ring"></div>'+
+      '<div class="lt" id="loadT">CONNECTING...</div><div class="lsub">正在破解并提取数据</div></div></div>';
+  document.getElementById('app').appendChild(win);
+  win.querySelector('.wclose').onclick=function(){win.remove();};
+
+  var steps=['CONNECTING...','DECRYPTING '+a.name.toUpperCase()+'...','EXTRACTING DATA...','RENDERING...'];
+  var si=0;
+  var lt=win.querySelector('#loadT');
+  var timer=setInterval(function(){si=(si+1)%steps.length;if(lt)lt.textContent=steps[si];},700);
+
+  var messages=[
+    {role:'system',content:buildPeekSystem(c)+
+      '\n【最近聊天记录（仅供参考 TA 的近期状态之一，不是全部）】\n'+recentChatText(c)+
+      '\n\n【极重要·内容平衡原则】\n'+
+      '1. 上面的聊天记录只反映"最近几天"的一件事，绝不能让它（比如一次吵架、一时情绪）主导你生成的全部内容。\n'+
+      '2. 生成内容要以 TA 的【身份、职业、长期生活方式、性格】为主体。先想：以 TA 这个身份的人，手机里本该有什么？再自然带一点近期状态。\n'+
+      '3. 严禁整篇都在抒情、自怨自艾、写散文。TA 是有事业、有社会身份的人，不是只会伤春悲秋。\n'+
+      '\n'+HTML_RULE},
+
+    {role:'user',content:APP_TASK[a.id]}
+  ];
+
+  console.log('[查手机] 发起请求，模型=',peekModelName());
+
+  callAI(messages,peekModelName()).then(function(out){
+    clearInterval(timer);
+    console.log('[查手机] AI 返回=',out);
+    var html=cleanHtml(out);
+    var body=win.querySelector('.win-body');
+    if(body){
+      if(html){
+        var n=new Date();
+        var stamp=n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate())+' '+pad(n.getHours())+':'+pad(n.getMinutes());
+        var head='<div class="win-forensic">'+
+          'FORENSIC EXTRACT · 数据取证报告<br>'+
+          'TARGET: <b>'+nameOf(c)+'</b> &nbsp; MODULE: <b>'+a.name+'</b><br>'+
+          'TIME: '+stamp+' &nbsp; STATUS: <b>DECRYPTED</b> <span class="blink">_</span>'+
+        '</div>';
+        body.innerHTML=head+html;
+      }else{
+        body.innerHTML='<div class="win-err">未能提取到数据（AI 返回为空）</div>';
+      }
+    }
+  }).catch(function(e){
+    clearInterval(timer);
+    console.error('[查手机] 出错=',e);
+    var body=win.querySelector('.win-body');
+    if(body) body.innerHTML='<div class="win-err">⚠ ACCESS FAILED<br>'+((e&&e.message)||'连接失败')+
+      '<br><button onclick="this.closest(\'.win\').remove()">返回</button></div>';
+  });
+}
+
+/* ===== 清洗 AI 输出：去掉 markdown 围栏和多余解释 ===== */
+function cleanHtml(t){
+  if(!t)return '';
+  t=t.replace(/```html/gi,'').replace(/```/g,'').trim();
+  var i=t.indexOf('<div');
+  if(i>0)t=t.slice(i);
+  return t;
+}
+
+/* ===== 启动 ===== */
+loadDB().then(function(){renderPick();initBattery();});
+</script>
+</body>
+</html>
