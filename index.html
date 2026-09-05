@@ -18052,12 +18052,34 @@ function bootStartup(){
   restoreFocusState();
   setTimeout(updateAllIcons, 100);
   if(focusPhase==='work'&&view.type==='focus') render();
-  if(DB.settings.showBootAnim === false){
-    var _bl = document.getElementById('bootLoading');
-    if(_bl && _bl.parentNode) _bl.remove();
-  }else{
-    runBootLoading();
+// 1.3 决定是否显示开场动画（三重判断，更稳）
+
+// ① 本次会话之前是否已经播放过
+var _bootPlayed = false;
+try{ _bootPlayed = sessionStorage.getItem('bootAnimPlayed') === '1'; }catch(e){}
+
+// ② 这次是不是用浏览器「返回/前进」按钮进来的（从查手机、游戏返回都算）
+var _isBackForward = false;
+try{
+  var _nav = performance.getEntriesByType('navigation')[0];
+  if(_nav && _nav.type === 'back_forward') _isBackForward = true;
+  // 兼容老一点的浏览器
+  if(!_nav && performance.navigation && performance.navigation.type === 2){
+    _isBackForward = true;
   }
+}catch(e){}
+
+// 满足任意一个「不该播」的条件，就直接移除加载画面
+if(DB.settings.showBootAnim === false || _bootPlayed || _isBackForward){
+  var _bl = document.getElementById('bootLoading');
+  if(_bl && _bl.parentNode) _bl.remove();
+}else{
+  // 真·冷启动：盖个章，再播放
+  try{ sessionStorage.setItem('bootAnimPlayed', '1'); }catch(e){}
+  runBootLoading();
+}
+
+
 }
 
 // ============================================================
