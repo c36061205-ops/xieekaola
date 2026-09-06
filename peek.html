@@ -543,6 +543,585 @@
 .vault-go:active{transform:scale(.98)}
 .vault-deeper{margin-top:18px;padding-top:16px;border-top:1px dashed rgba(53,240,192,.25)}
 .vault-deeper-lb{font-size:12.5px;color:#8fb8ae;letter-spacing:.5px;margin-bottom:10px}
+/* ===== 私密收藏夹专属样式 ===== */
+.fav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+.fav-card {
+  background: rgba(53, 240, 192, 0.05);
+  border: 1px solid rgba(53, 240, 192, 0.25);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.fav-card:hover {
+  background: rgba(53, 240, 192, 0.12);
+  border-color: rgba(53, 240, 192, 0.5);
+  transform: translateY(-1px);
+}
+.fav-card:active {
+  transform: scale(0.98);
+}
+.fav-card-ic {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+.fav-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.fav-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #eafff8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fav-card-tag {
+  font-size: 11px;
+  color: #8fb8ae;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fav-card-del {
+  color: #ff5c7a;
+  font-size: 13px;
+  padding: 6px 8px;
+  opacity: 0.6;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.fav-card-del:hover {
+  opacity: 1;
+  background: rgba(255, 92, 122, 0.15);
+}
+.fav-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #5a7a78;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+/* ==================== 桌面 4 套自适应黑客主题 ==================== */
+.deskwrap.theme-matrix {
+  --hud: #35f0c0;
+  --hud-rgb: 53, 240, 192;
+  --desk-bg: linear-gradient(180deg, #08141e 0%, #050d14 45%, #020508 100%);
+  --card-bg: rgba(53, 240, 192, 0.05);
+  --card-border: rgba(53, 240, 192, 0.2);
+}
+.deskwrap.theme-gold {
+  --hud: #fbbf24;
+  --hud-rgb: 251, 191, 36;
+  --desk-bg: linear-gradient(180deg, #191209 0%, #100b05 45%, #050301 100%);
+  --card-bg: rgba(251, 191, 36, 0.05);
+  --card-border: rgba(251, 191, 36, 0.2);
+}
+.deskwrap.theme-blue {
+  --hud: #00d4ff;
+  --hud-rgb: 0, 212, 255;
+  --desk-bg: linear-gradient(180deg, #071728 0%, #040f1a 45%, #02060b 100%);
+  --card-bg: rgba(0, 212, 255, 0.05);
+  --card-border: rgba(0, 212, 255, 0.2);
+}
+.deskwrap.theme-purple {
+  --hud: #c084fc;
+  --hud-rgb: 192, 132, 252;
+  --desk-bg: linear-gradient(180deg, #180a26 0%, #0f0518 45%, #050208 100%);
+  --card-bg: rgba(192, 132, 252, 0.05);
+  --card-border: rgba(192, 132, 252, 0.2);
+}
+
+/* ==================== 桌面容器（防贴边超安全边距） ==================== */
+.deskwrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--desk-bg);
+  /* 🌟 防遮挡核心：上下预留充足安全区 */
+  padding: calc(env(safe-area-inset-top, 24px) + 12px) 16px calc(env(safe-area-inset-bottom, 20px) + 12px);
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: -apple-system, "SF Mono", Consolas, "PingFang SC", monospace;
+  transition: background 0.4s ease;
+}
+
+/* 四角定位标（内缩防遮挡） */
+.hud-corner.tl { top: 38px; left: 14px; }
+.hud-corner.tr { top: 38px; right: 14px; }
+.hud-corner.bl { bottom: 30px; left: 14px; }
+.hud-corner.br { bottom: 30px; right: 14px; }
+
+/* 顶部状态栏与操作条 */
+.hud-status-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: var(--hud);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+.hud-status-line .rec b {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--hud);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--hud);
+  animation: blink 1.2s infinite;
+  margin-right: 5px;
+}
+
+/* 目标角色面板卡 */
+.target-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  backdrop-filter: blur(12px);
+}
+.target-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+.target-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--hud);
+  box-shadow: 0 0 8px rgba(var(--hud-rgb), 0.35);
+  flex-shrink: 0;
+  background: #000;
+}
+.target-meta { min-width: 0; flex: 1; }
+.target-lbl { font-size: 8.5px; color: var(--hud); opacity: 0.7; letter-spacing: 1px; }
+.target-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.target-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 模型选择胶囊 */
+.hud-model {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 2px;
+  font-size: 9.5px;
+}
+.hud-model .mlab {
+  color: var(--hud);
+  opacity: 0.6;
+  padding: 0 4px;
+  font-size: 8px;
+}
+.hud-model .mopt {
+  color: #777;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: .15s;
+}
+.hud-model .mopt.on {
+  background: var(--hud);
+  color: #03060a;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(var(--hud-rgb), 0.5);
+}
+
+.btn-disconnect {
+  font-size: 10.5px;
+  color: var(--hud);
+  border: 1px solid var(--card-border);
+  background: rgba(var(--hud-rgb), 0.08);
+  padding: 5px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-disconnect:active { background: rgba(var(--hud-rgb), 0.2); }
+
+/* 经典大时钟 */
+.desk .clock {
+  text-align: center;
+  margin: 4px 0 14px;
+}
+.desk .clock .t {
+  font-size: 52px;
+  font-weight: 200;
+  line-height: 1;
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 20px rgba(var(--hud-rgb), 0.35);
+  font-family: -apple-system, "SF Pro Display", sans-serif;
+}
+.desk .clock .d {
+  font-size: 11px;
+  color: var(--hud);
+  letter-spacing: 2px;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+/* 🌟 取证进度组件（选项 B） */
+.hud-telemetry {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: auto;
+  font-size: 9.5px;
+  color: var(--hud);
+  backdrop-filter: blur(8px);
+}
+.telem-head {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed var(--card-border);
+  padding-bottom: 4px;
+  margin-bottom: 5px;
+  font-size: 8.5px;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+.telem-info {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-family: "SF Mono", monospace;
+}
+.telem-bar {
+  height: 3.5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.telem-fill {
+  height: 100%;
+  background: var(--hud);
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--hud);
+  transition: width 0.6s ease;
+}
+
+/* 底部 Dock 栏 */
+.desk .dock {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  backdrop-filter: blur(14px);
+  margin-top: 8px;
+}
+/* ===== 桌面黑客 4 套自适应主题 ===== */
+.deskwrap.theme-matrix {
+  --hud: #35f0c0;
+  --hud-rgb: 53, 240, 192;
+  --desk-bg: linear-gradient(180deg, #08141e 0%, #050d14 45%, #020508 100%);
+  --card-bg: rgba(53, 240, 192, 0.05);
+  --card-border: rgba(53, 240, 192, 0.2);
+}
+.deskwrap.theme-gold {
+  --hud: #fbbf24;
+  --hud-rgb: 251, 191, 36;
+  --desk-bg: linear-gradient(180deg, #191209 0%, #100b05 45%, #050301 100%);
+  --card-bg: rgba(251, 191, 36, 0.05);
+  --card-border: rgba(251, 191, 36, 0.2);
+}
+.deskwrap.theme-blue {
+  --hud: #00d4ff;
+  --hud-rgb: 0, 212, 255;
+  --desk-bg: linear-gradient(180deg, #071728 0%, #040f1a 45%, #02060b 100%);
+  --card-bg: rgba(0, 212, 255, 0.05);
+  --card-border: rgba(0, 212, 255, 0.2);
+}
+.deskwrap.theme-purple {
+  --hud: #c084fc;
+  --hud-rgb: 192, 132, 252;
+  --desk-bg: linear-gradient(180deg, #180a26 0%, #0f0518 45%, #050208 100%);
+  --card-bg: rgba(192, 132, 252, 0.05);
+  --card-border: rgba(192, 132, 252, 0.2);
+}
+
+/* ==================== 终极黑客桌面排版与动效 ==================== */
+.deskwrap {
+  position: absolute !important;
+  inset: 0 !important;
+  overflow: hidden !important;
+  background: radial-gradient(circle at 50% 12%, #0d1e2b 0%, #060e17 45%, #020509 100%) !important;
+  font-family: -apple-system, "SF Pro Display", "PingFang SC", "SF Mono", monospace !important;
+}
+
+/* 氛围光与细扫描线 */
+.hud-ambient-glow {
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(53, 240, 192, 0.14) 0%, transparent 70%);
+  pointer-events: none; z-index: 5;
+}
+.hud-scan {
+  position: absolute; inset: 0; pointer-events: none; z-index: 20;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0px, rgba(0, 0, 0, 0.25) 1px, transparent 1px, transparent 3px);
+  opacity: 0.35;
+}
+.hud-sweep {
+  position: absolute; left: 0; right: 0; height: 160px; top: -160px;
+  pointer-events: none; z-index: 21;
+  background: linear-gradient(180deg, transparent, rgba(53, 240, 192, 0.06), transparent);
+  animation: sweep 8s linear infinite;
+}
+@keyframes sweep { to { top: 110%; } }
+
+/* 🌟 醒目放大版四角「L」定位标 */
+.hud-corner {
+  position: absolute; width: 24px; height: 24px;
+  border-color: #35f0c0; opacity: 0.65; pointer-events: none; z-index: 25;
+  filter: drop-shadow(0 0 5px rgba(53, 240, 192, 0.6));
+}
+/* 🌟 1. 强制四角「L」为亮发光青绿，解决黑角问题 */
+.hud-corner {
+  position: absolute !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-color: #35f0c0 !important;
+  opacity: 0.85 !important;
+  pointer-events: none !important;
+  z-index: 40 !important;
+  filter: drop-shadow(0 0 6px rgba(53, 240, 192, 0.8)) !important;
+}
+.hud-corner.tl { top: 22px !important; left: 14px !important; border-top: 2.5px solid #35f0c0 !important; border-left: 2.5px solid #35f0c0 !important; }
+.hud-corner.tr { top: 22px !important; right: 14px !important; border-top: 2.5px solid #35f0c0 !important; border-right: 2.5px solid #35f0c0 !important; }
+.hud-corner.bl { bottom: 20px !important; left: 14px !important; border-bottom: 2.5px solid #35f0c0 !important; border-left: 2.5px solid #35f0c0 !important; }
+.hud-corner.br { bottom: 20px !important; right: 14px !important; border-bottom: 2.5px solid #35f0c0 !important; border-right: 2.5px solid #35f0c0 !important; }
+
+/* 🌟 2. 角色卡内部左右严格分栏，彻底解决模型选择重叠 */
+.terminal-main {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+.terminal-target-box {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+}
+.terminal-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+}
+.hud-model {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(53, 240, 192, 0.3) !important;
+  border-radius: 6px !important;
+  padding: 2px 4px !important;
+  font-size: 10px !important;
+  font-family: "SF Mono", monospace !important;
+  position: static !important;
+  transform: none !important;
+}
+.hud-model .mlab { color: #35f0c0 !important; opacity: 0.7 !important; padding: 0 4px !important; font-size: 8.5px !important; }
+.hud-model .mopt { color: #888 !important; padding: 2px 6px !important; border-radius: 4px !important; cursor: pointer !important; }
+.hud-model .mopt.on { background: #35f0c0 !important; color: #03060a !important; font-weight: 700 !important; box-shadow: 0 0 6px rgba(53, 240, 192, 0.6) !important; }
+
+/* 🌟 3. 监控噪点与呼吸闪烁动效（找回监控摄像头实录感） */
+.hud-monitor-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 22;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 2px, 3px 100%;
+  opacity: 0.6;
+}
+.hud-flicker {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 23;
+  background: rgba(53, 240, 192, 0.02);
+  opacity: 0;
+  animation: monitorFlicker 0.15s infinite;
+}
+@keyframes monitorFlicker {
+  0% { opacity: 0.01; }
+  50% { opacity: 0.06; }
+  100% { opacity: 0.02; }
+}
+/* 1. 🌟 顶部状态栏（下移至 top: 32px，彻底避开刘海） */
+.hud-status-line {
+  position: absolute !important;
+  top: 32px !important;
+  left: 20px !important;
+  right: 20px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 11.5px !important;
+  font-family: "SF Mono", monospace !important;
+  color: #35f0c0 !important;
+  letter-spacing: 1.2px !important;
+  font-weight: 600 !important;
+  text-shadow: 0 0 8px rgba(53, 240, 192, 0.4) !important;
+  z-index: 30 !important;
+}
+.hud-status-line .rec { display: flex; align-items: center; gap: 6px; }
+.hud-status-line .rec b {
+  width: 7px; height: 7px; background: #35f0c0; border-radius: 50%;
+  box-shadow: 0 0 10px #35f0c0; animation: blink 1.2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+/* 2. 角色控制台卡片 (top: 58px) */
+.target-terminal-card {
+  position: absolute !important;
+  top: 58px !important;
+  left: 16px !important;
+  right: 16px !important;
+  background: rgba(10, 24, 32, 0.6) !important;
+  border: 1px solid rgba(53, 240, 192, 0.28) !important;
+  border-radius: 14px !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  backdrop-filter: blur(14px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+  z-index: 30 !important;
+}
+.terminal-top {
+  display: flex !important; justify-content: space-between !important; align-items: center !important;
+  font-family: "SF Mono", monospace !important; font-size: 10px !important;
+  color: #35f0c0 !important; opacity: 0.8 !important; letter-spacing: 0.5px !important;
+  border-bottom: 1px dashed rgba(53, 240, 192, 0.2) !important; padding-bottom: 4px !important;
+}
+.terminal-main { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 8px !important; }
+.terminal-target-box { display: flex !important; align-items: center !important; gap: 10px !important; min-width: 0 !important; }
+.target-avatar-wrap { position: relative !important; width: 38px !important; height: 38px !important; flex-shrink: 0 !important; }
+.target-avatar {
+  width: 100% !important; height: 100% !important; border-radius: 50% !important;
+  object-fit: cover !important; border: 1.5px solid #35f0c0 !important;
+  box-shadow: 0 0 10px rgba(53, 240, 192, 0.4) !important;
+}
+.avatar-pulse {
+  position: absolute; inset: -3px; border-radius: 50%; border: 1px solid #35f0c0;
+  opacity: 0; animation: ringPulse 2.5s infinite;
+}
+@keyframes ringPulse { 0% { opacity: 0.8; transform: scale(0.95); } 100% { opacity: 0; transform: scale(1.2); } }
+
+.target-name { font-size: 15px !important; font-weight: 700 !important; color: #fff !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+.target-code-stream { font-family: "SF Mono", monospace !important; font-size: 10.5px !important; color: #35f0c0 !important; opacity: 0.85 !important; margin-top: 1px !important; }
+
+.terminal-actions { display: flex !important; align-items: center !important; gap: 6px !important; flex-shrink: 0 !important; }
+.hud-model {
+  display: flex !important; align-items: center !important;
+  background: rgba(0, 0, 0, 0.55) !important; border: 1px solid rgba(53, 240, 192, 0.3) !important;
+  border-radius: 6px !important; padding: 2px 4px !important; font-size: 10.5px !important; font-family: "SF Mono", monospace !important;
+}
+.hud-model .mlab { color: #35f0c0 !important; opacity: 0.7 !important; padding: 0 3px !important; font-size: 9px !important; }
+.hud-model .mopt { color: #888 !important; padding: 2px 6px !important; border-radius: 4px !important; cursor: pointer !important; }
+.hud-model .mopt.on { background: #35f0c0 !important; color: #03060a !important; font-weight: 700 !important; box-shadow: 0 0 6px rgba(53, 240, 192, 0.6) !important; }
+
+.btn-disconnect {
+  font-size: 11px !important; font-weight: 600 !important; color: #35f0c0 !important;
+  border: 1px solid rgba(53, 240, 192, 0.35) !important; background: rgba(53, 240, 192, 0.1) !important;
+  padding: 5px 10px !important; border-radius: 6px !important; cursor: pointer !important; font-family: "SF Mono", monospace !important;
+}
+
+/* 3. 经典居中大时钟 (top: 136px) */
+.desk .clock {
+  position: absolute !important; top: 136px !important; left: 0 !important; right: 0 !important;
+  text-align: center !important; margin: 0 !important; z-index: 30 !important;
+}
+.desk .clock .t {
+  font-size: 54px !important; font-weight: 200 !important; letter-spacing: 2px !important;
+  line-height: 1 !important; color: #ffffff !important; text-shadow: 0 0 20px rgba(53, 240, 192, 0.35) !important;
+  font-family: -apple-system, "SF Pro Display", sans-serif !important;
+}
+.desk .clock .d {
+  font-size: 12px !important; font-family: "SF Mono", monospace !important; color: #35f0c0 !important;
+  letter-spacing: 2.5px !important; margin-top: 6px !important; font-weight: 600 !important;
+  text-shadow: 0 0 8px rgba(53, 240, 192, 0.4) !important;
+}
+
+/* 4. App 图标网格 (top: 232px) */
+.desk .grid {
+  position: absolute !important; top: 232px !important; left: 16px !important; right: 16px !important;
+  display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 16px 10px !important; z-index: 30 !important;
+}
+.capp .an { font-size: 12px !important; font-weight: 500 !important; color: #e0f2ed !important; letter-spacing: 0.3px !important; }
+
+/* 5. 填补下方留白：控制台面板 (top: 454px) */
+.hud-bottom-console {
+  position: absolute !important; top: 454px !important; left: 18px !important; right: 18px !important;
+  display: flex !important; flex-direction: column !important; gap: 8px !important;
+  font-family: "SF Mono", monospace !important; z-index: 30 !important;
+}
+.hud-inline-telemetry { display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; color: #35f0c0; font-weight: 600; }
+.telem-top-row { display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.8px; }
+.telem-progress-track { display: flex; align-items: center; gap: 10px; }
+.telem-bar-line { flex: 1; height: 3px; background: rgba(53, 240, 192, 0.2); border-radius: 2px; overflow: hidden; }
+.telem-bar-fill { height: 100%; background: #35f0c0; box-shadow: 0 0 8px #35f0c0; transition: width 0.6s ease; }
+
+.hud-mem-dump {
+  background: rgba(53, 240, 192, 0.035); border: 1px solid rgba(53, 240, 192, 0.15);
+  border-radius: 8px; padding: 6px 10px; font-size: 10px; color: #35f0c0; opacity: 0.85;
+  line-height: 1.5; letter-spacing: 0.6px;
+}
+.mem-row { display: flex; justify-content: space-between; }
+.mem-hex { opacity: 0.65; }
+
+/* 6. 底部 Dock 栏 (bottom: 24px) */
+.desk .dock {
+  position: absolute !important; bottom: 24px !important; left: 16px !important; right: 16px !important;
+  top: auto !important; background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(53, 240, 192, 0.22) !important; border-radius: 24px !important;
+  padding: 8px 12px !important; display: grid !important; grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important; z-index: 30 !important; backdrop-filter: blur(14px) !important;
+}
 
 </style>
 </head>
@@ -780,52 +1359,199 @@ function startPeek(id){
     if(p>=100){clearInterval(t);setTimeout(function(){renderDesktop(id);},500);}
   },90);
 }
+// ==================== 1. 自适应黑客主题派发器 ====================
+function getCharTheme(c) {
+  if (!c) return 'theme-matrix';
+  var str = ((c.name || '') + ' ' + (c.job || '') + ' ' + (c.pKeywords || '') + ' ' + (c.pExtra || '') + ' ' + (c.pBack || '')).toLowerCase();
+  if (/龙|神|魔|皇|尊|王|首领|异兽|深渊|血族|古|霸/.test(str)) return 'theme-gold';
+  if (/仙|道|剑|宗|医|律|总裁|精英|高冷|克制|冷|霜/.test(str)) return 'theme-blue';
+  if (/疯|狂|杀|恶|罪|暗|蛊|魅|妖|幽|怪/.test(str)) return 'theme-purple';
+  return 'theme-matrix';
+}
 
-/* ================= 视图 3：黑客桌面 ================= */
-function renderDesktop(id){
-  var c=getC(id);if(!c)return renderPick();
-  var aff=(c.status&&c.status.好感度)||0;
-  function appHtml(a){
-    var locked=a.locked||false;
-    var badge=badgeOf(a,c);
-    return '<div class="capp'+(locked?' lock':'')+'" style="--c:'+a.c+'" onclick="openApp(\''+id+'\',\''+a.id+'\')">'+
-      (badge!==''?'<span class="dbadge">'+badge+'</span>':'')+
-      '<div class="ico"><svg viewBox="0 0 24 24">'+a.g+'</svg></div>'+
-      '<span class="an">'+a.name+'</span></div>';
+// ==================== 2. 计算取证进度（选项 B） ====================
+function getForensicProgress(c) {
+  var total = 8; // 总共8个主要App
+  var count = 0;
+  if (c.peekApps && c.peekApps.chat) count++;
+  if (c.peekApps && c.peekApps.gallery) count++;
+  if (c.peekApps && c.peekApps.browser) count++;
+  if (c.peekApps && c.peekApps.notes) count++;
+  if (c.peekApps && c.peekApps.music) count++;
+  if (c.peekWallet) count++;
+  if (c.peekApps && c.peekApps.secret) count++;
+  if (c.peekPriv && c.peekPriv.apps && c.peekPriv.apps.length) count++;
+  
+  // 至少显示 1/8（刚入侵初始状态）
+  count = Math.max(1, count);
+  var pct = Math.round((count / total) * 100);
+  return { count: count, total: total, pct: pct };
+}
+
+// ==================== 1. 自适应黑客主题派发 ====================
+function getCharTheme(c) {
+  if (!c) return 'theme-matrix';
+  var str = ((c.name || '') + ' ' + (c.job || '') + ' ' + (c.pKeywords || '') + ' ' + (c.pExtra || '') + ' ' + (c.pBack || '')).toLowerCase();
+  if (/龙|神|魔|皇|尊|王|首领|异兽|深渊|血族|古|霸/.test(str)) return 'theme-gold';
+  if (/仙|道|剑|宗|医|律|总裁|精英|高冷|克制|冷|霜/.test(str)) return 'theme-blue';
+  if (/疯|狂|杀|恶|罪|暗|蛊|魅|妖|幽|怪/.test(str)) return 'theme-purple';
+  return 'theme-matrix';
+}
+
+// ==================== 2. 取证进度计算 ====================
+function getForensicProgress(c) {
+  var total = 8;
+  var count = 0;
+  if (c.peekApps && c.peekApps.chat) count++;
+  if (c.peekApps && c.peekApps.gallery) count++;
+  if (c.peekApps && c.peekApps.browser) count++;
+  if (c.peekApps && c.peekApps.notes) count++;
+  if (c.peekApps && c.peekApps.music) count++;
+  if (c.peekWallet) count++;
+  if (c.peekApps && c.peekApps.secret) count++;
+  if (c.peekPriv && c.peekPriv.apps && c.peekPriv.apps.length) count++;
+  
+  count = Math.max(1, count);
+  var pct = Math.round((count / total) * 100);
+  return { count: count, total: total, pct: pct };
+}
+
+// ==================== 3. 桌面主渲染函数 ====================
+// ==================== 1. 取证进度计算 ====================
+function getForensicProgress(c) {
+  var total = 8;
+  var count = 0;
+  if (c.peekApps && c.peekApps.chat) count++;
+  if (c.peekApps && c.peekApps.gallery) count++;
+  if (c.peekApps && c.peekApps.browser) count++;
+  if (c.peekApps && c.peekApps.notes) count++;
+  if (c.peekApps && c.peekApps.music) count++;
+  if (c.peekWallet) count++;
+  if (c.peekApps && c.peekApps.secret) count++;
+  if (c.peekPriv && c.peekPriv.apps && c.peekPriv.apps.length) count++;
+  
+  count = Math.max(1, count);
+  var pct = Math.round((count / total) * 100);
+  return { count: count, total: total, pct: pct };
+}
+
+// ==================== 2. 桌面主渲染函数 ====================
+function renderDesktop(id) {
+  var c = getC(id); if (!c) return renderPick();
+  var prog = getForensicProgress(c);
+
+  function appHtml(a) {
+    var locked = a.locked || false;
+    var badge = badgeOf(a, c);
+    return '<div class="capp' + (locked ? ' lock' : '') + '" style="--c:' + a.c + '" onclick="openApp(\'' + id + '\',\'' + a.id + '\')">' +
+      (badge !== '' ? '<span class="dbadge">' + badge + '</span>' : '') +
+      '<div class="ico"><svg viewBox="0 0 24 24">' + a.g + '</svg></div>' +
+      '<span class="an">' + a.name + '</span></div>';
   }
-  var gridHtml=APPS.map(appHtml).join('');
-  var dockHtml=DOCK.map(function(a){
-    return '<div class="capp" style="--c:'+a.c+'" onclick="openApp(\''+id+'\',\''+a.id+'\')">'+
-      '<div class="ico"><svg viewBox="0 0 24 24">'+a.g+'</svg></div><span class="an">'+a.name+'</span></div>';
+  
+  var gridHtml = APPS.map(appHtml).join('');
+  var dockHtml = DOCK.map(function(a) {
+    return '<div class="capp" style="--c:' + a.c + '" onclick="openApp(\'' + id + '\',\'' + a.id + '\')">' +
+      '<div class="ico"><svg viewBox="0 0 24 24">' + a.g + '</svg></div><span class="an">' + a.name + '</span></div>';
   }).join('');
 
-  scr.innerHTML='<div class="deskwrap">'+
-    '<div class="hud-scan"></div><div class="hud-sweep"></div><div class="hud-glitch"></div>'+
-    '<div class="hud-corner tl"></div><div class="hud-corner tr"></div><div class="hud-corner bl"></div><div class="hud-corner br"></div>'+
-    '<div class="edge"></div>'+
-    '<div class="hud-top"><span>SYS <b id="hudClk">--:--:--</b></span><span class="rec"><b></b>REC · ACCESSED</span></div>'+
-    '<div class="hud-back" onclick="renderPick()">‹ 断开连接</div>'+
-	    '<div class="hud-model" id="hudModel"></div>'+
-    '<div class="hud-owner">TARGET<br><b>'+nameOf(c)+'</b></div>'+
-    '<div class="desk">'+
-      '<div class="clock"><div class="t" id="dt">--:--</div><div class="d" id="dd"></div></div>'+
-      '<div class="grid">'+gridHtml+'</div>'+
-      '<div class="dock">'+dockHtml+'</div>'+
-    '</div>'+
-    '<div class="home" onclick="renderPick()"></div>'+
+  var avatarUrl = c.avatar || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="%2335f0c0"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>';
+
+  scr.innerHTML = '<div class="deskwrap">' +
+    '<!-- 监控实录动效层 -->' +
+    '<div class="hud-ambient-glow"></div>' +
+    '<div class="hud-monitor-noise"></div>' +
+    '<div class="hud-flicker"></div>' +
+    '<div class="hud-scan"></div><div class="hud-sweep"></div>' +
+    '<div class="hud-corner tl"></div><div class="hud-corner tr"></div><div class="hud-corner bl"></div><div class="hud-corner br"></div>' +
+    
+    '<!-- 1. 顶部状态栏 -->' +
+    '<div class="hud-status-line">' +
+      '<span>SYS <b id="hudClk">--:--:--</b></span>' +
+      '<div class="rec"><b></b><span>REC · INTRUDED</span></div>' +
+    '</div>' +
+
+    '<!-- 2. 终端角色控制台卡片 -->' +
+    '<div class="target-terminal-card">' +
+      '<div class="terminal-top">' +
+        '<span>HOST_CTRL // 192.168.1.104</span>' +
+        '<span>SIG: 98.4% · PORT: 8080</span>' +
+      '</div>' +
+      '<div class="terminal-main">' +
+        '<div class="terminal-target-box">' +
+          '<div class="target-avatar-wrap">' +
+            '<img class="target-avatar" src="' + pkEsc(avatarUrl) + '" alt="Avatar">' +
+            '<div class="avatar-pulse"></div>' +
+          '</div>' +
+          '<div class="target-meta">' +
+            '<div class="target-name">' + nameOf(c) + '</div>' +
+            '<div class="target-code-stream">0x7FFD // BYPASSED</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="terminal-actions">' +
+          '<div class="hud-model" id="hudModel"></div>' +
+          '<div class="btn-disconnect" onclick="renderPick()">‹ 断开</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<!-- 3. 主桌面与大时钟 -->' +
+    '<div class="desk">' +
+      '<div class="clock"><div class="t" id="dt">--:--</div><div class="d" id="dd"></div></div>' +
+      '<div class="grid">' + gridHtml + '</div>' +
+      '<div class="dock">' + dockHtml + '</div>' +
+    '</div>' +
+
+    '<!-- 4. 下方控制台（取证进度条 + 内存抓包流） -->' +
+    '<div class="hud-bottom-console">' +
+      '<div class="hud-inline-telemetry">' +
+        '<div class="telem-top-row">' +
+          '<span>▸ DECRYPT_VAULT // ' + prog.count + '/' + prog.total + ' MODS</span>' +
+          '<span>COMPLETION ' + prog.pct + '%</span>' +
+        '</div>' +
+        '<div class="telem-progress-track">' +
+          '<div class="telem-bar-line"><div class="telem-bar-fill" style="width:' + prog.pct + '%;"></div></div>' +
+          '<span style="font-size:10px; opacity:0.75;">AES-256</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="hud-mem-dump">' +
+        '<div class="mem-row">' +
+          '<span>PACKET_SNIFFER: <b style="color:#fff;">0x7FFD: LIVE</b></span>' +
+          '<span>SIG: [||||||||░░]</span>' +
+        '</div>' +
+        '<div class="mem-row mem-hex">' +
+          '<span>0x00A4: 7F 45 4C 46 02 01</span>' +
+          '<span>PORT: 8080/TCP</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="home" onclick="renderPick()"></div>' +
   '</div>';
-  tick();
-    paintModelSel();
 
+  // 🌟 挂载原版全局黑客特效函数（确保和弹窗内部一样的闪烁质感）
+  if (typeof addPeekFx === 'function') {
+    addPeekFx(scr);
+  }
+
+  tick();
+  paintModelSel();
 }
-function paintModelSel(){
-  var el=document.getElementById('hudModel');if(!el)return;
-  var cur=(DB.settings&&DB.settings.peekModel)||'aux';
-  var opts=[['aux','辅'],['chat','主'],['light','轻']];
-  el.innerHTML='<span class="mlab">MODEL</span>'+opts.map(function(o){
-    return '<span class="mopt'+(cur===o[0]?' on':'')+'" onclick="setPeekModel(\''+o[0]+'\')">'+o[1]+'</span>';
+// ==================== 3. 模型选择胶囊渲染 ====================
+function paintModelSel() {
+  var el = document.getElementById('hudModel');
+  if (!el) return;
+  var cur = (DB.settings && DB.settings.peekModel) || 'aux';
+  var opts = [
+    ['aux', '辅'],
+    ['chat', '主'],
+    ['light', '轻']
+  ];
+  el.innerHTML = '<span class="mlab">M</span>' + opts.map(function(o) {
+    return '<span class="mopt' + (cur === o[0] ? ' on' : '') + '" onclick="setPeekModel(\'' + o[0] + '\')">' + o[1] + '</span>';
   }).join('');
 }
+
 function setPeekModel(m){
   DB.settings=DB.settings||{};DB.settings.peekModel=m;saveDB();paintModelSel();
 }
@@ -1053,12 +1779,15 @@ var APP_TASK={
     '5. 可以藏 1~2 张透露秘密或反差的照片。'+
     '整体用一个 sec 分区包起来，标题写：相册 · GALLERY。',
 
-  notes:'请伪造 TA 的【备忘录】，要像真实手机备忘录：零散、实用、口语、不修辞、不抒情，像随手速记而不是写文章。'+
-    '生成 5~8 条，每条一个 item：who 写简短标题，time 写时间，txt 写正文（可以短到几个字）。'+
-    '内容必须紧扣 TA 的真实身份和职业去记——TA 因为身份会记录哪些别人看不懂的东西？'+
-    '（例如待办、要见的人、地点时间、数字或金额或代号、密码提示、清单、要提防的人、临时决定）。'+
-    '大部分是冷冰冰的实务记录，最多夹 1 条情绪碎念，绝不要整篇抒情或自怨自艾。'+
-    '要有让查看者看不太懂但觉得可疑的窥私感。整体用一个 sec 分区包起来，标题写：备忘录 · NOTES。',
+  notes: '请还原 TA 手机里的【备忘录/便签】，要像真实手机备忘录：零散、实用、口语、不修辞、不抒情，像随手速记而不是写文章。\n' +
+    '生成 5~8 条便签，每条一个 item：who 写简短标题，time 写时间，txt 写正文（可短到几个字或一行代号）。\n\n' +
+    '【内容结构与比例要求·严禁千篇一律】：\n' +
+    '1. 【主体实务（占大多数，3~5条）】：必须紧扣 TA 的真实身份和职业记录别人看不懂的硬核内容（待办事项、要见的人、地点时间、数字/金额/代号、密码提示、清单、要提防的人、临时决断）。大部分是冷冰冰的实务速记。\n' +
+    '2. 【反差与暗戳戳的情绪（仅限 1~2 条，宁缺毋滥）】：从以下挑选 1~2 种混在实务里，增加窥私惊喜感：\n' +
+    '   - 【未发出的草稿】：写了一半没敢发给某人的长文或对峙话术。\n' +
+    '   - 【反差碎念/复盘】：跟白天人设相反的生闷气吐槽、吵架后补想出的犀利反击、奇葩自我提醒。\n' +
+    '   - 【不可告人的私人清单】：与其人设/物种形成反差的奇葩爱好或秘密计划。\n\n' +
+    '【语言硬性要求】：真实、凌乱、生活化或公事公办。严禁整篇都在抒情写小作文。整体用一个 sec 分区包起来，标题写：备忘录 · NOTES。',
 	
   wallet:'你已黑入 TA 名下的银行与金融系统，请伪造一份【资产核查报告】。'+
     '生成一个 sec 分区，标题写：资产核查 · ASSET SCAN。'+
@@ -1190,92 +1919,322 @@ function parsePrivateApp(raw){
   if(!html)return null;
   return {app:app||'未知应用',icon:icon||'📱',tag:tag,html:html};
 }
-function loadPrivateApp(c,win){
-  var box=win._pv;
-  var had=box.apps.map(function(a){return a.app;}).join('、');
-  var msgs=[
-    {role:'system',content:buildPeekSystem(c)+
-      '\n【最近聊天记录参考】\n'+recentChatText(c)+
-      '\n\n你已突破 TA 手机最高权限，发现 TA 藏在深处、伪装或隐藏起来、不想被人看到的 App。'},
-    {role:'user',content:
-      '偷看 TA 手机里藏着的、不为人知的一个 App，把它此刻打开的样子还原出来。\n'+
-      (had?('已经翻到过这些了，这次要一个完全不同的：'+had+'\n'):'')+
-      '别管它是什么——工具、游戏、社交、记录、乱七八糟的小众玩意儿都行，'+
-      '想到什么最有意思、最出乎意料、最能让人"啊？他居然玩这个"的，就是它。放开想。\n'+
-      '唯一要避开的：别搞得病态吓人（跟踪、偏执、自残那种）。其余随便。\n\n'+
-      '【关键】要做得像一个真实上架的 App 截图，不是草稿：'+
-      '该有顶部标题栏、内容区（卡片/列表/头像/图标/数字统计/标签等真实控件）、底部导航栏这些完整结构，'+
-      '排版饱满、有层次、填充真实感的数据，让人一眼以为真是手机上的某个 App。\n'+
-      '用纯 HTML+内联 style 实现，善用圆角、背景色块、分割线、emoji 当图标，'+
-      '别用 <script>、<img> 和外链。\n\n'+
-      '按这个格式给我，别的话都不要：\n'+
-      '【APP】名字\n【ICON】一个emoji\n【说明】一句话吐槽它暴露了啥\n'+
-      '【界面】\n<界面HTML>'}
+// ==================== 彻底去类型池，完全根据上下文反差生成 ====================
+function loadPrivateApp(c, win) {
+  var box = win._pv;
+  
+  // 1. 整理出前面所有已经生成过的 APP 信息（包括名称和吐槽说明）
+  var historyInfo = '';
+  if (box.apps && box.apps.length > 0) {
+    historyInfo = '【此前已经翻出过的应用（绝对不要雷同）】：\n' + 
+      box.apps.map(function(a, i) { 
+        return (i + 1) + '. 《' + a.app + '》：' + (a.tag || '无说明'); 
+      }).join('\n') + '\n\n';
+  }
 
+  // 2. 纯动态反差提示词：要求 AI 自行分析上文并彻底换赛道
+  var msgs = [
+    { 
+      role: 'system', 
+      content: buildPeekSystem(c) + '\n【最近聊天记录参考】\n' + recentChatText(c) +
+        '\n\n你已突破 TA 手机最高权限，发现 TA 藏在深处、伪装或隐藏起来、不想被人看到的 App。' 
+    },
+    { 
+      role: 'user', 
+      content:
+        '偷看 TA 手机里藏着的、不为人知的又一个 App，把它此刻打开的样子还原出来。\n\n' +
+        historyInfo +
+        (historyInfo ? 
+          '【差异化强制要求】：\n' +
+          '- 看看上面已经出现的应用，本次生成的 APP 必须在【功能用途】、【使用场景】、【心理动机】和【情绪风格】上与它们完全相反或彻底无关！\n' +
+          '- 严禁同质化！如果上面是日常/记录类，这次就来点离谱/实用/社交/自嗨/反差极大的类型。\n' +
+          '- 充分挖掘该角色性格中最出人意料、最具反差萌或最不想让熟人发现的小秘密。\n\n' 
+          : 
+          '【要求】：放开脑洞，想一个最能体现 TA 性格反差、出乎意料的隐藏 App（避开病态违法的即可）。\n\n'
+        ) +
+        '【关键界面要求】：\n' +
+        '必须做得像一个真实运行中的 App 截图，排版完整且丰富：\n' +
+        '1. 具有完整结构：顶部标题栏、核心内容展示区（卡片/列表/头像/数字统计/标签等）、底部导航栏。\n' +
+        '2. 用纯 HTML + 内联 style（使用圆角、卡片阴影、渐变色块、emoji 当图标），排版精致紧凑。\n' +
+        '3. 严禁使用 <script>、<img> 和外部链接图片。\n\n' +
+		'4. 界面内容采用自然长列表展示，严禁在内部容器加 overflow:scroll/auto 或写死固定高度，让内容从上到下自然撑开。\n' +
+        '必须严格按以下格式输出，不要任何多余废话：\n' +
+        '【APP】应用名称\n' +
+        '【ICON】一个匹配的emoji图标\n' +
+        '【说明】一句话神吐槽（这暴露了TA什么秘密/反差）\n' +
+        '【界面】\n' +
+        '<你的HTML界面代码>' 
+    }
   ];
-  callAI(msgs,peekModelName()).then(function(out){
-    console.log('=== 私密AI原始返回 ===\n',out);   // ①看AI到底返回了啥
-    var data=parsePrivateApp(out);
-    console.log('=== 解析结果 data ===\n',data);      // ②看解析出来是什么
-    var root=win.querySelector('#pkPrivRoot');
-    if(!data){
-      if(root)root.innerHTML='<div class="win-err">AI没按格式返回，已跳过。点关闭重进重试。</div>';
+
+  callAI(msgs, peekModelName()).then(function(out) {
+    var data = parsePrivateApp(out);
+    var root = win.querySelector('#pkPrivRoot');
+    if (!data) {
+      if (root) {
+        root.innerHTML = 
+          '<div class="win-err">⚠ 解析应用界面失败<br>AI 未按规范生成</div>' +
+          '<div class="priv-nav" style="justify-content:center;margin-top:15px;">' +
+            (box.apps.length > 0 ? '<span class="priv-btn" id="pvRetryBack">‹ 返回已有的</span>' : '') +
+            '<span class="priv-btn main" id="pvRetry">↻ 重试生成</span>' +
+          '</div>';
+        var backBtn = root.querySelector('#pvRetryBack');
+        if (backBtn) backBtn.onclick = function() { renderPrivate(c, win); };
+        root.querySelector('#pvRetry').onclick = function() {
+          peekHackLoad(root, '正在重新尝试破解...');
+          loadPrivateApp(c, win);
+        };
+      }
       return;
     }
+
+    // 成功生成，存入缓存列表
     box.apps.push(data);
-    box.idx=box.apps.length-1;
-    box.time=box.time||Date.now();
+    box.idx = box.apps.length - 1; // 切换到最新生成的这一个
+    box.time = box.time || Date.now();
     saveDB();
-    if(win.querySelector('#pkPrivRoot'))renderPrivate(c,win);
-  }).catch(function(e){
-    var root=win.querySelector('#pkPrivRoot');
-    if(root)root.innerHTML='<div class="win-err">⚠ 扫描失败<br>'+((e&&e.message)||'连接失败')+'</div>';
+    if (win.querySelector('#pkPrivRoot')) renderPrivate(c, win);
+
+  }).catch(function(e) {
+    var root = win.querySelector('#pkPrivRoot');
+    if (root) {
+      root.innerHTML = 
+        '<div class="win-err">⚠ 扫描失败<br>' + ((e && e.message) || '网络连接超时') + '</div>' +
+        '<div class="priv-nav" style="justify-content:center;margin-top:15px;">' +
+          (box.apps.length > 0 ? '<span class="priv-btn" id="pvRetryBack">‹ 返回已有的</span>' : '') +
+          '<span class="priv-btn main" id="pvRetry">↻ 重试连接</span>' +
+        '</div>';
+      var backBtn = root.querySelector('#pvRetryBack');
+      if (backBtn) backBtn.onclick = function() { renderPrivate(c, win); };
+      root.querySelector('#pvRetry').onclick = function() {
+        peekHackLoad(root, '正在重新尝试破解...');
+        loadPrivateApp(c, win);
+      };
+    }
   });
 }
-function renderPrivate(c,win){
-  var box=win._pv,root=win.querySelector('#pkPrivRoot');
-  if(!root||!box)return;
-  if(!box.apps||!box.apps.length){    // 一个都还没生成 → 去加载
-    peekHackLoad(root,'正在扫描隐藏应用');
-    loadPrivateApp(c,win);return;
+
+// ==================== 私密APP 收藏与展示完整模块 ====================
+
+// 1. 收藏/取消收藏 控制
+function toggleFavPrivApp(c, data) {
+  if (!c.peekFavApps) c.peekFavApps = [];
+  var index = c.peekFavApps.findIndex(function(item) {
+    return item.app === data.app && item.html === data.html;
+  });
+
+  if (index > -1) {
+    c.peekFavApps.splice(index, 1);
+  } else {
+    c.peekFavApps.push({
+      app: data.app,
+      icon: data.icon,
+      tag: data.tag,
+      html: data.html,
+      favTime: Date.now()
+    });
   }
-  if(box.idx>=box.apps.length)box.idx=box.apps.length-1;  // idx 越界兜底
-  if(box.idx<0)box.idx=0;
-  var data=box.apps[box.idx];
-  if(!data){                          // 该位置为空 → 去加载
-    peekHackLoad(root,'正在解析下一个隐藏应用');
-    loadPrivateApp(c,win);return;
+  saveDB();
+}
+
+// 2. 查看具体某个收藏 APP 的详情弹窗
+function openFavAppDetail(c, item) {
+  var win = document.createElement('div');
+  win.className = 'win';
+  win.innerHTML =
+    '<div class="win-bar">' +
+      '<span class="wdot"></span>' +
+      '<div class="wt">' +
+        '<div class="wn">⭐ ' + pkEsc(item.app) + '</div>' +
+        '<div class="ws">FAVORITE :: ARCHIVED APP</div>' +
+      '</div>' +
+      '<div class="wclose">✕ 关闭</div>' +
+    '</div>' +
+    '<div class="win-body">' +
+      '<div class="pk-priv">' +
+        '<div class="priv-head">' +
+          '<span class="priv-ic">' + pkEsc(item.icon || '📱') + '</span>' +
+          '<div class="priv-hi">' +
+            '<div class="priv-name">' + pkEsc(item.app) + '</div>' +
+            (item.tag ? '<div class="priv-tag">' + pkEsc(item.tag) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="priv-screen">' + item.html + '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('app').appendChild(win);
+  addPeekFx(win);
+  win.querySelector('.wclose').onclick = function() { win.remove(); };
+}
+
+// 3. 收藏夹列表弹窗
+function openPrivateFavs(c) {
+  var win = document.createElement('div');
+  win.className = 'win';
+  
+  function renderList() {
+    var favList = c.peekFavApps || [];
+    var listHtml = '';
+    
+    if (favList.length === 0) {
+      listHtml = '<div class="fav-empty">【暂无收藏的私密应用】<br><br>在浏览隐藏应用时点击右上角 ☆收藏 即可归档到这里</div>';
+    } else {
+      listHtml = '<div class="fav-list">' + favList.map(function(item, idx) {
+        return '<div class="fav-card" data-idx="' + idx + '">' +
+          '<span class="fav-card-ic">' + pkEsc(item.icon || '📱') + '</span>' +
+          '<div class="fav-card-info">' +
+            '<div class="fav-card-title">' + pkEsc(item.app) + '</div>' +
+            '<div class="fav-card-tag">' + pkEsc(item.tag || '暂无说明') + '</div>' +
+          '</div>' +
+          '<div class="fav-card-del" data-del="' + idx + '" title="删除此收藏">✕</div>' +
+        '</div>';
+      }).join('') + '</div>';
+    }
+
+    win.querySelector('.win-body').innerHTML =
+      '<div class="priv-found">⭐ 已归档私密应用 (' + favList.length + ')</div>' +
+      listHtml;
+
+    // 绑定点击查看详情
+    win.querySelectorAll('.fav-card').forEach(function(card) {
+      card.onclick = function(e) {
+        if (e.target.dataset.del !== undefined) return;
+        var idx = parseInt(this.dataset.idx, 10);
+        openFavAppDetail(c, favList[idx]);
+      };
+    });
+
+    // 绑定删除按钮
+    win.querySelectorAll('.fav-card-del').forEach(function(delBtn) {
+      delBtn.onclick = function(e) {
+        e.stopPropagation();
+        var idx = parseInt(this.dataset.del, 10);
+        favList.splice(idx, 1);
+        saveDB();
+        renderList();
+      };
+    });
   }
 
-  var total=box.total||peekPrivRandCount();
-  var isLast=(box.idx>=total-1);
-  var nextLabel=isLast?'↻ 重新扫描一批':'查看下一个应用 ›';
-  root.innerHTML=
-    '<div class="priv-found">🔓 检测到 '+total+' 个隐藏应用 · 当前 '+(box.idx+1)+'/'+total+'</div>'+
-    '<div class="priv-head"><span class="priv-ic">'+pkEsc(data.icon||'📱')+'</span>'+
-    '<div class="priv-hi"><div class="priv-name">'+pkEsc(data.app||'未知应用')+'</div>'+
-    (data.tag?'<div class="priv-tag">'+pkEsc(data.tag)+'</div>':'')+'</div></div>'+
-    '<div class="priv-screen">'+data.html+'</div>'+
-    '<div class="priv-nav">'+
-      (box.idx>0?'<span class="priv-btn" id="pvPrev">‹ 上一个</span>':'<span></span>')+
-      '<span class="priv-btn main" id="pvNext">'+nextLabel+'</span>'+
+  win.innerHTML =
+    '<div class="win-bar">' +
+      '<span class="wdot"></span>' +
+      '<div class="wt">' +
+        '<div class="wn">⭐ 私密收藏库</div>' +
+        '<div class="ws">TARGET :: ' + nameOf(c) + ' · ARCHIVE</div>' +
+      '</div>' +
+      '<div class="wclose">✕ 返回</div>' +
+    '</div>' +
+    '<div class="win-body"></div>';
+
+  document.getElementById('app').appendChild(win);
+  addPeekFx(win);
+  renderList();
+  win.querySelector('.wclose').onclick = function() { win.remove(); };
+}
+
+// 4. 私密APP主界面渲染函数（包含顶部收藏按钮）
+function renderPrivate(c, win) {
+  var box = win._pv, root = win.querySelector('#pkPrivRoot');
+  if (!root || !box) return;
+
+  if (!box.apps || !box.apps.length) {
+    peekHackLoad(root, '正在破解手机隐藏分区...');
+    loadPrivateApp(c, win);
+    return;
+  }
+
+  if (box.idx >= box.apps.length) box.idx = box.apps.length - 1;
+  if (box.idx < 0) box.idx = 0;
+
+  var data = box.apps[box.idx];
+  var total = box.total || 6;
+  var hasPrev = box.idx > 0;
+  var isCachedNext = box.idx < box.apps.length - 1;
+  var isLastLimit = (box.idx >= total - 1);
+
+  var nextLabel = '查看下一个 ›';
+  if (isCachedNext) {
+    nextLabel = '下一个 ›';
+  } else if (isLastLimit) {
+    nextLabel = '↻ 重新扫描';
+  } else {
+    nextLabel = '🔍 挖掘下一个应用 ›';
+  }
+
+  var favList = c.peekFavApps || [];
+  var isFaved = favList.some(function(item) {
+    return item.app === data.app && item.html === data.html;
+  });
+
+  root.innerHTML =
+    '<div class="priv-found" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+      '<span>🔓 已解密 ' + (box.idx + 1) + '/' + Math.max(box.apps.length, total) + '</span>' +
+      '<div style="display:flex; gap:8px;">' +
+        '<span id="pvFavListBtn" style="cursor:pointer; font-size:11px; padding:3px 8px; border-radius:4px; border:1px solid rgba(53,240,192,0.3); color:#35f0c0;">' +
+          '⭐ 收藏库 (' + favList.length + ')' +
+        '</span>' +
+        '<span id="pvFavBtn" style="cursor:pointer; font-size:11px; padding:3px 8px; border-radius:4px; background:' + (isFaved ? '#ffd70033' : 'rgba(255,255,255,0.08)') + '; color:' + (isFaved ? '#ffd700' : '#8fb8ae') + '; border:1px solid ' + (isFaved ? '#ffd700' : 'rgba(255,255,255,0.15)') + ';">' +
+          (isFaved ? '★ 已收藏' : '☆ 收藏') +
+        '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="priv-head">' +
+      '<span class="priv-ic">' + pkEsc(data.icon || '📱') + '</span>' +
+      '<div class="priv-hi">' +
+        '<div class="priv-name">' + pkEsc(data.app || '未知应用') + '</div>' +
+        (data.tag ? '<div class="priv-tag">' + pkEsc(data.tag) + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="priv-screen">' + data.html + '</div>' +
+    '<div class="priv-nav" style="display:flex; justify-content:space-between; align-items:center; margin-top:14px;">' +
+      (hasPrev ? '<span class="priv-btn" id="pvPrev">‹ 上一个</span>' : '<span style="width:70px;"></span>') +
+      '<span style="font-size:11px; opacity:0.6; color:#8fb8ae;">' + (box.idx + 1) + ' / ' + box.apps.length + '</span>' +
+      '<span class="priv-btn main" id="pvNext">' + nextLabel + '</span>' +
     '</div>';
-  var prev=root.querySelector('#pvPrev');
-  if(prev)prev.onclick=function(){box.idx--;saveDB();renderPrivate(c,win);};
-  root.querySelector('#pvNext').onclick=function(){
-    if(isLast){
-      c.peekPriv={apps:[],idx:0,total:peekPrivRandCount(),time:Date.now()};win._pv=c.peekPriv;saveDB();
-      peekHackLoad(root,'正在重新扫描一批隐藏应用');
-      loadPrivateApp(c,win);
-    }else if(box.idx<box.apps.length-1){
-      box.idx++;saveDB();renderPrivate(c,win);
-    }else{
-      peekHackLoad(root,'正在解析下一个隐藏应用');
-      loadPrivateApp(c,win);
+
+  // 绑定：打开收藏库
+  root.querySelector('#pvFavListBtn').onclick = function() {
+    openPrivateFavs(c);
+  };
+
+  // 绑定：收藏 / 取消收藏
+  root.querySelector('#pvFavBtn').onclick = function() {
+    toggleFavPrivApp(c, data);
+    renderPrivate(c, win);
+  };
+
+  // 绑定：上一个
+  var prevBtn = root.querySelector('#pvPrev');
+  if (prevBtn) {
+    prevBtn.onclick = function() {
+      if (box.idx > 0) {
+        box.idx--;
+        saveDB();
+        renderPrivate(c, win);
+      }
+    };
+  }
+
+  // 绑定：下一个 / 重新扫描
+  root.querySelector('#pvNext').onclick = function() {
+    if (isCachedNext) {
+      box.idx++;
+      saveDB();
+      renderPrivate(c, win);
+    } else if (isLastLimit) {
+      c.peekPriv = { apps: [], idx: 0, total: peekPrivRandCount(), time: Date.now() };
+      win._pv = c.peekPriv;
+      saveDB();
+      peekHackLoad(root, '正在重新扫描隐藏应用...');
+      loadPrivateApp(c, win);
+    } else {
+      peekHackLoad(root, '正在破解下一个隐藏应用...');
+      loadPrivateApp(c, win);
     }
   };
 }
-
 // ============ 音乐 App（播放器）============
 var PEEK_MUSIC_TTL=12*3600*1000;
 
@@ -1954,127 +2913,171 @@ function peekValidWallet(c){
   return c.peekWallet;
 }
 
-function loadWallet(c,win){
-  var msgs=[
-    {role:'system',content:buildPeekSystem(c)+
-      '\n【最近聊天记录（仅供参考近况之一，不是全部）】\n'+recentChatText(c)+
-      '\n\n你已黑入 TA 名下的银行与金融系统，要伪造一份符合 TA 身份的资产与资金数据。'},
-    {role:'user',content:
-      '根据 TA 的身份、职业、生活方式，伪造 TA 的钱包/银行数据。'+
-      '【内容结构你自己决定】：有钱有身份的人可以有信托、股票、房产、多张卡、公司账户；'+
-      '普通人就是工资卡+零星流水。务必贴合身份体量。\n'+
-      '【分区归类·重要】：把"资产类"（房产/车/股票/信托/存款等）和"账单流水类"（每一笔收支转账）分开放进不同 section，'+
-      '账单流水统一放进 bill 字段里（见下方格式），不要塞进 sections。\n'+
-      '【要有戏】：近期账单不要只有吃饭话费的流水账，要藏进能让查看者"心里一紧"的线索。'+
-      '可从下面挑：定期转给某人的固定金额、深夜大额转账给陌生名字、医院/律师/当铺/借贷平台的消费、'+
-      '来路不明的整数进账、反复给某人发的小额红包、和聊天记录里某人对得上的转账。\n'+
-      '【可疑数量·硬限制】：所有账单里，warn=true 的可疑条目最多 1~3 条，其余都是正常消费。'+
-      '可疑太多就不叫秘密了，宁少勿多。\n'+
-      '【语言硬性要求】：你是银行数据引擎，输出的是系统字段，不是文章！'+
-      '每个字段极短、冷、具体。严禁形容词堆砌、华丽辞藻、抒情比喻。'+
-      '备注写大白话，如"还老陈的""房租""不知道谁转的""给她的"。\n'+
-      '严格只输出 JSON，禁止解释、禁止 markdown 围栏。格式：\n'+
-      '{"accounts":[{"bank":"银行名","no":"尾号xxxx","balance":"¥金额","tag":"主卡/小号(可空)"}],'+
-      '"summary":{"in":"¥本月收入","out":"¥本月支出"},'+
-      '"sections":[{"title":"资产类分区标题(自拟,如 名下资产/信托/持仓)","rows":['+
-      '{"l":"项目(≤10字)","r":"金额或数值(≤12字)","sub":"备注(≤14字,可空)","warn":false}]}],'+
-      '"bill":[{"name":"对方或商户(≤10字)","amt":"±¥金额","time":"日期时间(≤12字)","note":"备注(≤14字,可空)","warn":false}]}\n'+
-      'accounts 1~3 个；sections 1~3 个（只放资产，每个 3~6 条）；'+
-      'bill 放 10~15 条账单，收入用 +、支出用 -；金额具体、别都是整数。'}
+function loadWallet(c, win) {
+  var msgs = [
+    { 
+      role: 'system', 
+      content: buildPeekSystem(c) +
+        '\n【最近聊天记录（参考近况）】\n' + recentChatText(c) +
+        '\n\n你已黑入 TA 名下的银行卡、网络支付及加密钱包系统，要还原 TA 最真实的资金、资产与开销流水。' 
+    },
+    { 
+      role: 'user', 
+      content:
+        '根据 TA 的真实身份、职业、性格反差与秘密，生成 TA 的钱包与银行流水数据。\n\n' +
+        '【核心要求·必须有反差和故事感】：\n' +
+        '1. 严禁千篇一律的柴米油盐！必须结合 TA 的物种、身份或暗地里的秘密（如：表面高冷/神魔/总裁/大佬，暗地里却在买奇奇怪怪的小玩意、冷门爱好氪金、暗网交易、偷偷给某人打钱、封口费、赔偿金等）。\n' +
+        '2. 资产类（sections）：要有贴合身份的离谱/反差资产（如：深渊领地地契、绝对真圆水晶球库存、绝版痛包、私房小金库、某股票亏损持仓等）。\n' +
+        '3. 账单流水（bill）：生成 10~15 条。备注（note）是大精髓！要像真实转账备注（如"水晶球尾款-要求极度真圆""封口费""别再联系了""奶茶去冰多加波霸""违约赔偿"）。\n' +
+        '4. 标记可疑：其中 2~4 条特别离谱或涉及隐私秘密的账单，标记 `"warn": true`。\n\n' +
+        '严格只输出 JSON 格式，禁止任何 Markdown 标记和废话：\n' +
+        '{"accounts":[{"bank":"银行/平台名","no":"尾号xxxx","balance":"¥金额/单位","tag":"主卡/小金库/暗网账户"}],' +
+        '"summary":{"in":"¥本月收入","out":"¥本月支出"},' +
+        '"sections":[{"title":"资产分区名","rows":[{"l":"资产名","r":"估值/数量","sub":"备注说明","warn":false}]}],' +
+        '"bill":[{"name":"交易对方/商户","amt":"±¥金额","time":"时间","note":"转账备注/具体买了啥","warn":false}]}'
+    }
   ];
-  callAI(msgs,peekModelName()).then(function(out){
-    var data=parseJsonFromAI(out);
-    if(!data){
-      var r=win.querySelector('#pkWalletRoot');
-      if(r)r.innerHTML='<div class="win-err">未能提取到银行数据（格式异常），可点重新扫描或关闭重试。</div>';
+
+  callAI(msgs, peekModelName()).then(function(out) {
+    var data = parseJsonFromAI(out);
+    var r = win.querySelector('#pkWalletRoot');
+    if (!data) {
+      if (r) r.innerHTML = '<div class="win-err">未能提取到银行数据，点下方重试。</div><div class="wal-foot"><span class="wal-refresh" id="pkWalErrRe">↻ 重新扫描</span></div>';
+      var errRe = win.querySelector('#pkWalErrRe');
+      if (errRe) errRe.onclick = function() { loadWallet(c, win); };
       return;
     }
-    c.peekWallet=data;c.peekWalletTime=Date.now();saveDB();
-    if(win.querySelector('#pkWalletRoot'))renderWallet(c,win,data);
-  }).catch(function(e){
-    var r=win.querySelector('#pkWalletRoot');
-    if(r)r.innerHTML='<div class="win-err">⚠ 接入失败<br>'+((e&&e.message)||'连接失败')+'</div>';
+    c.peekWallet = data;
+    c.peekWalletTime = Date.now();
+    saveDB();
+    if (win.querySelector('#pkWalletRoot')) renderWallet(c, win, data);
+  }).catch(function(e) {
+    var r = win.querySelector('#pkWalletRoot');
+    if (r) r.innerHTML = '<div class="win-err">⚠ 接入失败<br>' + ((e && e.message) || '连接失败') + '</div>';
   });
 }
-
-function renderWallet(c,win,data){
-  var root=win.querySelector('#pkWalletRoot');
-  if(!root)return;
-  var html='';
-  var accs=data.accounts||[];
-  if(accs.length){
-    html+='<div class="wal-cards">';
-    accs.forEach(function(a){
-      html+='<div class="wal-card">'+
-        '<div class="wal-bank">'+pkEsc(a.bank||'银行')+
-        (a.tag?' <span class="wal-tag">'+pkEsc(a.tag)+'</span>':'')+'</div>'+
-        '<div class="wal-bal">'+pkEsc(a.balance||'')+'</div>'+
-        '<div class="wal-no">'+pkEsc(a.no||'')+'</div></div>';
+// ==================== 钱包主页面渲染 ====================
+function renderWallet(c, win, data) {
+  var root = win.querySelector('#pkWalletRoot');
+  if (!root || !data) return;
+  var html = '';
+  
+  // 银行卡/账户卡片
+  var accs = data.accounts || [];
+  if (accs.length) {
+    html += '<div class="wal-cards">';
+    accs.forEach(function(a) {
+      html += '<div class="wal-card">' +
+        '<div class="wal-bank">' + pkEsc(a.bank || '账户') +
+        (a.tag ? ' <span class="wal-tag">' + pkEsc(a.tag) + '</span>' : '') + '</div>' +
+        '<div class="wal-bal">' + pkEsc(a.balance || '0.00') + '</div>' +
+        '<div class="wal-no">' + pkEsc(a.no || '') + '</div></div>';
     });
-    html+='</div>';
+    html += '</div>';
   }
-  var sm=data.summary||{};
-  if(sm.in||sm.out){
-    html+='<div class="wal-sum">'+
-      '<div class="wal-si"><span>本月收入</span><b>'+pkEsc(sm.in||'—')+'</b></div>'+
-      '<div class="wal-so"><span>本月支出</span><b>'+pkEsc(sm.out||'—')+'</b></div></div>';
+  
+  // 本月收支汇总
+  var sm = data.summary || {};
+  if (sm.in || sm.out) {
+    html += '<div class="wal-sum">' +
+      '<div class="wal-si"><span>本月流入</span><b>' + pkEsc(sm.in || '—') + '</b></div>' +
+      '<div class="wal-so"><span>本月流出</span><b>' + pkEsc(sm.out || '—') + '</b></div></div>';
   }
-  /* 账单入口 */
-  var bill=data.bill||[];
-  var sus=bill.filter(function(b){return b.warn;}).length;
-  html+='<div class="wal-entry" id="pkBillEntry">'+
-    '<div class="wal-el"><div class="wal-en">账单明细</div>'+
-    '<div class="wal-es">共 '+bill.length+' 笔'+(sus?' · <span class="wal-esw">'+sus+' 笔可疑</span>':'')+'</div></div>'+
+  
+  // 账单入口按钮
+  var bill = data.bill || [];
+  var sus = bill.filter(function(b) { return b.warn; }).length;
+  html += '<div class="wal-entry" id="pkBillEntry">' +
+    '<div class="wal-el"><div class="wal-en">💳 账单明细流水</div>' +
+    '<div class="wal-es">共 ' + bill.length + ' 笔' + (sus ? ' · <span class="wal-esw">🚨 ' + sus + ' 笔可疑交易</span>' : '') + '</div></div>' +
     '<div class="msg-ar">›</div></div>';
-  /* 资产类分区 */
-  (data.sections||[]).forEach(function(sec){
-    html+='<div class="wal-sec"><div class="wal-sect">'+pkEsc(sec.title||'')+'</div>';
-    (sec.rows||[]).forEach(function(r){
-      html+='<div class="wal-row'+(r.warn?' warn':'')+'">'+
-        '<div class="wal-l"><div class="wal-ln">'+pkEsc(r.l||'')+'</div>'+
-        (r.sub?'<div class="wal-ls">'+pkEsc(r.sub)+'</div>':'')+'</div>'+
-        '<div class="wal-r">'+pkEsc(r.r||'')+'</div></div>';
+  
+  // 资产类分区
+  (data.sections || []).forEach(function(sec) {
+    html += '<div class="wal-sec"><div class="wal-sect">' + pkEsc(sec.title || '名下资产') + '</div>';
+    (sec.rows || []).forEach(function(r) {
+      html += '<div class="wal-row' + (r.warn ? ' warn' : '') + '">' +
+        '<div class="wal-l"><div class="wal-ln">' + pkEsc(r.l || '') + '</div>' +
+        (r.sub ? '<div class="wal-ls">' + pkEsc(r.sub) + '</div>' : '') + '</div>' +
+        '<div class="wal-r">' + pkEsc(r.r || '') + '</div></div>';
     });
-    html+='</div>';
+    html += '</div>';
   });
-  html+='<div class="wal-foot"><span class="wal-refresh" id="pkWalRe">↻ 重新扫描</span></div>';
-  root.innerHTML=html;
+  
+  // 底部刷新
+  html += '<div class="wal-foot" style="margin-top:16px;"><span class="wal-refresh" id="pkWalRe">↻ 重新渗透资金库</span></div>';
+  root.innerHTML = html;
 
-  var entry=root.querySelector('#pkBillEntry');
-  if(entry)entry.onclick=function(){renderWalletBill(c,win,data);};
-  var re=root.querySelector('#pkWalRe');
-  if(re)re.onclick=function(){
-    c.peekWallet=null;c.peekWalletTime=0;saveDB();
-    root.innerHTML='<div class="msg-load">◉ 正在重新接入银行系统…</div>';
-    loadWallet(c,win);
+  // 点击进入账单明细
+  root.querySelector('#pkBillEntry').onclick = function() {
+    renderWalletBill(c, win, data);
+  };
+  
+  // 点击重新扫描
+  root.querySelector('#pkWalRe').onclick = function() {
+    c.peekWallet = null;
+    c.peekWalletTime = 0;
+    saveDB();
+    peekHackLoad(root, '正在破解银行网关与加密货币节点...');
+    loadWallet(c, win);
   };
 }
 
-/* 账单明细页 */
-function renderWalletBill(c,win,data){
-  var root=win.querySelector('#pkWalletRoot');
-  if(!root)return;
-  var bill=data.bill||[];
-  var html='<div class="msg-back" id="pkBillBack">‹ 返回钱包</div>'+
-    '<div class="wal-sect" style="margin-top:4px">账单明细 · '+bill.length+' 笔</div>';
-  if(!bill.length){
-    html+='<div class="msg-empty">（无账单记录）</div>';
-  }else{
-    bill.forEach(function(b){
-      var amt=(b.amt||'').toString();
-      var isIn=/^\+|^＋/.test(amt.trim());
-      html+='<div class="bill-row'+(b.warn?' warn':'')+'">'+
-        '<div class="bill-l"><div class="bill-nm">'+pkEsc(b.name||'')+
-        (b.warn?' <span class="wal-warn">可疑</span>':'')+'</div>'+
-        '<div class="bill-tm">'+pkEsc(b.time||'')+(b.note?' · '+pkEsc(b.note):'')+'</div></div>'+
-        '<div class="bill-amt '+(isIn?'in':'out')+'">'+pkEsc(amt)+'</div></div>';
+// ==================== 账单明细页面（支持收藏奇葩账单） ====================
+function renderWalletBill(c, win, data) {
+  var root = win.querySelector('#pkWalletRoot');
+  if (!root) return;
+  var bill = data.bill || [];
+  if (!c.peekFavBills) c.peekFavBills = [];
+
+  var html = '<div class="msg-back" id="pkBillBack" style="cursor:pointer; color:#35f0c0; font-size:13px; margin-bottom:12px;">‹ 返回钱包总览</div>' +
+    '<div class="wal-sect" style="margin-top:4px">账单明细 · ' + bill.length + ' 笔</div>';
+
+  if (!bill.length) {
+    html += '<div class="msg-empty">（暂无账单记录）</div>';
+  } else {
+    bill.forEach(function(b, idx) {
+      var amt = (b.amt || '').toString();
+      var isIn = /^\+|^＋/.test(amt.trim());
+      var isFaved = c.peekFavBills.some(function(fb) { return fb.name === b.name && fb.time === b.time && fb.amt === b.amt; });
+      
+      html += '<div class="bill-row' + (b.warn ? ' warn' : '') + '" style="position:relative; padding-right:32px;">' +
+        '<div class="bill-l">' +
+          '<div class="bill-nm">' + pkEsc(b.name || '') + (b.warn ? ' <span class="wal-warn" style="color:#ff5c7a;font-size:10px;border:1px solid #ff5c7a;border-radius:3px;padding:0 3px;">可疑</span>' : '') + '</div>' +
+          '<div class="bill-tm">' + pkEsc(b.time || '') + (b.note ? ' · <span style="color:#eafff8;">' + pkEsc(b.note) + '</span>' : '') + '</div>' +
+        '</div>' +
+        '<div class="bill-amt ' + (isIn ? 'in' : 'out') + '">' + pkEsc(amt) + '</div>' +
+        '<span class="bill-fav" data-idx="' + idx + '" style="position:absolute; right:4px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:14px; color:' + (isFaved ? '#ffd700' : '#5a7a78') + ';">' +
+          (isFaved ? '★' : '☆') +
+        '</span>' +
+      '</div>';
     });
   }
-  root.innerHTML=html;
-  root.querySelector('#pkBillBack').onclick=function(){renderWallet(c,win,data);};
-  var body=win.querySelector('.win-body');if(body)body.scrollTop=0;
-}
 
+  root.innerHTML = html;
+
+  // 返回主页
+  root.querySelector('#pkBillBack').onclick = function() { renderWallet(c, win, data); };
+
+  // 绑定每条账单的收藏事件
+  root.querySelectorAll('.bill-fav').forEach(function(btn) {
+    btn.onclick = function() {
+      var idx = parseInt(this.dataset.idx, 10);
+      var target = bill[idx];
+      var fIndex = c.peekFavBills.findIndex(function(fb) { return fb.name === target.name && fb.time === target.time && fb.amt === target.amt; });
+      if (fIndex > -1) {
+        c.peekFavBills.splice(fIndex, 1);
+      } else {
+        c.peekFavBills.push(target);
+      }
+      saveDB();
+      renderWalletBill(c, win, data); // 刷新
+    };
+  });
+
+  var body = win.querySelector('.win-body');
+  if (body) body.scrollTop = 0;
+}
 function realMsgText(m){
   if(m.recalled)return '（撤回了一条消息）';
   if(m.type==='image')return '[图片]';
