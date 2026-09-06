@@ -414,23 +414,59 @@ textarea {
 .idea-btn svg { width: 18px; height: 18px; stroke: var(--sub); transition: stroke .15s; }
 .idea-btn.on svg { stroke: #f5a623; }
 
-/* 选项弹窗（复用你的 .popup 主题） */
+/* ===== 行动建议弹窗内容样式（适配全局弹窗） ===== */
 .idea-box { text-align: left; }
-.idea-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.idea-close { cursor: pointer; color: var(--sub); font-size: 16px; padding: 2px 6px; }
-.idea-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-.idea-item {
-  padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
-  font-size: 14px; color: var(--text); line-height: 1.5; cursor: pointer;
+.idea-content { padding: 18px 16px 14px; }
+.idea-head { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  margin-bottom: 10px; 
 }
-.idea-item:active { background: var(--nav); }
-.idea-empty { color: var(--sub); font-size: 14px; padding: 10px 4px; }
+.idea-head .popup-title {
+  margin-bottom: 0;
+  text-align: left;
+}
 .idea-toggle {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:8px 10px; margin-bottom:10px; border-radius:8px;
-  background:var(--nav); font-size:13px; color:var(--sub); cursor:pointer;
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between;
+  padding: 8px 10px; 
+  margin-bottom: 10px; 
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--pop-text) 6%, transparent); 
+  font-size: 13px; 
+  color: var(--pop-sub); 
+  cursor: pointer;
 }
-.idea-toggle b { color: var(--theme); }
+.idea-toggle b { color: var(--pop-accent); font-weight: 600; }
+.idea-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+}
+.idea-item {
+  padding: 10px 12px; 
+  border: .5px solid var(--pop-line); 
+  background: color-mix(in srgb, var(--pop-text) 3%, transparent);
+  border-radius: 10px;
+  font-size: 13.5px; 
+  color: var(--pop-text); 
+  line-height: 1.45; 
+  cursor: pointer;
+  transition: background .12s;
+}
+.idea-item:active { 
+  background: color-mix(in srgb, var(--pop-text) 10%, transparent); 
+}
+.idea-empty { 
+  color: var(--pop-sub); 
+  font-size: 13px; 
+  text-align: center;
+  padding: 12px 4px; 
+  line-height: 1.45;
+}
+
 /* 默认主题：输入行防溢出保护 */
 #inputRow {
   width: 100%;
@@ -3361,7 +3397,7 @@ var SHOP_FIXED_ITEMS = [
 
 // 核心：调用轻量模型生成商品
 async function shopGenerate() {
-  var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
+  var model = DB.settings.auxModel || DB.settings.chatModel || DB.settings.lightModel;
   if (!model) throw new Error('请先在设置里选择模型');
 
   var world = shopActiveWorld();
@@ -15067,14 +15103,24 @@ function groupIcon(size){
 
 // ===== 统一弹窗系统 =====
 function popClose(){var p=document.getElementById('popup');if(p)p.remove();}
-// 解析选项（内联和重新生成通用）
+// 解析选项文本（增强清理：彻底移除各类尖括号标签及思考标签）
 function _parseIdeas(out){
   if (!out) return [];
+  // 1. 截取 OPTIONS 后的正文
   var s = out;
   var idx = s.indexOf('[[[OPTIONS]]]');
   if (idx !== -1) s = s.slice(idx + '[[[OPTIONS]]]'.length);
+  
+  // 2. 清理所有 <...> 格式的标签（包括 <action>...</action> 等）
+  s = s.replace(/<[\s\S]*?>/g, '');
+
+  // 3. 分行并清理序号、符号
   return s.split('\n')
-    .map(function(x){ return x.replace(/^[\s\-•·*\d.、)）]+/, '').trim(); })
+    .map(function(x){
+      return x
+        .replace(/^[\s\-•·*\d.、)）]+/, '') // 去除开头的 1. / - 等
+        .trim();
+    })
     .filter(function(x){ return x.length > 0 && !/OPTIONS/i.test(x); })
     .slice(0, 3);
 }
@@ -15096,6 +15142,7 @@ function openIdeaPop(){
   _renderIdeaPop((m && m.ideas) ? m.ideas : []);
 }
 
+// 渲染快捷行动弹窗（适配全局弹窗结构与按钮组）
 function _renderIdeaPop(ideas){
   popClose();
   window._ideaCache = ideas || [];
@@ -15103,7 +15150,7 @@ function _renderIdeaPop(ideas){
   var isOn = !!(c && c.ideaOn);
   var toggleRow =
     '<div class="idea-toggle" onclick="toggleIdeaOn()">' +
-      '<span>每轮自动生成</span><b>' + (isOn ? '开 ●' : '关 ○') + '</b>' +
+      '<span>每轮自动生成</span><b>' + (isOn ? '已开启 ●' : '已关闭 ○') + '</b>' +
     '</div>';
   var inner;
   if (ideas && ideas.length){
@@ -15112,19 +15159,25 @@ function _renderIdeaPop(ideas){
     }).join('');
   } else {
     inner = '<div class="idea-empty">' +
-      (isOn ? '这轮没有可用的接话，点下面重新生成～'
-            : '自动生成已关闭。可点上方开启，或直接点下面重新生成～') +
+      (isOn ? '这轮没有可用的建议，点击下方重新生成～'
+            : '自动生成已关闭，可点上方开启或直接生成～') +
       '</div>';
   }
   var p = document.createElement('div');
   p.className = 'popup'; p.id = 'popup';
   p.innerHTML =
     '<div class="popup-box idea-box">' +
-      '<div class="idea-head"><span class="popup-title">帮你想想怎么接</span>' +
-      '<span class="idea-close" onclick="popClose()">✕</span></div>' +
-      toggleRow +
-      '<div class="idea-list">' + inner + '</div>' +
-      '<div class="popup-btns"><button class="popup-btn main" onclick="regenIdeas()">🔄 重新生成</button></div>' +
+      '<div class="idea-content">' +
+        '<div class="idea-head">' +
+          '<div class="popup-title">帮你想想怎么接</div>' +
+        '</div>' +
+        toggleRow +
+        '<div class="idea-list">' + inner + '</div>' +
+      '</div>' +
+      '<div class="popup-btns">' +
+        '<button class="popup-btn sub" onclick="popClose()">取消</button>' +
+        '<button class="popup-btn main" onclick="regenIdeas()">🔄 重新生成</button>' +
+      '</div>' +
     '</div>';
   phone.appendChild(p);
 }
