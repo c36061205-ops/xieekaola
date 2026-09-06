@@ -572,7 +572,8 @@ function saveDB(){return new Promise(function(res,rej){
 
 /* ================= 工具 ================= */
 var scr=document.getElementById('screen');
-var COST_HEART=0, COST_COIN=15;
+var COST_HEART=20, COST_COIN=15;
+var COST_VIEW  = 5;
 var battPct=80;
 function getC(id){return (DB.contacts||[]).find(function(x){return x.id===id;});}
 function nameOf(c){return c.name||c.nick||'未命名';}
@@ -660,6 +661,17 @@ function tick(){
   if(dd){var wk=['SUN','MON','TUE','WED','THU','FRI','SAT'];dd.textContent=pad(n.getMonth()+1)+'.'+pad(n.getDate())+' '+wk[n.getDay()];}
 }
 setInterval(tick,1000);
+function payView(c){
+  var have = c.hearts || 0;
+  if(have < COST_VIEW){
+    alert('查看这个功能需要 '+COST_VIEW+' 心动值，当前只有 '+have+' ～\n多和「'+nameOf(c)+'」聊聊天攒一点吧');
+    return false;
+  }
+  c.hearts = have - COST_VIEW;
+  c.heartLog = c.heartLog || [];
+  c.heartLog.unshift({t:Date.now(), n:-COST_VIEW, reason:'查看App'});
+  return true;
+}
 
 /* ================= 扣费 ================= */
 function payToPeek(c){
@@ -1092,6 +1104,7 @@ var APP_RULE={
 };
 
 /* ===== App 点击分发 ===== */
+var PEEK_WIN_TTL = 12*3600*1000;   // 浏览器/备忘录 缓存 12 小时
 function openApp(id,appId){
   var c=getC(id);
   if(!c)return;
@@ -1127,7 +1140,8 @@ function openApp(id,appId){
     });
     return;
   }
-
+  if(!payView(c)) return;
+  saveDB();
   openWin(c,a);
 }
 // ============ 私密 App（随机生成·多隐藏应用）============
@@ -1279,6 +1293,8 @@ function openMusic(c){
   var cache=peekValidMusic(c);
   if(cache){renderMusic(c,win,cache);}
   else{
+      if(!payView(c)){ win.remove(); return; }
+    saveDB();
     win.querySelector('#pkMusicRoot').innerHTML='<div class="msg-load">◉ 正在读取 TA 的播放记录…</div>';
     loadMusic(c,win);
   }
@@ -1501,6 +1517,8 @@ function openAlbum(c){
   var cache=peekValidAlbum(c);
   if(cache){renderAlbum(c,win,cache);}
   else{
+      if(!payView(c)){ win.remove(); return; }
+    saveDB();
     win.querySelector('#pkAlbumRoot').innerHTML='<div class="msg-load">◉ 正在解密 TA 的相册数据…</div>';
     loadAlbum(c,win);
   }
@@ -1693,6 +1711,9 @@ function renderMsgList(c,win){
     html+='<div class="msg-load" id="pkNpcLoad">◉ 正在提取通讯录联系人…</div>';
   }
   html+='</div>';
+  if(npcs.length){
+    html+='<div class="wal-foot"><span class="wal-refresh" id="pkNpcRe">↻ 重新提取联系人</span></div>';
+  }
   root.innerHTML=html;
 
   root.querySelectorAll('.msg-li').forEach(function(li){
@@ -1702,9 +1723,17 @@ function renderMsgList(c,win){
       else openMsgConv(c,win,parseInt(li.getAttribute('data-i'),10));
     };
   });
+  var npcRe=root.querySelector('#pkNpcRe');
+  if(npcRe) npcRe.onclick=function(){
+    c.peekNpcChats=null; c.peekNpcTime=0; saveDB();
+    var list=root.querySelector('.msg-list');
+    if(list) list.insertAdjacentHTML('beforeend','<div class="msg-load" id="pkNpcLoad">◉ 正在重新提取联系人…</div>');
+    loadPeekNpc(c,win,true);   // 免费重新提取
+  };
 
   if(!c.peekMyNick)loadPeekMyNick(c,win);
   if(!npcs.length)loadPeekNpc(c,win);
+
 }
 
 /* AI 现编一个爱称，只取第一个词，缓存并局部刷新 */
@@ -1731,8 +1760,17 @@ function loadPeekMyNick(c,win){
 }
 
 /* AI 生成 3~4 个 NPC 及对话（JSON），缓存并刷新列表 */
-function loadPeekNpc(c,win){
+function loadPeekNpc(c,win,free){
+  if(!free){
+    if(!payView(c)){
+      var l0=win.querySelector('#pkNpcLoad');
+      if(l0) l0.textContent='（心动值不足 5，无法提取其他联系人）';
+      return;
+    }
+    saveDB();
+  }
   var msgs=[
+
     {role:'system',content:buildPeekSystem(c)+
       '\n\n你现在要伪造 TA 手机「消息」App 里，除了"我"以外的其他聊天联系人及其对话。'},
     {role:'user',content:
@@ -1901,10 +1939,13 @@ function openWallet(c){
   var cache=peekValidWallet(c);
   if(cache){renderWallet(c,win,cache);}
   else{
+    if(!payView(c)){ win.remove(); return; }
+    saveDB();
     win.querySelector('#pkWalletRoot').innerHTML=
       '<div class="msg-load">◉ 正在接入 TA 名下的银行与金融系统…</div>';
     loadWallet(c,win);
   }
+
 }
 
 function peekValidWallet(c){
@@ -2077,7 +2118,16 @@ function hackConfirm(appName,cost,onOk){
   m.addEventListener('click',function(e){if(e.target===m)m.remove();});
 }
 
-/* ===== App 窗口 ===== */
+/* 判断浏览器/备忘录的缓存是否还有效 */
+function peekValidWin(c, appId){
+  c.peekApps = c.peekApps || {};
+  var box = c.peekApps[appId];
+  if(!box || !box.html) return null;
+  if(box.time && (Date.now() - box.time) > PEEK_WIN_TTL) return null;
+  return box.html;
+}
+
+/* ===== App 窗口（浏览器、备忘录等通用窗口）===== */
 function openWin(c,a){
   var win=document.createElement('div');
   win.className='win';
@@ -2090,6 +2140,23 @@ function openWin(c,a){
   addPeekFx(win);
   win.querySelector('.wclose').onclick=function(){win.remove();};
 
+  // 先看缓存：12 小时内直接读旧数据，免费
+  var cache = peekValidWin(c, a.id);
+  if(cache){ renderWin(c, win, a, cache); return; }
+
+  // 没缓存 / 过期 → 扣 5 心动值再重新生成
+  if(!payView(c)){ win.remove(); return; }
+  saveDB();
+  fetchWin(c, win, a);
+}
+
+/* 真正去问 AI 拿数据 */
+function fetchWin(c, win, a){
+  var body=win.querySelector('.win-body');
+  if(body){
+    body.innerHTML='<div class="win-load"><div class="ring"></div>'+
+      '<div class="lt" id="loadT">CONNECTING...</div><div class="lsub">正在破解并提取数据</div></div>';
+  }
   var steps=['CONNECTING...','DECRYPTING '+a.name.toUpperCase()+'...','EXTRACTING DATA...','RENDERING...'];
   var si=0;
   var lt=win.querySelector('#loadT');
@@ -2103,38 +2170,50 @@ function openWin(c,a){
       '2. 生成内容要以 TA 的【身份、职业、长期生活方式、性格】为主体。先想：以 TA 这个身份的人，手机里本该有什么？再自然带一点近期状态。\n'+
       '3. 严禁整篇都在抒情、自怨自艾、写散文。TA 是有事业、有社会身份的人，不是只会伤春悲秋。\n'+
       '\n'+HTML_RULE},
-
     {role:'user',content:APP_TASK[a.id]}
   ];
 
-  console.log('[查手机] 发起请求，模型=',peekModelName());
-
   callAI(messages,peekModelName()).then(function(out){
     clearInterval(timer);
-    console.log('[查手机] AI 返回=',out);
     var html=cleanHtml(out);
-    var body=win.querySelector('.win-body');
-    if(body){
-      if(html){
-        var n=new Date();
-        var stamp=n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate())+' '+pad(n.getHours())+':'+pad(n.getMinutes());
-        var head='<div class="win-forensic">'+
-          'FORENSIC EXTRACT · 数据取证报告<br>'+
-          'TARGET: <b>'+nameOf(c)+'</b> &nbsp; MODULE: <b>'+a.name+'</b><br>'+
-          'TIME: '+stamp+' &nbsp; STATUS: <b>DECRYPTED</b> <span class="blink">_</span>'+
-        '</div>';
-        body.innerHTML=head+html;
-      }else{
-        body.innerHTML='<div class="win-err">未能提取到数据（AI 返回为空）</div>';
-      }
+    if(html){
+      c.peekApps = c.peekApps || {};
+      c.peekApps[a.id] = { html: html, time: Date.now() };   // ← 存缓存
+      saveDB();
+      renderWin(c, win, a, html);
+    }else{
+      var b=win.querySelector('.win-body');
+      if(b) b.innerHTML='<div class="win-err">未能提取到数据（AI 返回为空）</div>';
     }
   }).catch(function(e){
     clearInterval(timer);
-    console.error('[查手机] 出错=',e);
-    var body=win.querySelector('.win-body');
-    if(body) body.innerHTML='<div class="win-err">⚠ ACCESS FAILED<br>'+((e&&e.message)||'连接失败')+
+    var b=win.querySelector('.win-body');
+    if(b) b.innerHTML='<div class="win-err">⚠ ACCESS FAILED<br>'+((e&&e.message)||'连接失败')+
       '<br><button onclick="this.closest(\'.win\').remove()">返回</button></div>';
   });
+}
+
+/* 把数据显示出来，并带一个"重新生成"按钮 */
+function renderWin(c, win, a, html){
+  var body=win.querySelector('.win-body');
+  if(!body) return;
+  var n=new Date();
+  var stamp=n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate())+' '+pad(n.getHours())+':'+pad(n.getMinutes());
+  var head='<div class="win-forensic">'+
+    'FORENSIC EXTRACT · 数据取证报告<br>'+
+    'TARGET: <b>'+nameOf(c)+'</b> &nbsp; MODULE: <b>'+a.name+'</b><br>'+
+    'TIME: '+stamp+' &nbsp; STATUS: <b>DECRYPTED</b> <span class="blink">_</span>'+
+  '</div>';
+  var foot='<div class="wal-foot"><span class="wal-refresh" id="pkWinRe">↻ 重新生成</span></div>';
+  body.innerHTML=head+html+foot;
+
+  var re=body.querySelector('#pkWinRe');
+  if(re) re.onclick=function(){
+    c.peekApps = c.peekApps || {};
+    c.peekApps[a.id] = null;   // 清掉缓存
+    saveDB();
+    fetchWin(c, win, a);       // 免费重新生成
+  };
 }
 
 /* ===== 清洗 AI 输出：去掉 markdown 围栏和多余解释 ===== */
