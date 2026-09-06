@@ -499,37 +499,56 @@ textarea {
 .popup{position:absolute;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:30px;box-sizing:border-box;
   background:rgba(0,0,0,.32);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:popFade .2s ease;}
 
+/* ===== 遮罩层 ===== */
+.popup{position:absolute;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:30px;box-sizing:border-box;
+  background:rgba(0,0,0,.4);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);animation:popFade .2s ease;}
+
+/* ===== 弹窗主体 ===== */
 .popup-box{
   width:var(--pop-width);
   border-radius:var(--pop-radius);
   overflow:hidden;text-align:center;
-  background:var(--pop-bg);                                    /* 兜底：纯色，所有浏览器都认 */
-  background:color-mix(in srgb, var(--pop-bg) 92%, transparent);/* 支持的浏览器再叠磨砂 */
-  color:var(--pop-text);                                       /* 关键：给弹窗定默认文字色 */
-  backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);
-  box-shadow:0 12px 45px rgba(0,0,0,.28);
-  animation:popUp .28s cubic-bezier(.2,.9,.3,1.05);}
+  background:var(--pop-bg);
+  background:color-mix(in srgb, var(--pop-bg) 94%, transparent);
+  color:var(--pop-text);
+  backdrop-filter:blur(30px) saturate(1.6);-webkit-backdrop-filter:blur(30px) saturate(1.6);
+  box-shadow:0 10px 40px rgba(0,0,0,.3);
+  animation:popUp .25s cubic-bezier(.2,.9,.3,1.05);}
 
-.popup-head{padding:22px 20px 18px;}
-.popup-icon{font-size:28px;line-height:1;margin-bottom:10px;}
-.popup-title{font-size:17px;font-weight:600;color:var(--pop-text);margin-bottom:6px;letter-spacing:.2px;}
-.popup-msg{font-size:13.5px;color:var(--pop-sub);line-height:1.55;white-space:pre-wrap;}
+/* ===== 头部：图标 / 标题 / 说明 ===== */
+.popup-head{padding:19px 16px 15px;}
+.popup-icon{font-size:30px;line-height:1;margin-bottom:8px;}
+.popup-title{font-size:17px;font-weight:600;color:var(--pop-text);margin-bottom:4px;letter-spacing:-.2px;}
+.popup-msg{font-size:13px;color:var(--pop-text);line-height:1.45;white-space:pre-wrap;opacity:.9;}
 
-.popup-btns{display:flex;border-top:1px solid var(--pop-line);}
-.popup-btn{flex:1;padding:13px 8px;border:none;background:transparent;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,opacity .15s;}
-.popup-btn + .popup-btn{border-left:1px solid var(--pop-line);}
-.popup-btn:active{opacity:.6;}
-.popup-btn.sub{color:var(--pop-text);}                        /* 取消键：用文字色，永远看得清 */
-.popup-btn.main{color:var(--pop-accent);font-weight:600;}     /* 确定键：用强调色 */
+/* ===== 按钮区（横排）===== */
+.popup-btns{display:flex;border-top:.5px solid var(--pop-line);}
+.popup-btn{
+  flex:1;min-width:0;                                    /* 关键：允许按钮被压窄 */
+  height:44px;line-height:44px;padding:0 8px;
+  border:none;background:transparent;
+  font-size:17px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;  /* 关键：不换行，太长就显示… */
+  transition:background .12s;}
+.popup-btn + .popup-btn{border-left:.5px solid var(--pop-line);}
+.popup-btn:active{background:color-mix(in srgb, var(--pop-text) 8%, transparent);}
+.popup-btn.sub{color:var(--pop-text);font-weight:400;}   /* 取消：普通字重，文字色 */
+.popup-btn.main{color:var(--pop-accent);font-weight:600;}/* 确定：加粗，强调色 */
 
+/* ===== 按钮区（竖排，长文字时自动切换）===== */
+.popup-btns.vertical{flex-direction:column;}
+.popup-btns.vertical .popup-btn{height:46px;line-height:46px;}
+.popup-btns.vertical .popup-btn + .popup-btn{border-left:none;border-top:.5px solid var(--pop-line);}
+
+/* ===== Loading ===== */
 .popup-spin{width:28px;height:28px;margin:24px auto 14px;border-radius:50%;border:2.5px solid var(--pop-line);border-top-color:var(--pop-accent);animation:popSpin .7s linear infinite;}
 .popup-loadmsg{font-size:14px;color:var(--pop-sub);padding:0 18px 24px;}
-.popup-input{width:calc(100% - 40px);box-sizing:border-box;margin:0 20px 18px;padding:10px 12px;font-size:14px;color:var(--pop-text);background:color-mix(in srgb,var(--pop-text) 6%, transparent);border:.5px solid var(--pop-line);border-radius:10px;outline:none;transition:border-color .2s;}
-.popup-input:focus{border-color:var(--pop-accent);}
 
+/* ===== 动画 ===== */
 @keyframes popFade{from{opacity:0}to{opacity:1}}
-@keyframes popUp{from{transform:scale(1.08);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes popUp{from{transform:scale(1.1);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes popSpin{to{transform:rotate(360deg)}}
+
 /* ===== 弹窗统一配色（以后想整体换风格，只改这一块就行）===== */
 :root{
   --pop-bg:       var(--card);   /* 弹窗背景  */
@@ -538,7 +557,7 @@ textarea {
   --pop-line:     color-mix(in srgb, var(--pop-text) 16%, transparent);   /* 分割线（从文字色借16%，深浅主题都看得清）*/
   --pop-accent:   var(--theme);  /* 确定键/强调色 */
   --pop-on-accent:#fff;          /* （备用）填充按钮上的文字色 */
-  --pop-radius:   16px;          /* 圆角      */
+  --pop-radius:   14px;          /* 圆角      */
   --pop-width:    275px;         /* 宽度      */
 }
 
@@ -1726,7 +1745,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026905_2';
+const APP_VER = 'v2026906_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -4676,6 +4695,12 @@ if (view.type === 'album') return renderAlbum();
   applyPhoneScale();
 }
 function showChrome(t,b){topbar.style.display=t?'flex':'none';tabbar.style.display=b?'flex':'none';}
+
+// 统一的返回箭头图标（颜色自动跟随主题）
+function backIcon(){
+  return '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+}
+
 // 计算两个日期相差的天数（今天减去某日期）
 function daysBetween(dateStr){
   var target = new Date(dateStr);
@@ -4806,7 +4831,7 @@ function openAnniversary(){
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '📅 纪念日';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = goHome;
   tbRight.textContent = '＋';
   tbRight.onclick = annivAddMenu;
@@ -6654,7 +6679,7 @@ function renderWorlds() {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '🌍 世界观';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = goHome;
   tbRight.textContent = '＋';
   tbRight.onclick = function() { openWorldEditor(null); };
@@ -7146,7 +7171,7 @@ function renderFloating() {
     showChrome(true, false);
     statusbar.classList.add('dark');
     tbTitle.textContent = '浮光';
-    tbLeft.textContent = '‹';
+    tbLeft.innerHTML = backIcon();
     tbLeft.onclick = goHome;
     tbRight.textContent = '';
     tbRight.onclick = null;
@@ -7165,7 +7190,7 @@ function renderFloating() {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '浮光';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = goHome;
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -7538,7 +7563,7 @@ function openWorldEditor(worldId) {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = isEdit ? '编辑世界观' : '新建世界观';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = isEdit ? function() { openWorldDetail(w.id); } : goWorlds;
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -7579,7 +7604,7 @@ function openWorldDetail(worldId) {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = w.name || '世界观';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = goWorlds;
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -7638,7 +7663,7 @@ function openLorebook(worldId){
   showChrome(true,false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '📖 '+(w.name||'世界书');
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function(){ openWorldDetail(worldId); };
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -7697,7 +7722,7 @@ function openLoreEntries(worldId, bookId){
   showChrome(true,false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '📖 '+(book.name||'世界书');
-  tbLeft.textContent = selMode ? '取消' : '‹';
+  tbLeft.innerHTML = selMode ? '取消' : backIcon();
   tbLeft.onclick = selMode
     ? function(){ window._loreSelMode=false; window._loreSelSet={}; openLoreEntries(worldId, bookId); }
     : function(){ window._loreCurBook=null; openLorebook(worldId); };
@@ -7765,7 +7790,7 @@ function openLoreEditor(worldId, bookId, loreId){
   showChrome(true,false);
   statusbar.classList.add('dark');
   tbTitle.textContent = isEdit ? '编辑条目' : '新增条目';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function(){ openLoreEntries(worldId, bookId); };
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -8654,7 +8679,7 @@ function renderGroupChat(keepScroll){
   // 顶部栏
   showChrome(true, false);
   statusbar.classList.add('dark');
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function(){ goWechat('chats'); };   // ← 退出回聊天列表
   tbTitle.textContent = g.name + '(' + (g.members.length+1) + ')';
   tbRight.textContent = '⋯';
@@ -9489,7 +9514,7 @@ function renderGroupSet(){
 
   showChrome(true, false);
   statusbar.classList.add('dark');
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function(){ view={type:'groupChat', id:g.id}; render(); };
   tbTitle.textContent = '群聊设置';
   tbRight.textContent = '';
@@ -9894,7 +9919,7 @@ function renderSettings(){
 
   tbRight.textContent = '';
   tbRight.onclick = null;
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
 
   // ===== 分类列表（主页）=====
   if(!tab){
@@ -10198,7 +10223,7 @@ function renderCharEdit() {
   if (!c) { goWechat('contacts'); return; }
   showChrome(true, false);
   statusbar.classList.add('dark');
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = leaveEdit;
   tbTitle.textContent = c.name || c.nick || '编辑';
   tbRight.textContent = '';
@@ -12222,7 +12247,7 @@ function renderHearts() {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '心迹';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = goHome;
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -12267,7 +12292,7 @@ function renderVoiceList() {
   statusbar.classList.add('dark');
   var name = c.name || c.nick;
   tbTitle.textContent = name + ' 的心声';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); };
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -12307,7 +12332,7 @@ function renderHeartDetail() {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = (c.name || c.nick) + ' · 心迹';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function() { view = { type: 'hearts' }; render(); };
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -12568,7 +12593,7 @@ popLoading('正在调取 ' + displayName + ' 此刻的画面…');
 }
 function openWatch(cid) { view = { type: 'watchLog', id: cid }; render(); }
 function renderWatchLog() { var c = getC(view.id); if (!c) { view = { type: 'hearts' }; return render(); } c.watchLogs = c.watchLogs || []; showChrome(true, false); statusbar.classList.add('dark'); var displayName = (c.name && c.name.trim() && c.name !== '新角色') ? c.name : (c.nick || '未命名');
-tbTitle.textContent = displayName + ' 的监控'; tbLeft.textContent = '‹'; tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); }; tbRight.textContent = ''; tbRight.onclick = null;
+tbTitle.textContent = displayName + ' 的监控'; tbLeft.innerHTML = backIcon(); tbLeft.onclick = function() { view = { type: 'heartDetail', id: c.id }; render(); }; tbRight.textContent = ''; tbRight.onclick = null;
 var html = '<div style="padding:14px 16px 24px;">'; html += '<button class="btn" style="width:100%;margin:0 0 6px;" onclick="watchNow(\'' + c.id + '\')">📡 调取此刻画面（5💗）</button>'; html += '<div style="text-align:center;font-size:11px;color:var(--sub);opacity:.5;margin-bottom:16px;">画面每 10 分钟更新 · 收藏不会被覆盖 · 有今日行程时画面更准</div>';
 var logs = c.watchLogs.slice().sort(function(a, b) { if (a.starred !== b.starred) return a.starred ? -1 : 1; return b.time - a.time; });
 if (!logs.length) { html += '<div style="text-align:center;padding:50px 0;color:var(--sub);font-size:14px;line-height:2;">📼 还没有监控录像<br><span style="font-size:12px;opacity:.7;">点上面的按钮，调取 TA 此刻的画面</span></div>'; } else { logs.forEach(function(w) { html += buildWatchCard(w, c.id); }); }
@@ -12667,7 +12692,7 @@ function renderSchedule() {
   statusbar.classList.add('dark');
   var displayName = (c.name && c.name.trim() && c.name !== '新角色') ? c.name : (c.nick || '未命名');
 tbTitle.textContent = displayName + ' 的行程';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function() { 
     if (window._scheduleTimer) { clearTimeout(window._scheduleTimer); window._scheduleTimer = null; }
     if (window._scheduleFrom === 'chat') { window._scheduleFrom = null; view = { type: 'chat', id: c.id }; }
@@ -13076,7 +13101,7 @@ function renderMemoMain() {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '📒 备忘录';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = goHome;
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -13303,7 +13328,7 @@ function renderMemoDetail(cid, tab) {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = (c.name || c.nick) + ' 的记忆';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function() { view = { type: 'memo' }; render(); };
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -14143,7 +14168,7 @@ function renderChat(keepScroll) {
   // ===== 4. 顶部栏 =====
   showChrome(true, false);
   statusbar.classList.add('dark');
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = function() { goWechat('chats'); };
 
   setChatTitle(c);
@@ -15201,8 +15226,21 @@ function _buildPopup(opts){
     if (opts.msg)   html += '<div class="popup-msg">' + esc(opts.msg) + '</div>';
     html += '</div>';
     if (opts.buttons && opts.buttons.length) {
-      html += '<div class="popup-btns">';
-      opts.buttons.forEach(function(b){
+      // ===== 新增：判断要不要竖排 =====
+      // 只要有按钮文字超过4个字、或者按钮多于2个，就自动竖着排，杜绝换行
+      var needVertical = opts.buttons.length > 2 ||
+        opts.buttons.some(function(b){ return (b.label || '').length > 4; });
+
+      // 竖排时，把「取消」这类次要按钮挪到最下面（iOS 习惯）
+      var btns = opts.buttons.slice();
+      if (needVertical) {
+        btns.sort(function(a, b){
+          return (a.kind === 'sub' ? 1 : 0) - (b.kind === 'sub' ? 1 : 0);
+        });
+      }
+
+      html += '<div class="popup-btns' + (needVertical ? ' vertical' : '') + '">';
+      btns.forEach(function(b){
         html += '<button class="popup-btn ' + (b.kind || 'main') + '" data-act="' + b.act + '">' + esc(b.label) + '</button>';
       });
       html += '</div>';
@@ -15211,7 +15249,6 @@ function _buildPopup(opts){
   html += '</div>';
   p.innerHTML = html;
 
-  // 绑定按钮点击
   Array.prototype.forEach.call(p.querySelectorAll('.popup-btn'), function(btn){
     btn.addEventListener('click', function(){
       var act = btn.getAttribute('data-act');
@@ -15311,7 +15348,7 @@ function popPrompt(msg, placeholder, onConfirm, opts) {
 }
 function openModePreset() {
   showChrome(true, false);
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = goHome;
   tbRight.textContent = '';
   tbRight.onclick = null;
@@ -19114,7 +19151,7 @@ function renderAlbum() {
   showChrome(true, false);
   statusbar.classList.add('dark');
   tbTitle.textContent = '📸 相册';
-  tbLeft.textContent = '‹';
+  tbLeft.innerHTML = backIcon();
   tbLeft.onclick = goHome;
   tbRight.textContent = '';
   tbRight.onclick = null;
