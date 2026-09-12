@@ -1725,7 +1725,323 @@ body.wx-theme-card #topbar.wx-topbar .tb-btn {
   font-weight: 300 !important;          /* 返回箭头变细 */
   font-size: 20px !important;
 }
+/* ================= 📝 OA审批流专属样式（完全自适应深浅色主题） ================= */
+.oa-modal-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  animation: popFade 0.2s ease;
+}
 
+.oa-container {
+  background: var(--bg);
+  width: 100%;
+  height: 94%;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
+  animation: popUp 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+/* 顶部导航 */
+.oa-navbar {
+  height: 48px;
+  background: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 0.5px solid var(--line);
+  flex-shrink: 0;
+}
+.oa-nav-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.oa-nav-btn {
+  font-size: 14px;
+  color: var(--sub);
+  cursor: pointer;
+  padding: 6px;
+  user-select: none;
+}
+
+/* 滚动区 */
+.oa-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+/* 页眉状态 */
+.oa-status-banner {
+  background: var(--card);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+.oa-status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.oa-status-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+.oa-status-no {
+  font-size: 11px;
+  color: var(--sub);
+  font-family: monospace;
+}
+.oa-badge {
+  background: rgba(255, 154, 0, 0.1);
+  color: #FF9A00;
+  border: 1px solid rgba(255, 154, 0, 0.15);
+  padding: 2px 6px;
+  font-size: 11px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: opacity 0.15s ease; /* 用于盖章时优雅隐形 */
+}
+
+/* 标准卡片 */
+.oa-card {
+  background: var(--card);
+  margin-bottom: 8px;
+  padding: 16px;
+}
+.oa-card-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  padding-bottom: 10px;
+  border-bottom: 0.5px solid var(--line);
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+/* 字段排版 */
+.oa-field {
+  display: flex;
+  padding: 6px 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.oa-field-label {
+  width: 75px;
+  color: var(--sub);
+  flex-shrink: 0;
+}
+.oa-field-value {
+  color: var(--text);
+  flex: 1;
+}
+.oa-value-highlight {
+  color: var(--theme);
+  font-weight: 600;
+}
+.oa-field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0;
+}
+.oa-textarea-display {
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  border: 0.5px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* 审批时间线 */
+.oa-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.oa-node {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+.oa-node:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: -14px;
+  width: 1px;
+  border-left: 1px dashed var(--line);
+}
+/* 头像组件 */
+.oa-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--theme);
+  color: #FFF;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  overflow: hidden;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.oa-avatar.gray {
+  background: #A0A4A8;
+}
+.oa-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.oa-node-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.oa-node-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.oa-node-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.oa-node-action {
+  font-size: 12px;
+  color: var(--sub);
+}
+.oa-node-time {
+  font-size: 11px;
+  color: var(--sub);
+}
+
+/* 底部固定操作栏 */
+.oa-action-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--card);
+  border-top: 0.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 10px;
+  z-index: 10;
+}
+.oa-btn {
+  height: 38px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  outline: none;
+}
+.oa-btn:active {
+  filter: brightness(0.95);
+}
+.oa-btn-sub {
+  flex: 1;
+}
+.oa-btn-approve {
+  flex: 1.8;
+  background: var(--theme);
+  color: #FFF;
+  border: none;
+  font-weight: 600;
+}
+
+/* 🎯 电子印章动画 */
+.oa-stamp {
+  position: absolute;
+  right: 16px;
+  top: 6px;
+  width: 65px;
+  height: 65px;
+  border: 3px double #FF3B30;
+  border-radius: 50%;
+  color: #FF3B30;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: scale(3) rotate(-35deg);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+  font-family: "SimSun", "STSong", serif;
+}
+.oa-stamp-inner {
+  border-top: 1px solid #FF3B30;
+  border-bottom: 1px solid #FF3B30;
+  padding: 1px 4px;
+  font-size: 11px;
+  margin-top: 1px;
+}
+.oa-stamp.approved {
+  border-color: var(--theme);
+  color: var(--theme);
+  transform: scale(3) rotate(-15deg);
+}
+.oa-stamp.approved .oa-stamp-inner {
+  border-color: var(--theme);
+  color: var(--theme);
+}
+.oa-stamp.returned {
+  border-color: #FF9A00;
+  color: #FF9A00;
+  transform: scale(3) rotate(-8deg);
+}
+.oa-stamp.returned .oa-stamp-inner {
+  border-color: #FF9A00;
+  color: #FF9A00;
+}
+@keyframes stampFalling {
+  0% { transform: scale(2.5) rotate(-45deg); opacity: 0; }
+  80% { transform: scale(0.95) rotate(-22deg); opacity: 0.9; }
+  90% { transform: scale(1.05) rotate(-18deg); }
+  100% { transform: scale(1) rotate(-20deg); opacity: 0.85; }
+}
+.oa-stamp.animate {
+  animation: stampFalling 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
 </style>
 </head>
 <body>
@@ -14246,6 +14562,12 @@ function renderChat(keepScroll) {
   var c = getC(view.id);
   if (!c) { goWechat('chats'); return; }
 
+  // ★【核心拦截代码】：如果发现此角色有未审批的 OA 申请，且不是刚在微信生成的，直接拦截聊天，显示 OA 页面
+  if (c._oaMeetRequest && c._oaMeetRequest.status === 'pending' && !c._justProposed) {
+    renderOAMeetApproval(c);
+    return; // 彻底中断后续聊天气泡和输入框的绘制，强制用户必须先审批
+  }
+
   c.lastActive = Date.now();
   checkTimeDecay(c);
   c.mode = c.mode || 'online';
@@ -14304,28 +14626,25 @@ function renderChat(keepScroll) {
     html += bubble(c, m);
   });
   
-  
-// ===== 7. 心声气泡（已改用全局弹窗，此处不再生成） =====
-// 删除旧的常驻气泡，改为在页面渲染完成后通过 showHeartBubbleDirect 触发弹窗
   content.innerHTML = html;
-  fillChatImages();   // ← 新增：异步填充聊天里的图片
+  fillChatImages();   // ← 异步填充聊天里的图片
 
   // ===== 8. 绑定消息左滑 =====
 
   // ===== 9. 长按菜单 =====
   attachLongPress();
-    // 接话灵感：切换模式时自动重置（线下开/线上关）；同模式内保留手动设置
-    if (c._ideaLastMode !== c.mode) {
-      c.ideaOn = (c.mode === 'offline');
-      c._ideaLastMode = c.mode;
-      save();
-    }
+  // 接话灵感：切换模式时自动重置
+  if (c._ideaLastMode !== c.mode) {
+    c.ideaOn = (c.mode === 'offline');
+    c._ideaLastMode = c.mode;
+    save();
+  }
 
   // ===== 10. 底部输入栏 =====
   var bar = document.createElement('div');
   bar.id = 'chatBottom';
 
-  // 拉黑横幅：单独插在 chatBottom 上方，不混入底栏内部
+  // 拉黑横幅
   var oldBanner = document.getElementById('chatBanner');
   if (oldBanner) oldBanner.remove();
 
@@ -14339,22 +14658,19 @@ function renderChat(keepScroll) {
     phone.appendChild(banner);
 
   } else if (c.isBlockedByUser) {
-    // ★兜底：被拉黑但从没生成过拦截数据 → 自动补生成一次
     if (!c.blockEventData && !c._schedulingBlock) {
-      scheduleBlockEvents(c);   // 后台生成，好了之后你再进来就有了
+      scheduleBlockEvents(c);
     }
 
-var _now = Date.now();
-var _ints = (c.blockEventData && c.blockEventData.intercepts) || [];
-// ★每条拦截消息再用 splitToBubbles 拆成微信式短气泡
-var deliveredBox = [];
-_ints.filter(function(i){ return i.content && i.triggerAt <= _now; })
-  .forEach(function(i){
-    splitToBubbles(i.content).forEach(function(line){
-      if (line && line.trim()) deliveredBox.push({ content: line.trim(), time: i.triggerAt });
-    });
-  });
-var _pendingCount = _ints.filter(function(i){ return i.content && i.triggerAt > _now; }).length;
+    var _now = Date.now();
+    var _ints = (c.blockEventData && c.blockEventData.intercepts) || [];
+    var deliveredBox = [];
+    _ints.filter(function(i){ return i.content && i.triggerAt <= _now; })
+      .forEach(function(i){
+        splitToBubbles(i.content).forEach(function(line){
+          if (line && line.trim()) deliveredBox.push({ content: line.trim(), time: i.triggerAt });
+        });
+      });
 
     var interceptHtml = '';
     if (deliveredBox.length) {
@@ -14365,7 +14681,7 @@ var _pendingCount = _ints.filter(function(i){ return i.content && i.triggerAt > 
           '<span style="color:var(--sub);font-size:11px;margin-right:6px;">' + tStr + '</span>' +
           esc(item.content) +
           '</div>';
-		  }).join('');
+      }).join('');
       var isExpanded = c._interceptExpanded ? 'block' : 'none';
       var toggleText = c._interceptExpanded ? '收起' : '偷看';
       interceptHtml =
@@ -14391,8 +14707,7 @@ var _pendingCount = _ints.filter(function(i){ return i.content && i.triggerAt > 
   }
 
   var inputHtml = '<div id="bubbleRow">' +
-
-  '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendImage()">' +
+    '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendImage()">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
       '相册' +
     '</div>' +
@@ -14423,10 +14738,10 @@ var _pendingCount = _ints.filter(function(i){ return i.content && i.triggerAt > 
 
     '<div class="voice-btn" id="voiceMsgBtn">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
-    '</div>' +
-'<button class="reply-btn" id="actBtn" onclick="actBtnClick()">' +
-'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
-'</button>' +
+    '</div>' + // 🟢 这里已经完美修复
+    '<button class="reply-btn" id="actBtn" onclick="actBtnClick()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
+    '</button>' +
   '</div>' +
   '<div id="chatPanel">' +
     '<div class="pnl" onclick="togglePanel();watchNow(view.id,{fromChat:true})">' +
@@ -14441,9 +14756,10 @@ var _pendingCount = _ints.filter(function(i){ return i.content && i.triggerAt > 
       '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg></div>' +
       '<span id="modeTxt">' + (c.mode === 'offline' ? '线下中' : '线上中') + '</span>' +
     '</div>' +
-	    '<div class="pnl" onclick="togglePanel();startVoiceCall(view.id)">' +
+    '<div class="pnl" onclick="togglePanel();startVoiceCall(view.id)">' +
       '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>' +
       '<span>通话</span>' +
+    '</div>' +
   '</div>';
   bar.innerHTML = inputHtml;
   phone.appendChild(bar);
@@ -14452,20 +14768,18 @@ var _pendingCount = _ints.filter(function(i){ return i.content && i.triggerAt > 
   attachSwipe();
 
   // ===== 12. 滚动处理 =====
-// 在浏览器绘制之前，同步锁定滚动位置到底部
-if (keepScroll && savedScroll !== undefined) {
-  content.scrollTop = savedScroll;
-} else {
-  content.scrollTop = content.scrollHeight;
-}
-
-// 图片加载完成后高度可能会变，但此时不做“滚动动画”，只是静默修正
-// 用 requestAnimationFrame 保证在下一帧绘制前完成，而不是 setTimeout 延迟
-requestAnimationFrame(function() {
-  if (!keepScroll || savedScroll === undefined) {
+  if (keepScroll && savedScroll !== undefined) {
+    content.scrollTop = savedScroll;
+  } else {
     content.scrollTop = content.scrollHeight;
   }
-});
+
+  requestAnimationFrame(function() {
+    if (!keepScroll || savedScroll === undefined) {
+      content.scrollTop = content.scrollHeight;
+    }
+  });
+
   // ===== 13. 输入框自动调整 =====
   var resizeTimer;
   function handleResize() {
@@ -14478,49 +14792,35 @@ requestAnimationFrame(function() {
     }, 200);
   }
 
-// ===== 14. 转账点击监听（只绑一次，增强健壮性） =====
-if (!document._transferListener) {
-  document._transferListener = true;
-  document.addEventListener('click', function(e) {
-    try {
-      var card = e.target.closest('.transfer-card');
-      if (!card) return;
+  // ===== 14. 转账点击监听 =====
+  if (!document._transferListener) {
+    document._transferListener = true;
+    document.addEventListener('click', function(e) {
+      try {
+        var card = e.target.closest('.transfer-card');
+        if (!card) return;
 
-      var msgId = card.dataset.mid;
-      if (!msgId) return;
+        var msgId = card.dataset.mid;
+        if (!msgId) return;
 
-      // 检查当前是否在聊天页面
-      if (!view || view.type !== 'chat' || !view.id) {
-        console.warn('转账点击：当前不在聊天界面，忽略');
-        return;
+        if (!view || view.type !== 'chat' || !view.id) return;
+
+        var arr = DB.chats[view.id];
+        if (!arr) return;
+
+        var msg = arr.find(function(m) { return m.id === msgId; });
+        if (!msg || msg.type !== 'transfer') return;
+
+        if (msg.status === 'accepted' || msg.status === 'refunded') return;
+        if (msg.from !== 'ai') return;
+
+        if (typeof openTransferModal !== 'function') return;
+        openTransferModal(msgId);
+      } catch (err) {
+        console.error('转账点击出错：', err);
       }
-
-      var arr = DB.chats[view.id];
-      if (!arr) {
-        console.warn('转账点击：该角色的聊天记录不存在');
-        return;
-      }
-
-      var msg = arr.find(function(m) { return m.id === msgId; });
-      if (!msg || msg.type !== 'transfer') return;
-
-      if (msg.status === 'accepted' || msg.status === 'refunded') return;
-      if (msg.from !== 'ai') return;
-
-      // 检查 openTransferModal 是否存在
-      if (typeof openTransferModal !== 'function') {
-        console.error('转账点击：openTransferModal 函数未定义');
-        alert('功能未加载，请刷新页面重试');
-        return;
-      }
-
-      openTransferModal(msgId);
-    } catch (err) {
-      console.error('转账点击出错：', err);
-      alert('操作失败，请查看控制台错误信息');
-    }
-  });
-}
+    });
+  }
 
   // ===== 15. resize 监听 =====
   window.addEventListener('resize', handleResize);
@@ -16980,60 +17280,126 @@ function userUnblockChar(id) {
     }
   }, {icon:'🔓', title:'解除拉黑'});
 }
+// ===== [新增辅助函数] 判定每日审批限制 =====
+function checkOALimit(c) {
+  var today = new Date().toDateString(); // 例如 "Mon Oct 30 2023"
+  if (c._oaSubmitDate !== today) {
+    c._oaSubmitDate = today;
+    c._oaSubmitCount = 0;
+    save();
+  }
+  return c._oaSubmitCount || 0;
+}
+
+// ===== [全新替换] 见面邀请触发器 =====
 function proposeMeet(c, place, initiator) {
   initiator = initiator || 'ai';
-  var where = place ? ('（' + place + '）') : '';
   var isUser = (initiator === 'user');
 
-  var title = isUser
-    ? '确定要开启线下见面吗？'
-    : '🎬 ' + esc(c.nick || c.name) + ' 想和你线下见面' + esc(where);
+  // 如果是用户主动点击按钮发起，保留原逻辑：直接弹窗确认是否进入线下
+  if (isUser) {
+    popConfirm('确定要开启线下见面吗？', function() {
+      enterOffline(c.id, place || '');
+    }, { ok: '确定', cancel: '取消' });
+    return;
+  }
 
-  var confirmText = isUser ? '确定' : '✨ 进入线下剧情';
-  var cancelText = isUser ? '取消' : '💬 待会儿再说';
+  // AI 发起：判定今天提交的审批是否达到上限（2次）
+  var todayCount = checkOALimit(c);
+  if (todayCount >= 2) {
+    // 达到上限，不再弹窗，只在聊天界面静默插入系统提示
+    insertSystemMessage(`（${c.nick || c.name} 今天还想发起线下见面，但由于今日审批额度（2次）已用完，系统已自动拦截。）`);
+    return;
+  }
 
-  var mo = document.createElement('div');
-  mo.className = 'modal';
-  mo.id = 'modal';
-  mo.innerHTML =
-    '<div class="sheet-box">' +
-    '<div style="text-align:center;font-size:14px;color:var(--sub);padding:8px 0 12px">' + title + '</div>' +
-    '<button class="btn" onclick="closeModal();enterOffline(\'' + c.id + '\',\'' + encodeURIComponent(place || '') + '\')">' + confirmText + '</button>' +
-    '<button class="btn gray" onclick="' + (isUser ? 'closeModal()' : 'closeModal();declineMeet(\'' + c.id + '\')') + '">' + cancelText + '</button>' +
-    '</div>';
-
-  // 点击外部关闭：用户主动发起时无反馈，AI主动发起时视为拒绝
-  mo.onclick = function(e) {
-    if (e.target === mo) {
-      closeModal();
-      if (!isUser) {
-        declineMeet(c.id);
-      }
+  // 1. 自动根据 AI 发的最后一句话抓取作为“申请事由”
+  var msgs = DB.chats[c.id] || [];
+  var lastAIMsg = '';
+  for (var i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role === 'assistant' && msgs[i].type === 'text') {
+      lastAIMsg = msgs[i].content;
+      break;
     }
+  }
+  var reason = lastAIMsg || '有些话感觉在微信里总是说不清楚，我们能当面聊聊吗？';
+
+  // 2. 自动判定预计时长
+  var duration = '约 2 小时';
+  if (/(天|晚|夜|过夜|住)/.test(reason)) {
+    duration = '约 6-8 小时';
+  } else if (/(吃|饭|喝|咖啡|午餐|晚餐)/.test(reason)) {
+    duration = '约 2-3 小时';
+  }
+
+  // 3. 动态生成唯一审批单号，存入缓存（防止刷新变动）
+  var now = new Date();
+  var yyyy = now.getFullYear();
+  var mm = String(now.getMonth() + 1).padStart(2, '0');
+  var dd = String(now.getDate()).padStart(2, '0');
+  var randomNo = Math.floor(1000 + Math.random() * 9000);
+  var serialNo = `SP-${yyyy}${mm}${dd}-${randomNo}`;
+
+  // 4. 构建暂存的 OA 数据模型
+  c._oaMeetRequest = {
+    status: 'pending',
+    id: serialNo,
+    place: place || '待双方沟通确定',
+    duration: duration,
+    reason: reason,
+    time: now.getTime()
   };
-  phone.appendChild(mo);
+  
+  // 增加今日提交计数
+  c._oaSubmitCount = todayCount + 1;
+  c._oaSubmitDate = now.toDateString();
+  
+  // 核心体验优化：标记“刚刚发起”，此时绝不立刻打断用户，给用户 2.5 秒看最新微信内容
+  c._justProposed = true;
+  save();
+
+  setTimeout(function() {
+    // 延迟 2.5 秒后，如果用户还没点出去，依然在跟这个人聊天，才温柔滑起 OA
+    if (view.type === 'chat' && view.id === c.id) {
+      c._justProposed = false; // 清除刚刚发起的标记，转为“强制拦截”状态
+      save();
+      renderOAMeetApproval(c);
+    }
+  }, 2500); 
 }
+// ===== [全新替换] 驳回并冷却 =====
 function declineMeet(cid) {
   var c = getC(cid);
   if (!c) return;
-  // 婉拒见面：不做负面降值（避免AI因"失落/焦虑"而更执着地追问）
+  
+  c._oaMeetRequest = null; // ★ 增加此行，防止审批状态残留
+  
+  // 婉拒见面：不做负面降值
   // 冷却到今天 24:00，次日自动重置
   var _end = new Date(); _end.setHours(24, 0, 0, 0);
   c.meetCd = _end.getTime();
   save();
   if (view.type === 'chat' && view.id === cid) {
-    insertSystemMessage(`你婉拒了 ${c.nick || c.name} 的见面邀请，TA表示理解，今天不会再提了。`);
+    insertSystemMessage(`你驳回了 ${c.nick || c.name} 的见面申请，TA表示理解，今天不会再提了。`);
   }
 }
-function enterOffline(cid,place){
-  var c=getC(cid);if(!c)return;
-  place=decodeURIComponent(place||'');
-  c.mode='offline';c.meetCd=0;save();
-  if(view.type==='chat'&&view.id===cid)renderChat();
-  var nudge='【场景切换：现在从线上微信转入线下面对面见面】请紧接刚才你们在微信上聊的内容，自然展开这次见面的开场。要求：①用第二人称小说笔法，从环境或画面淡入，严禁"我到了""开门""敲门""我来了"这类生硬开场；②承接刚才线上聊天的情绪与话题；③结合当前真实时间和你的作息，让见面场景合理'+(place?('，地点在'+place):'')+'；④只写到你出现、两人刚照面的瞬间即可，把接下来交给对方。';
+
+// ===== [全新替换] 同意进入线下 =====
+function enterOffline(cid, place) {
+  var c = getC(cid);
+  if (!c) return;
+  
+  c._oaMeetRequest = null; // ★ 增加此行，进入线下后立刻销毁待审批状态
+  
+  place = decodeURIComponent(place || '');
+  c.mode = 'offline';
+  c.meetCd = 0;
+  save();
+  
+  if (view.type === 'chat' && view.id === cid) renderChat();
+  
+  var nudge = '【场景切换：现在从线上微信转入线下面对面见面】请紧接刚才你们在微信上聊的内容，自然展开这次见面的开场。要求：①用第二人称小说笔法，从环境或画面淡入，严禁"我到了""开门""敲门""我来了"这类生硬开场；②承接刚才线上聊天的情绪与话题；③结合当前真实时间和你的作息，让见面场景合理' + (place ? ('，地点在' + place) : '') + '；④只写到你出现、两人刚照面的瞬间即可，把接下来交给对方。';
   aiReply(nudge);
 }
-
 function proposeBackOnline(c, isRestore){
   if(!c || c.mode !== 'offline') return;
   // 节流：非恢复模式下，10分钟内不重复显示
@@ -19944,6 +20310,241 @@ function closeShareModal() {
   var overlay = document.getElementById('shareModalOverlay');
   if (overlay) overlay.style.display = 'none';
   document.body.style.overflow = '';
+}
+
+// =========================================================================
+// ========================= 📝 [新增] OA 审批核心逻辑 ========================
+// =========================================================================
+
+// 1. 渲染高逼真 OA 审批详情页
+function renderOAMeetApproval(c) {
+  var req = c._oaMeetRequest;
+  if (!req) return renderChat();
+
+  // 清除旧的可能存在的弹窗
+  var oldModal = document.getElementById('modal');
+  if (oldModal) oldModal.remove();
+  var oldOAModal = document.getElementById('oaModal');
+  if (oldOAModal) oldOAModal.remove();
+
+  var mo = document.createElement('div');
+  mo.className = 'oa-modal-mask';
+  mo.id = 'oaModal';
+
+  // 读取“我”的实名，以及“我”对该角色的专属身份 (c.myJob)
+  var userName = DB.me.realName || DB.me.name || '我';
+  var userIdentity = c.myJob || '主管审批人';
+  var reqDate = new Date(req.time);
+  var timeStr = String(reqDate.getHours()).padStart(2,'0') + ':' + String(reqDate.getMinutes()).padStart(2,'0');
+  var fullDateStr = reqDate.getFullYear() + '.' + String(reqDate.getMonth()+1).padStart(2,'0') + '.' + String(reqDate.getDate()).padStart(2,'0');
+
+  // 处理头像（如果有就渲染，没有截取名字首字）
+  var aiAvatarHtml = c.avatar 
+    ? `<img src="${esc(c.avatar)}" alt="avatar">` 
+    : esc((c.nick || c.name).charAt(0));
+  var userAvatarHtml = DB.me.avatar 
+    ? `<img src="${esc(DB.me.avatar)}" alt="avatar">` 
+    : esc(userName.charAt(0));
+
+  mo.innerHTML = `
+    <div class="oa-container">
+      <div class="oa-navbar">
+        <span class="oa-nav-btn" onclick="closeOATemp()">暂存</span>
+        <span class="oa-nav-title">审批详情</span>
+        <span class="oa-nav-btn" style="font-size:18px;font-weight:bold;" onclick="closeOATemp()">✕</span>
+      </div>
+
+      <div class="oa-scroll-content">
+        <div class="oa-status-banner">
+          <div class="oa-status-info">
+            <span class="oa-status-title" id="oaTitleHeader">等待 ${esc(userName)} 审批</span>
+            <span class="oa-status-no">审批单号：${esc(req.id)}</span>
+          </div>
+          <span class="oa-badge" id="oaStatusBadge">审批中</span>
+          
+          <div class="oa-stamp" id="oaStamp">
+            <span id="stampText">已同意</span>
+            <div class="oa-stamp-inner" id="stampDate">${fullDateStr}</div>
+          </div>
+        </div>
+
+        <div class="oa-card">
+          <div class="oa-card-header">申请明细</div>
+          <div class="oa-field">
+            <span class="oa-field-label">申请人员</span>
+            <span class="oa-field-value">${esc(c.nick || c.name)}</span>
+          </div>
+          <div class="oa-field">
+            <span class="oa-field-label">审批类型</span>
+            <span class="oa-field-value">线下见面申请</span>
+          </div>
+          <div class="oa-field">
+            <span class="oa-field-label">见面地点</span>
+            <span class="oa-field-value oa-value-highlight">📍 ${esc(req.place)}</span>
+          </div>
+          <div class="oa-field">
+            <span class="oa-field-label">预计时长</span>
+            <span class="oa-field-value">${esc(req.duration)}</span>
+          </div>
+          <div class="oa-field-block">
+            <span class="oa-field-label">申请事由</span>
+            <div class="oa-textarea-display">${esc(req.reason)}</div>
+          </div>
+        </div>
+
+        <div class="oa-card">
+          <div class="oa-card-header">审批流程</div>
+          <div class="oa-timeline">
+            <div class="oa-node">
+              <div class="oa-avatar">${aiAvatarHtml}</div>
+              <div class="oa-node-content">
+                <div class="oa-node-row">
+                  <span class="oa-node-name">${esc(c.nick || c.name)}</span>
+                  <span class="oa-node-time">${timeStr}</span>
+                </div>
+                <div class="oa-node-action">发起申请</div>
+              </div>
+            </div>
+            <div class="oa-node">
+              <div class="oa-avatar gray">${userAvatarHtml}</div>
+              <div class="oa-node-content">
+                <div class="oa-node-row">
+                  <span class="oa-node-name">${esc(userName)} <span style="font-size:11px;color:var(--sub);font-weight:normal;">(${esc(userIdentity)})</span></span>
+                  <span class="oa-node-time" style="color:#FF9A00;" id="userTimeStatus">等待审批</span>
+                </div>
+                <div class="oa-node-action">审批人</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="oa-action-bar" id="oaActionBar">
+        <button class="oa-btn oa-btn-sub" onclick="handleOAReject('${c.id}')">驳回</button>
+        <button class="oa-btn oa-btn-sub" onclick="handleOAReturn('${c.id}')">退回重写</button>
+        <button class="oa-btn oa-btn-approve" onclick="handleOAApprove('${c.id}')">同意</button>
+      </div>
+    </div>
+  `;
+
+  phone.appendChild(mo);
+}
+
+// 2. 暂存关闭，回到列表（下次进聊天还会强弹）
+function closeOATemp() {
+  goWechat('chats');
+}
+
+// 3. 执行盖章下坠动画
+function runStampAnimation(statusText, stampClass, onComplete) {
+  var badge = document.getElementById('oaStatusBadge');
+  var stamp = document.getElementById('oaStamp');
+  var stampTxt = document.getElementById('stampText');
+  var actionBar = document.getElementById('oaActionBar');
+
+  if (actionBar) actionBar.style.display = 'none';
+
+  if (stamp && stampTxt) {
+    stampTxt.innerText = statusText;
+    stamp.className = `oa-stamp ${stampClass}`;
+    
+    setTimeout(function() {
+      stamp.classList.add('animate');
+      
+      // 120毫秒印章重击页面瞬间，隐去黄色的「审批中」标签，修改时间线文字
+      setTimeout(function() {
+        if (badge) badge.style.opacity = '0'; 
+        var userTimeStatus = document.getElementById('userTimeStatus');
+        if (userTimeStatus) {
+          userTimeStatus.innerText = statusText.replace('已', '');
+          if (statusText === '已同意') userTimeStatus.style.color = 'var(--theme)';
+          if (statusText === '已驳回') userTimeStatus.style.color = '#FF3B30';
+          if (statusText === '已退回') userTimeStatus.style.color = '#FF9A00';
+        }
+      }, 120);
+
+      setTimeout(function() {
+        if (onComplete) onComplete();
+      }, 1000);
+    }, 100);
+  } else {
+    if (onComplete) onComplete();
+  }
+}
+
+// 4. 按钮回调：同意
+function handleOAApprove(cid) {
+  var c = getC(cid);
+  if (!c || !c._oaMeetRequest) return;
+  
+  popConfirm('确定同意这次线下见面申请吗？', function() {
+    var place = c._oaMeetRequest.place;
+    runStampAnimation('已同意', 'approved', function() {
+      c._oaMeetRequest = null;
+      save();
+      var oldOAModal = document.getElementById('oaModal');
+      if (oldOAModal) oldOAModal.remove();
+      enterOffline(c.id, place === '待双方沟通确定' ? '' : place);
+    });
+  });
+}
+
+// 5. 按钮回调：驳回
+function handleOAReject(cid) {
+  var c = getC(cid);
+  if (!c || !c._oaMeetRequest) return;
+
+  var countLeft = 2 - (c._oaSubmitCount || 0);
+  var tips = `确定驳回此申请吗？（对方今天还可以提交 ${countLeft} 次）`;
+
+  popConfirm(tips, function() {
+    runStampAnimation('已驳回', 'rejected', function() {
+      c._oaMeetRequest = null;
+      save();
+      var oldOAModal = document.getElementById('oaModal');
+      if (oldOAModal) oldOAModal.remove();
+      
+      renderChat(true); // ★ 修复关键：驳回后，立刻重新画出微信聊天框，确保用户留在聊天框里
+      declineMeet(c.id); // 执行原有驳回提示逻辑
+    });
+  });
+}
+
+// 6. 按钮回调：退回重写
+function handleOAReturn(cid) {
+  var c = getC(cid);
+  if (!c || !c._oaMeetRequest) return;
+
+  popPrompt('请输入退回重写的意见/理由：', '例如：我这会走不开、换个近一点的地方吧', function(reason) {
+    if (!reason.trim()) return;
+
+    runStampAnimation('已退回', 'returned', function() {
+      c._oaMeetRequest = null;
+      save();
+
+      var oldOAModal = document.getElementById('oaModal');
+      if (oldOAModal) oldOAModal.remove();
+
+      renderChat(true);
+
+      // 把退回理由作为消息 Push 进记录并渲染
+      var feedbackText = `【↩️ 退回申请】意见：${reason.trim()}`;
+      DB.chats[c.id] = DB.chats[c.id] || [];
+      DB.chats[c.id].push({
+        id: newId(),
+        role: 'user',
+        type: 'text',
+        content: feedbackText,
+        time: Date.now()
+      });
+      c._lastUserAt = Date.now();
+      save();
+      renderChat(true); 
+
+      // 触发 AI 的微信回复，由 AI 解释并重新写一份申请
+      aiReply();
+    });
+  }, { title: '退回重写', ok: '退回', cancel: '取消' });
 }
 </script>
 </html>
