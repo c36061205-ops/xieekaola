@@ -2042,6 +2042,89 @@ body.wx-theme-card #topbar.wx-topbar .tb-btn {
 .oa-stamp.animate {
   animation: stampFalling 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
+/* ================= 📝 OA 聊天气泡卡片样式 ================= */
+.oa-bubble-card-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 12px 0;
+}
+.oa-bubble-card {
+  background: var(--card);
+  border: 0.5px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  width: 270px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: transform 0.15s ease, background 0.15s;
+  user-select: none;
+}
+.oa-bubble-card:active {
+  transform: scale(0.98);
+  background: color-mix(in srgb, var(--text) 2%, var(--card));
+}
+.oa-bubble-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 0.5px solid var(--line);
+  padding-bottom: 8px;
+}
+.oa-bubble-card-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.oa-bubble-card-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+/* 气泡卡片的不同状态颜色 */
+.oa-bubble-card-status.pending { background: rgba(255, 154, 0, 0.15); color: #FF9A00; }
+.oa-bubble-card-status.approved { background: rgba(0, 137, 255, 0.15); color: var(--theme); }
+.oa-bubble-card-status.rejected { background: rgba(255, 59, 48, 0.15); color: #FF3B30; }
+.oa-bubble-card-status.returned { background: rgba(143, 149, 158, 0.15); color: var(--sub); }
+
+.oa-bubble-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+}
+.oa-bubble-card-row {
+  display: flex;
+  line-height: 1.4;
+}
+.oa-bubble-card-label {
+  color: var(--sub);
+  width: 45px;
+  flex-shrink: 0;
+}
+.oa-bubble-card-val {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+.oa-bubble-card-foot {
+  border-top: 0.5px solid var(--line);
+  padding-top: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--theme);
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -14360,7 +14443,15 @@ s += '- 标签里的文字请一律用中文引号「」，不要出现英文双
     s += c.sampleLines + '\n';
     s += '现在，用这样的语气，作为「' + (c.nick || c.name) + '」自然地回应对方。\n';
   }
-
+  // 🟢 [全新替换] 规范化的 XML 标签见面提示词
+  s += `\n\n【💼 线下见面模式与OA申请表填写规范】\n` +
+       `当你根据当前的剧情、对话情绪、或者想要跟对方推进关系而产生“想要线下面对面见面”的意愿时，你必须在回复的最末尾附带以下尖括号标签（严禁在普通聊天气泡里用中文打出这些括号）：\n` +
+       `格式要求：<meet place="见面具体地点" reason="符合你当下面对人设和心情的见面理由"></meet>\n` +
+       `填写规范：\n` +
+       `1. “place”属性必须结合你们当前的聊天情境、世界观和时间安排，定一个具体真实的位置（例如：学校后街的旧咖啡馆、家楼下的便利店、旧操场看台等，严禁空泛说“老地方”或“任何地方”）。\n` +
+       `2. “reason”属性必须以你（角色）的第一人称语气撰写。根据你当下的心情（如撒娇、傲娇、失落或期待），写一段非常符合你说话风格的、30-70字左右的申请理由。这会被直接写在对方的OA审批单上，请务必真诚、符合人设且打动对方（例如：“微信里总是说不清楚...而且我今天带了你最想要的CD，我在老地方等你，不来我可要生气了！”）。\n` +
+       `3. 当你不打算、或剧情不需要见面的情况下，绝对不能输出该标签。\n`;
+	   
   return s;
 }
 
@@ -14562,12 +14653,7 @@ function renderChat(keepScroll) {
   var c = getC(view.id);
   if (!c) { goWechat('chats'); return; }
 
-  // ★【核心拦截代码】：如果发现此角色有未审批的 OA 申请，且不是刚在微信生成的，直接拦截聊天，显示 OA 页面
-  if (c._oaMeetRequest && c._oaMeetRequest.status === 'pending' && !c._justProposed) {
-    renderOAMeetApproval(c);
-    return; // 彻底中断后续聊天气泡和输入框的绘制，强制用户必须先审批
-  }
-
+  // 🟢 这里不再强制拦截全屏弹窗了，允许用户查看历史气泡
   c.lastActive = Date.now();
   checkTimeDecay(c);
   c.mode = c.mode || 'online';
@@ -14599,7 +14685,6 @@ function renderChat(keepScroll) {
   msgs.forEach(function(m) {
     if (!m.id) { m.id = newId(); changed = true; }
     if (!m.type) { m.type = 'text'; changed = true; }
-    // 语音消息默认折叠
     if (m.type === 'voice' && m.voiceExpanded === undefined) {
       m.voiceExpanded = false;
       changed = true;
@@ -14617,7 +14702,7 @@ function renderChat(keepScroll) {
   var html = more ? '<div class="ts">（仅显示最近500条，更早' + more + '条已折叠，记忆不受影响）</div>' : '';
   lastBubbleTime = 0;
   show.forEach(function(m) {
-    if (m.hidden) return; // ★ 隐形小纸条跳过渲染
+    if (m.hidden) return; 
     var t = m.time || Date.now();
     if (!lastBubbleTime || t - lastBubbleTime > 300000) {
       html += tsHtml(t);
@@ -14627,13 +14712,12 @@ function renderChat(keepScroll) {
   });
   
   content.innerHTML = html;
-  fillChatImages();   // ← 异步填充聊天里的图片
+  fillChatImages(); 
 
   // ===== 8. 绑定消息左滑 =====
 
   // ===== 9. 长按菜单 =====
   attachLongPress();
-  // 接话灵感：切换模式时自动重置
   if (c._ideaLastMode !== c.mode) {
     c.ideaOn = (c.mode === 'offline');
     c._ideaLastMode = c.mode;
@@ -14644,7 +14728,7 @@ function renderChat(keepScroll) {
   var bar = document.createElement('div');
   bar.id = 'chatBottom';
 
-  // 拉黑横幅
+  // 拉黑横幅处理
   var oldBanner = document.getElementById('chatBanner');
   if (oldBanner) oldBanner.remove();
 
@@ -14661,7 +14745,6 @@ function renderChat(keepScroll) {
     if (!c.blockEventData && !c._schedulingBlock) {
       scheduleBlockEvents(c);
     }
-
     var _now = Date.now();
     var _ints = (c.blockEventData && c.blockEventData.intercepts) || [];
     var deliveredBox = [];
@@ -14706,62 +14789,79 @@ function renderChat(keepScroll) {
     phone.appendChild(banner);
   }
 
-  var inputHtml = '<div id="bubbleRow">' +
-    '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendImage()">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
-      '相册' +
-    '</div>' +
-    '<div class="bubble-btn" onclick="openStickerPicker()">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="0.8" fill="currentColor"/><circle cx="15" cy="10" r="0.8" fill="currentColor"/></svg>' +
-      '表情' +
-    '</div>' +
-    '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendTransfer()">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><circle cx="12" cy="15" r="2"/></svg>' +
-      '转账' +
-    '</div>' +
-    '<div class="bubble-btn" onclick="openNotePanel()">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' +
-      '小纸条' +
-    '</div>' +
-  '</div>' +
-
-  '<div id="inputRow">' +
-    '<div class="plus-btn" onclick="togglePanel()">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
-    '</div>' +
-    '<div class="input-wrap">' +
-      '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
-      '<div class="idea-btn' + (c.ideaOn ? ' on' : '') + '" id="ideaBtn" onclick="openIdeaPop()" title="接话灵感">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12c.5.5 1 1.5 1 2h6c0-.5.5-1.5 1-2a7 7 0 0 0-4-12z"/></svg>' +
+  // 🟢 [锁定拦截机制核心]：检查是否存在未审批的申请
+  if (c._oaMeetRequest && c._oaMeetRequest.status === 'pending') {
+    // 锁定状态：将输入框替换为“待审批提示栏”
+    var lockHtml = `
+      <div style="background:var(--card); border-top:0.5px solid var(--line); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; color:var(--text); height:50px; box-sizing:border-box; width:100%;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:15px;">📝</span>
+          <span style="font-weight:600; color:var(--text); opacity:0.85;">您有一条未处理的线下见面申请</span>
+        </div>
+        <button class="oa-btn oa-btn-approve" style="height:30px; font-size:12px; padding:0 14px; width:auto; margin:0; border-radius:6px;" onclick="renderOAMeetApproval(getC(view.id))">去审批</button>
+      </div>
+    `;
+    bar.innerHTML = lockHtml;
+  } else {
+    // 正常状态：显示打字输入框
+    var inputHtml = '<div id="bubbleRow">' +
+      '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendImage()">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' +
+        '相册' +
+      '</div>' +
+      '<div class="bubble-btn" onclick="openStickerPicker()">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="0.8" fill="currentColor"/><circle cx="15" cy="10" r="0.8" fill="currentColor"/></svg>' +
+        '表情' +
+      '</div>' +
+      '<div class="bubble-btn" onclick="const p=document.getElementById(\'chatPanel\');if(p)p.classList.remove(\'on\');sendTransfer()">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/><circle cx="12" cy="15" r="2"/></svg>' +
+        '转账' +
+      '</div>' +
+      '<div class="bubble-btn" onclick="openNotePanel()">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' +
+        '小纸条' +
       '</div>' +
     '</div>' +
 
-    '<div class="voice-btn" id="voiceMsgBtn">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
-    '</div>' + // 🟢 这里已经完美修复
-    '<button class="reply-btn" id="actBtn" onclick="actBtnClick()">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
-    '</button>' +
-  '</div>' +
-  '<div id="chatPanel">' +
-    '<div class="pnl" onclick="togglePanel();watchNow(view.id,{fromChat:true})">' +
-      '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8M12 18v4"/></svg></div>' +
-      '<span>监控</span>' +
+    '<div id="inputRow">' +
+      '<div class="plus-btn" onclick="togglePanel()">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
+      '</div>' +
+      '<div class="input-wrap">' +
+        '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
+        '<div class="idea-btn' + (c.ideaOn ? ' on' : '') + '" id="ideaBtn" onclick="openIdeaPop()" title="接话灵感">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12c.5.5 1 1.5 1 2h6c0-.5.5-1.5 1-2a7 7 0 0 0-4-12z"/></svg>' + // 🟢 已经完美修复
+        '</div>' +
+      '</div>' +
+
+      '<div class="voice-btn" id="voiceMsgBtn">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
+      '</div>' + 
+      '<button class="reply-btn" id="actBtn" onclick="actBtnClick()">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
+      '</button>' +
     '</div>' +
-    '<div class="pnl" onclick="togglePanel();window._scheduleFrom=\'chat\';openSchedule(view.id)">' +
-      '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div>' +
-      '<span>行程</span>' +
-    '</div>' +
-    '<div class="pnl" onclick="toggleMode()">' +
-      '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg></div>' +
-      '<span id="modeTxt">' + (c.mode === 'offline' ? '线下中' : '线上中') + '</span>' +
-    '</div>' +
-    '<div class="pnl" onclick="togglePanel();startVoiceCall(view.id)">' +
-      '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>' +
-      '<span>通话</span>' +
-    '</div>' +
-  '</div>';
-  bar.innerHTML = inputHtml;
+    '<div class="chatPanel" id="chatPanel">' +
+      '<div class="pnl" onclick="togglePanel();watchNow(view.id,{fromChat:true})">' +
+        '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8M12 18v4"/></svg></div>' +
+        '<span>监控</span>' +
+      '</div>' +
+      '<div class="pnl" onclick="togglePanel();window._scheduleFrom=\'chat\';openSchedule(view.id)">' +
+        '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div>' +
+        '<span>行程</span>' +
+      '</div>' +
+      '<div class="pnl" onclick="toggleMode()">' +
+        '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg></div>' +
+        '<span id="modeTxt">' + (c.mode === 'offline' ? '线下中' : '线上中') + '</span>' +
+      '</div>' +
+      '<div class="pnl" onclick="togglePanel();startVoiceCall(view.id)">' +
+        '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>' +
+        '<span>通话</span>' +
+      '</div>' +
+    '</div>';
+    bar.innerHTML = inputHtml;
+  }
+  
   phone.appendChild(bar);
 
   // ===== 11. 滑动辅助 =====
@@ -14840,6 +14940,7 @@ function renderChat(keepScroll) {
     });
   }
 }
+
 function flushBlockEvents() {
   var nowTs = Date.now();
   var anyChange = false;
@@ -16367,10 +16468,13 @@ lines.forEach(line => {
             case 'meet': {
                 var pMatch = (t.attrs || '').match(/place=["']([^"']*)["']/);
                 var mPlace = pMatch ? pMatch[1] : '';
-                parts.push({ type: 'meet_invite', place: mPlace });
+                // 🟢 新增：提取尖括号里附带的 reason（事由）属性
+                var rMatch = (t.attrs || '').match(/reason=["']([^"']*)["']/);
+                var mReason = rMatch ? rMatch[1] : '';
+                parts.push({ type: 'meet_invite', place: mPlace, reason: mReason });
                 break;
             }
-			            case 'msg': {
+			case 'msg': {
                 var mc = cleanLeftoverTags(t.content || '').trim();
                 if (mc) {
                     // 万一 AI 把好几句塞进一个 <msg>，再用原有兜底拆一次
@@ -16839,6 +16943,7 @@ out = out.replace(/\[\[\[OPTIONS\]\]\][\s\S]*$/i, '').trim();
     // 为了简单，我们在解析出的 text 类型消息中再次检查。
     
     let meetPlace = null;
+	let meetReason = null;
     let wantBack = false;
 
     // 3. 调用解析器（线下叙事整段处理，不拆碎气泡）
@@ -16886,9 +16991,11 @@ narr = narr.replace(/<\/?(?:inner|心声|voice|sticker|recall|transfer|block)[^>
         const part = parts[i];
     if (part.type === 'meet_invite' && c.mode === 'online') {
       meetPlace = part.place || '老地方';
+      meetReason = part.reason || ''; // 🟢 新增：把解析出来的事由存进变量里
       continue; // 捕获后直接跳过，不用把它当成普通聊天文字气泡输出
     }
-        // --- 处理特殊动作 ---
+
+	// --- 处理特殊动作 ---
         
         // 1. 拉黑玩家
         if (part.type === 'block_player') {
@@ -17006,10 +17113,15 @@ if (part.type === 'share') {
             let txt = part.content;
             
             // 检查 [见面|地点]
+            // 🟢 [已修改]：不仅提取地点，还同步提取 AI 写的申请事由
+            let meetReason = null; // 新增：保存 AI 写的事由
             if (c.mode === 'online') {
                 var meetMatch = txt.match(/\[见面[|｜]?([\s\S]*?)\]/);
                 if (meetMatch) {
-                    meetPlace = meetMatch[1].trim();
+                    var rawMeet = meetMatch[1].trim();
+                    var meetParts = rawMeet.split(/[|｜]/); // 用竖线分割 地点 和 事由
+                    meetPlace = meetParts[0] ? meetParts[0].trim() : null;
+                    meetReason = meetParts[1] ? meetParts[1].trim() : null; // 👈 提取出事由
                     txt = txt.replace(/\[见面[|｜]?[\s\S]*?\]/, '').trim();
                 }
             }
@@ -17076,14 +17188,12 @@ if (c.ideaOn && _pendingIdeas && _pendingIdeas.length) {
     var meetCooling = Date.now() < (c.meetCd || 0);   // 今天是否处于"已拒绝"冷却中
     var wantMeet = (meetPlace !== null) || (c.mode === 'online' && hasMeetIntent(aiFullText));
     if (c.mode === 'online' && wantMeet) {
-      if (meetCooling) {
-        // 冷却期：不弹卡片，只淡淡提示一句
-        insertSystemMessage('（对方今天似乎还想见面，你可以回应 TA）');
-      } else {
-        // 正常：只要表达了见面意愿，就一定弹卡片
-        proposeMeet(c, meetPlace || '');
-      }
-    }
+   if (meetCooling) {
+     insertSystemMessage('（对方今天似乎还想见面，你可以回应 TA）');
+   } else {
+     proposeMeet(c, meetPlace || '', meetReason || ''); // 👈 已经把 meetReason 传进去了
+   }
+   }
     if (wantBack && c.mode === 'offline') proposeBackOnline(c);
 
     // ---- 12. 紧张度回落 ----
@@ -17291,12 +17401,12 @@ function checkOALimit(c) {
   return c._oaSubmitCount || 0;
 }
 
-// ===== [全新替换] 见面邀请触发器 =====
-function proposeMeet(c, place, initiator) {
+// ===== [全新替换] 见面邀请触发器（支持动态事由与地点） =====
+function proposeMeet(c, place, reason, initiator) {
   initiator = initiator || 'ai';
   var isUser = (initiator === 'user');
 
-  // 如果是用户主动点击按钮发起，保留原逻辑：直接弹窗确认是否进入线下
+  // 如果是用户主动点击按钮发起，直接弹窗确认
   if (isUser) {
     popConfirm('确定要开启线下见面吗？', function() {
       enterOffline(c.id, place || '');
@@ -17307,23 +17417,24 @@ function proposeMeet(c, place, initiator) {
   // AI 发起：判定今天提交的审批是否达到上限（2次）
   var todayCount = checkOALimit(c);
   if (todayCount >= 2) {
-    // 达到上限，不再弹窗，只在聊天界面静默插入系统提示
     insertSystemMessage(`（${c.nick || c.name} 今天还想发起线下见面，但由于今日审批额度（2次）已用完，系统已自动拦截。）`);
     return;
   }
 
-  // 1. 自动根据 AI 发的最后一句话抓取作为“申请事由”
-  var msgs = DB.chats[c.id] || [];
-  var lastAIMsg = '';
-  for (var i = msgs.length - 1; i >= 0; i--) {
-    if (msgs[i].role === 'assistant' && msgs[i].type === 'text') {
-      lastAIMsg = msgs[i].content;
-      break;
+  // 🔴 动态事由判定：如果 AI 标记里没写事由，再用最后一句聊天作为 fallback 兜底
+  if (!reason) {
+    var msgs = DB.chats[c.id] || [];
+    var lastAIMsg = '';
+    for (var i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].role === 'assistant' && msgs[i].type === 'text') {
+        lastAIMsg = msgs[i].content;
+        break;
+      }
     }
+    reason = lastAIMsg || '有些话感觉在微信里总是说不清楚，我们能当面聊聊吗？';
   }
-  var reason = lastAIMsg || '有些话感觉在微信里总是说不清楚，我们能当面聊聊吗？';
 
-  // 2. 自动判定预计时长
+  // 自动判定预计时长
   var duration = '约 2 小时';
   if (/(天|晚|夜|过夜|住)/.test(reason)) {
     duration = '约 6-8 小时';
@@ -17331,40 +17442,48 @@ function proposeMeet(c, place, initiator) {
     duration = '约 2-3 小时';
   }
 
-  // 3. 动态生成唯一审批单号，存入缓存（防止刷新变动）
+  // 动态生成唯一审批单号，存入缓存
   var now = new Date();
   var yyyy = now.getFullYear();
   var mm = String(now.getMonth() + 1).padStart(2, '0');
   var dd = String(now.getDate()).padStart(2, '0');
   var randomNo = Math.floor(1000 + Math.random() * 9000);
   var serialNo = `SP-${yyyy}${mm}${dd}-${randomNo}`;
+  var messageId = newId(); // 绑定卡片消息的唯一ID
 
-  // 4. 构建暂存的 OA 数据模型
+  // 构建暂存的 OA 数据模型
   c._oaMeetRequest = {
     status: 'pending',
     id: serialNo,
     place: place || '待双方沟通确定',
     duration: duration,
-    reason: reason,
-    time: now.getTime()
+    reason: reason, // 👈 100% 动态的 AI 亲笔事由！
+    time: now.getTime(),
+    _relatedMsgId: messageId
   };
   
-  // 增加今日提交计数
   c._oaSubmitCount = todayCount + 1;
   c._oaSubmitDate = now.toDateString();
   
-  // 核心体验优化：标记“刚刚发起”，此时绝不立刻打断用户，给用户 2.5 秒看最新微信内容
-  c._justProposed = true;
-  save();
+  c._justProposed = true; // 临时允许本次 renderChat 不拦截
+  DB.chats[c.id].push({
+    id: messageId,
+    role: 'assistant',
+    type: 'oa_invite',
+    content: '发起了线下见面申请',
+    time: now.getTime(),
+    oaId: serialNo,
+    place: c._oaMeetRequest.place,
+    reason: c._oaMeetRequest.reason,
+    duration: c._oaMeetRequest.duration,
+    oaStatus: 'pending'
+  });
 
-  setTimeout(function() {
-    // 延迟 2.5 秒后，如果用户还没点出去，依然在跟这个人聊天，才温柔滑起 OA
-    if (view.type === 'chat' && view.id === c.id) {
-      c._justProposed = false; // 清除刚刚发起的标记，转为“强制拦截”状态
-      save();
-      renderOAMeetApproval(c);
-    }
-  }, 2500); 
+  save();
+  renderChat(true); // 刷新聊天
+  
+  c._justProposed = false;
+  save();
 }
 // ===== [全新替换] 驳回并冷却 =====
 function declineMeet(cid) {
@@ -20472,7 +20591,26 @@ function runStampAnimation(statusText, stampClass, onComplete) {
   }
 }
 
-// 4. 按钮回调：同意
+// ===== [辅助函数] 同步微信卡片气泡上的状态 =====
+function syncOABubbleStatus(c, status) {
+  var relatedId = c._oaMeetRequest ? c._oaMeetRequest._relatedMsgId : null;
+  var msgs = DB.chats[c.id] || [];
+  if (relatedId) {
+    var m = msgs.find(function(msg) { return msg.id === relatedId; });
+    if (m) m.oaStatus = status;
+  } else {
+    // 备份方案：如果关联丢失，自动把最近的一个 oa_invite 消息改为对应的状态
+    for (var i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].type === 'oa_invite' && msgs[i].oaStatus === 'pending') {
+        msgs[i].oaStatus = status;
+        break;
+      }
+    }
+  }
+  save();
+}
+
+// ===== [全新替换] 按钮回调：同意 =====
 function handleOAApprove(cid) {
   var c = getC(cid);
   if (!c || !c._oaMeetRequest) return;
@@ -20480,6 +20618,7 @@ function handleOAApprove(cid) {
   popConfirm('确定同意这次线下见面申请吗？', function() {
     var place = c._oaMeetRequest.place;
     runStampAnimation('已同意', 'approved', function() {
+      syncOABubbleStatus(c, 'approved'); // 卡片气泡同步显示“已同意”
       c._oaMeetRequest = null;
       save();
       var oldOAModal = document.getElementById('oaModal');
@@ -20489,7 +20628,7 @@ function handleOAApprove(cid) {
   });
 }
 
-// 5. 按钮回调：驳回
+// ===== [全新替换] 按钮回调：驳回 =====
 function handleOAReject(cid) {
   var c = getC(cid);
   if (!c || !c._oaMeetRequest) return;
@@ -20499,18 +20638,19 @@ function handleOAReject(cid) {
 
   popConfirm(tips, function() {
     runStampAnimation('已驳回', 'rejected', function() {
+      syncOABubbleStatus(c, 'rejected'); // 卡片气泡同步显示“已驳回”
       c._oaMeetRequest = null;
       save();
       var oldOAModal = document.getElementById('oaModal');
       if (oldOAModal) oldOAModal.remove();
       
-      renderChat(true); // ★ 修复关键：驳回后，立刻重新画出微信聊天框，确保用户留在聊天框里
-      declineMeet(c.id); // 执行原有驳回提示逻辑
+      renderChat(true); // 留在聊天页面
+      declineMeet(c.id);
     });
   });
 }
 
-// 6. 按钮回调：退回重写
+// ===== [全新替换] 按钮回调：退回重写 =====
 function handleOAReturn(cid) {
   var c = getC(cid);
   if (!c || !c._oaMeetRequest) return;
@@ -20519,6 +20659,7 @@ function handleOAReturn(cid) {
     if (!reason.trim()) return;
 
     runStampAnimation('已退回', 'returned', function() {
+      syncOABubbleStatus(c, 'returned'); // 卡片气泡同步显示“已退回”
       c._oaMeetRequest = null;
       save();
 
@@ -20527,7 +20668,6 @@ function handleOAReturn(cid) {
 
       renderChat(true);
 
-      // 把退回理由作为消息 Push 进记录并渲染
       var feedbackText = `【↩️ 退回申请】意见：${reason.trim()}`;
       DB.chats[c.id] = DB.chats[c.id] || [];
       DB.chats[c.id].push({
@@ -20541,10 +20681,110 @@ function handleOAReturn(cid) {
       save();
       renderChat(true); 
 
-      // 触发 AI 的微信回复，由 AI 解释并重新写一份申请
-      aiReply();
+      aiReply(); // 触发 AI 微信回复
     });
   }, { title: '退回重写', ok: '退回', cancel: '取消' });
+}
+// =========================================================================
+// ================= 📝 [全新新增] 挂载并拦截微信气泡渲染 =====================
+// =========================================================================
+
+// 劫持原来的 bubble 渲染：如果是 oa_invite 类型的消息，绘制工作审批卡片；否则，走原先的老气泡逻辑
+if (typeof window._originalBubble === 'undefined') {
+  window._originalBubble = window.bubble;
+  window.bubble = function(c, m) {
+    if (m.type === 'oa_invite') {
+      return renderOACardBubble(c, m);
+    }
+    return window._originalBubble(c, m);
+  };
+}
+
+// 生成 Work 微信/飞书风格的精美卡片 HTML
+function renderOACardBubble(c, m) {
+  var statusText = '待审批';
+  var statusClass = 'pending';
+  if (m.oaStatus === 'approved') { statusText = '已同意'; statusClass = 'approved'; }
+  else if (m.oaStatus === 'rejected') { statusText = '已驳回'; statusClass = 'rejected'; }
+  else if (m.oaStatus === 'returned') { statusText = '已退回'; statusClass = 'returned'; }
+
+  var html = `
+    <div class="oa-bubble-card-wrapper">
+      <div class="oa-bubble-card" onclick="clickOACardBubble('${c.id}', '${m.id}')">
+        <div class="oa-bubble-card-head">
+          <span class="oa-bubble-card-title">📝 线下见面申请单</span>
+          <span class="oa-bubble-card-status ${statusClass}">${statusText}</span>
+        </div>
+        <div class="oa-bubble-card-body">
+          <div class="oa-bubble-card-row">
+            <span class="oa-bubble-card-label">申请人</span>
+            <span class="oa-bubble-card-val">${esc(c.nick || c.name)}</span>
+          </div>
+          <div class="oa-bubble-card-row">
+            <span class="oa-bubble-card-label">地点</span>
+            <span class="oa-bubble-card-val" style="color:var(--theme); font-weight:600;">📍 ${esc(m.place || '待双方沟通')}</span>
+          </div>
+          <div class="oa-bubble-card-row">
+            <span class="oa-bubble-card-label">事由</span>
+            <span class="oa-bubble-card-val" style="color:var(--sub);">${esc(m.reason || '')}</span>
+          </div>
+        </div>
+        <div class="oa-bubble-card-foot">
+          ${m.oaStatus === 'pending' ? '点击办理审批 ＞' : '点击查看详情 ＞'}
+        </div>
+      </div>
+    </div>
+  `;
+  return html;
+}
+
+// 点击卡片后，打开 OA 详情弹窗
+function clickOACardBubble(cid, mid) {
+  var c = getC(cid);
+  if (!c) return;
+  
+  var msgs = DB.chats[cid] || [];
+  var m = msgs.find(function(msg) { return msg.id === mid; });
+  if (!m) return;
+
+  // 1. 将该卡片的数据激活至正在审批的数据中
+  c._oaMeetRequest = {
+    status: m.oaStatus,
+    id: m.oaId,
+    place: m.place,
+    duration: m.duration || '约 2 小时',
+    reason: m.reason,
+    time: m.time,
+    _relatedMsgId: m.id // 绑定卡片，好在审批完成时直接将它的状态刷成已同意/驳回
+  };
+  save();
+
+  // 2. 渲染滑起 OA 详情表单
+  renderOAMeetApproval(c);
+  
+  // 3. 将审批表上的按钮状态进行对应切换（如果已经审批过，不显示审批按钮）
+  var actionBar = document.getElementById('oaActionBar');
+  var badge = document.getElementById('oaStatusBadge');
+  var stamp = document.getElementById('oaStamp');
+  var stampTxt = document.getElementById('stampText');
+
+  if (m.oaStatus !== 'pending') {
+    if (actionBar) actionBar.style.display = 'none'; // 已经审批过，隐藏操作按钮
+    if (badge) badge.style.opacity = '0'; // 隐去状态黄标
+    if (stamp && stampTxt) {
+      stampTxt.innerText = m.oaStatus === 'approved' ? '已同意' : (m.oaStatus === 'rejected' ? '已驳回' : '已退回');
+      stamp.className = `oa-stamp ${m.oaStatus} animate`; // 直接盖上印章，并保持不消失
+      stamp.style.opacity = '0.85';
+    }
+  }
+}
+// ===== [全新新增] 审批页面点击✕或暂存，直接关掉面板回到微信聊天界面 =====
+function closeOATemp() {
+  var oldOAModal = document.getElementById('oaModal');
+  if (oldOAModal) {
+    oldOAModal.remove(); // 移除 OA 审批单界面
+  }
+  renderChat(true); // 👈 重新渲染微信界面（由于 c._oaMeetRequest 状态依然是 pending，输入框会保持锁定）
 }
 </script>
 </html>
