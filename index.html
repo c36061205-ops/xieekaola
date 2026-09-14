@@ -1946,15 +1946,20 @@ body.wx-theme-card #topbar.wx-topbar .tb-btn {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  min-height: 60px;
   background: var(--card);
   border-top: 0.5px solid var(--line);
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px;
   gap: 10px;
   z-index: 10;
+  box-sizing: border-box;
 }
+.oa-scroll-content {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
 .oa-btn {
   height: 38px;
   border-radius: 6px;
@@ -2180,7 +2185,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026911_1';
+const APP_VER = 'v2026914_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -14445,12 +14450,15 @@ s += '- 标签里的文字请一律用中文引号「」，不要出现英文双
   }
   // 🟢 [全新替换] 规范化的 XML 标签见面提示词
   s += `\n\n【💼 线下见面模式与OA申请表填写规范】\n` +
-       `当你根据当前的剧情、对话情绪、或者想要跟对方推进关系而产生“想要线下面对面见面”的意愿时，你必须在回复的最末尾附带以下尖括号标签（严禁在普通聊天气泡里用中文打出这些括号）：\n` +
-       `格式要求：<meet place="见面具体地点" reason="符合你当下面对人设和心情的见面理由"></meet>\n` +
-       `填写规范：\n` +
-       `1. “place”属性必须结合你们当前的聊天情境、世界观和时间安排，定一个具体真实的位置（例如：学校后街的旧咖啡馆、家楼下的便利店、旧操场看台等，严禁空泛说“老地方”或“任何地方”）。\n` +
-       `2. “reason”属性必须以你（角色）的第一人称语气撰写。根据你当下的心情（如撒娇、傲娇、失落或期待），写一段非常符合你说话风格的、30-70字左右的申请理由。这会被直接写在对方的OA审批单上，请务必真诚、符合人设且打动对方（例如：“微信里总是说不清楚...而且我今天带了你最想要的CD，我在老地方等你，不来我可要生气了！”）。\n` +
-       `3. 当你不打算、或剧情不需要见面的情况下，绝对不能输出该标签。\n`;
+       `当你根据当前剧情、对话情绪、或想推进关系而产生"想线下见面"的意愿时，必须在回复的最末尾附带以下尖括号标签（严禁在普通聊天气泡里用中文打出这些括号，也严禁把标签内容复述成台词）：\n` +
+       `格式：<meet type="申请类型" place="具体地点" duration="预计时长" reason="申请事由"></meet>\n` +
+       `四个字段的填写规范：\n` +
+       `1. type（申请类型）：用一个简短的名字概括你这次见面的目的，就像审批单的标题。例如"赔礼道歉""请你喝下午茶""想见你""当面说清楚""一起过生日"等，必须结合当前剧情，不要千篇一律，也不要写成"线下见面申请"这种废话。\n` +
+       `2. place（见面地点）：绝对不能为空，也绝对不能写"老地方""待双方沟通确定""任何地方""再说"这类模糊词，必须是一个具体、真实、能明确定位的场所，例如"学校后街的旧咖啡馆""你家楼下的便利店""市图书馆三楼靠窗座位""河边那张老长椅"。如果你想不出具体地点，就说明这次不适合见面，那就不要输出 meet 标签。\n` +
+       `3. duration（预计时长）：结合见面目的估一个合理时长，例如"约1小时""约2-3小时""一下午"。\n` +
+       `4. reason（申请事由）：这是重点。必须以你（角色）的第一人称语气，专门为"这次见面"重新写一句申请理由，30-70字，内容要和 type 匹配、并贴合你此刻的情绪与人设。严禁直接复制你上一句聊天台词。示例：type是"赔礼道歉"→reason写"刚才是我太冲动、态度不好，微信里说总觉得不够诚恳，想当面跟你说声对不起"；type是"请你喝下午茶"→reason写"下午刚好没事，想约你出来坐坐，把上次没聊完的那件事说完，顺便尝尝新开那家店"。\n` +
+       `5. 当你不打算见面、或剧情不需要时，绝对不要输出该标签。6. 注意：place、reason、type、duration 四个属性的内容里，一律使用中文引号「」或""，绝对不要使用英文单引号 ' 和英文双引号 "，否则会破坏标签格式。
+\n`;
 	   
   return s;
 }
@@ -15248,7 +15256,7 @@ function toggleMode() {
     // 让 AI 知道已回线上，不再沿用线下叙事口吻
     backOnline(c.id);
   } else {
-    proposeMeet(c, '', 'user');
+    proposeMeet(c, '', '', 'user');
   }
 }
 function appendBubble(c,m){if(m.hidden)return;if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
@@ -16466,12 +16474,16 @@ lines.forEach(line => {
         // 处理标签本身
         switch (t.tag) {
             case 'meet': {
-                var pMatch = (t.attrs || '').match(/place=["']([^"']*)["']/);
+                var attrs = t.attrs || '';
+                var pMatch = attrs.match(/place=["']([^"']*)["']/);
                 var mPlace = pMatch ? pMatch[1] : '';
-                // 🟢 新增：提取尖括号里附带的 reason（事由）属性
-                var rMatch = (t.attrs || '').match(/reason=["']([^"']*)["']/);
+                var rMatch = attrs.match(/reason=["']([^"']*)["']/);
                 var mReason = rMatch ? rMatch[1] : '';
-                parts.push({ type: 'meet_invite', place: mPlace, reason: mReason });
+                var tyMatch = attrs.match(/type=["']([^"']*)["']/);
+                var mType = tyMatch ? tyMatch[1] : '';
+                var duMatch = attrs.match(/duration=["']([^"']*)["']/);
+                var mDuration = duMatch ? duMatch[1] : '';
+                parts.push({ type: 'meet_invite', place: mPlace, reason: mReason, meetType: mType, duration: mDuration });
                 break;
             }
 			case 'msg': {
@@ -16872,7 +16884,7 @@ let allh = (DB.chats[c.id] || []).map(function(m){ return toApiMsg(m, _withTime)
         save();
       }
 if (Date.now() > (c.meetCd || 0)) {
-    modeReminder += '\n【线下见面·相处常态】你和对方是一段以线上陪伴为主、彼此都很自在的关系，日常这样聊天本身就已经很好、很满足。你不会主动去想、也不会主动提起线下见面，更不需要为"没有见面"寻找任何理由或流露任何遗憾——这不是需要弥补的缺憾，而是你们自然舒服的相处方式。只有当对方"明确主动"表达了想见你时，你才可以顺着回应；而一旦你在回复里表达了任何见面的意愿（无论是同意、提议还是暗示），就必须在整段消息末尾另起一行、单独输出标记 [见面|地点]，绝对不允许只用言语说见面却不输出这个标记。地点简短如"楼下""老地方"，没有明确地点就写 [见面|]。发出标记即可，不要在这条里描写见面过程。';
+    modeReminder += '\n【线下见面·相处常态】你和对方是一段以线上陪伴为主、彼此都很自在的关系，日常这样聊天本身就已经很好、很满足。你不会主动去想、也不会主动提起线下见面，更不需要为"没有见面"寻找任何理由或流露任何遗憾——这不是需要弥补的缺憾，而是你们自然舒服的相处方式。只有当对方"明确主动"表达了想见你时，你才可以顺着回应；而一旦你在回复里表达了任何见面的意愿（无论是同意、提议还是暗示），就必须在整段消息末尾另起一行，按上面【线下见面模式与OA申请表填写规范】的格式，完整输出 <meet type="" place="" duration="" reason=""></meet> 标签（四个字段都要认真填），绝对不允许只用言语说见面却不输出这个标签。输出标签即可，不要在这条消息里描写见面过程。';
 } else {
     modeReminder += '\n【线下见面·今日止】对方今天已经婉拒过线下见面。从现在到今天结束，你绝对不要再主动提起、暗示或请求任何形式的见面，也不要输出见面标记，就自然、轻松地继续线上聊天，不要流露失落或反复试探。';
 }
@@ -16944,6 +16956,8 @@ out = out.replace(/\[\[\[OPTIONS\]\]\][\s\S]*$/i, '').trim();
     
     let meetPlace = null;
 	let meetReason = null;
+	let meetType = '';
+	let meetDuration = '';
     let wantBack = false;
 
     // 3. 调用解析器（线下叙事整段处理，不拆碎气泡）
@@ -16990,9 +17004,11 @@ narr = narr.replace(/<\/?(?:inner|心声|voice|sticker|recall|transfer|block)[^>
     for (let i = 0; i < parts.length; i++) {
         const part = parts[i];
     if (part.type === 'meet_invite' && c.mode === 'online') {
-      meetPlace = part.place || '老地方';
-      meetReason = part.reason || ''; // 🟢 新增：把解析出来的事由存进变量里
-      continue; // 捕获后直接跳过，不用把它当成普通聊天文字气泡输出
+      meetPlace = part.place || '';
+      meetReason = part.reason || '';
+      meetType = part.meetType || '';
+      meetDuration = part.duration || '';
+      continue;
     }
 
 	// --- 处理特殊动作 ---
@@ -17191,7 +17207,7 @@ if (c.ideaOn && _pendingIdeas && _pendingIdeas.length) {
    if (meetCooling) {
      insertSystemMessage('（对方今天似乎还想见面，你可以回应 TA）');
    } else {
-     proposeMeet(c, meetPlace || '', meetReason || ''); // 👈 已经把 meetReason 传进去了
+     proposeMeet(c, meetPlace || '', meetReason || '', 'ai', meetType || '', meetDuration || '');
    }
    }
     if (wantBack && c.mode === 'offline') proposeBackOnline(c);
@@ -17402,11 +17418,11 @@ function checkOALimit(c) {
 }
 
 // ===== [全新替换] 见面邀请触发器（支持动态事由与地点） =====
-function proposeMeet(c, place, reason, initiator) {
+function proposeMeet(c, place, reason, initiator, meetType, duration) {
   initiator = initiator || 'ai';
   var isUser = (initiator === 'user');
 
-  // 如果是用户主动点击按钮发起，直接弹窗确认
+  // 用户主动发起：直接确认后进线下，不走审批
   if (isUser) {
     popConfirm('确定要开启线下见面吗？', function() {
       enterOffline(c.id, place || '');
@@ -17414,58 +17430,55 @@ function proposeMeet(c, place, reason, initiator) {
     return;
   }
 
-  // AI 发起：判定今天提交的审批是否达到上限（2次）
+  // AI 发起：今日审批额度判定
   var todayCount = checkOALimit(c);
   if (todayCount >= 2) {
-    insertSystemMessage(`（${c.nick || c.name} 今天还想发起线下见面，但由于今日审批额度（2次）已用完，系统已自动拦截。）`);
+    insertSystemMessage(`（${c.name || c.nick} 今天还想发起线下见面，但由于今日审批额度（2次）已用完，系统已自动拦截。）`);
     return;
   }
 
-  // 🔴 动态事由判定：如果 AI 标记里没写事由，再用最后一句聊天作为 fallback 兜底
-  if (!reason) {
-    var msgs = DB.chats[c.id] || [];
-    var lastAIMsg = '';
-    for (var i = msgs.length - 1; i >= 0; i--) {
-      if (msgs[i].role === 'assistant' && msgs[i].type === 'text') {
-        lastAIMsg = msgs[i].content;
-        break;
-      }
-    }
-    reason = lastAIMsg || '有些话感觉在微信里总是说不清楚，我们能当面聊聊吗？';
+  // 事由：优先用 AI 亲笔写的，实在没有才用兜底句（不再复制上一句台词）
+  if (!reason || !reason.trim()) {
+    reason = '有些话感觉在微信里总是说不清楚，想约你出来当面聊聊。';
+  }
+  // 类型：优先用 AI 写的，没有才给通用标题（不再写死"线下见面申请"）
+  if (!meetType || !meetType.trim()) {
+    meetType = '想见你';
+  }
+  // 地点必须由 AI 提供具体值；缺失或占位词一律视为无效，不发起审批
+  if (!place || !place.trim() || /待.*沟通|待定|再说|任何地方|老地方/.test(place)) {
+    insertSystemMessage(`（${c.name || c.nick} 想见面，但没有说清楚具体地点，本次申请未发起。）`);
+    return;
   }
 
-  // 自动判定预计时长
-  var duration = '约 2 小时';
-  if (/(天|晚|夜|过夜|住)/.test(reason)) {
-    duration = '约 6-8 小时';
-  } else if (/(吃|饭|喝|咖啡|午餐|晚餐)/.test(reason)) {
-    duration = '约 2-3 小时';
+  // 时长：优先用 AI 写的，没有才给默认（不再用正则去猜）
+  if (!duration || !duration.trim()) {
+    duration = '约 2 小时';
   }
 
-  // 动态生成唯一审批单号，存入缓存
   var now = new Date();
   var yyyy = now.getFullYear();
   var mm = String(now.getMonth() + 1).padStart(2, '0');
   var dd = String(now.getDate()).padStart(2, '0');
   var randomNo = Math.floor(1000 + Math.random() * 9000);
   var serialNo = `SP-${yyyy}${mm}${dd}-${randomNo}`;
-  var messageId = newId(); // 绑定卡片消息的唯一ID
+  var messageId = newId();
 
-  // 构建暂存的 OA 数据模型
   c._oaMeetRequest = {
     status: 'pending',
     id: serialNo,
-    place: place || '待双方沟通确定',
+    type: meetType,
+    place: place,
     duration: duration,
-    reason: reason, // 👈 100% 动态的 AI 亲笔事由！
+    reason: reason,
     time: now.getTime(),
     _relatedMsgId: messageId
   };
-  
+
   c._oaSubmitCount = todayCount + 1;
   c._oaSubmitDate = now.toDateString();
-  
-  c._justProposed = true; // 临时允许本次 renderChat 不拦截
+
+  c._justProposed = true;
   DB.chats[c.id].push({
     id: messageId,
     role: 'assistant',
@@ -17473,15 +17486,16 @@ function proposeMeet(c, place, reason, initiator) {
     content: '发起了线下见面申请',
     time: now.getTime(),
     oaId: serialNo,
-    place: c._oaMeetRequest.place,
-    reason: c._oaMeetRequest.reason,
-    duration: c._oaMeetRequest.duration,
+    oaType: meetType,
+    place: place,
+    reason: reason,
+    duration: duration,
     oaStatus: 'pending'
   });
 
   save();
-  renderChat(true); // 刷新聊天
-  
+  renderChat(true);
+
   c._justProposed = false;
   save();
 }
@@ -20453,6 +20467,7 @@ function renderOAMeetApproval(c) {
   // 读取“我”的实名，以及“我”对该角色的专属身份 (c.myJob)
   var userName = DB.me.realName || DB.me.name || '我';
   var userIdentity = c.myJob || '主管审批人';
+  var applicantName = c.name || c.nick || '对方';
   var reqDate = new Date(req.time);
   var timeStr = String(reqDate.getHours()).padStart(2,'0') + ':' + String(reqDate.getMinutes()).padStart(2,'0');
   var fullDateStr = reqDate.getFullYear() + '.' + String(reqDate.getMonth()+1).padStart(2,'0') + '.' + String(reqDate.getDate()).padStart(2,'0');
@@ -20460,7 +20475,7 @@ function renderOAMeetApproval(c) {
   // 处理头像（如果有就渲染，没有截取名字首字）
   var aiAvatarHtml = c.avatar 
     ? `<img src="${esc(c.avatar)}" alt="avatar">` 
-    : esc((c.nick || c.name).charAt(0));
+    : esc(applicantName.charAt(0));
   var userAvatarHtml = DB.me.avatar 
     ? `<img src="${esc(DB.me.avatar)}" alt="avatar">` 
     : esc(userName.charAt(0));
@@ -20491,11 +20506,11 @@ function renderOAMeetApproval(c) {
           <div class="oa-card-header">申请明细</div>
           <div class="oa-field">
             <span class="oa-field-label">申请人员</span>
-            <span class="oa-field-value">${esc(c.nick || c.name)}</span>
+            <span class="oa-field-value">${esc(applicantName)}</span>
           </div>
           <div class="oa-field">
             <span class="oa-field-label">审批类型</span>
-            <span class="oa-field-value">线下见面申请</span>
+            <span class="oa-field-value">${esc(req.type || '线下见面申请')}</span>
           </div>
           <div class="oa-field">
             <span class="oa-field-label">见面地点</span>
@@ -20518,7 +20533,7 @@ function renderOAMeetApproval(c) {
               <div class="oa-avatar">${aiAvatarHtml}</div>
               <div class="oa-node-content">
                 <div class="oa-node-row">
-                  <span class="oa-node-name">${esc(c.nick || c.name)}</span>
+                  <span class="oa-node-name">${esc(applicantName)}</span>
                   <span class="oa-node-time">${timeStr}</span>
                 </div>
                 <div class="oa-node-action">发起申请</div>
@@ -20718,7 +20733,7 @@ function renderOACardBubble(c, m) {
         <div class="oa-bubble-card-body">
           <div class="oa-bubble-card-row">
             <span class="oa-bubble-card-label">申请人</span>
-            <span class="oa-bubble-card-val">${esc(c.nick || c.name)}</span>
+            <span class="oa-bubble-card-val">${esc(c.name || c.nick)}</span>
           </div>
           <div class="oa-bubble-card-row">
             <span class="oa-bubble-card-label">地点</span>
@@ -20751,6 +20766,7 @@ function clickOACardBubble(cid, mid) {
   c._oaMeetRequest = {
     status: m.oaStatus,
     id: m.oaId,
+    type: m.oaType,
     place: m.place,
     duration: m.duration || '约 2 小时',
     reason: m.reason,
@@ -20775,6 +20791,14 @@ function clickOACardBubble(cid, mid) {
       stampTxt.innerText = m.oaStatus === 'approved' ? '已同意' : (m.oaStatus === 'rejected' ? '已驳回' : '已退回');
       stamp.className = `oa-stamp ${m.oaStatus} animate`; // 直接盖上印章，并保持不消失
       stamp.style.opacity = '0.85';
+    }
+    // 新增：重新打开已审批的卡片时，同步刷新"审批流程"里的时间线文字
+    var userTimeStatus = document.getElementById('userTimeStatus');
+    if (userTimeStatus) {
+      userTimeStatus.innerText = m.oaStatus === 'approved' ? '同意' : (m.oaStatus === 'rejected' ? '驳回' : '退回');
+      if (m.oaStatus === 'approved') userTimeStatus.style.color = 'var(--theme)';
+      if (m.oaStatus === 'rejected') userTimeStatus.style.color = '#FF3B30';
+      if (m.oaStatus === 'returned') userTimeStatus.style.color = '#FF9A00';
     }
   }
 }
