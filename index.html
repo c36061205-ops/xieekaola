@@ -2130,6 +2130,383 @@ body.wx-theme-card #topbar.wx-topbar .tb-btn {
   color: var(--theme);
   font-weight: 600;
 }
+/* ==================================================
+   📜 「微光信笺」主题样式 (wx-theme-letter)
+   ================================================== */
+body.wx-theme-letter {
+  --letter-back-3: linear-gradient(180deg, 
+    color-mix(in srgb, var(--theme) 75%, #fff 25%) 0%, 
+    color-mix(in srgb, var(--theme) 50%, #fff 50%) 30%, 
+    transparent 100%);
+  --letter-back-2: linear-gradient(180deg, 
+    color-mix(in srgb, var(--theme) 48%, #fff 52%) 0%, 
+    color-mix(in srgb, var(--theme) 28%, #fff 72%) 35%, 
+    transparent 100%);
+  --letter-back-1: linear-gradient(180deg, 
+    color-mix(in srgb, var(--theme) 25%, #fff 75%) 0%, 
+    color-mix(in srgb, var(--theme) 10%, #fff 90%) 40%, 
+    transparent 100%);
+  
+  --letter-glass-bg: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.48) 0%, 
+    rgba(255, 255, 255, 0.72) 40%, 
+    rgba(255, 255, 255, 0.88) 100%);
+  
+  --letter-glow-other: color-mix(in srgb, var(--theme) 26%, transparent);
+  --letter-glow-self: rgba(255, 255, 255, 0.7);
+  --letter-bubble-other: color-mix(in srgb, var(--theme) 15%, var(--card) 85%);
+  --letter-bubble-self: rgba(255, 255, 255, 0.94);
+}
+
+/* 微信下隐藏系统顶部栏，交给信笺外壳接管 */
+body.wx-theme-letter #topbar.wx-topbar {
+  display: none !important;
+}
+
+/* 舞台容器 */
+body.wx-theme-letter .letter-stage {
+  position: relative;
+  padding: 0 14px 14px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* 顶部常驻箴言 */
+body.wx-theme-letter .letter-top-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 10px 18px 12px;
+}
+body.wx-theme-letter .letter-phrase {
+  font-family: "Georgia", "Baskerville", serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+body.wx-theme-letter .letter-dots {
+  color: var(--sub);
+  font-size: 14px;
+  letter-spacing: 2px;
+  opacity: 0.6;
+}
+
+/* 3层错落背板 */
+body.wx-theme-letter .letter-back-3 {
+  position: absolute;
+  top: 42px;
+  left: 34px;
+  right: 14px;
+  height: 440px;
+  background: var(--letter-back-3);
+  border-radius: 36px 36px 0 0;
+  transform: rotate(3.2deg);
+  filter: blur(5px);
+  opacity: 0.85;
+  z-index: 1;
+  pointer-events: none;
+}
+body.wx-theme-letter .letter-back-2 {
+  position: absolute;
+  top: 48px;
+  left: 14px;
+  right: 32px;
+  height: 410px;
+  background: var(--letter-back-2);
+  border-radius: 34px 34px 0 0;
+  transform: rotate(-2.2deg);
+  filter: blur(3px);
+  opacity: 0.9;
+  z-index: 2;
+  pointer-events: none;
+}
+body.wx-theme-letter .letter-back-1 {
+  position: absolute;
+  top: 54px;
+  left: 24px;
+  right: 20px;
+  height: 380px;
+  background: var(--letter-back-1);
+  border-radius: 34px 34px 0 0;
+  transform: rotate(0.8deg);
+  filter: blur(1.5px);
+  opacity: 0.95;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* 前景磨砂主卡（内凹切口） */
+body.wx-theme-letter .letter-main-card {
+  position: relative;
+  flex: 1;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  clip-path: path("M 0,36 A 36,36 0 0,1 36,0 L 102,0 C 112,0 117,5 121,11 C 125,16 130,18 140,18 L 232,18 C 242,18 247,16 251,11 C 255,5 260,0 270,0 L 336,0 A 36,36 0 0,1 372,36 L 372,680 A 36,36 0 0,1 336,716 L 36,716 A 36,36 0 0,1 0,680 Z");
+  background: var(--letter-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.75);
+  border-radius: 36px;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.06);
+}
+
+body.wx-theme-letter .letter-notch-time {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--sub);
+  letter-spacing: 0.5px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* 顶部导航栏 */
+body.wx-theme-letter .letter-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 24px 18px 8px;
+  z-index: 10;
+}
+body.wx-theme-letter .letter-nav-item {
+  width: 44px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: var(--sub);
+  cursor: pointer;
+  transition: all .2s;
+}
+body.wx-theme-letter .letter-nav-item svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.wx-theme-letter .letter-nav-item.active {
+  color: var(--theme);
+  transform: translateY(-1px);
+}
+
+body.wx-theme-letter .letter-view-container {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* 列表项 */
+body.wx-theme-letter .letter-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: background .15s;
+}
+body.wx-theme-letter .letter-cell:active { background: rgba(255, 255, 255, 0.45); }
+
+body.wx-theme-letter .letter-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid rgba(255,255,255,0.9);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+body.wx-theme-letter .letter-cell-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+body.wx-theme-letter .letter-cell-top { display: flex; justify-content: space-between; align-items: center; }
+body.wx-theme-letter .letter-cell-name { font-size: 14px; font-weight: 600; color: var(--text); }
+body.wx-theme-letter .letter-cell-time { font-size: 10px; color: var(--sub); }
+body.wx-theme-letter .letter-cell-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+body.wx-theme-letter .letter-cell-msg { font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+body.wx-theme-letter .letter-unread {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--theme);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 9.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 消息气泡粉刷 */
+body.wx-theme-letter .msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 85%;
+}
+body.wx-theme-letter .msg.me {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+body.wx-theme-letter .cavatar {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(255,255,255,0.9) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+body.wx-theme-letter .mbody {
+  border-radius: 16px !important;
+  padding: 9px 13px !important;
+  font-size: 13.5px !important;
+  line-height: 1.5 !important;
+  border: none !important;
+}
+body.wx-theme-letter .msg:not(.me) .mbody {
+  background: var(--letter-bubble-other) !important;
+  color: var(--text) !important;
+  box-shadow: 0 0 16px var(--letter-glow-other), 0 2px 4px rgba(0,0,0,0.02) !important;
+}
+body.wx-theme-letter .msg.me .mbody {
+  background: var(--letter-bubble-self) !important;
+  color: var(--text) !important;
+  box-shadow: 0 0 14px var(--letter-glow-self), 0 2px 6px rgba(0,0,0,0.03) !important;
+}
+
+/* 通讯录 / 发现 / 我的卡片组件 */
+body.wx-theme-letter .letter-mood-box { text-align: center; padding: 12px 10px 18px; }
+body.wx-theme-letter .letter-mood-tag {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--theme);
+  padding: 2px 10px;
+  border: 1px solid var(--theme);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+body.wx-theme-letter .letter-mood-txt { font-size: 13px; line-height: 1.7; color: var(--text); }
+
+body.wx-theme-letter .letter-action-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--letter-bubble-self);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin: 0 14px 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--letter-glow-self);
+}
+body.wx-theme-letter .letter-action-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: color-mix(in srgb, var(--theme) 14%, transparent);
+  display: flex; align-items: center; justify-content: center;
+}
+body.wx-theme-letter .letter-action-icon svg { width: 17px; height: 17px; stroke: var(--theme); fill: none; }
+body.wx-theme-letter .letter-action-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
+body.wx-theme-letter .letter-action-sub { font-size: 10.5px; color: var(--sub); }
+
+body.wx-theme-letter .letter-entry-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--letter-bubble-self);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 0 14px 10px;
+  cursor: pointer;
+  box-shadow: 0 0 12px var(--letter-glow-self);
+}
+body.wx-theme-letter .letter-entry-left { display: flex; align-items: center; gap: 12px; }
+body.wx-theme-letter .letter-icon-box {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: color-mix(in srgb, var(--theme) 12%, transparent);
+  display: flex; align-items: center; justify-content: center;
+}
+body.wx-theme-letter .letter-icon-box svg { width: 18px; height: 18px; stroke: var(--theme); fill: none; }
+
+body.wx-theme-letter .letter-profile-box {
+  background: var(--letter-bubble-self);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 20px;
+  padding: 16px;
+  margin: 0 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 0 12px var(--letter-glow-self);
+}
+body.wx-theme-letter .letter-profile-ava {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--theme);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: bold;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+
+body.wx-theme-letter .letter-form-card {
+  background: var(--letter-bubble-self);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 18px;
+  padding: 4px 14px;
+  margin: 0 14px 12px;
+  box-shadow: 0 0 10px var(--letter-glow-self);
+}
+body.wx-theme-letter .letter-form-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+body.wx-theme-letter .letter-form-row:last-child { border-bottom: none; }
+body.wx-theme-letter .letter-form-label { font-size: 13px; color: var(--sub); width: 75px; flex-shrink: 0; }
+body.wx-theme-letter .letter-form-input {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-size: 13.5px; color: var(--text); font-weight: 500;
+}
+
+/* 聊天底栏 */
+body.wx-theme-letter #chatBottom {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
+  padding: 8px 12px 16px !important;
+}
 </style>
 </head>
 <body>
@@ -2185,7 +2562,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026914_1';
+const APP_VER = 'v2026916_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -10124,27 +10501,30 @@ function openGroupSet(gid){
 // 以后想加新的微信主题，只需要在这个数组里新增一行，
 // 不需要去改其他任何函数！
 const WX_THEMES = [
-  { id: 'default', name: '经典微信原版', icon: '🟩', tabIconMode: 'img' },
-  { id: 'card',    name: '软萌卡片风',   icon: '🍬', tabIconMode: 'svg' },
+  { id: 'default', name: '经典微信', icon: '🟩', tabIconMode: 'img' },
+  { id: 'card',    name: '软萌卡片',   icon: '🍬', tabIconMode: 'svg' },
+  { id: 'letter',  name: '微光信笺',     icon: '📜', tabIconMode: 'svg' },
 ];
 
 function applyWxTheme(themeName) {
   DB.settings = DB.settings || {};
   DB.settings.wxTheme = themeName;
   save();
+  document.body.classList.remove('wx-theme-card', 'wx-theme-letter');
   if (themeName === 'card') {
     document.body.classList.add('wx-theme-card');
-  } else {
-    document.body.classList.remove('wx-theme-card');
+  } else if (themeName === 'letter') {
+    document.body.classList.add('wx-theme-letter');
   }
-  // 根据主题配置表，记录这个主题的底部导航图标该用哪种模式（img图片 或 svg线条图标）
   var themeConfig = WX_THEMES.find(function(t){ return t.id === themeName; });
   document.body.setAttribute('data-tab-icon-mode', (themeConfig && themeConfig.tabIconMode) || 'img');
 }
 
 // 页面刚加载时自动同步一次状态（用户上次选了卡片风，这次打开网页要记得恢复）
-if ((DB.settings && DB.settings.wxTheme) === 'card') {
+if (DB.settings && DB.settings.wxTheme === 'card') {
   document.body.classList.add('wx-theme-card');
+} else if (DB.settings && DB.settings.wxTheme === 'letter') {
+  document.body.classList.add('wx-theme-letter');
 }
 
 function renderWxMe(){
@@ -15262,9 +15642,13 @@ function toggleMode() {
 function appendBubble(c,m){if(m.hidden)return;if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
 function scrollBottom(){
   requestAnimationFrame(() => {
+    var vc = document.querySelector('.letter-view-container');
+    if (vc) vc.scrollTop = vc.scrollHeight;
     content.scrollTop = content.scrollHeight;
     // 双重保险：如果图片还没加载完，延迟再滚一次
     setTimeout(() => {
+      var vc2 = document.querySelector('.letter-view-container');
+      if (vc2) vc2.scrollTop = vc2.scrollHeight;
       content.scrollTop = content.scrollHeight;
     }, 150);
   });
@@ -20810,5 +21194,666 @@ function closeOATemp() {
   }
   renderChat(true); // 👈 重新渲染微信界面（由于 c._oaMeetRequest 状态依然是 pending，输入框会保持锁定）
 }
+</script>
+
+<!-- ==================================================
+     📜 「微光信笺」终极完整插件（全页面接管 + 实体叠纸 + 聊天气泡美化）
+     ================================================== -->
+<script>
+(function initLetterThemePlugin() {
+  // 1. 注入信笺核心视觉 CSS
+  var styleId = 'wx-theme-letter-style';
+  var oldStyle = document.getElementById(styleId);
+  if (oldStyle) oldStyle.remove();
+
+  var styleEl = document.createElement('style');
+  styleEl.id = styleId;
+  styleEl.innerHTML = `
+    body.wx-theme-letter {
+      --letter-back-3: linear-gradient(135deg, color-mix(in srgb, var(--theme) 85%, #fff 15%) 0%, color-mix(in srgb, var(--theme) 60%, #fff 40%) 100%);
+      --letter-back-2: linear-gradient(135deg, color-mix(in srgb, var(--theme) 55%, #fff 45%) 0%, color-mix(in srgb, var(--theme) 35%, #fff 65%) 100%);
+      --letter-back-1: linear-gradient(135deg, color-mix(in srgb, var(--theme) 30%, #fff 70%) 0%, color-mix(in srgb, var(--theme) 12%, #fff 88%) 100%);
+      --letter-glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.72) 35%, rgba(255, 255, 255, 0.92) 100%);
+      --letter-glow-other: color-mix(in srgb, var(--theme) 26%, transparent);
+      --letter-glow-self: rgba(255, 255, 255, 0.75);
+      --letter-bubble-other: color-mix(in srgb, var(--theme) 14%, var(--card) 86%);
+      --letter-bubble-self: rgba(255, 255, 255, 0.94);
+    }
+    
+    body.wx-theme-letter #topbar,
+    body.wx-theme-letter #tabbar { display: none !important; }
+
+    /* 舞台基础 */
+    body.wx-theme-letter .letter-stage {
+      position: relative;
+      padding: 0 14px 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+	
+    /* 顶部箴言与加号 */
+    body.wx-theme-letter .letter-top-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px 22px 14px;
+      z-index: 5;
+    }
+    body.wx-theme-letter .letter-phrase {
+      font-family: "Georgia", "Baskerville", serif;
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+    body.wx-theme-letter .letter-top-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    body.wx-theme-letter .letter-add-btn {
+      font-size: 20px;
+      font-weight: 300;
+      color: var(--text);
+      cursor: pointer;
+      opacity: 0.85;
+      padding: 0 4px;
+    }
+    body.wx-theme-letter .letter-dots {
+      color: var(--sub);
+      font-size: 14px;
+      letter-spacing: 2px;
+      opacity: 0.6;
+    }
+
+    /* ★ 实体 3 层层叠信纸（边缘清晰、物理向右上/左上露角） */
+    body.wx-theme-letter .letter-back-3 {
+      position: absolute;
+      top: 36px;
+      left: 44px;
+      right: 8px;
+      height: 160px;
+      background: color-mix(in srgb, var(--theme) 65%, #fff 35%);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 36px 36px 0 0;
+      transform: rotate(4.2deg);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+      z-index: 1;
+      pointer-events: none;
+    }
+    body.wx-theme-letter .letter-back-2 {
+      position: absolute;
+      top: 42px;
+      left: 8px;
+      right: 38px;
+      height: 150px;
+      background: color-mix(in srgb, var(--theme) 40%, #fff 60%);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 34px 34px 0 0;
+      transform: rotate(-3.2deg);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      z-index: 2;
+      pointer-events: none;
+    }
+    body.wx-theme-letter .letter-back-1 {
+      position: absolute;
+      top: 48px;
+      left: 22px;
+      right: 22px;
+      height: 140px;
+      background: color-mix(in srgb, var(--theme) 20%, #fff 80%);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 34px 34px 0 0;
+      transform: rotate(0.8deg);
+      z-index: 3;
+      pointer-events: none;
+    }
+    /* 前景磨砂主卡（内凹切口，底部通底无收口） */
+    body.wx-theme-letter .letter-main-card {
+      position: relative;
+      flex: 1;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      clip-path: path("M 0,36 A 36,36 0 0,1 36,0 L 102,0 C 112,0 117,5 121,11 C 125,16 130,18 140,18 L 232,18 C 242,18 247,16 251,11 C 255,5 260,0 270,0 L 336,0 A 36,36 0 0,1 372,36 L 372,716 L 0,716 Z");
+      background: var(--letter-glass-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.75);
+      border-radius: 36px 36px 0 0;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.06);
+    }
+	
+    body.wx-theme-letter .letter-notch-time {
+      position: absolute;
+      top: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--sub);
+      letter-spacing: 0.5px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* 顶部导航栏 */
+    body.wx-theme-letter .letter-nav {
+      display: flex;
+      justify-content: space-around;
+      padding: 24px 18px 8px;
+      z-index: 10;
+    }
+    body.wx-theme-letter .letter-nav-item {
+      width: 44px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      color: var(--sub);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    body.wx-theme-letter .letter-nav-item svg { width: 20px !important; height: 20px !important; fill: none !important; stroke: currentColor !important; stroke-width: 2 !important; }
+    body.wx-theme-letter .letter-nav-item.active { color: var(--theme); transform: translateY(-1px); }
+
+    body.wx-theme-letter .letter-view-container {
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+    }
+    body.wx-theme-letter .letter-view-container::-webkit-scrollbar { width: 5px; }
+    body.wx-theme-letter .letter-view-container::-webkit-scrollbar-thumb {
+      background: var(--theme);
+      border-radius: 3px;
+      opacity: 0.6;
+    }
+    body.wx-theme-letter .letter-view-container::-webkit-scrollbar-track { background: transparent; }
+	
+	
+    /* 列表项 */
+    body.wx-theme-letter .letter-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    body.wx-theme-letter .letter-cell:active { background: rgba(255, 255, 255, 0.45); }
+
+    body.wx-theme-letter .letter-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--theme);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 15px;
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+      flex-shrink: 0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    body.wx-theme-letter .letter-cell-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    body.wx-theme-letter .letter-cell-top { display: flex; justify-content: space-between; align-items: center; }
+    body.wx-theme-letter .letter-cell-name { font-size: 14.5px; font-weight: 600; color: var(--text); }
+    body.wx-theme-letter .letter-cell-time { font-size: 10.5px; color: var(--sub); }
+    body.wx-theme-letter .letter-cell-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    body.wx-theme-letter .letter-cell-msg { font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    body.wx-theme-letter .letter-unread { min-width: 16px; height: 16px; padding: 0 4px; background: var(--theme); color: #fff; border-radius: 8px; font-size: 9.5px; display: flex; align-items: center; justify-content: center; }
+
+    /* ★ 聊天详情页：顶栏与气泡发光体系 */
+    body.wx-theme-letter .letter-chat-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 16px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.4);
+      z-index: 10;
+    }
+    body.wx-theme-letter .letter-chat-back {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.6); border: none;
+      color: var(--theme); display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    body.wx-theme-letter .letter-chat-scroll {
+      flex: 1; overflow-y: auto; padding: 14px 14px 10px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    /* 气泡美化：平滑大圆角 + 发光投影 + 头像分离 */
+    body.wx-theme-letter .msg {
+      display: flex !important;
+      align-items: flex-start !important;
+      gap: 10px !important;
+      max-width: 84% !important;
+      padding: 2px 4px !important;
+    }
+    body.wx-theme-letter .msg.me {
+      align-self: flex-end !important;
+      flex-direction: row-reverse !important;
+    }
+    body.wx-theme-letter .cavatar {
+      width: 34px !important;
+      height: 34px !important;
+      border-radius: 50% !important;
+      border: 2px solid rgba(255,255,255,0.95) !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+      background-color: var(--theme) !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      color: #fff !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 13px !important;
+      flex-shrink: 0 !important;
+    }
+    body.wx-theme-letter .mbody {
+      border-radius: 16px !important;
+      padding: 10px 14px !important;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      word-break: break-word !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    body.wx-theme-letter .msg:not(.me) .mbody {
+      background: color-mix(in srgb, var(--theme) 14%, var(--card) 86%) !important;
+      color: var(--text) !important;
+      border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+    }
+    body.wx-theme-letter .msg.me .mbody {
+      background: rgba(255, 255, 255, 0.94) !important;
+      color: var(--text) !important;
+      border: 1px solid rgba(255, 255, 255, 0.8) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+    /* 聊天底栏：严丝合缝贴底，与主卡融为一体 */
+    body.wx-theme-letter #chatBottom {
+      background: var(--letter-glass-bg) !important;
+      backdrop-filter: blur(24px) !important;
+      -webkit-backdrop-filter: blur(24px) !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
+      padding: 6px 14px calc(12px + env(safe-area-inset-bottom, 0px)) 14px !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      position: relative !important;
+      z-index: 15 !important;
+      flex-shrink: 0 !important;
+    }
+    body.wx-theme-letter .letter-stage {
+      padding-bottom: 0 !important;
+    }
+    body.wx-theme-letter #bubbleRow { display: flex !important; gap: 6px !important; margin-bottom: 6px !important; overflow-x: auto !important; }
+    body.wx-theme-letter .bubble-btn {
+      background: rgba(255, 255, 255, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.9) !important;
+      border-radius: 14px !important;
+      padding: 4px 10px !important;
+      font-size: 11.5px !important;
+      color: var(--text) !important;
+    }
+    body.wx-theme-letter #chatInput {
+      background: rgba(255, 255, 255, 0.7) !important;
+      border: 1px solid rgba(255, 255, 255, 0.85) !important;
+      border-radius: 18px !important;
+    }
+
+    /* 通讯录 / 发现 / 我的卡片 */
+    body.wx-theme-letter .letter-mood-box { text-align: center; padding: 12px 10px 18px; }
+    body.wx-theme-letter .letter-mood-tag { display: inline-block; font-size: 9px; letter-spacing: 2px; color: var(--theme); padding: 2px 10px; border: 1px solid var(--theme); border-radius: 12px; margin-bottom: 8px; opacity: 0.8; }
+    body.wx-theme-letter .letter-mood-txt { font-size: 13px; line-height: 1.7; color: var(--text); }
+    body.wx-theme-letter .letter-action-card { display: flex; align-items: center; gap: 12px; background: var(--letter-bubble-self); border: 1px solid rgba(255,255,255,0.7); border-radius: 16px; padding: 10px 14px; margin: 0 14px 8px; cursor: pointer; box-shadow: 0 0 10px var(--letter-glow-self); }
+    body.wx-theme-letter .letter-action-icon { width: 32px; height: 32px; border-radius: 10px; background: color-mix(in srgb, var(--theme) 14%, transparent); display: flex; align-items: center; justify-content: center; }
+    body.wx-theme-letter .letter-action-icon svg { width: 17px !important; height: 17px !important; stroke: var(--theme) !important; fill: none !important; }
+    body.wx-theme-letter .letter-action-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
+    body.wx-theme-letter .letter-action-sub { font-size: 10.5px; color: var(--sub); }
+    body.wx-theme-letter .letter-entry-card { display: flex; align-items: center; justify-content: space-between; background: var(--letter-bubble-self); border: 1px solid rgba(255,255,255,0.7); border-radius: 18px; padding: 14px 16px; margin: 0 14px 10px; cursor: pointer; box-shadow: 0 0 12px var(--letter-glow-self); }
+    body.wx-theme-letter .letter-entry-left { display: flex; align-items: center; gap: 12px; }
+    body.wx-theme-letter .letter-icon-box { width: 34px; height: 34px; border-radius: 10px; background: color-mix(in srgb, var(--theme) 12%, transparent); display: flex; align-items: center; justify-content: center; }
+    body.wx-theme-letter .letter-icon-box svg { width: 18px !important; height: 18px !important; stroke: var(--theme) !important; fill: none !important; }
+    body.wx-theme-letter .letter-profile-box { background: var(--letter-bubble-self); border: 1px solid rgba(255,255,255,0.7); border-radius: 20px; padding: 16px; margin: 0 14px 10px; display: flex; align-items: center; gap: 14px; box-shadow: 0 0 12px var(--letter-glow-self); }
+    body.wx-theme-letter .letter-profile-ava { width: 52px; height: 52px; border-radius: 50%; background: var(--theme); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; flex-shrink: 0; background-size: cover; background-position: center; }
+    body.wx-theme-letter .letter-form-card { background: var(--letter-bubble-self); border: 1px solid rgba(255,255,255,0.7); border-radius: 18px; padding: 4px 14px; margin: 0 14px 12px; box-shadow: 0 0 10px var(--letter-glow-self); }
+    body.wx-theme-letter .letter-form-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
+    body.wx-theme-letter .letter-form-row:last-child { border-bottom: none; }
+    body.wx-theme-letter .letter-form-label { font-size: 13px; color: var(--sub); width: 75px; flex-shrink: 0; }
+    body.wx-theme-letter .letter-form-input { flex: 1; border: none; background: transparent; outline: none; font-size: 13.5px; color: var(--text); font-weight: 500; }
+  `;
+  document.head.appendChild(styleEl);
+
+  // 2. 注册主题
+  if (typeof WX_THEMES !== 'undefined') {
+    if (!WX_THEMES.some(function(t){ return t.id === 'letter'; })) {
+      WX_THEMES.push({ id: 'letter', name: '微光信笺', icon: '📜', tabIconMode: 'svg' });
+    }
+  }
+
+  // 3. 增强路由 render
+  var _origRender = window.render;
+  window.render = function() {
+    var isLetter = (typeof DB !== 'undefined' && DB.settings && DB.settings.wxTheme === 'letter');
+    var isWx = typeof view !== 'undefined' && (view.type === 'wechat' || view.type === 'chats' || view.type === 'contacts' || view.type === 'discover' || view.type === 'me' || view.type === 'chat');
+    if (document.body) {
+      document.body.classList.toggle('wx-theme-letter', isLetter && isWx);
+    }
+    if (_origRender) _origRender.apply(this, arguments);
+  };
+
+  // 4. 信笺外壳包装器
+  function wrapLetterStage(innerHtml, isDetail, charObj) {
+    var now = new Date();
+    var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    var dateStr = (now.getMonth() + 1) + '月' + now.getDate() + '日 ' + timeStr;
+    var curPage = (typeof wechatPage !== 'undefined') ? wechatPage : 'chats';
+
+    // 顶部导航栏（详情页收起，四大 Tab 展开）
+    var headerArea = '';
+    if (isDetail && charObj) {
+      headerArea = '<div class="letter-chat-header">' +
+        '<button class="letter-chat-back" onclick="goWechat(\'chats\')">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="15 18 9 12 15 6"/></svg>' +
+        '</button>' +
+        '<div style="flex:1;">' +
+          '<div style="font-size:14.5px;font-weight:700;color:var(--text);">' + esc(charObj.nick || charObj.name) + '</div>' +
+          '<div style="font-size:10px;color:var(--sub);">在线</div>' +
+        '</div>' +
+        '<div class="letter-avatar" style="width:30px;height:30px;font-size:12px;cursor:pointer;' + (charObj.avatar ? 'background-image:url(\'' + charObj.avatar + '\');' : '') + '" onclick="editContact(\'' + charObj.id + '\', \'chat\')">' + (charObj.avatar ? '' : (charObj.name ? charObj.name[0] : '?')) + '</div>' +
+      '</div>';
+    } else {
+      headerArea = '<nav class="letter-nav">' +
+        '<div class="letter-nav-item ' + (curPage === 'chats' ? 'active' : '') + '" onclick="wechatPage=\'chats\';render();">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+        '</div>' +
+        '<div class="letter-nav-item ' + (curPage === 'contacts' ? 'active' : '') + '" onclick="wechatPage=\'contacts\';render();">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' +
+        '</div>' +
+        '<div class="letter-nav-item ' + (curPage === 'discover' ? 'active' : '') + '" onclick="wechatPage=\'discover\';render();">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>' +
+        '</div>' +
+        '<div class="letter-nav-item ' + (curPage === 'me' ? 'active' : '') + '" onclick="wechatPage=\'me\';render();">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' +
+        '</div>' +
+      '</nav>';
+    }
+
+    return '<div class="letter-stage">' +
+      '<div class="letter-top-heading">' +
+        '<span class="letter-phrase" style="cursor:pointer;" onclick="goHome()" title="返回桌面">No rain, no flowers.</span>' +
+        '<div class="letter-top-action">' +
+          (curPage === 'contacts' ? '<span class="letter-add-btn" onclick="addContact()" title="新建角色">＋</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="letter-back-3"></div>' +
+      '<div class="letter-back-2"></div>' +
+      '<div class="letter-back-1"></div>' +
+      '<div class="letter-main-card">' +
+        '<div class="letter-notch-time">' + dateStr + '</div>' +
+        headerArea +
+        '<div class="letter-view-container">' +
+          innerHtml +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // 5. 接管聊天列表 renderChats
+  var _origRenderChats = window.renderChats;
+  window.renderChats = function() {
+    if (!DB.settings || DB.settings.wxTheme !== 'letter') {
+      return _origRenderChats.apply(this, arguments);
+    }
+    if (typeof flushBlockEvents === 'function') flushBlockEvents();
+
+    var privateItems = (DB.contacts || []).filter(function(c){ return !c._draft && c.inChatList; })
+      .map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
+    var groupItems = (DB.groups || []).filter(function(g){ return !g.hideInChats; })
+      .map(function(g){ return { kind:'group', id:g.id, time:(g.lastMsg && g.lastMsg.time) ? g.lastMsg.time : (g.createdAt || 0), g:g }; });
+    var all = privateItems.concat(groupItems).sort(function(a,b){ return b.time - a.time; });
+
+    if (!all.length) {
+      content.innerHTML = wrapLetterStage('<div class="empty" style="padding:40px 0;color:var(--sub);text-align:center;font-size:13px;">还没有对话～<br>去「通讯录」选一个好友开始聊天</div>');
+      if (typeof refreshChatBadges === 'function') refreshChatBadges();
+      return;
+    }
+
+    var itemsHtml = all.map(function(item){
+      if (item.kind === 'private') {
+        var c = item.c;
+        var msgs = (DB.chats && DB.chats[c.id]) || [];
+        var visibleMsgs = msgs.filter(function(x){ return !x.hidden; });
+        var last = lastText(visibleMsgs[visibleMsgs.length - 1]) || '开始聊天吧';
+        var un = c.unread || 0;
+        var timeStr = item.time ? (typeof formatTime === 'function' ? formatTime(item.time) : '') : '';
+        var avaStyle = c.avatar ? 'background-image:url(\'' + c.avatar + '\');' : '';
+        var avaText = c.avatar ? '' : (c.name ? c.name[0] : '?');
+        var badgeHtml = un > 0 ? '<span class="letter-unread">' + (un > 99 ? '99+' : un) + '</span>' : '';
+
+        return '<div class="letter-cell" onclick="openChat(\'' + c.id + '\')">' +
+          '<div class="letter-avatar" style="' + avaStyle + '">' + avaText + '</div>' +
+          '<div class="letter-cell-body">' +
+            '<div class="letter-cell-top">' +
+              '<span class="letter-cell-name">' + esc(c.nick || c.name) + '</span>' +
+              '<span class="letter-cell-time">' + timeStr + '</span>' +
+            '</div>' +
+            '<div class="letter-cell-bottom">' +
+              '<span class="letter-cell-msg">' + esc(last) + '</span>' +
+              badgeHtml +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      } else {
+        var g = item.g;
+        var gLast = (g.lastMsg && g.lastMsg.text) ? g.lastMsg.text : '群聊已创建';
+        var gTime = (g.lastMsg && g.lastMsg.time) ? (typeof formatTime === 'function' ? formatTime(g.lastMsg.time) : '') : '';
+        return '<div class="letter-cell" onclick="view={type:\'groupChat\',id:\'' + g.id + '\'};render();">' +
+          '<div class="letter-avatar" style="background:var(--sub);">' + (g.name ? g.name[0] : '群') + '</div>' +
+          '<div class="letter-cell-body">' +
+            '<div class="letter-cell-top"><span class="letter-cell-name">' + esc(g.name) + '</span><span class="letter-cell-time">' + gTime + '</span></div>' +
+            '<div class="letter-cell-bottom"><span class="letter-cell-msg">' + esc(gLast) + '</span></div>' +
+          '</div>' +
+        '</div>';
+      }
+    }).join('');
+
+    content.innerHTML = wrapLetterStage(itemsHtml);
+    if (typeof refreshChatBadges === 'function') refreshChatBadges();
+  };
+
+  // 6. 接管通讯录 renderContacts
+  var _origRenderContacts = window.renderContacts;
+  window.renderContacts = function() {
+    if (!DB.settings || DB.settings.wxTheme !== 'letter') {
+      return _origRenderContacts.apply(this, arguments);
+    }
+    var cs = (DB.contacts || []).filter(function(c){ return !c._draft; });
+    var groupCount = (DB.groups || []).length;
+    var groupSubText = groupCount ? (groupCount + ' 个群聊') : '还没有群聊';
+
+    var letterItems = cs.map(function(c){
+      var avaStyle = c.avatar ? 'background-image:url(\'' + c.avatar + '\');' : '';
+      var avaText = c.avatar ? '' : (c.name ? c.name[0] : '?');
+      var sign = c.signature || c.pKeywords || '这个人很神秘，什么都没留下';
+      return '<div class="letter-cell" onclick="openChat(\'' + c.id + '\')">' +
+        '<div class="letter-avatar" style="' + avaStyle + '">' + avaText + '</div>' +
+        '<div class="letter-cell-body">' +
+          '<div class="letter-cell-name">' + esc(c.nick || c.name) + '</div>' +
+          '<div class="letter-cell-msg">' + esc(sign) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var contactsHtml = 
+      '<div class="letter-mood-box">' +
+        '<div class="letter-mood-tag">MOOD</div>' +
+        '<p class="letter-mood-txt">「 见春天不见故人，见山水不见过往。 」</p>' +
+      '</div>' +
+      '<div class="letter-action-card" onclick="addContact()">' +
+        '<div class="letter-action-icon">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M12 5v14M5 12h14"/></svg>' +
+        '</div>' +
+        '<div>' +
+          '<div class="letter-action-title">新建角色</div>' +
+          '<div class="letter-action-sub">创建全新的 AI 对话角色</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="letter-action-card" onclick="addContact()">' +
+        '<div class="letter-action-icon">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+        '</div>' +
+        '<div>' +
+          '<div class="letter-action-title">导入角色</div>' +
+          '<div class="letter-action-sub">支持 JSON 配置文件导入</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="letter-action-card" onclick="view={type:\'groupList\'};render();">' +
+        '<div class="letter-action-icon">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' +
+        '</div>' +
+        '<div>' +
+          '<div class="letter-action-title">群聊</div>' +
+          '<div class="letter-action-sub">' + groupSubText + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:10.5px;color:var(--sub);padding:12px 18px 6px;letter-spacing:1px;">全部好友 · ' + cs.length + '</div>' +
+      letterItems;
+
+    content.innerHTML = wrapLetterStage(contactsHtml);
+  };
+
+  // 7. 接管发现页 renderDiscover
+  var _origRenderDiscover = window.renderDiscover;
+  window.renderDiscover = function() {
+    if (!DB.settings || DB.settings.wxTheme !== 'letter') {
+      return _origRenderDiscover.apply(this, arguments);
+    }
+    var hasUnread = (DB.momentUnread || 0) > 0 || (DB.momentReplyUnread || 0) > 0;
+    var dotHtml = hasUnread ? '<span style="width:8px;height:8px;border-radius:50%;background:#f43;display:inline-block"></span>' : '';
+
+    var discoverHtml = 
+      '<div style="padding-top:10px;">' +
+        '<div class="letter-entry-card" onclick="openMoments()">' +
+          '<div class="letter-entry-left">' +
+            '<div class="letter-icon-box">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>' +
+            '</div>' +
+            '<span style="font-size:14px;font-weight:600;color:var(--text);">朋友圈</span>' +
+          '</div>' +
+          dotHtml +
+        '</div>' +
+        '<div class="letter-entry-card" onclick="sessionStorage.setItem(\'returnToDiscover\', \'1\'); location.href=\'peek.html\';">' +
+          '<div class="letter-entry-left">' +
+            '<div class="letter-icon-box">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><rect x="4" y="2" width="12" height="20" rx="2"/><circle cx="15" cy="13" r="4.5"/><line x1="18.5" y1="16.5" x2="21.5" y2="19.5"/></svg>' +
+            '</div>' +
+            '<span style="font-size:14px;font-weight:600;color:var(--text);">查手机</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    content.innerHTML = wrapLetterStage(discoverHtml);
+    if (typeof refreshMomentBadge === 'function') refreshMomentBadge();
+  };
+
+  // 8. 接管我的页 renderWxMe
+  var _origRenderWxMe = window.renderWxMe;
+  window.renderWxMe = function() {
+    if (!DB.settings || DB.settings.wxTheme !== 'letter') {
+      return _origRenderWxMe.apply(this, arguments);
+    }
+    var currentTheme = DB.settings.wxTheme || 'default';
+    var themeButtonsHtml = WX_THEMES.map(function(t){
+      var isActive = (currentTheme === t.id);
+      return '<div onclick="applyWxTheme(\'' + t.id + '\');renderWxMe();" style="cursor:pointer;padding:10px;border-radius:14px;border:1.5px solid ' + (isActive ? 'var(--theme)' : 'var(--line)') + ';background:var(--card);display:flex;align-items:center;gap:8px;">' +
+        '<span style="font-size:18px;">' + t.icon + '</span>' +
+        '<div><div style="font-size:12.5px;font-weight:600;color:var(--text);">' + t.name + '</div><div style="font-size:9.5px;color:' + (isActive ? 'var(--theme)' : 'var(--sub)') + ';">' + (isActive ? '当前使用中' : '点击切换') + '</div></div>' +
+      '</div>';
+    }).join('');
+
+    var avaStyle = DB.me.avatar ? 'background-image:url(\'' + DB.me.avatar + '\');' : '';
+    var avaText = DB.me.avatar ? '' : (DB.me.name ? DB.me.name[0] : '📷');
+
+    var meHtml = 
+      '<div style="padding-top:8px;">' +
+        '<div class="letter-profile-box">' +
+          '<div class="letter-profile-ava" style="' + avaStyle + '" onclick="pickMeAvatar()" title="点击更换头像">' + avaText + '</div>' +
+          '<div>' +
+            '<div style="font-size:16px;font-weight:700;color:var(--text);">' + esc(DB.me.name || '点击设置网名') + '</div>' +
+            '<div style="font-size:11px;color:var(--sub);margin-top:3px;">点击头像更换图片</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="letter-form-card">' +
+          '<div class="letter-form-row">' +
+            '<span class="letter-form-label">我的网名</span>' +
+            '<input class="letter-form-input" value="' + esc(DB.me.name || '') + '" onchange="DB.me.name=this.value;save();renderWxMe();" placeholder="输入网名">' +
+          '</div>' +
+          '<div class="letter-form-row">' +
+            '<span class="letter-form-label">真实姓名</span>' +
+            '<input class="letter-form-input" value="' + esc(DB.me.realName || '') + '" onchange="DB.me.realName=this.value;save();" placeholder="AI会知道你的真名">' +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--sub);padding:0 18px 10px;line-height:1.4;">' +
+          '通用的身份设定。针对某角色专属的关系与外貌，可在该角色编辑的「我方」里单独设。' +
+        '</div>' +
+        '<div style="font-size:10.5px;color:var(--sub);padding:0 18px 8px;letter-spacing:1px;text-transform:uppercase;">🎨 微信主题</div>' +
+        '<div style="padding:0 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+          themeButtonsHtml +
+        '</div>' +
+      '</div>';
+
+    content.innerHTML = wrapLetterStage(meHtml);
+  };
+
+  // 9. ★ 关键：接管聊天详情页 renderChat（让聊天界面也装进堆叠卡片中）
+  var _origRenderChat = window.renderChat;
+  window.renderChat = function(keepScroll) {
+    if (!DB.settings || DB.settings.wxTheme !== 'letter') {
+      return _origRenderChat.apply(this, arguments);
+    }
+    // 先执行原生逻辑组装消息 DOM 与 #chatBottom
+    _origRenderChat.apply(this, arguments);
+
+    var c = getC(view.id);
+    if (!c) return;
+
+    // 获取原生生成的气泡 HTML
+    var rawBubblesHtml = content.innerHTML;
+    // 将气泡用信笺卡片堆叠外壳包裹
+    content.innerHTML = wrapLetterStage('<div class="letter-chat-scroll" id="letterChatScroll">' + rawBubblesHtml + '</div>', true, c);
+
+    // 重新校准滚动条到底部（信笺外壳下的真实滚动容器是 .letter-view-container）
+    function _letterScrollBottom() {
+      var vc = document.querySelector('.letter-view-container');
+      if (vc) vc.scrollTop = vc.scrollHeight;
+      var sc = document.getElementById('letterChatScroll');
+      if (sc) sc.scrollTop = sc.scrollHeight;
+    }
+    requestAnimationFrame(_letterScrollBottom);
+    setTimeout(_letterScrollBottom, 80);
+    setTimeout(_letterScrollBottom, 260);
+
+	};
+
+  // 10. 查手机返回自动恢复发现页
+  if (sessionStorage.getItem('returnToDiscover') === '1') {
+    sessionStorage.removeItem('returnToDiscover');
+    setTimeout(function(){
+      if (typeof goWechat === 'function') goWechat('discover');
+    }, 100);
+  }
+})();
 </script>
 </html>
