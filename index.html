@@ -22038,11 +22038,13 @@ body.wx-theme-letter .letter-form-row {
         '<button class="letter-chat-back" onclick="goWechat(\'chats\')">' +
           '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="15 18 9 12 15 6"/></svg>' +
         '</button>' +
-        '<div style="flex:1;">' +
-          '<div style="font-size:14.5px;font-weight:700;color:var(--text);">' + esc(charObj.nick || charObj.name) + '</div>' +
-          '<div style="font-size:10px;color:var(--sub);">' + esc(moodStat) + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div id="letterChatName" style="font-size:14.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+          esc(charObj.nick || charObj.name) + (window._isLetterTyping ? ' <span style="font-size:12px;font-weight:normal;color:var(--theme);">正在输入…</span>' : '') +
         '</div>' +
-        '<div class="letter-avatar" style="width:30px;height:30px;font-size:12px;cursor:pointer;' + (charObj.avatar ? 'background-image:url(\'' + charObj.avatar + '\');' : '') + '" onclick="editContact(\'' + charObj.id + '\', \'chat\')">' + (charObj.avatar ? '' : (charObj.name ? charObj.name[0] : '?')) + '</div>' +
+        '<div class="letter-chat-status" id="letterChatStatus" style="font-size:10px;color:var(--sub);">' + esc(moodStat) + '</div>' +
+      '</div>' +
+	  '<div class="letter-avatar" style="width:30px;height:30px;font-size:12px;cursor:pointer;' + (charObj.avatar ? 'background-image:url(\'' + charObj.avatar + '\');' : '') + '" onclick="editContact(\'' + charObj.id + '\', \'chat\')">' + (charObj.avatar ? '' : (charObj.name ? charObj.name[0] : '?')) + '</div>' +
       '</div>';
     } else {
       headerArea = '<nav class="letter-nav">' +
@@ -22326,19 +22328,17 @@ body.wx-theme-letter .letter-form-row {
            再用信笺外壳重新包裹，最后把 #chatBottom「抱出」滚动区，
            钉在 .letter-main-card 底部。
      ============================================================ */
-	 /* 接管 setChatTitle，支持信笺主题显示“正在输入…” */
+/* 接管 setChatTitle，记录打字状态并实时同步到信笺顶栏 */
 var _origSetChatTitle = window.setChatTitle;
 window.setChatTitle = function(c, typing) {
+  window._isLetterTyping = !!typing; // 1. 全局记录当前是否在打字
   if (_origSetChatTitle) _origSetChatTitle.apply(this, arguments);
-  var el = document.getElementById('letterChatStatus');
-  if (el && c) {
-    if (typing) {
-      el.textContent = '正在输入…';
-      el.style.color = 'var(--theme)';
-    } else {
-      ensureTodayMood(c);
-      el.textContent = pickStatus(c) || '';
-      el.style.color = 'var(--sub)';
+
+  // 2. 实时更新已有的 DOM 节点
+  if (c) {
+    var nameEl = document.getElementById('letterChatName');
+    if (nameEl) {
+      nameEl.innerHTML = esc(c.nick || c.name) + (typing ? ' <span style="font-size:12px;font-weight:normal;color:var(--theme);">正在输入…</span>' : '');
     }
   }
 };
