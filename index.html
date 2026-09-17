@@ -2567,7 +2567,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026917_1';
+const APP_VER = 'v2026917_2';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -15765,11 +15765,11 @@ function openNotePanel() {
         PRESET_NOTES.map(function(n) {
           return '<div style="background:var(--bg, #f5f5f5);padding:10px 12px;border-radius:10px;margin-bottom:8px;cursor:pointer;border:1px solid var(--line, #eee);display:flex;align-items:center;gap:10px;" onclick="sendPresetNote(\'' + n.id + '\')">' +
             '<div style="color:var(--theme, #07c160);flex-shrink:0;">' + n.svg + '</div>' +
-            '<div style="flex:1;">' +
-              '<div style="font-weight:600;font-size:13px;margin-bottom:2px;">' + n.title + '</div>' +
-              '<div style="font-size:11px;color:var(--sub, #888);">' + n.desc + '</div>' +
-            '</div>' +
-          '</div>';
+      '<div style="flex:1;">' +
+        '<div style="font-size:14.5px;font-weight:700;color:var(--text);">' + esc(charObj.nick || charObj.name) + '</div>' +
+        '<div class="letter-chat-status" id="letterChatStatus" style="font-size:10px;color:var(--sub);">' + esc(moodStat) + '</div>' +
+      '</div>' +
+	  '</div>';
         }).join('') +
 
         '<div style="font-size:12px;color:var(--sub, #888);margin-top:10px;margin-bottom:6px;">自定义小纸条</div>' +
@@ -21583,61 +21583,63 @@ body.wx-theme-letter .letter-chat-scroll {
     /* 收紧日期时间戳与消息的间距（原生 .ts 自带 margin 和 gap 叠加了） */
     body.wx-theme-letter .ts { margin: 0 !important; }
 
-    /* ----------------------------------------------------------
-       [11] 聊天气泡（大圆角 + 发光投影 + 头像分离）
-       ---------------------------------------------------------- */
-    body.wx-theme-letter .msg {
-      display: flex !important;
-      align-items: flex-start !important;
-      gap: 6px !important;
-      max-width: 85% !important;
-      padding: 0 4px !important;
-      margin: 0 !important;
-    }
-    body.wx-theme-letter .msg.me {
-      align-self: flex-end !important;
-      flex-direction: row-reverse !important;
-    }
-    body.wx-theme-letter .cavatar {
-      width: 34px !important;
-      height: 34px !important;
-      border-radius: 50% !important;
-      border: 2px solid rgba(255,255,255,0.95) !important;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
-      background-color: var(--theme) !important;
-      background-size: cover !important;
-      background-position: center !important;
-      background-repeat: no-repeat !important;
-      color: #fff !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      font-size: 13px !important;
-      flex-shrink: 0 !important;
-    }
-    body.wx-theme-letter .mbody {
-      border-radius: 16px !important;
-      padding: 6px 14px !important;
-      font-size: 14px !important;
-      line-height: 1.45 !important;
-      word-break: break-word !important;
-      max-width: 100% !important;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-    body.wx-theme-letter .msg:not(.me) .mbody {
-      background: color-mix(in srgb, var(--theme) 14%, var(--card) 86%) !important;
-      color: var(--text) !important;
-      border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent) !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03), 0 0 14px var(--letter-glow-other) !important;
-    }
-    body.wx-theme-letter .msg.me .mbody {
-      background: linear-gradient(135deg, color-mix(in srgb, var(--theme) 40%, var(--card) 60%) 0%, color-mix(in srgb, var(--theme) 24%, var(--card) 76%) 100%) !important;
-      color: var(--text) !important;
-      border: none !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 16px var(--letter-glow-self) !important;
-    }
-
+/* ----------------------------------------------------------
+   [11] 聊天气泡（AI左靠 / 我右靠 / 去掉渐变 / 保留发光）
+   ---------------------------------------------------------- */
+body.wx-theme-letter .msg {
+  display: flex !important;
+  align-items: flex-start !important;
+  align-self: flex-start !important; /* AI 方整块往左靠 */
+  gap: 6px !important;
+  max-width: 88% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+body.wx-theme-letter .msg.me {
+  align-self: flex-end !important;   /* 我方整块往右靠 */
+  flex-direction: row-reverse !important;
+}
+body.wx-theme-letter .cavatar {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--card) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+  background-color: var(--theme) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  flex-shrink: 0 !important;
+}
+body.wx-theme-letter .mbody {
+  border-radius: 16px !important;
+  padding: 7px 13px !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+/* AI 气泡 */
+body.wx-theme-letter .msg:not(.me) .mbody {
+  background: color-mix(in srgb, var(--theme) 14%, var(--card) 86%) !important;
+  color: var(--text) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03), 0 0 14px var(--letter-glow-other) !important;
+}
+/* 用户气泡：去掉 linear-gradient 渐变，改用纯底色 + 纯发光阴影 */
+body.wx-theme-letter .msg.me .mbody {
+  background: color-mix(in srgb, var(--theme) 28%, var(--card) 72%) !important;
+  color: var(--text) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
+  box-shadow: 0 0 16px var(--letter-glow-self) !important;
+}
     /* ----------------------------------------------------------
        [12] 底部输入区（★ 已合并：原 2 处 #chatBottom）
        ---------------------------------------------------------- */
@@ -21693,106 +21695,119 @@ body.wx-theme-letter .letter-chat-scroll {
       height: 15px !important;
     }
 
-    /* 输入行：加号 / 输入框 / 语音 / 发送 一排对齐 */
-    body.wx-theme-letter #inputRow {
-      display: flex !important;
-      align-items: center !important;
-      gap: 8px !important;
-    }
+/* 输入行：缩小间距，留更多空间给输入框 */
+body.wx-theme-letter #inputRow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
 
-    /* 加号按钮 */
-    body.wx-theme-letter .plus-btn {
-      width: 36px !important;
-      height: 36px !important;
-      flex-shrink: 0 !important;
-      border-radius: 50% !important;
-      background: color-mix(in srgb, var(--theme) 16%, var(--card) 84%) !important;
-      border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
-      color: var(--theme) !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-    body.wx-theme-letter .plus-btn svg {
-      width: 18px !important;
-      height: 18px !important;
-    }
+/* 加号按钮：尺寸从 36px 缩小为 30px，图标同步缩小 */
+body.wx-theme-letter .plus-btn {
+  width: 30px !important;
+  height: 30px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  background: var(--card) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 22%, transparent) !important;
+  color: var(--theme) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body.wx-theme-letter .plus-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+}
 
-    /* 输入框外壳（含小灯泡） */
-    body.wx-theme-letter .input-wrap {
-      flex: 1 !important;
-      display: flex !important;
-      align-items: center !important;
-      background: color-mix(in srgb, var(--theme) 10%, var(--card) 90%) !important;
-      border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
-      border-radius: 18px !important;
-      padding: 0 8px 0 12px !important;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.12) !important;
-    }
-    body.wx-theme-letter #chatInput {
-      flex: 1 !important;
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      color: var(--text) !important;
-      padding: 8px 0 !important;
-      resize: none !important;
-    }
-    body.wx-theme-letter #chatInput::placeholder {
-      color: color-mix(in srgb, var(--text) 45%, transparent) !important;
-    }
+/* 输入框外壳：相对定位，右侧给灯泡留出 26px 空间 */
+body.wx-theme-letter .input-wrap {
+  flex: 1 !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  background: var(--card) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 22%, transparent) !important;
+  border-radius: 18px !important;
+  padding: 0 28px 0 12px !important;
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text) 6%, transparent) !important;
+  min-height: 32px !important;
+}
+body.wx-theme-letter #chatInput {
+  width: 100% !important;
+  flex: 1 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+  padding: 6px 0 !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  resize: none !important;
+  display: block !important;
+  vertical-align: middle !important;
+}
+body.wx-theme-letter #chatInput::placeholder {
+  color: color-mix(in srgb, var(--text) 45%, transparent) !important;
+}
 
-    /* 小灯泡（接话灵感） */
-    body.wx-theme-letter .idea-btn {
-      flex-shrink: 0 !important;
-      color: color-mix(in srgb, var(--theme) 70%, var(--text) 30%) !important;
-      display: flex !important;
-      align-items: center !important;
-      padding: 4px !important;
-    }
-    body.wx-theme-letter .idea-btn svg {
-      width: 18px !important;
-      height: 18px !important;
-      stroke: currentColor !important;
-    }
+/* 小灯泡：绝对定位，无论文字几行都死死锁在右侧垂直正中 */
+body.wx-theme-letter .idea-btn {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: color-mix(in srgb, var(--theme) 70%, var(--text) 30%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  z-index: 2 !important;
+}
+body.wx-theme-letter .idea-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  stroke: currentColor !important;
+}
+/* 语音按钮：尺寸从 36px 缩小为 30px */
+body.wx-theme-letter .voice-btn {
+  width: 30px !important;
+  height: 30px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  background: var(--card) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 22%, transparent) !important;
+  color: var(--theme) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body.wx-theme-letter .voice-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+}
 
-    /* 语音按钮 */
-    body.wx-theme-letter .voice-btn {
-      width: 36px !important;
-      height: 36px !important;
-      flex-shrink: 0 !important;
-      border-radius: 50% !important;
-      background: color-mix(in srgb, var(--theme) 16%, var(--card) 84%) !important;
-      border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
-      color: var(--theme) !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-    body.wx-theme-letter .voice-btn svg {
-      width: 18px !important;
-      height: 18px !important;
-    }
-
-    /* 发送按钮（主题色圆钮 + 白色箭头） */
-    body.wx-theme-letter .reply-btn {
-      width: 38px !important;
-      height: 38px !important;
-      flex-shrink: 0 !important;
-      border-radius: 50% !important;
-      border: none !important;
-      background: var(--theme) !important;
-      color: #fff !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      box-shadow: 0 2px 8px color-mix(in srgb, var(--theme) 40%, transparent) !important;
-    }
-    body.wx-theme-letter .reply-btn svg {
-      width: 18px !important;
-      height: 18px !important;
-    }
-
+/* 发送按钮：尺寸从 38px 缩小为 32px */
+body.wx-theme-letter .reply-btn {
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: var(--theme) !important;
+  color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--theme) 35%, transparent) !important;
+}
+body.wx-theme-letter .reply-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+}
     /* ----------------------------------------------------------
        [13] 展开面板（监控/行程/线上中/通话）
        ---------------------------------------------------------- */
@@ -22311,6 +22326,22 @@ body.wx-theme-letter .letter-form-row {
            再用信笺外壳重新包裹，最后把 #chatBottom「抱出」滚动区，
            钉在 .letter-main-card 底部。
      ============================================================ */
+	 /* 接管 setChatTitle，支持信笺主题显示“正在输入…” */
+var _origSetChatTitle = window.setChatTitle;
+window.setChatTitle = function(c, typing) {
+  if (_origSetChatTitle) _origSetChatTitle.apply(this, arguments);
+  var el = document.getElementById('letterChatStatus');
+  if (el && c) {
+    if (typing) {
+      el.textContent = '正在输入…';
+      el.style.color = 'var(--theme)';
+    } else {
+      ensureTodayMood(c);
+      el.textContent = pickStatus(c) || '';
+      el.style.color = 'var(--sub)';
+    }
+  }
+};
   var _origRenderChat = window.renderChat;
   window.renderChat = function(keepScroll) {
     if (!DB.settings || DB.settings.wxTheme !== 'letter') {
