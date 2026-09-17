@@ -2193,6 +2193,11 @@ body.wx-theme-letter .letter-dots {
   letter-spacing: 2px;
   opacity: 0.6;
 }
+    /* 聊天详情页的矮占位：只露一点后卡片，尽量省空间 */
+    body.wx-theme-letter .letter-top-spacer {
+      height: 26px;
+      flex-shrink: 0;
+    }
 
 /* 3层错落背板 */
 body.wx-theme-letter .letter-back-3 {
@@ -2562,7 +2567,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026916_2';
+const APP_VER = 'v2026917_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -15639,7 +15644,25 @@ function toggleMode() {
     proposeMeet(c, '', '', 'user');
   }
 }
-function appendBubble(c,m){if(m.hidden)return;if(!lastBubbleTime||m.time-lastBubbleTime>300000){content.insertAdjacentHTML('beforeend',tsHtml(m.time));lastBubbleTime=m.time;}content.insertAdjacentHTML('beforeend',bubble(c,m));attachLongPress();scrollBottom();attachSwipe();}
+function appendBubble(c,m){
+  if(m.hidden)return;
+  // 信笺主题：气泡要放进卡片内部的滚动盒子；其它主题维持原样
+  var box = document.getElementById('letterChatScroll') || content;
+  if(!lastBubbleTime||m.time-lastBubbleTime>300000){
+    box.insertAdjacentHTML('beforeend',tsHtml(m.time));
+    lastBubbleTime=m.time;
+  }
+  box.insertAdjacentHTML('beforeend',bubble(c,m));
+  attachLongPress();
+  // 滚到底部：信笺滚小盒子，其它主题走原来的 scrollBottom
+  if(box===content){
+    scrollBottom();
+  }else{
+    box.scrollTop=box.scrollHeight;
+  }
+  attachSwipe();
+}
+
 function scrollBottom(){
   requestAnimationFrame(() => {
     var vc = document.querySelector('.letter-view-container');
@@ -21200,8 +21223,24 @@ function closeOATemp() {
      📜 「微光信笺」终极完整插件（全页面接管 + 实体叠纸 + 聊天气泡美化）
      ================================================== -->
 <script>
+/* ==================================================
+   📜 「微光信笺」插件（wx-theme-letter）
+   --------------------------------------------------
+   ⚠️ 维护警示：
+   1. 本插件是「猴子补丁」形式，通过 window.renderXxx = function(){...}
+      接管原有渲染。修改任何 CSS 前，请先确认 .letter-* 选择器
+      是否在 <head> 里已存在旧版本——旧版会被本插件覆盖，
+      但两者同时存在于 DOM 中，请勿在 head 里再改样式，改这里。
+   2. 本插件内 CSS 已做去重整理，每个选择器只出现一次。
+      若需新增样式，请追加到对应分组的末尾，并加注释说明用途。
+   3. 死代码：无。所有规则均在生产环境生效。
+   ================================================== */
 (function initLetterThemePlugin() {
-  // 1. 注入信笺核心视觉 CSS
+
+  /* ============================================================
+     一、注入信笺主题 CSS
+     ============================================================ */
+
   var styleId = 'wx-theme-letter-style';
   var oldStyle = document.getElementById(styleId);
   if (oldStyle) oldStyle.remove();
@@ -21209,36 +21248,52 @@ function closeOATemp() {
   var styleEl = document.createElement('style');
   styleEl.id = styleId;
   styleEl.innerHTML = `
-    body.wx-theme-letter {
-      --letter-back-3: linear-gradient(135deg, color-mix(in srgb, var(--theme) 85%, #fff 15%) 0%, color-mix(in srgb, var(--theme) 60%, #fff 40%) 100%);
-      --letter-back-2: linear-gradient(135deg, color-mix(in srgb, var(--theme) 55%, #fff 45%) 0%, color-mix(in srgb, var(--theme) 35%, #fff 65%) 100%);
-      --letter-back-1: linear-gradient(135deg, color-mix(in srgb, var(--theme) 30%, #fff 70%) 0%, color-mix(in srgb, var(--theme) 12%, #fff 88%) 100%);
-      --letter-glass-bg: linear-gradient(180deg, color-mix(in srgb, var(--card) 55%, transparent) 0%, color-mix(in srgb, var(--card) 80%, transparent) 35%, var(--card) 100%);
-      --letter-glow-other: color-mix(in srgb, var(--theme) 26%, transparent);
-      --letter-glow-self: color-mix(in srgb, var(--theme) 45%, transparent);
-      --letter-bubble-other: color-mix(in srgb, var(--theme) 14%, var(--card) 86%);
-      --letter-bubble-self: rgba(255, 255, 255, 0.94);
-    }
-    
+
+    /* ----------------------------------------------------------
+       [1] 主题变量定义
+       ---------------------------------------------------------- */
+body.wx-theme-letter {
+  --letter-back-3: linear-gradient(135deg, color-mix(in srgb, var(--theme) 85%, var(--card) 15%) 0%, color-mix(in srgb, var(--theme) 60%, var(--card) 40%) 100%);
+  --letter-back-2: linear-gradient(135deg, color-mix(in srgb, var(--theme) 55%, var(--card) 45%) 0%, color-mix(in srgb, var(--theme) 35%, var(--card) 65%) 100%);
+  --letter-back-1: linear-gradient(135deg, color-mix(in srgb, var(--theme) 30%, var(--card) 70%) 0%, color-mix(in srgb, var(--theme) 12%, var(--card) 88%) 100%);
+  --letter-glass-bg: linear-gradient(180deg, color-mix(in srgb, var(--card) 55%, transparent) 0%, color-mix(in srgb, var(--card) 80%, transparent) 35%, var(--card) 100%);
+  --letter-glow-other: color-mix(in srgb, var(--theme) 26%, transparent);
+  --letter-glow-self: color-mix(in srgb, var(--theme) 45%, transparent);
+  --letter-bubble-other: color-mix(in srgb, var(--theme) 14%, var(--card) 86%);
+  --letter-bubble-self: color-mix(in srgb, var(--card) 92%, var(--theme) 8%);
+}
+    /* ----------------------------------------------------------
+       [2] 全局：隐藏原生顶栏底栏
+       ---------------------------------------------------------- */
     body.wx-theme-letter #topbar,
     body.wx-theme-letter #tabbar { display: none !important; }
 
-    /* 舞台基础 */
+    /* ----------------------------------------------------------
+       [3] 舞台容器（★ 已合并：原 2 处 .letter-stage）
+       ---------------------------------------------------------- */
     body.wx-theme-letter .letter-stage {
       position: relative;
-      padding: 0 6px 0;
       height: 100%;
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
+      padding: 0 6px 0;             /* 原第一处：左右 6px，底部靠下方补丁清零 */
+      padding-bottom: 0 !important; /* 原第二处：强制贴底，消灭双滚动条 */
     }
-	
-    /* 顶部箴言与加号 */
+
+    /* 聊天详情页：关掉外层大盒子的滚动，只留卡片内部滚动，消灭双滚动条 */
+    body.wx-theme-letter #content:has(#letterChatScroll) {
+      overflow: hidden !important;
+    }
+
+    /* ----------------------------------------------------------
+       [4] 顶部箴言与加号
+       ---------------------------------------------------------- */
     body.wx-theme-letter .letter-top-heading {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 12px 22px 14px;
+      padding: 6px 12px 10px 14px;
       z-index: 5;
     }
     body.wx-theme-letter .letter-phrase {
@@ -21268,14 +21323,19 @@ function closeOATemp() {
       opacity: 0.6;
     }
 
-    /* ★ 实体 3 层层叠信纸（边缘清晰、物理向右上/左上露角） */
+    /* ----------------------------------------------------------
+       [5] 实体三层叠纸（边缘清晰、物理向右上/左上露角）
+       ---------------------------------------------------------- */
     body.wx-theme-letter .letter-back-3 {
       position: absolute;
-      top: 36px;
+      top: 13px;
       left: 44px;
       right: 8px;
       height: 220px;
-      background: linear-gradient(to bottom, color-mix(in srgb, var(--theme) 55%, var(--card) 45%) 0%, transparent 100%);
+      background: linear-gradient(to bottom,
+        color-mix(in srgb, var(--theme) 60%, var(--card) 40%) 0%,
+        color-mix(in srgb, var(--theme) 60%, var(--card) 40%) 70%,
+        transparent 100%);
       border: none;
       border-radius: 36px 36px 0 0;
       transform: rotate(4.2deg);
@@ -21285,11 +21345,14 @@ function closeOATemp() {
 
     body.wx-theme-letter .letter-back-2 {
       position: absolute;
-      top: 42px;
+      top: 18px;
       left: 8px;
       right: 38px;
       height: 210px;
-      background: linear-gradient(to bottom, color-mix(in srgb, var(--theme) 38%, var(--card) 62%) 0%, transparent 100%);
+      background: linear-gradient(to bottom,
+        color-mix(in srgb, var(--theme) 30%, var(--card) 70%) 0%,
+        color-mix(in srgb, var(--theme) 30%, var(--card) 70%) 70%,
+        transparent 100%);
       border: none;
       border-radius: 34px 34px 0 0;
       transform: rotate(-3.2deg);
@@ -21310,23 +21373,26 @@ function closeOATemp() {
       z-index: 3;
       pointer-events: none;
     }
-    /* 前景磨砂主卡（内凹切口，底部通底无收口） */
-    body.wx-theme-letter .letter-main-card {
-      position: relative;
-      flex: 1;
-      z-index: 4;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      clip-path: path("M 0,36 A 36,36 0 0,1 36,0 L 102,0 C 112,0 117,5 121,11 C 125,16 130,18 140,18 L 232,18 C 242,18 247,16 251,11 C 255,5 260,0 270,0 L 336,0 A 36,36 0 0,1 372,36 L 372,716 L 0,716 Z");
-      background: var(--letter-glass-bg);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-      border-radius: 36px 36px 0 0;
-      box-shadow: none;
-    }
-	
+
+    /* ----------------------------------------------------------
+       [6] 前景磨砂主卡（内凹切口，底部通底无收口）
+       ---------------------------------------------------------- */
+body.wx-theme-letter .letter-main-card {
+  position: relative;
+  flex: 1;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  clip-path: path("M 0,36 A 36,36 0 0,1 36,0 L 102,0 C 112,0 117,5 121,11 C 125,16 130,18 140,18 L 232,18 C 242,18 247,16 251,11 C 255,5 260,0 270,0 L 336,0 A 36,36 0 0,1 372,36 L 372,9999 L 0,9999 Z");
+  background: var(--letter-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-radius: 36px 36px 0 0;
+  box-shadow: none;
+  border-bottom: none !important;：
+}
     body.wx-theme-letter .letter-notch-time {
       position: absolute;
       top: 2px;
@@ -21339,7 +21405,9 @@ function closeOATemp() {
       pointer-events: none;
     }
 
-    /* 顶部导航栏 */
+    /* ----------------------------------------------------------
+       [7] 顶部导航栏（四大 Tab）
+       ---------------------------------------------------------- */
     body.wx-theme-letter .letter-nav {
       display: flex;
       justify-content: space-around;
@@ -21357,9 +21425,21 @@ function closeOATemp() {
       cursor: pointer;
       transition: all .2s;
     }
-    body.wx-theme-letter .letter-nav-item svg { width: 20px !important; height: 20px !important; fill: none !important; stroke: currentColor !important; stroke-width: 2 !important; }
-    body.wx-theme-letter .letter-nav-item.active { color: var(--theme); transform: translateY(-1px); }
+    body.wx-theme-letter .letter-nav-item svg {
+      width: 20px !important;
+      height: 20px !important;
+      fill: none !important;
+      stroke: currentColor !important;
+      stroke-width: 2 !important;
+    }
+    body.wx-theme-letter .letter-nav-item.active {
+      color: var(--theme);
+      transform: translateY(-1px);
+    }
 
+    /* ----------------------------------------------------------
+       [8] 列表（聊天/通讯录通用条目）
+       ---------------------------------------------------------- */
     body.wx-theme-letter .letter-view-container {
       flex: 1;
       display: flex;
@@ -21367,23 +21447,7 @@ function closeOATemp() {
       overflow: hidden;
       position: relative;
     }
-    /* 恢复随主题变色的滚轮（挂在真正滚动的 .letter-chat-scroll 上） */
-    body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar { width: 5px !important; }
-    body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar-thumb {
-      background: var(--theme) !important;
-      border-radius: 3px !important;
-      opacity: 0.6 !important;
-    }
-    body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar-track { background: transparent !important; }
-    body.wx-theme-letter .letter-chat-scroll {
-      flex: 1; overflow-y: auto; padding: 14px 6px 8px;
-      display: flex; flex-direction: column; gap: 9px;
-    }
 
-    /* 收紧日期时间戳与消息的间距（原生 .ts 自带 margin 和 gap 叠加了） */
-    body.wx-theme-letter .ts { margin: 0 !important; }
-	
-    /* 列表项 */
     body.wx-theme-letter .letter-cell {
       display: flex;
       align-items: center;
@@ -21392,35 +21456,77 @@ function closeOATemp() {
       cursor: pointer;
       transition: background .15s;
     }
-    body.wx-theme-letter .letter-cell:active { background: rgba(255, 255, 255, 0.45); }
+body.wx-theme-letter .letter-cell:active {
+  background: color-mix(in srgb, var(--theme) 12%, transparent);
+}
+body.wx-theme-letter .letter-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 15px;
+  border: 2px solid var(--card);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--text) 8%, transparent);
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
 
-    body.wx-theme-letter .letter-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
+    body.wx-theme-letter .letter-cell-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    body.wx-theme-letter .letter-cell-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    body.wx-theme-letter .letter-cell-name {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    body.wx-theme-letter .letter-cell-time {
+      font-size: 10.5px;
+      color: var(--sub);
+    }
+    body.wx-theme-letter .letter-cell-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    body.wx-theme-letter .letter-cell-msg {
+      font-size: 12px;
+      color: var(--sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    body.wx-theme-letter .letter-unread {
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
       background: var(--theme);
       color: #fff;
+      border-radius: 8px;
+      font-size: 9.5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 600;
-      font-size: 15px;
-      border: 2px solid rgba(255,255,255,0.9);
-      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
-      flex-shrink: 0;
-      background-size: cover;
-      background-position: center;
     }
 
-    body.wx-theme-letter .letter-cell-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-    body.wx-theme-letter .letter-cell-top { display: flex; justify-content: space-between; align-items: center; }
-    body.wx-theme-letter .letter-cell-name { font-size: 14.5px; font-weight: 600; color: var(--text); }
-    body.wx-theme-letter .letter-cell-time { font-size: 10.5px; color: var(--sub); }
-    body.wx-theme-letter .letter-cell-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    body.wx-theme-letter .letter-cell-msg { font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    body.wx-theme-letter .letter-unread { min-width: 16px; height: 16px; padding: 0 4px; background: var(--theme); color: #fff; border-radius: 8px; font-size: 9.5px; display: flex; align-items: center; justify-content: center; }
-
-    /* ★ 聊天详情页：顶栏与气泡发光体系 */
+    /* ----------------------------------------------------------
+       [9] 聊天详情页：顶栏
+       ---------------------------------------------------------- */
     body.wx-theme-letter .letter-chat-header {
       display: flex;
       align-items: center;
@@ -21430,23 +21536,56 @@ function closeOATemp() {
       z-index: 10;
     }
     body.wx-theme-letter .letter-chat-back {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: color-mix(in srgb, var(--theme) 18%, var(--card) 82%); border: none;
-      color: var(--theme); display: flex; align-items: center; justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--theme) 18%, var(--card) 82%);
+      border: none;
+      color: var(--theme);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
 
-    body.wx-theme-letter .letter-chat-scroll {
-      flex: 1; overflow-y: auto; padding: 14px 12px 8px;
-      display: flex; flex-direction: column; gap: 14px;
-    }
+    /* ----------------------------------------------------------
+       [10] 聊天滚动容器（★ 已归拢 3 块：基础 / ::before / 滚动条）
+       ---------------------------------------------------------- */
+body.wx-theme-letter .letter-chat-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+    /* 内容不足时贴底 */
     body.wx-theme-letter .letter-chat-scroll::before {
       content: '' !important;
       margin-top: auto !important;
     }
+    /* 随主题变色的滚轮 */
+    body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar {
+      width: 5px !important;
+    }
+    body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar-thumb {
+      background: var(--theme) !important;
+      border-radius: 3px !important;
+      opacity: 0.6 !important;
+    }
+    body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar-track {
+      background: transparent !important;
+    }
 
+    /* 收紧日期时间戳与消息的间距（原生 .ts 自带 margin 和 gap 叠加了） */
+    body.wx-theme-letter .ts { margin: 0 !important; }
 
-    /* 气泡美化：平滑大圆角 + 发光投影 + 头像分离 */
+    /* ----------------------------------------------------------
+       [11] 聊天气泡（大圆角 + 发光投影 + 头像分离）
+       ---------------------------------------------------------- */
     body.wx-theme-letter .msg {
       display: flex !important;
       align-items: flex-start !important;
@@ -21455,7 +21594,6 @@ function closeOATemp() {
       padding: 0 4px !important;
       margin: 0 !important;
     }
-
     body.wx-theme-letter .msg.me {
       align-self: flex-end !important;
       flex-direction: row-reverse !important;
@@ -21487,14 +21625,12 @@ function closeOATemp() {
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
     }
-
     body.wx-theme-letter .msg:not(.me) .mbody {
       background: color-mix(in srgb, var(--theme) 14%, var(--card) 86%) !important;
       color: var(--text) !important;
       border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent) !important;
       box-shadow: 0 2px 8px rgba(0,0,0,0.03), 0 0 14px var(--letter-glow-other) !important;
     }
-
     body.wx-theme-letter .msg.me .mbody {
       background: linear-gradient(135deg, color-mix(in srgb, var(--theme) 40%, var(--card) 60%) 0%, color-mix(in srgb, var(--theme) 24%, var(--card) 76%) 100%) !important;
       color: var(--text) !important;
@@ -21502,15 +21638,16 @@ function closeOATemp() {
       box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 16px var(--letter-glow-self) !important;
     }
 
-    body.wx-theme-letter .letter-stage {
-      padding-bottom: 0 !important;
-    }
-    /* ===== 底部输入区 · 微光信笺重做（钉底 + 居中 + 深浅自适应） ===== */
+    /* ----------------------------------------------------------
+       [12] 底部输入区（★ 已合并：原 2 处 #chatBottom）
+       ---------------------------------------------------------- */
     body.wx-theme-letter #chatBottom {
       background: transparent !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       border-top: none !important;
+      border: none !important;              /* 原第二处：彻底消灭边框 */
+      box-shadow: none !important;          /* 原第二处：彻底消灭阴影 */
       padding: 8px 12px calc(16px + env(safe-area-inset-bottom, 10px)) 12px !important;
       margin: 0 !important;
       width: 100% !important;
@@ -21522,6 +21659,13 @@ function closeOATemp() {
       flex-shrink: 0 !important;
       overflow: visible !important;
     }
+    /* 原第二处：针对 ::before / ::after 的兜底清零 */
+    body.wx-theme-letter #chatBottom::before,
+    body.wx-theme-letter #chatBottom::after {
+      border-top: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
 
     /* 四个快捷按钮：居中一排 */
     body.wx-theme-letter #bubbleRow {
@@ -21531,7 +21675,6 @@ function closeOATemp() {
       margin-bottom: 8px !important;
       overflow-x: visible !important;
     }
-
     body.wx-theme-letter .bubble-btn {
       display: flex !important;
       align-items: center !important;
@@ -21545,7 +21688,10 @@ function closeOATemp() {
       white-space: nowrap !important;
       flex-shrink: 0 !important;
     }
-    body.wx-theme-letter .bubble-btn svg { width: 15px !important; height: 15px !important; }
+    body.wx-theme-letter .bubble-btn svg {
+      width: 15px !important;
+      height: 15px !important;
+    }
 
     /* 输入行：加号 / 输入框 / 语音 / 发送 一排对齐 */
     body.wx-theme-letter #inputRow {
@@ -21556,19 +21702,27 @@ function closeOATemp() {
 
     /* 加号按钮 */
     body.wx-theme-letter .plus-btn {
-      width: 36px !important; height: 36px !important; flex-shrink: 0 !important;
+      width: 36px !important;
+      height: 36px !important;
+      flex-shrink: 0 !important;
       border-radius: 50% !important;
       background: color-mix(in srgb, var(--theme) 16%, var(--card) 84%) !important;
       border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
       color: var(--theme) !important;
-      display: flex !important; align-items: center !important; justify-content: center !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
-    body.wx-theme-letter .plus-btn svg { width: 18px !important; height: 18px !important; }
+    body.wx-theme-letter .plus-btn svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
 
     /* 输入框外壳（含小灯泡） */
     body.wx-theme-letter .input-wrap {
       flex: 1 !important;
-      display: flex !important; align-items: center !important;
+      display: flex !important;
+      align-items: center !important;
       background: color-mix(in srgb, var(--theme) 10%, var(--card) 90%) !important;
       border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
       border-radius: 18px !important;
@@ -21592,106 +21746,286 @@ function closeOATemp() {
     body.wx-theme-letter .idea-btn {
       flex-shrink: 0 !important;
       color: color-mix(in srgb, var(--theme) 70%, var(--text) 30%) !important;
-      display: flex !important; align-items: center !important;
+      display: flex !important;
+      align-items: center !important;
       padding: 4px !important;
     }
-    body.wx-theme-letter .idea-btn svg { width: 18px !important; height: 18px !important; stroke: currentColor !important; }
+    body.wx-theme-letter .idea-btn svg {
+      width: 18px !important;
+      height: 18px !important;
+      stroke: currentColor !important;
+    }
 
     /* 语音按钮 */
     body.wx-theme-letter .voice-btn {
-      width: 36px !important; height: 36px !important; flex-shrink: 0 !important;
+      width: 36px !important;
+      height: 36px !important;
+      flex-shrink: 0 !important;
       border-radius: 50% !important;
       background: color-mix(in srgb, var(--theme) 16%, var(--card) 84%) !important;
       border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
       color: var(--theme) !important;
-      display: flex !important; align-items: center !important; justify-content: center !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
-    body.wx-theme-letter .voice-btn svg { width: 18px !important; height: 18px !important; }
+    body.wx-theme-letter .voice-btn svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
 
     /* 发送按钮（主题色圆钮 + 白色箭头） */
     body.wx-theme-letter .reply-btn {
-      width: 38px !important; height: 38px !important; flex-shrink: 0 !important;
+      width: 38px !important;
+      height: 38px !important;
+      flex-shrink: 0 !important;
       border-radius: 50% !important;
       border: none !important;
       background: var(--theme) !important;
       color: #fff !important;
-      display: flex !important; align-items: center !important; justify-content: center !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       box-shadow: 0 2px 8px color-mix(in srgb, var(--theme) 40%, transparent) !important;
     }
-    body.wx-theme-letter .reply-btn svg { width: 18px !important; height: 18px !important; }
+    body.wx-theme-letter .reply-btn svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
 
-    /* 展开面板（监控/行程/线上中/通话）也跟随主题 */
+    /* ----------------------------------------------------------
+       [13] 展开面板（监控/行程/线上中/通话）
+       ---------------------------------------------------------- */
     body.wx-theme-letter .chatPanel .pnl-ico {
       background: color-mix(in srgb, var(--theme) 14%, var(--card) 86%) !important;
       color: var(--theme) !important;
     }
-    body.wx-theme-letter .chatPanel .pnl span { color: var(--text) !important; }
+    body.wx-theme-letter .chatPanel .pnl span {
+      color: var(--text) !important;
+    }
 
-    /* 通讯录 / 发现 / 我的卡片 */
-    body.wx-theme-letter .letter-mood-box { text-align: center; padding: 12px 10px 18px; }
-    body.wx-theme-letter .letter-mood-tag { display: inline-block; font-size: 9px; letter-spacing: 2px; color: var(--theme); padding: 2px 10px; border: 1px solid var(--theme); border-radius: 12px; margin-bottom: 8px; opacity: 0.8; }
-    body.wx-theme-letter .letter-mood-txt { font-size: 13px; line-height: 1.7; color: var(--text); }
-    body.wx-theme-letter .letter-action-card { display: flex; align-items: center; gap: 12px; background: var(--letter-bubble-self); border: 1px solid rgba(255,255,255,0.7); border-radius: 16px; padding: 10px 14px; margin: 0 14px 8px; cursor: pointer; box-shadow: 0 0 10px var(--letter-glow-self); }
-    body.wx-theme-letter .letter-action-icon { width: 32px; height: 32px; border-radius: 10px; background: color-mix(in srgb, var(--theme) 14%, transparent); display: flex; align-items: center; justify-content: center; }
-    body.wx-theme-letter .letter-action-icon svg { width: 17px !important; height: 17px !important; stroke: var(--theme) !important; fill: none !important; }
-    body.wx-theme-letter .letter-action-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
-    body.wx-theme-letter .letter-action-sub { font-size: 10.5px; color: var(--sub); }
-    body.wx-theme-letter .letter-entry-card { display: flex; align-items: center; justify-content: space-between; background: var(--letter-bubble-self); border: 1px solid rgba(255,255,255,0.7); border-radius: 18px; padding: 14px 16px; margin: 0 14px 10px; cursor: pointer; box-shadow: 0 0 12px var(--letter-glow-self); }
-    body.wx-theme-letter .letter-entry-left { display: flex; align-items: center; gap: 12px; }
-    body.wx-theme-letter .letter-icon-box { width: 34px; height: 34px; border-radius: 10px; background: color-mix(in srgb, var(--theme) 12%, transparent); display: flex; align-items: center; justify-content: center; }
-    body.wx-theme-letter .letter-icon-box svg { width: 18px !important; height: 18px !important; stroke: var(--theme) !important; fill: none !important; }
-    body.wx-theme-letter .letter-profile-box { background: var(--letter-bubble-self); border: 1px solid rgba(255,255,255,0.7); border-radius: 20px; padding: 16px; margin: 0 14px 10px; display: flex; align-items: center; gap: 14px; box-shadow: 0 0 12px var(--letter-glow-self); }
-    body.wx-theme-letter .letter-profile-ava { width: 52px; height: 52px; border-radius: 50%; background: var(--theme); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer; flex-shrink: 0; background-size: cover; background-position: center; }
-    body.wx-theme-letter .letter-form-card { background: var(--letter-bubble-self); border: 1px solid rgba(255,255,255,0.7); border-radius: 18px; padding: 4px 14px; margin: 0 14px 12px; box-shadow: 0 0 10px var(--letter-glow-self); }
-    body.wx-theme-letter .letter-form-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
-    body.wx-theme-letter .letter-form-row:last-child { border-bottom: none; }
-    body.wx-theme-letter .letter-form-label { font-size: 13px; color: var(--sub); width: 75px; flex-shrink: 0; }
-    body.wx-theme-letter .letter-form-input { flex: 1; border: none; background: transparent; outline: none; font-size: 13.5px; color: var(--text); font-weight: 500; }
-      body.wx-theme-letter #chatBottom,
-      body.wx-theme-letter #chatBottom::before,
-      body.wx-theme-letter #chatBottom::after {
-        border-top: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-      }
+    /* ----------------------------------------------------------
+       [14] 通讯录 / 发现 / 我的卡片
+       ---------------------------------------------------------- */
+    body.wx-theme-letter .letter-mood-box {
+      text-align: center;
+      padding: 12px 10px 18px;
+    }
+    body.wx-theme-letter .letter-mood-tag {
+      display: inline-block;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--theme);
+      padding: 2px 10px;
+      border: 1px solid var(--theme);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      opacity: 0.8;
+    }
+    body.wx-theme-letter .letter-mood-txt {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+/* 功能入口卡片（新建角色 / 导入角色 / 群聊） */
+body.wx-theme-letter .letter-action-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--letter-bubble-self);
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin: 0 14px 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--theme) 12%, transparent);
+}
+    body.wx-theme-letter .letter-action-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--theme) 14%, transparent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    body.wx-theme-letter .letter-action-icon svg {
+      width: 17px !important;
+      height: 17px !important;
+      stroke: var(--theme) !important;
+      fill: none !important;
+    }
+    body.wx-theme-letter .letter-action-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    body.wx-theme-letter .letter-action-sub {
+      font-size: 10.5px;
+      color: var(--sub);
+    }
+
+/* 发现页入口卡片（朋友圈 / 查手机） */
+body.wx-theme-letter .letter-entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--letter-bubble-self);
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 0 14px 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--theme) 12%, transparent);
+}
+    body.wx-theme-letter .letter-entry-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    body.wx-theme-letter .letter-icon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--theme) 12%, transparent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    body.wx-theme-letter .letter-icon-box svg {
+      width: 18px !important;
+      height: 18px !important;
+      stroke: var(--theme) !important;
+      fill: none !important;
+    }
+
+/* 个人资料卡片：头像 + 名字 */
+body.wx-theme-letter .letter-profile-box {
+  background: var(--letter-bubble-self);
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+  border-radius: 20px;
+  padding: 16px;
+  margin: 0 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--theme) 12%, transparent);
+}
+body.wx-theme-letter .letter-profile-ava {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  border: 2px solid var(--card);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 8%, transparent);
+  cursor: pointer;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+/* 表单卡片（网名 / 真实姓名） */
+body.wx-theme-letter .letter-form-card {
+  background: var(--letter-bubble-self);
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+  border-radius: 18px;
+  padding: 4px 14px;
+  margin: 0 14px 12px;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--theme) 12%, transparent);
+}
+body.wx-theme-letter .letter-form-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+}
+    body.wx-theme-letter .letter-form-row:last-child {
+      border-bottom: none;
+    }
+    body.wx-theme-letter .letter-form-label {
+      font-size: 13px;
+      color: var(--sub);
+      width: 75px;
+      flex-shrink: 0;
+    }
+    body.wx-theme-letter .letter-form-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 13.5px;
+      color: var(--text);
+      font-weight: 500;
+    }
+    /* 空占位也要有高度，保证后两张卡片能露头 */
+    body.wx-theme-letter .letter-top-heading {
+      min-height: 34px;
+    }
+
   `;
   document.head.appendChild(styleEl);
 
-  // 2. 注册主题
+  /* ============================================================
+     二、注册主题到 WX_THEMES
+     ============================================================ */
   if (typeof WX_THEMES !== 'undefined') {
     if (!WX_THEMES.some(function(t){ return t.id === 'letter'; })) {
       WX_THEMES.push({ id: 'letter', name: '微光信笺', icon: '📜', tabIconMode: 'svg' });
     }
   }
 
-  // 3. 增强路由 render
+  /* ============================================================
+     三、增强原生 render：切换 body class
+     ============================================================ */
   var _origRender = window.render;
   window.render = function() {
     var isLetter = (typeof DB !== 'undefined' && DB.settings && DB.settings.wxTheme === 'letter');
-    var isWx = typeof view !== 'undefined' && (view.type === 'wechat' || view.type === 'chats' || view.type === 'contacts' || view.type === 'discover' || view.type === 'me' || view.type === 'chat');
+    var isWx = typeof view !== 'undefined' && (
+      view.type === 'wechat' ||
+      view.type === 'chats' ||
+      view.type === 'contacts' ||
+      view.type === 'discover' ||
+      view.type === 'me' ||
+      view.type === 'chat'
+    );
     if (document.body) {
       document.body.classList.toggle('wx-theme-letter', isLetter && isWx);
     }
     if (_origRender) _origRender.apply(this, arguments);
   };
 
-  // 4. 信笺外壳包装器
+  /* ============================================================
+     四、信笺外壳包装器
+     把任意 innerHtml 装进「三层叠纸 + 磨砂主卡」结构里
+     - isDetail = true 时走聊天详情页顶栏（返回键 + 对方昵称 + 心情状态 + 头像）
+     - isDetail = false 时走四大 Tab 顶栏
+     ============================================================ */
   function wrapLetterStage(innerHtml, isDetail, charObj) {
     var now = new Date();
     var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
     var dateStr = (now.getMonth() + 1) + '月' + now.getDate() + '日 ' + timeStr;
     var curPage = (typeof wechatPage !== 'undefined') ? wechatPage : 'chats';
 
-    // 顶部导航栏（详情页收起，四大 Tab 展开）
+    /* ---- 顶部区域：详情页顶栏 或 四大 Tab 导航 ---- */
     var headerArea = '';
     if (isDetail && charObj) {
+      ensureTodayMood(charObj);                    // 确保今天的心情已生成
+      var moodStat = pickStatus(charObj) || '';    // 算出今日心情短句
+
       headerArea = '<div class="letter-chat-header">' +
         '<button class="letter-chat-back" onclick="goWechat(\'chats\')">' +
           '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><polyline points="15 18 9 12 15 6"/></svg>' +
         '</button>' +
         '<div style="flex:1;">' +
           '<div style="font-size:14.5px;font-weight:700;color:var(--text);">' + esc(charObj.nick || charObj.name) + '</div>' +
-          '<div style="font-size:10px;color:var(--sub);">在线</div>' +
+          '<div style="font-size:10px;color:var(--sub);">' + esc(moodStat) + '</div>' +
         '</div>' +
         '<div class="letter-avatar" style="width:30px;height:30px;font-size:12px;cursor:pointer;' + (charObj.avatar ? 'background-image:url(\'' + charObj.avatar + '\');' : '') + '" onclick="editContact(\'' + charObj.id + '\', \'chat\')">' + (charObj.avatar ? '' : (charObj.name ? charObj.name[0] : '?')) + '</div>' +
       '</div>';
@@ -21712,13 +22046,16 @@ function closeOATemp() {
       '</nav>';
     }
 
+    /* ---- 组装：舞台 + 三层叠纸 + 主卡 + 内容 + 顶栏 ---- */
     return '<div class="letter-stage">' +
-      '<div class="letter-top-heading">' +
-        '<span class="letter-phrase" style="cursor:pointer;" onclick="goHome()" title="返回桌面">No rain, no flowers.</span>' +
-        '<div class="letter-top-action">' +
-          (curPage === 'contacts' ? '<span class="letter-add-btn" onclick="addContact()" title="新建角色">＋</span>' : '') +
-        '</div>' +
-      '</div>' +
+      /* 顶部占位：详情页用矮占位露后卡片；其余页面留空位，仅聊天列表显示箴言 */
+      (!isDetail ?
+        '<div class="letter-top-heading">' +
+          (curPage === 'chats' ? '<span class="letter-phrase" style="cursor:pointer;" onclick="goHome()" title="返回桌面">No rain, no flowers.</span>' : '') +
+        '</div>'
+      :
+        '<div class="letter-top-spacer"></div>') +
+
       '<div class="letter-back-3"></div>' +
       '<div class="letter-back-2"></div>' +
       '<div class="letter-main-card">' +
@@ -21731,7 +22068,9 @@ function closeOATemp() {
     '</div>';
   }
 
-  // 5. 接管聊天列表 renderChats
+  /* ============================================================
+     五、接管 renderChats（聊天列表）
+     ============================================================ */
   var _origRenderChats = window.renderChats;
   window.renderChats = function() {
     if (!DB.settings || DB.settings.wxTheme !== 'letter') {
@@ -21739,18 +22078,25 @@ function closeOATemp() {
     }
     if (typeof flushBlockEvents === 'function') flushBlockEvents();
 
+    /* ---- 收集私聊 + 群聊，按时间排序 ---- */
     var privateItems = (DB.contacts || []).filter(function(c){ return !c._draft && c.inChatList; })
       .map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
     var groupItems = (DB.groups || []).filter(function(g){ return !g.hideInChats; })
       .map(function(g){ return { kind:'group', id:g.id, time:(g.lastMsg && g.lastMsg.time) ? g.lastMsg.time : (g.createdAt || 0), g:g }; });
     var all = privateItems.concat(groupItems).sort(function(a,b){ return b.time - a.time; });
 
+    /* ---- 空态 ---- */
     if (!all.length) {
-      content.innerHTML = wrapLetterStage('<div class="empty" style="padding:40px 0;color:var(--sub);text-align:center;font-size:13px;">还没有对话～<br>去「通讯录」选一个好友开始聊天</div>');
+      content.innerHTML = wrapLetterStage(
+        '<div class="empty" style="padding:40px 0;color:var(--sub);text-align:center;font-size:13px;">' +
+          '还没有对话～<br>去「通讯录」选一个好友开始聊天' +
+        '</div>'
+      );
       if (typeof refreshChatBadges === 'function') refreshChatBadges();
       return;
     }
 
+    /* ---- 逐条渲染 ---- */
     var itemsHtml = all.map(function(item){
       if (item.kind === 'private') {
         var c = item.c;
@@ -21783,8 +22129,13 @@ function closeOATemp() {
         return '<div class="letter-cell" onclick="view={type:\'groupChat\',id:\'' + g.id + '\'};render();">' +
           '<div class="letter-avatar" style="background:var(--sub);">' + (g.name ? g.name[0] : '群') + '</div>' +
           '<div class="letter-cell-body">' +
-            '<div class="letter-cell-top"><span class="letter-cell-name">' + esc(g.name) + '</span><span class="letter-cell-time">' + gTime + '</span></div>' +
-            '<div class="letter-cell-bottom"><span class="letter-cell-msg">' + esc(gLast) + '</span></div>' +
+            '<div class="letter-cell-top">' +
+              '<span class="letter-cell-name">' + esc(g.name) + '</span>' +
+              '<span class="letter-cell-time">' + gTime + '</span>' +
+            '</div>' +
+            '<div class="letter-cell-bottom">' +
+              '<span class="letter-cell-msg">' + esc(gLast) + '</span>' +
+            '</div>' +
           '</div>' +
         '</div>';
       }
@@ -21794,7 +22145,9 @@ function closeOATemp() {
     if (typeof refreshChatBadges === 'function') refreshChatBadges();
   };
 
-  // 6. 接管通讯录 renderContacts
+  /* ============================================================
+     六、接管 renderContacts（通讯录）
+     ============================================================ */
   var _origRenderContacts = window.renderContacts;
   window.renderContacts = function() {
     if (!DB.settings || DB.settings.wxTheme !== 'letter') {
@@ -21804,6 +22157,7 @@ function closeOATemp() {
     var groupCount = (DB.groups || []).length;
     var groupSubText = groupCount ? (groupCount + ' 个群聊') : '还没有群聊';
 
+    /* ---- 好友条目 ---- */
     var letterItems = cs.map(function(c){
       var avaStyle = c.avatar ? 'background-image:url(\'' + c.avatar + '\');' : '';
       var avaText = c.avatar ? '' : (c.name ? c.name[0] : '?');
@@ -21817,7 +22171,8 @@ function closeOATemp() {
       '</div>';
     }).join('');
 
-    var contactsHtml = 
+    /* ---- 顶部心情 + 三个操作卡 + 好友列表 ---- */
+    var contactsHtml =
       '<div class="letter-mood-box">' +
         '<div class="letter-mood-tag">MOOD</div>' +
         '<p class="letter-mood-txt">「 见春天不见故人，见山水不见过往。 」</p>' +
@@ -21855,16 +22210,20 @@ function closeOATemp() {
     content.innerHTML = wrapLetterStage(contactsHtml);
   };
 
-  // 7. 接管发现页 renderDiscover
+  /* ============================================================
+     七、接管 renderDiscover（发现）
+     ============================================================ */
   var _origRenderDiscover = window.renderDiscover;
   window.renderDiscover = function() {
     if (!DB.settings || DB.settings.wxTheme !== 'letter') {
       return _origRenderDiscover.apply(this, arguments);
     }
     var hasUnread = (DB.momentUnread || 0) > 0 || (DB.momentReplyUnread || 0) > 0;
-    var dotHtml = hasUnread ? '<span style="width:8px;height:8px;border-radius:50%;background:#f43;display:inline-block"></span>' : '';
+    var dotHtml = hasUnread
+      ? '<span style="width:8px;height:8px;border-radius:50%;background:#f43;display:inline-block"></span>'
+      : '';
 
-    var discoverHtml = 
+    var discoverHtml =
       '<div style="padding-top:10px;">' +
         '<div class="letter-entry-card" onclick="openMoments()">' +
           '<div class="letter-entry-left">' +
@@ -21889,25 +22248,33 @@ function closeOATemp() {
     if (typeof refreshMomentBadge === 'function') refreshMomentBadge();
   };
 
-  // 8. 接管我的页 renderWxMe
+  /* ============================================================
+     八、接管 renderWxMe（我的）
+     ============================================================ */
   var _origRenderWxMe = window.renderWxMe;
   window.renderWxMe = function() {
     if (!DB.settings || DB.settings.wxTheme !== 'letter') {
       return _origRenderWxMe.apply(this, arguments);
     }
     var currentTheme = DB.settings.wxTheme || 'default';
+
+    /* ---- 主题切换按钮 ---- */
     var themeButtonsHtml = WX_THEMES.map(function(t){
       var isActive = (currentTheme === t.id);
       return '<div onclick="applyWxTheme(\'' + t.id + '\');renderWxMe();" style="cursor:pointer;padding:10px;border-radius:14px;border:1.5px solid ' + (isActive ? 'var(--theme)' : 'var(--line)') + ';background:var(--card);display:flex;align-items:center;gap:8px;">' +
         '<span style="font-size:18px;">' + t.icon + '</span>' +
-        '<div><div style="font-size:12.5px;font-weight:600;color:var(--text);">' + t.name + '</div><div style="font-size:9.5px;color:' + (isActive ? 'var(--theme)' : 'var(--sub)') + ';">' + (isActive ? '当前使用中' : '点击切换') + '</div></div>' +
+        '<div>' +
+          '<div style="font-size:12.5px;font-weight:600;color:var(--text);">' + t.name + '</div>' +
+          '<div style="font-size:9.5px;color:' + (isActive ? 'var(--theme)' : 'var(--sub)') + ';">' + (isActive ? '当前使用中' : '点击切换') + '</div>' +
+        '</div>' +
       '</div>';
     }).join('');
 
+    /* ---- 头像 ---- */
     var avaStyle = DB.me.avatar ? 'background-image:url(\'' + DB.me.avatar + '\');' : '';
     var avaText = DB.me.avatar ? '' : (DB.me.name ? DB.me.name[0] : '📷');
 
-    var meHtml = 
+    var meHtml =
       '<div style="padding-top:8px;">' +
         '<div class="letter-profile-box">' +
           '<div class="letter-profile-ava" style="' + avaStyle + '" onclick="pickMeAvatar()" title="点击更换头像">' + avaText + '</div>' +
@@ -21938,34 +22305,43 @@ function closeOATemp() {
     content.innerHTML = wrapLetterStage(meHtml);
   };
 
-  // 9. ★ 关键：接管聊天详情页 renderChat（让聊天界面也装进堆叠卡片中）
+  /* ============================================================
+     九、接管 renderChat（聊天详情页）
+     说明：先调原生 renderChat 组装气泡与 #chatBottom，
+           再用信笺外壳重新包裹，最后把 #chatBottom「抱出」滚动区，
+           钉在 .letter-main-card 底部。
+     ============================================================ */
   var _origRenderChat = window.renderChat;
   window.renderChat = function(keepScroll) {
     if (!DB.settings || DB.settings.wxTheme !== 'letter') {
       return _origRenderChat.apply(this, arguments);
     }
-    // 先执行原生逻辑组装消息 DOM 与 #chatBottom
+
+    /* ---- 1. 先让原生逻辑跑一遍，生成气泡 DOM 与 #chatBottom ---- */
     _origRenderChat.apply(this, arguments);
 
     var c = getC(view.id);
     if (!c) return;
 
-    // 获取原生生成的气泡 HTML
+    /* ---- 2. 抓取原生生成的气泡 HTML，塞进信笺卡片堆叠外壳 ---- */
     var rawBubblesHtml = content.innerHTML;
-    // 将气泡用信笺卡片堆叠外壳包裹
-    content.innerHTML = wrapLetterStage('<div class="letter-chat-scroll" id="letterChatScroll">' + rawBubblesHtml + '</div>', true, c);
+    content.innerHTML = wrapLetterStage(
+      '<div class="letter-chat-scroll" id="letterChatScroll">' + rawBubblesHtml + '</div>',
+      true,
+      c
+    );
 
-    // ★ 把底部输入区从滚动区里"抱出来"，钉在卡片最底部（根治左右被裁切、衔接不上）
-    var _mainCard = content.querySelector('.letter-main-card');
-    var _chatBottom = content.querySelector('#chatBottom');
-    if (_mainCard && _chatBottom) {
-      _mainCard.appendChild(_chatBottom);
-    }
-
-    // ★ 重新绑定长按菜单（innerHTML 重建会丢失 addEventListener 的监听器）
+  /* ---- 3. 把底部输入区从外壳里「抓过来」，真正塞进卡片最底部 ---- */
+  var _mainCard = document.querySelector('.letter-main-card');
+  var _chatBottom = document.getElementById('chatBottom');
+  if (_mainCard && _chatBottom) {
+    _mainCard.appendChild(_chatBottom);
+  }
+  
+    /* ---- 4. 重新绑定长按菜单（innerHTML 重建会丢失监听器） ---- */
     if (typeof attachLongPress === 'function') attachLongPress();
 
-    // 重新校准滚动条到底部（信笺外壳下的真实滚动容器是 .letter-view-container）
+    /* ---- 5. 重新校准滚动到底部（信笺下真实滚动容器是 .letter-view-container） ---- */
     function _letterScrollBottom() {
       var vc = document.querySelector('.letter-view-container');
       if (vc) vc.scrollTop = vc.scrollHeight;
@@ -21975,16 +22351,18 @@ function closeOATemp() {
     requestAnimationFrame(_letterScrollBottom);
     setTimeout(_letterScrollBottom, 80);
     setTimeout(_letterScrollBottom, 260);
+  };
 
-	};
-
-  // 10. 查手机返回自动恢复发现页
+  /* ============================================================
+     十、查手机返回：自动恢复发现页
+     ============================================================ */
   if (sessionStorage.getItem('returnToDiscover') === '1') {
     sessionStorage.removeItem('returnToDiscover');
     setTimeout(function(){
       if (typeof goWechat === 'function') goWechat('discover');
     }, 100);
   }
+
 })();
 </script>
 </html>
