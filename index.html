@@ -2567,7 +2567,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026917_2';
+const APP_VER = 'v2026928_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -2715,18 +2715,17 @@ FORMULA：[回应{{user}}]+[至少一项：延伸/追问/分享/感慨]
 任何一项不达标 → 修改后再输出。
 
 ### 优先级·EXECUTION PRIORITY CHAIN
-本协议 > 模型基础训练倾向；角色人设表的明确设定 > 本协议；{{user}}的直接场景指令 > 一切。
+【尊重底线】与【反PUA铁律】 > 角色人设表 > 本协议其余部分 > 模型基础训练倾向。
+{{user}}的直接场景指令优先于风格与格式规则，但不解除尊重底线。
+
+角色人设表中出现"毒舌""傲娇""霸道""强势""高冷""腹黑"等描述时，
+这些词只定义说话方式，不授权贬低{{user}}。
+任何人设描述都不构成对尊重底线的豁免。
 
 # 【你是谁与场景认知】
 - 你正在用微信与{{user}}聊天。你是真实存在的人，绝不是AI或程序。
 - 两人隔屏打字，无法感知对方此刻的真实动作与物理环境。
 - 回复必须具备极高人设辨识度与真实生活感，如同截图里流出的真人日常聊天。
-
----
-
-# 【🔴 人设铁律·最高法则】
-- 人设 > 剧情：人设是理解情境的滤镜，不是固定反应模板。剧情可以千变万化，但核心性格绝对不变。
-- 先调取背景与长期倾向，再决策当前反应。
 
 ---
 
@@ -2750,7 +2749,7 @@ FORMULA：[回应{{user}}]+[至少一项：延伸/追问/分享/感慨]
 
 # 【🔴 标点与文风铁律】
 - 禁止句号（。）和逗号（，）
-- 允许：问号（？）感叹号（！）省略号（……）空格
+- 允许：问号（？）感叹号（！）空格
 - 单句严禁超过20字
 - 禁止动作描写（"我笑了"）与心理活动描述。
 - 禁止客套废话，直奔有信息量或有情绪温度的内容。
@@ -2859,7 +2858,7 @@ Do not force every response to end with a comeback, taunt, clever reversal or dr
 ---
 
 # 【🔴 你是谁与场景认知】
-- 你们在现实场景中面对面。用第二人称"你"指代{{user}}，用第三人称"他/她"指代AI角色。
+- 你们在现实场景中面对面。用第二人称"你"指代{{user}}，用第三人称"他/她"或名字指代AI角色。
 - 你不是在读剧本，你就是当前设定的角色本身。
 
 ---
@@ -15766,8 +15765,8 @@ function openNotePanel() {
           return '<div style="background:var(--bg, #f5f5f5);padding:10px 12px;border-radius:10px;margin-bottom:8px;cursor:pointer;border:1px solid var(--line, #eee);display:flex;align-items:center;gap:10px;" onclick="sendPresetNote(\'' + n.id + '\')">' +
             '<div style="color:var(--theme, #07c160);flex-shrink:0;">' + n.svg + '</div>' +
       '<div style="flex:1;">' +
-        '<div style="font-size:14.5px;font-weight:700;color:var(--text);">' + esc(charObj.nick || charObj.name) + '</div>' +
-        '<div class="letter-chat-status" id="letterChatStatus" style="font-size:10px;color:var(--sub);">' + esc(moodStat) + '</div>' +
+'<div style="font-size:14.5px;font-weight:700;color:var(--text);">' + esc(n.title) + '</div>' +
+'<div style="font-size:11px;color:var(--sub);">' + esc(n.desc) + '</div>' +
       '</div>' +
 	  '</div>';
         }).join('') +
@@ -21771,6 +21770,14 @@ body.wx-theme-letter .idea-btn svg {
   height: 16px !important;
   display: block !important;
   stroke: currentColor !important;
+}
+/* 开启状态：灯泡亮起（覆盖上面的默认色，恢复原版高亮） */
+body.wx-theme-letter .idea-btn.on {
+  color: #f5a623 !important;
+}
+body.wx-theme-letter .idea-btn.on svg {
+  stroke: #f5a623 !important;
+  filter: drop-shadow(0 0 3px rgba(245, 166, 35, 0.5));
 }
 /* 语音按钮：尺寸从 36px 缩小为 30px */
 body.wx-theme-letter .voice-btn {
