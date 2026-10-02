@@ -3639,8 +3639,10 @@ if(d.desktop._userWallpaper===undefined) d.desktop._userWallpaper=false;
 // 修复历史坏状态：标记说有自定义壁纸，但实际没值 → 重置为跟随主题
 if(d.desktop._userWallpaper===true && !d.desktop.wallpaper) d.desktop._userWallpaper=false;
 
-if(!d.desktop.iconSize) d.desktop.iconSize='large';
-  d.desktop.apps=d.desktop.apps.filter(a=>a.id!=='moments');
+d.desktop = d.desktop || {};
+if (!d.desktop.wallpaper) d.desktop.wallpaper = '';
+if (!Array.isArray(d.desktop.apps)) d.desktop.apps = defaultApps();
+if (d.desktop._userWallpaper === undefined) d.desktop._userWallpaper = false;
   if(!d.desktop.apps.find(a=>a.id==='music'))d.desktop.apps.push({id:'music',name:'音乐',emoji:'🎵',icon:''});
   if(!d.desktop.apps.find(a=>a.id==='preset'))d.desktop.apps.push({id:'preset',name:'预设',emoji:'🎭',icon:''});
     if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
