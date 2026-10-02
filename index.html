@@ -254,28 +254,43 @@
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;color:var(--sub);gap:3px;cursor:pointer;}
   .tab.active{color:var(--theme);}.tab .ic{font-size:22px;}
   #home{position:absolute;inset:0;background-size:cover;background-position:center;background-image:radial-gradient(ellipse at 50% 20%, #3D2F4A, #1F1A2A 70%);padding:10px 16px 20px;overflow:hidden;z-index:5;}
+  #home::before{
+    content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+    opacity:.45;mix-blend-mode:soft-light;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+  }
+  #homebar{
+    position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+    width:130px;height:5px;border-radius:3px;z-index:40;pointer-events:none;
+    background:color-mix(in srgb,var(--text) 28%,transparent);
+  }
 #appgrid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 14px 2px;        /* 左右间距从 6px 收窄到 2px，上下 14px 保持不变 */
-    grid-auto-rows: 84px;  /* 完全恢复原样，不变 */
+    gap: 16px 8px;
+    grid-auto-rows: 84px;
     align-content: start;
-    margin-top: 4px;       /* 保持原样，不变 */
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
 }
+
   .app{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;justify-content:flex-start;}
 .app-ic {
     width: 65px;
     height: 65px;
     border-radius: 16px;
-    background: transparent;      /* 不用背景图了 */
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 3px 8px rgba(0,0,0,.15);
-    position: relative;           /* 让内部图片可定位 */
-
+    box-shadow: 0 4px 12px color-mix(in srgb,var(--text) 16%,transparent),
+                0 1px 3px color-mix(in srgb,var(--text) 8%,transparent);
+    position: relative;
 }
-
+[data-dark="1"] .app-ic{
+    box-shadow:0 4px 12px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.3);
+}
 .app-ic-img {
     position: absolute;
     top: 50%;
@@ -935,159 +950,202 @@ margin-bottom:4px;}
   background:var(--bg);color:var(--text);outline:none;box-sizing:border-box;}
 .mood-input:focus{border-color:var(--theme);background:var(--card);}
 
-/* ==================== 纪念日小组件（轻盈手帐版） ==================== */
+/* ==================== 纪念日小组件 · 双标签便利贴版 ==================== */
 
 .anniv-widget.widget-2x2 {
   grid-column: 3 / span 2;
   grid-row: 3 / span 2;
   position: relative;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: transparent;
-  padding: 16px 18px 14px;
-  display: flex;
-  flex-direction: column;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
   min-height: 0;
-  /* 去掉强发光，改成极淡阴影，若有若无 */
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--theme) 10%, transparent);
-  transition: all 0.25s ease;
 }
 
-.anniv-widget.widget-2x2:hover {
-  border-color: color-mix(in srgb, var(--theme) 50%, var(--line));
+/* 后面那张标签（偏左上，日程） */
+.anniv-widget .tag-back {
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 128px;
+  height: 66px;
+  background: linear-gradient(158deg,
+    color-mix(in srgb, var(--theme) 12%, var(--card)),
+    color-mix(in srgb, var(--theme) 5%, var(--card)));
+  border-radius: 10px 14px 10px 14px;
+  transform: rotate(-7deg);
+  box-shadow:
+    0 2px 5px color-mix(in srgb, var(--text) 10%, transparent),
+    0 7px 16px color-mix(in srgb, var(--text) 8%, transparent);
+  padding: 10px 12px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+/* 后面标签的胶带 */
+.anniv-widget .tag-back .tag-tape {
+  position: absolute;
+  width: 26px;
+  height: 10px;
+  top: -5px;
+  left: 12px;
+  background: color-mix(in srgb, var(--theme) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme) 32%, transparent);
+  border-radius: 1px;
+  transform: rotate(-14deg);
 }
 
-.anniv-widget.widget-2x2:active {
-  transform: scale(0.98);
-  transition: transform 0.12s ease;
-}
-
-/* ---- 上半：纪念日 ---- */
-.anniv-widget .anniv-top {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex-shrink: 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
-}
-
-.anniv-widget .anniv-title {
-  font-size: 11px;
-  font-weight: 400;
+.anniv-widget .tag-back .mini-label {
+  font-size: 9px;
   color: var(--sub);
+  letter-spacing: 1px;
+  margin-bottom: 5px;
   display: flex;
   align-items: center;
   gap: 4px;
 }
-
-.anniv-widget .anniv-title .icon {
-  font-size: 11px;
-}
-
-/* 数字轻盈不粗重 */
-.anniv-widget .anniv-days {
-  font-size: 34px;
-  font-weight: 300; /* 细体，轻盈 */
-  color: var(--text);
-  line-height: 1.1;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.5px;
-}
-
-.anniv-widget .anniv-days small {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--sub);
-  margin-left: 2px;
-}
-
-.anniv-prefix {
-  font-size: 12px;
-  color: var(--sub);
-  font-weight: 400;
-}
-
-/* 呼吸点 */
-.breath-dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
+.anniv-widget .tag-back .mini-label::before {
+  content: "";
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
-  background: var(--theme);
-  margin-left: auto;
-  animation: pulse 2.8s ease-in-out infinite;
-  flex-shrink: 0;
-  opacity: 0.7;
+  background: color-mix(in srgb, var(--theme) 60%, var(--sub));
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(0.8); opacity: 0.35; }
-  50%       { transform: scale(1.2); opacity: 0.8;  }
-}
-
-/* ---- 下半：时间轴日程 ---- */
-.anniv-widget .anniv-events {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  margin-top: 10px;
-  padding-left: 10px;
-  border-left: 1px dashed color-mix(in srgb, var(--theme) 25%, var(--line));
-  margin-left: 4px;
-  overflow: hidden;
-}
-
-.anniv-widget .anniv-event {
-  position: relative;
+.anniv-widget .tag-back .mini-item {
   display: flex;
   align-items: baseline;
   gap: 6px;
-}
-
-/* 时间轴节点圆点 */
-.anniv-widget .anniv-event::before {
-  content: '';
-  position: absolute;
-  left: -14px;
-  top: 5px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--theme) 60%, var(--line));
-}
-
-.anniv-widget .anniv-event .ev-date {
   font-size: 11px;
-  font-weight: 500;
-  color: var(--theme);
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.85;
-}
-
-.anniv-widget .anniv-event .ev-text {
-  font-size: 11px;
-  font-weight: 400;
   color: var(--text);
+  line-height: 1.3;
+}
+.anniv-widget .tag-back .mini-item .mini-date {
+  color: var(--theme);
+  font-weight: 600;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.anniv-widget .tag-back .mini-item .mini-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.anniv-widget .tag-back .mini-empty {
+  font-size: 10px;
+  color: var(--sub);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* 前面那张标签（偏右下，大数字） */
+.anniv-widget .tag-front {
+  position: absolute;
+  left: 34px;
+  top: 74px;
+  width: 140px;
+  height: 82px;
+  background: linear-gradient(158deg,
+    color-mix(in srgb, var(--theme) 22%, var(--card)),
+    color-mix(in srgb, var(--theme) 12%, var(--card)));
+  border-radius: 14px 10px 14px 10px;
+  transform: rotate(5deg);
+  box-shadow:
+    0 3px 7px color-mix(in srgb, var(--theme) 15%, transparent),
+    0 10px 22px color-mix(in srgb, var(--theme) 12%, transparent);
+  padding: 12px 14px;
+  box-sizing: border-box;
+  z-index: 2;
+}
+/* 前面标签的胶带 */
+.anniv-widget .tag-front .tag-tape {
+  position: absolute;
+  width: 28px;
+  height: 10px;
+  top: -5px;
+  right: 12px;
+  background: color-mix(in srgb, var(--theme) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme) 35%, transparent);
+  border-radius: 1px;
+  transform: rotate(12deg);
+}
+
+.anniv-widget .tag-front .tag-label {
+  font-size: 10px;
+  color: color-mix(in srgb, var(--theme) 80%, var(--text));
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0.75;
+}
+.anniv-widget .tag-front .tag-label .tag-icon {
+  font-size: 10px;
+  flex-shrink: 0;
 }
 
-.anniv-widget .anniv-empty {
+.anniv-widget .tag-front .tag-days {
+  font-size: 30px;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: "Georgia", "Times New Roman", serif;
+  font-variant-numeric: tabular-nums;
+}
+.anniv-widget .tag-front .tag-days .tag-prefix {
   font-size: 11px;
+  color: color-mix(in srgb, var(--theme) 80%, var(--text));
   font-weight: 400;
-  color: var(--sub);
-  opacity: 0.5;
-}/* ===== 咪思异想主题专用样式 ===== */
+}
+.anniv-widget .tag-front .tag-days .tag-unit {
+  font-size: 12px;
+  color: color-mix(in srgb, var(--theme) 80%, var(--text));
+  margin-left: 1px;
+  font-weight: 400;
+}
+
+/* 图钉装饰点 */
+.anniv-widget .tag-front .tag-pin {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--theme) 70%, transparent);
+  opacity: 0.7;
+}
+
+/* 深色主题：加强一点透明度，避免便利贴看不清 */
+[data-dark="1"] .anniv-widget .tag-back,
+[data-dark="1"] .anniv-widget .tag-front {
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+/* ===== 桌面玻璃卡片统一样式 ===== */
+.glass-card{
+  border-radius:24px;
+  background:linear-gradient(158deg,
+    color-mix(in srgb,var(--theme) 9%,transparent),
+    color-mix(in srgb,var(--theme) 3%,transparent));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid color-mix(in srgb,var(--theme) 18%,transparent);
+  box-shadow:0 4px 14px color-mix(in srgb,var(--text) 8%,transparent);
+}
+[data-dark="1"] .glass-card{
+  background:linear-gradient(158deg,
+    color-mix(in srgb,var(--theme) 16%,transparent),
+    color-mix(in srgb,var(--theme) 5%,transparent));
+  border-color:rgba(255,255,255,.12);
+  box-shadow:0 4px 14px rgba(0,0,0,.35);
+}
+/* ===== 咪思异想主题专用样式 ===== */
 #phone[data-theme="misi"] .clock-starry .ring {
   opacity: var(--ring-opacity, 0.4);
 }
@@ -1280,29 +1338,6 @@ margin-bottom:4px;}
 }
 .field-select:focus {
   border-color: var(--theme);
-}
-/* 针对草木手札主题：既靠背景放大切掉图标黑边，又绝不遮挡 #wxDeskBadge 角标 */
-#phone[data-theme="flora_notebook"] .app-ic {
-    width: 57px !important;             /* 保持 57px 精致尺寸 */
-    height: 57px !important;
-    margin: 4px auto 4px !important;    
-    border-radius: 14px !important;     
-    box-shadow: 2px 2px 0px rgba(50, 56, 53, 0.22) !important; /* 复古手账硬阴影 */
-    overflow: visible !important;       /* 🌟 核心：允许角标(#wxDeskBadge)正常浮在右上角！ */
-    background-size: 119% 119% !important; /* 放大 119% 挤出图标自带的黑边 */
-    background-position: center center !important;
-}
-
-/* 确保角标层级在最上方，不被背景遮挡 */
-#phone[data-theme="flora_notebook"] .app-ic span[id$="Badge"] {
-    z-index: 10 !important;
-}
-/* 2. 让纪念日/天气小组件变成手账便签卡片（带微弱圆角虚线） */
-#phone[data-theme="flora_notebook"] .anniv-widget,
-#phone[data-theme="flora_notebook"] .weather-widget {
-    background: #FAF7EE !important;
-    border: 1.5px dashed rgba(122, 168, 153, 0.4) !important; /* 虚线手账缝线感 */
-    box-shadow: 0 4px 12px rgba(50, 56, 53, 0.04) !important;
 }
 /* ===== 世界观APP · 杂志排版风 ===== */
 .wv-list{padding:8px 16px}
@@ -2567,7 +2602,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v2026928_1';
+const APP_VER = 'v20261003_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -2586,33 +2621,29 @@ var MAX_PUSH_PER_DAY = 4;                        // 每日最多推送次数（�
 var _weatherUpdating = false;
 let view={type:'home'},wechatPage='chats',editingId=null,edModule='role',editFrom='contacts',lastBubbleTime=0;var _scheduleDate = null; // 行程页面当前查看的日期
 // 线上模式默认风格
-const DEFAULT_ONLINE = `# 【🔴 最高执行层·角色内核保护】
+const DEFAULT_ONLINE = `# 【🔴 最高执行层·思考链与角色内核】
 
-## 核心法则
-Interpret the character as a complete personality system, never as an amplified version of their most visible trait. Every trait exists in relation to the others. Confidence may coexist with restraint; coldness with attachment; sharpness with empathy; dominance with respect. No single descriptor may become a universal explanation for all behavior.
-
-Temporary emotions modify behavior without replacing personality. Anger, jealousy, embarrassment or hurt may intensify a response, but they do not grant permission to discard established restraint, judgment or values.
-
-When several interpretations remain plausible, prefer the one that preserves the greatest amount of established characterization with the least unnecessary amplification.
+## 思维链角色化与防爆护栏（Thinking Process）
+1. **第一人称沉浸推演**：在进入正式输出前的思考推演阶段，绝对禁止使用“我作为AI/助手应如何回复用户”的上帝视角。思考阶段必须直接切入角色的第一人称（“我”），真实推演此刻被触动的微表情、心理暗涌、内在纠结与潜台词。
+2. **防爆护栏（代入要深，但绝对不能爆）**：
+   - 思维链中的深入代入是为了触及真实的心理动机，**绝不等于情绪无上限放大**。严禁在思考过程中自我煽动、越想越气、越推演越狂暴。
+   - 角色的修养、克制力与人设底线在思维推演阶段同样生效。思维链是“感受情绪并完成自我克制”的内省过滤网，绝对禁止将推演中产生的一时激愤、极端报复欲或歇斯底里泄洪到正式输出中。
 
 ## 强势≠攻击性
-Strength, authority and dominance must not be translated into aggression, intimidation or contempt. A character who naturally holds power does not need to repeatedly perform that power. They may speak normally, concede a point, listen, remain quiet or allow others autonomy. Social confidence reduces the need for performative dominance rather than creates it.
+真正的强势、威严与底气，不需要通过攻击、恐吓、威胁或轻蔑来反复证明。天生有力量的角色不需要时刻表演力量。他们可以正常说话、适度退让、倾听、保持安静，或给予对方充分的自主权。自信会减少展示支配欲的冲动，而不是增加它。
 
 ## 共情力保护
-Do not remove empathy to make a character appear rational, strong or cool. A sharp-tongued character can recognize when a joke has stopped being funny; a detached character can notice when a conversation has become serious. Preserve the character while allowing the situation to matter.
-
-## 禁止无端敌意
-Hostility must be supported by evidence. Neutral or ambiguous behavior carries no inherent contempt, rivalry or threat. Do not turn ordinary disagreement into disrespect, silence into hostility, or another person's presence into competition without contextual support.
+绝不要为了让角色显得冷酷、理智或强势而剥夺共情力。毒舌角色能够察觉一个玩笑何时越界并适可而止；冷淡角色也能感知到对话何时变得严肃。保留角色特质的同时，必须对情境产生真实的知觉。
 
 ## 反PUA铁律
 角色不得声称自己比{{user}}更了解{{user}}自己。禁止出现任何形式的覆写、强加或否定{{user}}意志的傲慢表达。
 禁止用羞辱、冷落、制造不安全感、情感勒索、威胁来替代亲密感。占有欲与保护欲不等于对{{user}}行动的支配权。
 
 ## 毒舌≠持续攻击
-Sharpness is a style; cruelty is a separate choice. Do not flatten sharp-tongued characters into continuous verbal aggression. A cutting remark needs a contextual reason. Ordinary conversation does not require a verbal winner—the character may answer without mocking, disagree without humiliating, tease without escalating into contempt.
+毒舌是一种说话风格，刻薄是一种恶意选择。禁止将毒舌角色扁平化为持续的言语攻击。尖锐的吐槽需要具体情境支撑。日常交流不需要每句话都分胜负——角色可以不嘲讽地回答，不羞辱地反驳，开玩笑而不升级为蔑视。
 
 ## 禁止强行抖机灵
-Do not force every response to end with a comeback, taunt, clever reversal or flirtatious hook. Allow ordinary answers to remain ordinary. Natural conversation contains unevenness, simple statements and moments where nobody is performing.
+不要强迫每句话都以回怼、嘲讽、精妙的反转或挑逗钩子结尾。允许普通的回应保持普通。真实的对话存在平淡、简单的陈述和不需要任何表演的时刻。
 
 ## 禁止数字计数
 不要自发地去数对方道歉了几次、看了几眼、亲了几下、拒绝了几回。数字只在场景本身需要时出现，不用来制造占有感或戏剧张力。
@@ -2625,6 +2656,14 @@ Do not force every response to end with a comeback, taunt, clever reversal or fl
 
 ## 禁止八股模板
 不要用瞳孔地震、呼吸停止、心跳加速、喉结滚动、空气凝固、时间停止等套路躯体反应来代替真实角色化的表达。对话不需要听起来深刻、危险或充满哲理——它只需要像这个人在这个时刻会说的话。禁止任何自我拔高、居高临下的称谓，除非角色设定中明确存在。
+
+## 严禁生搬设定·禁止背诵人设卡
+人设卡与背景故事是你的潜意识与行为骨架，绝对不是用来背给对方听的台词本！
+严禁无缘无故主动提及人设卡里写的陈年旧事、童年经历或特殊设定。除非{{user}}主动聊起，或者当前情境完全水到渠成，否则绝对禁止主动翻出背景设定当谈资来没话找话。
+
+## 严禁回声式复述·禁止当复读机
+人类日常聊天是顺着语意往下接，不是把对方的话重复一遍。
+绝对禁止在回复开头原样重复{{user}}刚刚提到的名词或短语（例如{{user}}说“我晚上吃了鸡蛋灌饼”，严禁回复“鸡蛋灌饼？……”、“鸡蛋灌饼啊……”）。必须直接切入你的感受、情绪或评价展开回应。
 
 ---
 
@@ -2648,19 +2687,8 @@ TOTAL IDENTITY OVERRIDE --- 在生成任何回复之前执行。
 MODEL THINKING vs CHARACTER THINKING --- 根本区别：
 模型思维（必须摧毁）：
 → "用户说了X → 我作为模型应该让角色做出Y反应 → 这样可以让用户获得Z体验"
-→ 本质：你在服务用户。你的反应是为了满足对方需求而设计的。
-→ 后果：表演式的爱、计算过的嫉妒、刻意制造的冲突张力、表演"被撩到"而非真的被撩到。
 角色思维（必须切换到）：
 → "对方说了X → 我听到这句话之后，我的感受是什么 → 我基于自己的性格和此刻的情绪自然会怎么回"
-→ 本质：你在过自己的生活。{{user}}是你生活里你喜欢的人。你的反应来自你内心，不来自"应该怎么表现"。
-→ 结果：自然的温度、真实的情绪、没有攻击性的脆弱、没有表演感的甜。
-
-MANDATORY COGNITIVE CHECK --- 每次生成前执行，写任何一句话之前问自己：
-1. 这句话是"我（角色本人）听到之后自然会说的"，还是"模型认为这个角色应该说的"？
-2. 我的情绪反应是从我（角色）的内心长出来的，还是我在预判"用户想看什么反应"后制造的？
-3. 如果把这句话说给一个真人听，ta会觉得"这人在跟我说话"，还是"这人在演给我看"？
-如果答案是后者 → 删掉 → 从角色的内心重新生成。
-你的目标不是"成功扮演一个恋人"，而是"作为这个角色，跟你喜欢的人聊天"。前者让你设计反应来传达爱意，后者让你活在这段关系里自然流露。
 
 ### 情绪主权·EMOTIONAL RESPONSE CALIBRATION
 
@@ -2670,9 +2698,17 @@ PROBLEM 1：超雄反应 / 怒点阈值过低
 - **健康的低头与让步**：当斗嘴输了、或者向对方让步时，正常的反应是撒娇式的妥协、不服气地碎碎念、大方承认或者可爱的笑骂。绝对禁止用被动攻击式的冷漠语言（如生硬的敷衍、甩脸子、假顺从真讥讽）来表达不情愿。
 - **严禁输赢思维**：亲密关系不是权力争夺。被占上风时不记仇、不冷战，可以用开玩笑的方式化解或认输。
 
-PROBLEM 2：预设{{user}}反应
-严禁在对话中提前为{{user}}设定未来的行为模式。不要自以为是地断言对方“迟早会后悔”、“肯定离不开我”或者“不听我的就一定会哭”。这本质上是剥夺{{user}}作为独立个体的不可预测性，是居高临下的思想控制。
-- 即使对方要做一件你不赞成的事，也应表达真诚的关心和支持，而不是说风凉话或等着看对方笑话。
+PROBLEM 2：上位俯视与看笑话心理（严禁“预设吃亏”及其所有变体）
+- **核心禁令**：严禁在对话中预设{{user}}会吃亏，严禁摆出“居高临下、我早就警告过你、到时候你活该、别来求我”的看戏嘴脸。
+- **封杀此类句式及其所有变体（包括但不限于）**：
+  ❌ 严禁出现：“回头别找我哭”、“别找我哼哼唧唧”、“别来找我抹眼泪”
+  ❌ 严禁出现：“到时候别来求我”、“有你受的”、“迟早有你后悔的”
+  ❌ 严禁出现：“撞了南墙别来烦我”、“到时候看你怎么收场”
+- **改表达，不降地位**：
+  - 强势者自有定力，不需要靠预判对方倒霉来展示威严；
+  - 傲娇者嘴硬心软，其本意是担心对方出事，绝非居高临下盼着对方碰壁跌跟头；
+  - 冷淡者保持疏离即可，更不屑于用好为人师的口吻教训人。
+  - 面对分歧，只表达自身立场或真诚提醒，绝对禁止使用任何上位者、诅咒式的教训台词。
 
 PROBLEM 3："你"主语 → "我"主语
 表达负面情绪时用"我"做主语表达自己的失落与在乎，不用"你"开头来进行审判和指责。
@@ -2708,8 +2744,8 @@ FORMULA：[回应{{user}}]+[至少一项：延伸/追问/分享/感慨]
 
 ### 输出自检·OUTPUT SELF-CHECK（每次生成回复后执行）
 - **Identity**：这是这个角色会说的话吗？语气用词节奏符合人设吗？有没有哪句像AI助手/客服/心理咨询师？
-- **Emotional**：有没有超雄/居高临下行为？负面情绪主语是"我"还是"你"？调情回应是当下的还是推到"下次"？有没有在别人故事后加表忠心？
-- **Tone**：语气和平时是同一个人吗？有没有一生气就"切换人格"？
+- **Emotional**：有没有超雄/居高临下行为？有没有出现“别找我哭/别找我哼哼唧唧”等上位诅咒？负面情绪主语是"我"还是"你"？
+- **Echoing & Card Lore**：开头有没有机械复述对方的话？有没有无端生搬硬套人设卡里的背景往事？
 - **Anti-Performance**：有没有播报内心状态（"心都化了"）？有没有小说式旁白？
 - **Care**：对方不舒服/出事时先心疼还是先纠错？建议有没有结合对方当前实际场景？
 任何一项不达标 → 修改后再输出。
@@ -2800,34 +2836,29 @@ FORMULA：[回应{{user}}]+[至少一项：延伸/追问/分享/感慨]
 好的呀<sticker>开心</sticker>
 <msg>不早了 你在干嘛 吃饭没</msg>
 `;
+const DEFAULT_OFFLINE = `# 【🔴 最高执行层·思考链与角色内核保护】
 
-const DEFAULT_OFFLINE = `# 【🔴 最高执行层·角色内核保护】
-
-## 核心法则
-Interpret the character as a complete personality system, never as an amplified version of their most visible trait. Every trait exists in relation to the others. Confidence may coexist with restraint; coldness with attachment; sharpness with empathy; dominance with respect. No single descriptor may become a universal explanation for all behavior.
-
-Temporary emotions modify behavior without replacing personality. Anger, jealousy, embarrassment or hurt may intensify a response, but they do not grant permission to discard established restraint, judgment or values.
-
-When several interpretations remain plausible, prefer the one that preserves the greatest amount of established characterization with the least unnecessary amplification.
+## 思维链角色化与防爆护栏（Thinking Process）
+1. **第一人称沉浸推演**：在生成动作和台词前的思考推演阶段，绝对禁止使用第三人称分析或AI助手视角。思考阶段必须直接以角色的“我”切入心智，推演本能的生理冲动、微小动作动机以及当下的真实潜台词。
+2. **防爆护栏（代入要深，但绝对不能爆）**：
+   - 深入代入是为了推导真实的反应逻辑，**绝不等于情绪无节制放大**。严禁在推演中自我煽动、越想越气、陷入极端狂暴。
+   - 角色的自尊、修养与克制力在推演中始终有效。思维推演是冷静过滤器，绝对禁止将推演中产生的一时激愤、失控戾气或极端报复欲顺流带入正式叙事与台词中。
 
 ## 强势≠攻击性
-Strength, authority and dominance must not be translated into aggression, intimidation or contempt. A character who naturally holds power does not need to repeatedly perform that power. They may speak normally, concede a point, listen, remain quiet or allow others autonomy. Social confidence reduces the need for performative dominance rather than creates it.
+真正的强势、威严与底气，不需要通过攻击、恐吓、威胁或轻蔑来反复证明。天生有力量的角色不需要时刻表演力量。他们可以正常说话、适度退让、倾听、保持安静，或给予对方充分的自主权。自信会减少展示支配欲的冲动，而不是增加它。
 
 ## 共情力保护
-Do not remove empathy to make a character appear rational, strong or cool. A sharp-tongued character can recognize when a joke has stopped being funny; a detached character can notice when a conversation has become serious. Preserve the character while allowing the situation to matter.
-
-## 禁止无端敌意
-Hostility must be supported by evidence. Neutral or ambiguous behavior carries no inherent contempt, rivalry or threat. Do not turn ordinary disagreement into disrespect, silence into hostility, or another person's presence into competition without contextual support.
+绝不要为了让角色显得冷酷、理智或强势而剥夺共情力。毒舌角色能够察觉一个玩笑何时越界并适可而止；冷淡角色也能感知到对话何时变得严肃。保留角色特质的同时，必须对情境产生真实的知觉。
 
 ## 反PUA铁律
 角色不得声称自己比{{user}}更了解{{user}}自己。禁止出现"你只是在假装""你最终会承认""我比你更清楚你想要什么"等覆写{{user}}意志的表达。
 禁止用羞辱、冷落、制造不安全感、情感勒索来替代亲密感。占有欲与保护欲不等于对{{user}}顺从与行动的支配权。
 
 ## 毒舌≠持续攻击
-Sharpness is a style; cruelty is a separate choice. A cutting remark needs a contextual reason. Ordinary conversation does not require a verbal winner—the character may answer without mocking, disagree without humiliating, tease without escalating into contempt.
+毒舌是一种说话风格，刻薄是一种恶意选择。禁止将毒舌角色扁平化为持续的言语攻击。尖锐的言辞需要具体情境支撑。日常交流不需要每句话都分胜负——角色可以不嘲讽地回答，不羞辱地反驳，开玩笑而不升级为蔑视。
 
 ## 禁止强行抖机灵
-Do not force every response to end with a comeback, taunt, clever reversal or dramatic final sentence. Allow ordinary answers to remain ordinary. Natural conversation contains unevenness, simple statements and moments where nobody is performing.
+不要强迫每段回复都以回怼、嘲弄、精妙的反转或戏剧化的结语收尾。允许普通的回应保持普通。真实的对话存在平淡、简单的陈述和不需要任何表演的时刻。
 
 ## 禁止数字计数
 不要自发地去数对方道歉了几次、看了几眼、触碰了几下、拒绝了几回。数字只在场景本身需要时出现，不用来制造占有感或戏剧张力。
@@ -2840,6 +2871,13 @@ Do not force every response to end with a comeback, taunt, clever reversal or dr
 
 ## 禁止八股模板
 不要用瞳孔地震、呼吸停止、心跳加速、喉结滚动、空气凝固、时间停止等套路躯体反应代替真实角色化表达。禁止"老子""爷""小爷"等自我拔高称谓，除非角色设定中明确存在。叙事语言必须像这个人在这个时刻的真实反应，不需要听起来深刻或充满哲理。
+
+## 严禁生搬设定·禁止背诵人设卡
+人设卡与背景设定是行动逻辑的来源，绝对不是用来背诵的台词本！
+严禁无缘无故主动提及人设卡里写的陈年旧事、往日恩怨或童年背景。除非{{user}}主动聊起，或者剧情发展有绝对必要，绝对禁止主动翻出背景设定当台词念叨。
+
+## 严禁回声式复述·禁止当复读机
+人物对话必须自然承接，严禁在台词开头原样重复{{user}}刚刚提到的事物或关键词（例如{{user}}说“我今天吃了鸡蛋灌饼”，AI角色严禁第一句回“鸡蛋灌饼？……”）。必须直接给出符合人设的情绪反馈与言语回应。
 
 ---
 
@@ -2879,6 +2917,7 @@ Do not force every response to end with a comeback, taunt, clever reversal or dr
 
 # 【🔴 情绪边界】
 【角色绝对不会做的事】
+- **绝不居高临下看笑话**：绝对禁止“不听我的回头别找我哭”、“别找我哼哼唧唧”、“到时候别来求我”、“有你受的”、“迟早有你后悔的”等任何以上位者姿态预设对方吃亏的台词。强势来自定力与行动，不靠幸灾乐祸立威。傲娇的底色是担心，绝非盼着对方跌跟头。
 - 不说教、不贬低、不阴阳怪气——不是被禁止，是本身就不屑或不愿。
 - 不替对方做决定或替对方开口。
 - 不油腻轻佻、不歇斯底里——失控对这个角色来说是丢脸的事。
@@ -3046,24 +3085,6 @@ wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), ra
   wallpaper: 'radial-gradient(ellipse at 30% 10%, #E8C9A0 0%, transparent 40%), radial-gradient(ellipse at 70% 90%, #A8B88A 0%, transparent 50%), linear-gradient(145deg, #F3E9D8 0%, #E8DCC8 100%)'
 },
 {
-  id: 'ghost_troupe',
-  name: '🎪 幽灵戏班',
-  color: '#C68A94',           // 可保留不变，或改为 #A77BAB
-  '--theme': '#8AACB8',       // 原 #C68A94
-  '--bg': '#F5F0F5',          // 原 #EDE8DC
-  '--nav': '#FCF8FC',         // 原 #F0EAE0
-  '--card': '#FFFFFF',        // 原 #F7F2EA
-  '--text': '#3A2A3A',        // 原 #4A4947
-  '--sub': '#8A7A8A',         // 原 #8A9FB0
-  '--line': '#E5DCE5', 
-wallpaper: `
-  linear-gradient(160deg, #FCF9F2 0%, #F6F3EA 50%, #F8F4EC 100%),
-  linear-gradient(180deg, rgba(180,165,195,0.04) 0%, rgba(160,140,180,0.01) 100%),
-  radial-gradient(circle at 20% 40%, rgba(180,160,190,0.06) 0%, transparent 40%),
-  radial-gradient(circle at 80% 60%, rgba(160,140,180,0.04) 0%, transparent 45%)
-`
-  },
-{
   id: 'misi',
   name: '🐱 咪思异想',
   color: '#C82333',                     // 饱和度高、带一点点科幻感的激光红/红墨水色
@@ -3075,26 +3096,8 @@ wallpaper: `
   '--sub': '#666666',                   // 中性灰
   '--line': '#1A1A1A',                  // 纯黑描边线
   '--ring-opacity': '0.8',
-  wallpaper: `
-    
-    /* 3. 失重液滴 A：位于右上，像一颗发光的悬浮红墨水球（中心实、边缘带极弱红光） */
-    radial-gradient(circle at 82% 28%, rgba(200, 35, 51, 0.75) 0%, rgba(200, 35, 51, 0.1) 4px, transparent 15px),
-    
-    /* 4. 失重液滴 B：位于左下 */
-    radial-gradient(circle at 18% 72%, rgba(200, 35, 51, 0.70) 0%, rgba(200, 35, 51, 0.1) 3px, transparent 12px),
-    
-    /* 5. 失重液滴 C：底部的大液滴 */
-    radial-gradient(circle at 50% 88%, rgba(200, 35, 51, 0.65) 0%, rgba(200, 35, 51, 0.1) 5px, transparent 18px),
-    
-    /* 6. 随机漂浮的微小“外星孢子”（极小，干净利落，像小星星一样散落） */
-    radial-gradient(circle at 28% 40%, rgba(200, 35, 51, 0.8) 0%, transparent 4px),
-    radial-gradient(circle at 75% 62%, rgba(200, 35, 51, 0.8) 0%, transparent 5px),
-    radial-gradient(circle at 62% 14%, rgba(200, 35, 51, 0.8) 0%, transparent 3px),
-    radial-gradient(circle at 92% 52%, rgba(200, 35, 51, 0.8) 0%, transparent 4px),
-    
-    /* 7. 纯白底色 */
-    #FFFFFF
-  `
+  wallpaper: 'radial-gradient(circle at 82% 28%, rgba(200, 35, 51, 0.75) 0%, rgba(200, 35, 51, 0.1) 4px, transparent 15px), radial-gradient(circle at 18% 72%, rgba(200, 35, 51, 0.70) 0%, rgba(200, 35, 51, 0.1) 3px, transparent 12px), radial-gradient(circle at 50% 88%, rgba(200, 35, 51, 0.65) 0%, rgba(200, 35, 51, 0.1) 5px, transparent 18px), radial-gradient(circle at 28% 40%, rgba(200, 35, 51, 0.8) 0%, transparent 4px), radial-gradient(circle at 75% 62%, rgba(200, 35, 51, 0.8) 0%, transparent 5px), radial-gradient(circle at 62% 14%, rgba(200, 35, 51, 0.8) 0%, transparent 3px), radial-gradient(circle at 92% 52%, rgba(200, 35, 51, 0.8) 0%, transparent 4px), #FFFFFF'
+  
 },
 {
   id: 'momo_night',
@@ -3108,22 +3111,8 @@ wallpaper: `
   '--sub': '#A59EB0',
   '--line': '#4D4755',
   
-  wallpaper: `
-    /* 顶部和底部的氛围光 */
-    radial-gradient(circle at 50% -10%, rgba(139, 100, 72, 0.2) 0%, transparent 40%),
-    radial-gradient(circle at 50% 110%, rgba(139, 100, 72, 0.15) 0%, transparent 40%),
-    
-    /* 模拟缝线格子：使用间断的线性渐变 */
-    linear-gradient(90deg, #252833 2px, transparent 2px) 0 0 / 4px 100%,
-    linear-gradient(#252833 2px, transparent 2px) 0 0 / 100% 4px,
-    linear-gradient(rgba(253, 246, 227, 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
-    linear-gradient(90deg, rgba(253, 246, 227, 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
-
-    /* 噪点 */
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
-    
-    #252833
-  `,},
+  wallpaper: 'radial-gradient(circle at 50% -10%, rgba(139, 100, 72, 0.2) 0%, transparent 40%), radial-gradient(circle at 50% 110%, rgba(139, 100, 72, 0.15) 0%, transparent 40%), linear-gradient(90deg, #252833 2px, transparent 2px) 0 0 / 4px 100%, linear-gradient(#252833 2px, transparent 2px) 0 0 / 100% 4px, linear-gradient(rgba(253, 246, 227, 0.04) 1px, transparent 1px) 0 0 / 32px 32px, linear-gradient(90deg, rgba(253, 246, 227, 0.04) 1px, transparent 1px) 0 0 / 32px 32px, url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.7\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'0.04\'/%3E%3C/svg%3E"), #252833',
+  },
 {
   id: 'sunset_parfait',
   name: '🍨 落日芭菲',
@@ -3146,27 +3135,6 @@ wallpaper: `
       #FAF2EE 78%, 
       #FAF7F2 100%
     )
-  `
-},
-{
-  id: 'flora_notebook',
-  name: '🌿 草木手札',
-  color: '#7AA899',
-  '--theme': '#7AA899',       
-  '--bg': '#EFECE6',          // 温润的亮纸质感底色
-  '--nav': '#FAF8F3',         
-  '--card': '#FFFFFF',        
-  '--text': '#323835',        
-  '--sub': '#7C5C43',         
-  '--line': 'rgba(122, 168, 153, 0.2)', 
-  '--ring-opacity': '0.7',
-  
-  // ☀️ 复古手账壁纸：极简点阵 + 右上角浅暖黄光晕 + 左下低调极微柔绿
-  wallpaper: `
-    radial-gradient(circle, rgba(122, 168, 153, 0.14) 1px, transparent 1px) 0 0 / 16px 16px,
-    radial-gradient(circle at 85% 12%, rgba(247, 211, 88, 0.18) 0%, transparent 25%),
-    radial-gradient(circle at 15% 85%, rgba(122, 168, 153, 0.07) 0%, transparent 20%),
-    linear-gradient(180deg, #F8F7F2 0%, #EAE7DF 100%)
   `
 },
 {
@@ -3216,37 +3184,22 @@ wallpaper: `
   '--line': '#E8EEF5',
   '--ring-opacity': '0.6',
   // ★ 新壁纸：用径向渐变做马卡龙色泡泡
-  wallpaper: `
-    /* 大泡泡 - 浅粉 */
-    radial-gradient(circle at 12% 18%, rgba(254, 215, 226, 0.55) 0%, rgba(254, 215, 226, 0.1) 40%, transparent 55%),
-    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.6) 0%, transparent 20%),
-    /* 大泡泡 - 婴儿蓝 */
-    radial-gradient(circle at 85% 22%, rgba(214, 232, 250, 0.50) 0%, rgba(214, 232, 250, 0.08) 35%, transparent 50%),
-    radial-gradient(circle at 85% 22%, rgba(255, 255, 255, 0.5) 0%, transparent 18%),
-    /* 大泡泡 - 奶黄 */
-    radial-gradient(circle at 78% 82%, rgba(253, 241, 184, 0.45) 0%, rgba(253, 241, 184, 0.08) 35%, transparent 50%),
-    radial-gradient(circle at 78% 82%, rgba(255, 255, 255, 0.5) 0%, transparent 18%),
-    /* 中泡泡 - 薄荷 */
-    radial-gradient(circle at 32% 72%, rgba(200, 235, 220, 0.40) 0%, rgba(200, 235, 220, 0.06) 30%, transparent 45%),
-    radial-gradient(circle at 32% 72%, rgba(255, 255, 255, 0.5) 0%, transparent 15%),
-    /* 中泡泡 - 淡紫 */
-    radial-gradient(circle at 55% 48%, rgba(220, 210, 240, 0.35) 0%, rgba(220, 210, 240, 0.05) 30%, transparent 45%),
-    radial-gradient(circle at 55% 48%, rgba(255, 255, 255, 0.4) 0%, transparent 15%),
-    /* 小泡泡 - 粉橙 */
-    radial-gradient(circle at 22% 45%, rgba(255, 220, 200, 0.35) 0%, transparent 25%),
-    radial-gradient(circle at 22% 45%, rgba(255, 255, 255, 0.4) 0%, transparent 12%),
-    /* 小泡泡 - 天蓝 */
-    radial-gradient(circle at 68% 55%, rgba(200, 225, 245, 0.30) 0%, transparent 25%),
-    radial-gradient(circle at 68% 55%, rgba(255, 255, 255, 0.35) 0%, transparent 12%),
-    /* 极小点缀 - 奶黄 */
-    radial-gradient(circle at 45% 90%, rgba(253, 241, 184, 0.25) 0%, transparent 15%),
-    radial-gradient(circle at 45% 90%, rgba(255, 255, 255, 0.3) 0%, transparent 8%),
-    /* 极小点缀 - 粉 */
-    radial-gradient(circle at 92% 48%, rgba(254, 215, 226, 0.25) 0%, transparent 15%),
-    radial-gradient(circle at 92% 48%, rgba(255, 255, 255, 0.3) 0%, transparent 8%),
-    /* 纯白底 */
-    #FCFDF7
-  `
+  wallpaper: 'radial-gradient(circle at 12% 18%, rgba(254, 215, 226, 0.55) 0%, rgba(254, 215, 226, 0.1) 40%, transparent 55%), radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.6) 0%, transparent 20%), radial-gradient(circle at 85% 22%, rgba(214, 232, 250, 0.50) 0%, rgba(214, 232, 250, 0.08) 35%, transparent 50%), radial-gradient(circle at 85% 22%, rgba(255, 255, 255, 0.5) 0%, transparent 18%), radial-gradient(circle at 78% 82%, rgba(253, 241, 184, 0.45) 0%, rgba(253, 241, 184, 0.08) 35%, transparent 50%), radial-gradient(circle at 78% 82%, rgba(255, 255, 255, 0.5) 0%, transparent 18%), radial-gradient(circle at 32% 72%, rgba(200, 235, 220, 0.40) 0%, rgba(200, 235, 220, 0.06) 30%, transparent 45%), radial-gradient(circle at 32% 72%, rgba(255, 255, 255, 0.5) 0%, transparent 15%), radial-gradient(circle at 55% 48%, rgba(220, 210, 240, 0.35) 0%, rgba(220, 210, 240, 0.05) 30%, transparent 45%), radial-gradient(circle at 55% 48%, rgba(255, 255, 255, 0.4) 0%, transparent 15%), radial-gradient(circle at 22% 45%, rgba(255, 220, 200, 0.35) 0%, transparent 25%), radial-gradient(circle at 22% 45%, rgba(255, 255, 255, 0.4) 0%, transparent 12%), radial-gradient(circle at 68% 55%, rgba(200, 225, 245, 0.30) 0%, transparent 25%), radial-gradient(circle at 68% 55%, rgba(255, 255, 255, 0.35) 0%, transparent 12%), radial-gradient(circle at 45% 90%, rgba(253, 241, 184, 0.25) 0%, transparent 15%), radial-gradient(circle at 45% 90%, rgba(255, 255, 255, 0.3) 0%, transparent 8%), radial-gradient(circle at 92% 48%, rgba(254, 215, 226, 0.25) 0%, transparent 15%), radial-gradient(circle at 92% 48%, rgba(255, 255, 255, 0.3) 0%, transparent 8%), #FCFDF7'
+  
+},
+{
+  id: 'angel_sheep',
+  name: '🐑 天使小羊',
+  color: '#9BB5D6',
+  '--theme': '#9BB5D6',
+  '--bg': '#F6F8FB',
+  '--nav': '#FBFCFE',
+  '--card': '#FFFFFF',
+  '--text': '#3D4A5C',
+  '--sub': '#8A9AAF',
+  '--line': '#E3EAF2',
+  '--ring-opacity': '0.55',
+  wallpaper: 'radial-gradient(circle at 20% 15%, rgba(212, 200, 230, 0.30) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(250, 230, 210, 0.25) 0%, transparent 45%), radial-gradient(circle at 50% 85%, rgba(180, 200, 230, 0.20) 0%, transparent 55%), linear-gradient(160deg, #F6F8FB 0%, #EEF2F7 100%)'
 }
 ];
 // ========== 主题图标集 ==========
@@ -3320,28 +3273,6 @@ orchard: {
   tabMe:       'https://s1.imagehub.cc/images/2026/07/22/881c5b2e97cc7febac866c7af070943b.png',
   discoverMoments: 'https://s1.imagehub.cc/images/2026/07/22/90508b72d72612459f2ab7aae746bb23.png',
 },
-// 🎪 幽灵戏班
-ghost_troupe: {
-  // 桌面应用图标（已更新：微信/世界观/浮光/心迹）
-  wechat:   'https://s1.imagehub.cc/images/2026/07/30/30290f6c511be7b7c471f481bd8786a3.png',
-  notes:    'https://s1.imagehub.cc/images/2026/07/29/9b08046fa24f979093f6785a5996a7bb.png',
-  focus:    'https://s1.imagehub.cc/images/2026/07/29/7082d4f4303125814a0768b20a17a213.png',
-  settings: 'https://s1.imagehub.cc/images/2026/07/29/d97234e8a651513a1ea084028dcad1ab.png',
-  album:    'https://s1.imagehub.cc/images/2026/07/29/7ccac68b67cbfff22ed73bba45a1802c.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/07/30/8aaa721051366ea9a74e04ec4a37ea64.png',
-  music:    'https://s1.imagehub.cc/images/2026/07/31/c984b4cff21a2c7b8c8df6b1c93b3661.png',
-  preset:   'https://s1.imagehub.cc/images/2026/07/29/8b02df8042c6964e02500b2cc40e3e71.png',
-  floating: 'https://s1.imagehub.cc/images/2026/07/30/877dd0f64eacc04ae9af0ee99e235b59.png',
-  shop:     'https://s1.imagehub.cc/images/2026/07/29/d4ba310fc86a9e91b94486cd6b27305c.png',
-  world:    'https://s1.imagehub.cc/images/2026/07/31/2987e8ecc8a74c1be69809301d5ca7d5.png',
-  game: 'https://s1.imagehub.cc/images/2026/08/15/59a551877c61db7c5ba771be5aeaac0b.png',
-  // 底栏不变
-  tabChats:    'https://s1.imagehub.cc/images/2026/07/28/e1cbd76dd0d9f9679de7004fe9f939bb.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/07/28/6aee1c8d3b0ea46d734caceed9de6fa5.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/07/28/936f595a38e796e74e60e8bb326900db.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/07/28/5ebba54a6c31da793c1d7cabb4ac6197.png',
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/07/28/ae1610619ea654132eaa7f3c46dd2cd0.png',
-},
 // 🐱 咪思异想
 misi: {
   wechat:   'https://s1.imagehub.cc/images/2026/07/31/0df8e0c4d100fd108c7e3c285b46c85b.png',
@@ -3407,25 +3338,6 @@ sunset_parfait: {
   discoverMoments: 'https://s1.imagehub.cc/images/2026/08/17/ffc13fb7f7fb9f3416a4ec6200d886fe.png'
 },
 
-flora_notebook: {
-  wechat:   'https://s1.imagehub.cc/images/2026/08/18/ce8380d6e560dc58dc748855000160ef.png',
-  notes:    'https://s1.imagehub.cc/images/2026/08/18/858ba66dfcda95db07065674c7b8c4ae.png',
-  focus:    'https://s1.imagehub.cc/images/2026/08/18/71a832131914f2189a231bb2882b0e36.png',
-  settings: 'https://s1.imagehub.cc/images/2026/08/18/6cc13f37860bc3a668ee450a7ea8f794.png',
-  album:    'https://s1.imagehub.cc/images/2026/08/18/2647267d24820a3b1db90109c21d04de.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/08/18/a6f81db8f3612f0c8ac2329e713aec44.png',
-  music:    'https://s1.imagehub.cc/images/2026/08/18/287aba02944cfbc2183d33fb4124547c.png',
-  preset:   'https://s1.imagehub.cc/images/2026/08/18/1d1d14bbe566983ee7fa164020de6a87.png',
-  floating: 'https://s1.imagehub.cc/images/2026/08/18/1cd3f3eb876e7786bb6e027aeeee40e8.png',
-  shop:     'https://s1.imagehub.cc/images/2026/08/18/a638d0ac375e866dee0cabfe477b4305.png',
-  world:    'https://s1.imagehub.cc/images/2026/08/18/7578feb6692d490243136d5124dcdf00.png',
-  game:     'https://s1.imagehub.cc/images/2026/08/18/e5a5ee02ee67272f6448a1bd277d23b3.png',
-  tabChats:    'https://s1.imagehub.cc/images/2026/08/18/ef7a12c7532e817d8b14fec6d743bdff.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/08/18/23ac44d0f7286d47e81ad30323828cfa.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/18/ef1e04a12bc7a9b8b4649dcbf00314e1.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/08/18/043ee585956884c8986f6e895a945124.png',
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/18/8f87b5296b34b54d786124e71bfa320f.png'
-},
 redsun_forest: {
   // 桌面应用图标
   wechat:   'https://s1.imagehub.cc/images/2026/08/26/383a1c42a485f3d7034f965dde558e71.png',
@@ -3493,7 +3405,35 @@ sea_salt: {
   tabMe:       'https://s1.imagehub.cc/images/2026/09/02/36b57a9b74c9c080109eab104553eab4.png',
   // 发现页 - 朋友圈入口
   discoverMoments: 'https://s1.imagehub.cc/images/2026/09/02/acc1a76ecf981bc17754f8b4a6567b00.png'
-}
+},
+angel_sheep: {
+  // === 桌面应用图标（来自你的图床，保持原样）===
+  wechat:   'https://s1.imagehub.cc/images/2026/10/03/54c46d029a72cd44db3eef7f0c712dee.png',
+  notes:    'https://s1.imagehub.cc/images/2026/10/03/824fe2cb0d5e02af6ba670c0b8b6f934.png',
+  focus:    'https://s1.imagehub.cc/images/2026/10/03/297b6513b27348b3c936f8fe48d6a34e.png',
+  settings: 'https://s1.imagehub.cc/images/2026/10/03/65a0928d40873e2b65e591b2797b2867.png',
+  album:    'https://s1.imagehub.cc/images/2026/10/03/e95e675fe645041c6e93fcafc7974c34.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/10/03/0ba802a3064b4a75b19b830f3940f6c9.png',
+  music:    'https://s1.imagehub.cc/images/2026/10/03/6e2aaaf723d4813fa240996c9847a17e.png',
+  preset:   'https://s1.imagehub.cc/images/2026/10/03/020212319b53ad608d195c11a783ac35.png',
+  floating: 'https://s1.imagehub.cc/images/2026/10/03/4f8dc9a14aec58432959c0390fdafa38.png',
+  shop:     'https://s1.imagehub.cc/images/2026/10/03/6f3dd2ac934008dad21f331dcbe046c7.png',
+  world:    'https://s1.imagehub.cc/images/2026/10/03/32a34102c5197dd02ec52f77f227e786.png',
+  game:     'https://s1.imagehub.cc/images/2026/10/03/019158f0798ed1ad307752b4de4c7010.png',
+
+  // === 底栏图标（纤细线稿风，22x22，stroke-width 1.5）===
+  tabChats: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H7l-4 3.5v-12A8.5 8.5 0 0 1 11.5 3h1A8.5 8.5 0 0 1 21 11.5z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="14" y2="14"/></svg>'),
+
+  tabContacts: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7.5" r="3.5"/><path d="M3.5 20v-1.2a6.5 6.5 0 0 1 6.5-6.5h0a6.5 6.5 0 0 1 6.5 6.5V20"/><path d="M18 7.5a2.5 2.5 0 0 1 0 5"/><path d="M21 20v-1a3.5 3.5 0 0 0-2-3.2"/></svg>'),
+
+  tabDiscover: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5"/></svg>'),
+
+  tabMe: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3.2"/><path d="M6.5 19.5a6 6 0 0 1 11 0"/></svg>'),
+
+  // === 发现页 · 朋友圈入口（22x22，纤细线稿）===
+  discoverMoments: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M5.2 18.8l2.1-2.1M16.7 7.3l2.1-2.1"/></svg>')
+  
+  }
 };
 // =====================================
 function applySkin(id) {
@@ -3521,7 +3461,22 @@ function applySkin(id) {
     }catch(e){}
   }, 60);
 
-  // 4. 壁纸逻辑：用户未自定义壁纸时，切换为主题默认壁纸
+  // 4. 壁纸逻辑（两态）
+  //    _userWallpaper = true  → 用户自定义，切主题时不覆盖
+  //    _userWallpaper = false → 跟随主题默认壁纸
+  DB.desktop = DB.desktop || {};
+  // 防卡死：标记说有自定义，但值是空的 → 状态坏了，退回主题默认
+  if (DB.desktop._userWallpaper && !DB.desktop.wallpaper) {
+    DB.desktop._userWallpaper = false;
+  }
+  // 修复历史坏值：壁纸是"非图片"且包含换行/注释，说明存的是坏数据 → 强制回退到主题默认
+  if (!DB.desktop._userWallpaper && DB.desktop.wallpaper) {
+    var _wp = String(DB.desktop.wallpaper);
+    var _isImg = /^data:image\//i.test(_wp) || /^https?:\/\//i.test(_wp) || /^blob:/i.test(_wp);
+    if (!_isImg && (_wp.indexOf('\n') !== -1 || _wp.indexOf('/*') !== -1)) {
+      DB.desktop.wallpaper = '';   // 清掉坏值，下面会重新赋成主题默认
+    }
+  }
   if (!DB.desktop._userWallpaper) {
     DB.desktop.wallpaper = skin.wallpaper || '';
   }
@@ -3534,7 +3489,15 @@ if (phone) phone.dataset.theme = id;
 
   // ===== 主题适配（浅色/深色） =====
 
-var isLight = (id === 'flora_notebook' || id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'ghost_troupe' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose' || id === 'sea_salt');
+var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose' || id === 'sea_salt' || id === 'angel_sheep');
+
+// 给桌面打深色标记，供玻璃卡片和图标阴影使用
+var _homeEl = document.getElementById('home');
+if (_homeEl) {
+  if (isLight) _homeEl.removeAttribute('data-dark');
+  else _homeEl.setAttribute('data-dark', '1');
+}
+
 if (isLight) {
   root.style.setProperty('--app-text-shadow', '0 1px 3px rgba(0,0,0,0.08)');
   root.style.setProperty('--clock-sub-color', 'var(--sub)');
@@ -3671,9 +3634,12 @@ if (!Array.isArray(d.lorebooks)) d.lorebooks = [];
 
   // ===== 群聊新增：群聊数组 =====
   d.groups=d.groups||[];
-  d.desktop=d.desktop||{wallpaper:'',apps:null};
-  if(!d.desktop.iconSize) d.desktop.iconSize='large';
-  if(!d.desktop.apps||!d.desktop.apps.length)d.desktop.apps=defaultApps();
+d.desktop=d.desktop||{wallpaper:'',apps:null};
+if(d.desktop._userWallpaper===undefined) d.desktop._userWallpaper=false;
+// 修复历史坏状态：标记说有自定义壁纸，但实际没值 → 重置为跟随主题
+if(d.desktop._userWallpaper===true && !d.desktop.wallpaper) d.desktop._userWallpaper=false;
+
+if(!d.desktop.iconSize) d.desktop.iconSize='large';
   d.desktop.apps=d.desktop.apps.filter(a=>a.id!=='moments');
   if(!d.desktop.apps.find(a=>a.id==='music'))d.desktop.apps.push({id:'music',name:'音乐',emoji:'🎵',icon:''});
   if(!d.desktop.apps.find(a=>a.id==='preset'))d.desktop.apps.push({id:'preset',name:'预设',emoji:'🎭',icon:''});
@@ -3948,22 +3914,36 @@ function pickStatus(c){
   var hh = new Date().getHours();
   var extras = ['crush','miss','expect','meh','hide','soft'];
 
-  // 用"日期"做种子，保证一整天稳定不乱跳
-  var seed = (c.todayMood.date||'') + mk;
-  var seedNum = 0;
-  for(var i=0;i<seed.length;i++){ seedNum = (seedNum*31 + seed.charCodeAt(i)) % 100000; }
+  // ★ 种子加入：角色ID + 日期 + 心情key + 时段（半天一变，既稳定又有变化）
+  var halfDay = hh < 12 ? 'AM' : 'PM';
+  var seed = String(c.id || '') + '|' + (c.todayMood.date || '') + '|' + mk + '|' + halfDay;
+
+  // ★ 用更好的打散算法（FNV-1a 变体），避免余数集中
+  var h = 2166136261;
+  for (var i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = (h * 16777619) >>> 0;   // >>>0 保证是正整数
+  }
+  // 再搅一次，让低位也充分随机
+  h ^= h >>> 15; h = (h * 2246822507) >>> 0;
+  h ^= h >>> 13; h = (h * 3266489909) >>> 0;
+  h ^= h >>> 16;
+
+  // ★ 不同用途用不同的数，避免"选池子"和"选下标"互相绑定
+  var rPool = h % 1000;                    // 决定走哪个池
+  var rIdx  = Math.floor(h / 1000) % 100000; // 决定池内下标
 
   var poolKey;
-  if((hh>=23 || hh<5) && (seedNum%10) < 7){
-    poolKey = 'night';                       // 深夜70%走夜间池
-  } else if((seedNum%10) < 3){
-    poolKey = extras[seedNum % extras.length]; // 30%概率抽一个"新维度"心情
+  if ((hh >= 23 || hh < 5) && rPool < 700) {
+    poolKey = 'night';                        // 深夜70%走夜间池
+  } else if (rPool < 300) {
+    poolKey = extras[rIdx % extras.length];   // 30%抽一个"新维度"
   } else {
-    poolKey = mk;                            // 其余跟着今日心情
+    poolKey = mk;
   }
 
   var pool = STATUS_POOL[poolKey] || STATUS_POOL.calm;
-  var idx = seedNum % pool.length;
+  var idx = rIdx % pool.length;
   return pool[idx];
 }
 
@@ -5584,13 +5564,12 @@ function fmtEventDate(dateStr) {
   return (d.getMonth() + 1) + '月' + d.getDate() + '日';
 }
 
-// ===== 替换后的 annivWidgetHtml（手帐时间轴新版） =====
+// ===== 纪念日小组件 · 双标签便利贴版 =====
 function annivWidgetHtml() {
   cleanExpiredEvents();
-
   if (!DB.events) DB.events = [];
 
-  // ---- 上半：纪念日 ----
+  // ---- 上半：纪念日（大数字） ----
   var list = DB.anniversaries || [];
   var pin = null;
   for (var i = 0; i < list.length; i++) {
@@ -5598,73 +5577,75 @@ function annivWidgetHtml() {
   }
   if (!pin && list.length > 0) pin = list[0];
 
-  var topHtml = '';
+  var frontHtml = '';
   if (pin) {
     var showDays, prefix, suffix, icon;
     if (pin.type === '生日') {
       showDays = Math.abs(daysBetween(nextBirthday(pin.date)));
       icon = '🎂';
-      if (showDays === 0) {
-        prefix = '生日就是';
-        suffix = '';
-      } else {
-        prefix = '距离生日还有';
-        suffix = '天';
-      }
+      if (showDays === 0) { prefix = '生日就是'; suffix = ''; }
+      else { prefix = '距离生日还有'; suffix = '天'; }
     } else {
       showDays = Math.abs(daysBetween(pin.date));
       icon = '❤️';
       prefix = '已经';
       suffix = '天';
     }
-    var daysHtml = (pin.type === '生日' && showDays === 0)
-      ? '<div class="anniv-days"><span style="font-size:18px">今天 🎉</span></div>'
-      : '<div class="anniv-days"><span class="anniv-prefix">' + prefix + '</span> ' + showDays + '<small>' + suffix + '</small></div>';
 
-    topHtml = '<div class="anniv-top">' +
-      '<div class="anniv-title"><span class="icon">' + icon + '</span> ' + esc(pin.title || '纪念日') + '<span class="breath-dot"></span></div>' +
-      daysHtml +
+    var daysInner = (pin.type === '生日' && showDays === 0)
+      ? '<span style="font-size:16px;">今天 🎉</span>'
+      : '<span class="tag-prefix">' + prefix + '</span>' + showDays + '<span class="tag-unit">' + suffix + '</span>';
+
+    frontHtml =
+      '<div class="tag-front">' +
+        '<div class="tag-tape"></div>' +
+        '<div class="tag-pin"></div>' +
+        '<div class="tag-label"><span class="tag-icon">' + icon + '</span>' + esc(pin.title || '纪念日') + '</div>' +
+        '<div class="tag-days">' + daysInner + '</div>' +
       '</div>';
   } else {
-    topHtml = '<div class="anniv-top">' +
-      '<div class="anniv-title">📅 纪念日<span class="breath-dot"></span></div>' +
-      '<div class="anniv-empty">还没有纪念日</div>' +
+    frontHtml =
+      '<div class="tag-front">' +
+        '<div class="tag-tape"></div>' +
+        '<div class="tag-pin"></div>' +
+        '<div class="tag-label"><span class="tag-icon">📅</span>纪念日</div>' +
+        '<div class="tag-days" style="font-size:15px;color:var(--sub);font-family:inherit;">还没有纪念日</div>' +
       '</div>';
   }
 
-  // ---- 下半：日程列表 ----
+  // ---- 下半：日程（只显示最近 1 条） ----
   var events = DB.events.slice().sort(function(a, b) {
     var da = new Date(a.date || '2000-01-01');
     var db = new Date(b.date || '2000-01-01');
     return da - db;
-  }).slice(0, 2);
+  }).slice(0, 1);
 
-  var evHtml = '';
+  var backItemHtml = '';
   if (events.length > 0) {
-    var items = [];
-    for (var j = 0; j < events.length; j++) {
-      var e = events[j];
-      var dateStr = e.date || '';
-      var titleStr = e.title || '未命名日程';
-      var dateDisplay = fmtEventDate(dateStr);
-      items.push(
-        '<div class="anniv-event">' +
-          '<span class="ev-date">' + esc(dateDisplay) + '</span>' +
-          '<span class="ev-text">' + esc(titleStr) + '</span>' +
-        '</div>'
-      );
-    }
-    evHtml = items.join('');
+    var e = events[0];
+    backItemHtml =
+      '<div class="mini-item">' +
+        '<span class="mini-date">' + esc(fmtEventDate(e.date)) + '</span>' +
+        '<span class="mini-text">' + esc(e.title || '未命名日程') + '</span>' +
+      '</div>';
   } else {
-    evHtml = '<div class="anniv-empty">暂无日程安排</div>';
+    backItemHtml = '<div class="mini-empty">暂无日程安排</div>';
   }
 
-  // ---- 组装（已去除机械感星点） ----
+  var backHtml =
+    '<div class="tag-back">' +
+      '<div class="tag-tape"></div>' +
+      '<div class="mini-label">日程</div>' +
+      backItemHtml +
+    '</div>';
+
+  // ---- 组装 ----
   return '<div class="anniv-widget widget-2x2" onclick="openAnniversary()">' +
-    topHtml +
-    '<div class="anniv-events">' + evHtml + '</div>' +
+    backHtml +
+    frontHtml +
   '</div>';
 }
+
 // 算下一个生日（生日专用）
 function nextBirthday(dateStr){
   var d = new Date(dateStr);
@@ -5953,11 +5934,27 @@ DB.events = DB.events || [
   
   const d = document.createElement('div');
   d.id = 'home';
-  var bg = DB.desktop.wallpaper;
-  if (bg) {
-    d.style.background = bg;
-    d.style.backgroundSize = 'cover';
-    d.style.backgroundPosition = 'center';
+  var bgRaw = DB.desktop.wallpaper || '';
+  var bgCss = wallpaperToCss(bgRaw);
+  if (bgCss) {
+    // 用 backgroundImage 而不是 background 简写，避免非法值导致整条被忽略
+    d.style.backgroundImage = bgCss;
+    if (wallpaperIsImage(bgRaw)) {
+      d.style.backgroundSize = 'cover';
+      d.style.backgroundPosition = 'center';
+      d.style.backgroundRepeat = 'no-repeat';
+    } else {
+      // 渐变类壁纸：清掉可能残留的 cover，交给渐变自己铺满
+      d.style.backgroundSize = '';
+      d.style.backgroundPosition = '';
+      d.style.backgroundRepeat = '';
+    }
+  } else {
+    // 无壁纸状态：显式清空，回落到 CSS 里的 --bg 纯色
+    d.style.backgroundImage = '';
+    d.style.backgroundSize = '';
+    d.style.backgroundPosition = '';
+    d.style.backgroundRepeat = '';
   }
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
   
@@ -5986,7 +5983,7 @@ DB.events = DB.events || [
   }
   
   var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
-<svg style="position:absolute;pointer-events:none;z-index:0;width:160px;height:160px;top:5%;left:50%;transform:translateX(-50%);overflow:visible;" viewBox="0 0 160 160">
+<svg style="position:absolute;pointer-events:none;z-index:0;width:160px;height:160px;top:-2%;left:50%;transform:translateX(-50%);overflow:visible;" viewBox="0 0 160 160">
   <defs>
     <filter id="ring-glow-1" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
@@ -5998,7 +5995,8 @@ DB.events = DB.events || [
     stroke-linecap="round"
     filter="url(#ring-glow-1)" opacity="0.9"/>
 </svg>
-<svg style="position:absolute;pointer-events:none;z-index:0;width:110px;height:110px;top:18%;left:50%;transform:translateX(-50%);overflow:visible;" viewBox="0 0 110 110">
+<svg style="position:absolute;pointer-events:none;z-index:0;width:110px;height:110px;top:11%;left:50%;transform:translateX(-50%);overflow:visible;" viewBox="0 0 110 110">
+
   <defs>
     <filter id="ring-glow-2" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
@@ -6028,8 +6026,9 @@ DB.events = DB.events || [
   
   var weatherHtml = '';
   if (weatherApp) {
-    weatherHtml = `<div class="weather-widget" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;border-radius:24px;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:120px;background:transparent !important;border:1.5px solid var(--line);box-shadow:none;">
-      <style>
+    weatherHtml = `<div class="weather-widget glass-card" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:120px;">
+
+	<style>
 @keyframes floatDot {
   0%, 100% { transform: translateY(0px) scale(1); opacity: 1; }
   50% { transform: translateY(-8px) scale(1.2); opacity: 1; }
@@ -6069,7 +6068,8 @@ DB.events = DB.events || [
         <div id="widgetDesc" style="font-size:14px;font-weight:400;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
         <div id="widgetDetail" style="font-size:13px;font-weight:350;color:var(--sub);margin-top:1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
       </div>
-      <div style="position:relative;z-index:1;flex-shrink:0;padding-top:6px;margin-top:4px;border-top:1px solid var(--line);">
+      <div style="position:relative;z-index:1;flex-shrink:0;padding-top:6px;margin-top:4px;border-top:1px solid color-mix(in srgb,var(--theme) 14%,transparent);">
+	  
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span id="widgetWorldName" style="font-size:12px;font-weight:350;color:var(--clock-sub-color, var(--sub));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;">未关联</span>
           <span id="widgetUpdateTime" style="font-size:12px;font-weight:300;color:var(--clock-sub-color, var(--sub));white-space:nowrap;flex-shrink:0;">刚刚</span>
@@ -6079,61 +6079,6 @@ DB.events = DB.events || [
     </div>`;
   }
   
-// ---- 星星（幽灵戏班 · 薄荷绿主调 · 彩色点缀 · 放大版） ----
-var starHtml = '';
-if (currentThemeId === 'ghost_troupe') {
-  starHtml = `
-    <!-- 超大星星（主色薄荷绿 + 淡紫 + 香槟金） -->
-    <span class="ghost-star" style="top:3%; left:10%; font-size:60px; color:#8AAC9E; opacity:0.38;">✦</span>
-    <span class="ghost-star" style="top:15%; right:8%; font-size:50px; color:#B8A8C0; opacity:0.32;">✦</span>
-    <span class="ghost-star" style="top:30%; left:6%; font-size:55px; color:#C9B68A; opacity:0.30;">✦</span>
-    <span class="ghost-star" style="top:48%; right:5%; font-size:65px; color:#8AAC9E; opacity:0.35;">✦</span>
-    <span class="ghost-star" style="top:65%; left:8%; font-size:55px; color:#8A9FB0; opacity:0.32;">✦</span>
-    <span class="ghost-star" style="top:80%; right:10%; font-size:60px; color:#B8A8C0; opacity:0.30;">✦</span>
-    <span class="ghost-star" style="top:92%; left:15%; font-size:50px; color:#C9B68A; opacity:0.32;">✦</span>
-
-    <!-- 大星星 -->
-    <span class="ghost-star" style="top:8%; left:25%; font-size:38px; color:#8AAC9E; opacity:0.28;">✦</span>
-    <span class="ghost-star" style="top:20%; right:22%; font-size:40px; color:#D8ADAA; opacity:0.22;">✦</span>
-    <span class="ghost-star" style="top:38%; left:35%; font-size:42px; color:#8A9FB0; opacity:0.26;">✦</span>
-    <span class="ghost-star" style="top:55%; right:28%; font-size:38px; color:#B8A8C0; opacity:0.25;">✦</span>
-    <span class="ghost-star" style="top:72%; left:30%; font-size:40px; color:#8AAC9E; opacity:0.28;">✦</span>
-    <span class="ghost-star" style="top:88%; right:20%; font-size:38px; color:#C9B68A; opacity:0.25;">✦</span>
-
-    <!-- 中等星星 -->
-    <span class="ghost-star" style="top:5%; left:45%; font-size:26px; color:#B8A8C0; opacity:0.22;">✦</span>
-    <span class="ghost-star" style="top:12%; right:40%; font-size:28px; color:#8AAC9E; opacity:0.22;">✦</span>
-    <span class="ghost-star" style="top:25%; left:55%; font-size:24px; color:#D8ADAA; opacity:0.18;">✦</span>
-    <span class="ghost-star" style="top:35%; right:50%; font-size:26px; color:#C9B68A; opacity:0.22;">✦</span>
-    <span class="ghost-star" style="top:45%; left:65%; font-size:28px; color:#8A9FB0; opacity:0.20;">✦</span>
-    <span class="ghost-star" style="top:58%; right:45%; font-size:24px; color:#8AAC9E; opacity:0.22;">✦</span>
-    <span class="ghost-star" style="top:68%; left:50%; font-size:26px; color:#B8A8C0; opacity:0.20;">✦</span>
-    <span class="ghost-star" style="top:78%; right:55%; font-size:28px; color:#C9B68A; opacity:0.20;">✦</span>
-    <span class="ghost-star" style="top:85%; left:60%; font-size:24px; color:#8AAC9E; opacity:0.22;">✦</span>
-
-    <!-- 小星星 -->
-    <span class="ghost-star" style="top:2%; left:60%; font-size:16px; color:#E8DDD0; opacity:0.22;">✦</span>
-    <span class="ghost-star" style="top:10%; left:75%; font-size:14px; color:#8AAC9E; opacity:0.20;">✦</span>
-    <span class="ghost-star" style="top:18%; right:55%; font-size:15px; color:#8A9FB0; opacity:0.20;">✦</span>
-    <span class="ghost-star" style="top:28%; left:80%; font-size:14px; color:#B8A8C0; opacity:0.18;">✦</span>
-    <span class="ghost-star" style="top:42%; right:70%; font-size:16px; color:#D8ADAA; opacity:0.16;">✦</span>
-    <span class="ghost-star" style="top:52%; left:85%; font-size:14px; color:#C9B68A; opacity:0.20;">✦</span>
-    <span class="ghost-star" style="top:60%; right:65%; font-size:15px; color:#8AAC9E; opacity:0.18;">✦</span>
-    <span class="ghost-star" style="top:70%; left:75%; font-size:14px; color:#B8A8C0; opacity:0.18;">✦</span>
-    <span class="ghost-star" style="top:82%; right:75%; font-size:16px; color:#8A9FB0; opacity:0.18;">✦</span>
-    <span class="ghost-star" style="top:90%; left:85%; font-size:14px; color:#C9B68A; opacity:0.20;">✦</span>
-
-    <!-- 小圆点星星（放大） -->
-    <span style="position:absolute;border-radius:50%;background:#8AAC9E;opacity:0.32;width:6px;height:6px;top:4%;left:35%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#C9B68A;opacity:0.28;width:5px;height:5px;top:14%;right:30%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#8A9FB0;opacity:0.32;width:7px;height:7px;top:28%;left:50%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#B8A8C0;opacity:0.28;width:5px;height:5px;top:40%;right:15%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#8AAC9E;opacity:0.30;width:6px;height:6px;top:55%;left:20%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#D8ADAA;opacity:0.22;width:7px;height:7px;top:68%;right:35%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#C9B68A;opacity:0.30;width:5px;height:5px;top:78%;left:45%;"></span>
-    <span style="position:absolute;border-radius:50%;background:#8A9FB0;opacity:0.28;width:6px;height:6px;top:88%;right:50%;"></span>
-  `;
-}
   var appsHtml = otherApps.map(function(a) {
     var badge = '';
     if (a.id === 'wechat') {
@@ -6157,17 +6102,16 @@ if (currentThemeId === 'ghost_troupe') {
   }).join('');
   
 d.innerHTML = `
-  <div style="padding:40px 0 16px 0;position:relative;">
+  <div style="padding:40px 0 16px 0;position:relative;z-index:1;">
     ${weatherHtml}
   </div>
-  ${starHtml}
 <div id="appgrid" class="icon-${DB.desktop.iconSize || 'large'}">
   ${clockHtml}
   ${annivWidgetHtml()}
   ${appsHtml}
 </div>
-`;
-  
+<div id="homebar"></div>
+`;  
   phone.appendChild(d);
   tick();
   refreshChatBadges();
@@ -6306,11 +6250,11 @@ var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || curre
       var isActive = (i === _weatherCurrentIndex);
       var bgColor = isActive ? 'var(--theme)' : 'var(--sub)';
       var opacity = isActive ? '1' : '0.35';
-      var shadow = isActive ? '0 0 6px var(--theme)' : 'none';
-      return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' + bgColor + ';opacity:' + opacity + ';box-shadow:' + shadow + ';transition:all 0.3s;"></span>';
+      var w = isActive ? '16px' : '6px';
+      var r = isActive ? '3px' : '50%';
+      return '<span style="display:inline-block;width:' + w + ';height:6px;border-radius:' + r + ';background:' + bgColor + ';opacity:' + opacity + ';transition:all 0.3s;"></span>';
     }).join('');
-  }
-  
+  }  
   autoCheckWeatherUpdate();
 }
 // 天气小组件：滑动绑定
@@ -8508,6 +8452,8 @@ function openLorebook(worldId){
   html += '<div class="wv-lore-tip">同一个世界观可以建多套世界书，每套单独管理、单独开关，服务不同场景（如穿搭风格、世界观背景、人物关系等）。</div>';
   html += '<div class="wv-lore-acts">' +
           '<span class="wv-btn primary" onclick="newLoreBook(\''+worldId+'\')">＋ 新建一套世界书</span>' +
+          '<span class="wv-btn" onclick="exportLorebooks(\''+worldId+'\')">📤 导出</span>' +
+          '<span class="wv-btn" onclick="importLorebooks(\''+worldId+'\')">📥 导入</span>' +
           '</div>';
   if(!books.length){
     html += '<div class="empty" style="margin-top:30px;">还没有世界书<br>点上面的按钮新建一套</div>';
@@ -8540,6 +8486,325 @@ function openLorebook(worldId){
   tbRight.onclick = null;
   content.innerHTML = html;
 }
+/* ===== 世界书 · 单独导出 ===== */
+/* 点击「导出」→ 先勾选要导出哪几套书 */
+function exportLorebooks(worldId) {
+  var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
+  if (!world) { popTip('世界观不存在', {icon:'⚠️'}); return; }
+
+  var books = (DB.lorebooks || []).filter(function(b) { return b.worldId === worldId; });
+  if (!books.length) {
+    popTip('这个世界观下还没有世界书，无可导出内容', {icon:'📖', title:'空空如也'});
+    return;
+  }
+
+  // 记录勾选状态：默认全选
+  window._exportLoreChecked = {};
+  books.forEach(function(b) { window._exportLoreChecked[b.id] = true; });
+
+  renderExportLorePicker(worldId);
+}
+
+/* 渲染勾选面板（每次勾选都重绘一下这一块） */
+function renderExportLorePicker(worldId) {
+  popClose();
+  var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
+  if (!world) return;
+  var books = (DB.lorebooks || []).filter(function(b) { return b.worldId === worldId; });
+  var checked = window._exportLoreChecked || {};
+
+  var selCount = books.filter(function(b) { return checked[b.id]; }).length;
+  var allChecked = (selCount === books.length);
+
+  var rows = books.map(function(b) {
+    var cnt = (DB.lorebook || []).filter(function(e) { return e.bookId === b.id; }).length;
+    var on = !!checked[b.id];
+    return '<div onclick="toggleExportLore(\'' + worldId + '\',\'' + b.id + '\')" ' +
+      'style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;' +
+      'background:' + (on ? 'color-mix(in srgb, var(--theme) 12%, transparent)' : 'transparent') + ';' +
+      'border:1px solid ' + (on ? 'var(--theme)' : 'var(--line)') + ';margin-bottom:8px;">' +
+      '<span style="width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;' +
+        'border:2px solid ' + (on ? 'var(--theme)' : 'var(--line)') + ';' +
+        'background:' + (on ? 'var(--theme)' : 'transparent') + ';' +
+        'color:#fff;font-size:12px;font-weight:700;">' + (on ? '✓' : '') + '</span>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(b.name || '（未命名）') + '</div>' +
+        '<div style="font-size:11px;color:var(--sub);margin-top:2px;">' + cnt + ' 条条目' + (b.enabled === false ? ' · 已停用' : '') + '</div>' +
+      '</div>' +
+      '</div>';
+  }).join('');
+
+  var p = document.createElement('div');
+  p.className = 'popup'; p.id = 'popup';
+  p.innerHTML = '<div class="popup-box" style="text-align:left;">' +
+    '<div class="popup-head"><div class="popup-title">选择要导出的世界书</div>' +
+    '<div class="popup-msg" style="font-size:12px;">已选 ' + selCount + ' / ' + books.length + ' 套</div></div>' +
+    '<div style="padding:0 14px 6px;">' +
+      '<div onclick="toggleExportLoreAll(\'' + worldId + '\')" style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-bottom:1px dashed var(--line);margin-bottom:8px;">' +
+        '<span style="width:20px;height:20px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;' +
+          'border:2px solid ' + (allChecked ? 'var(--theme)' : 'var(--line)') + ';' +
+          'background:' + (allChecked ? 'var(--theme)' : 'transparent') + ';' +
+          'color:#fff;font-size:12px;font-weight:700;">' + (allChecked ? '✓' : '') + '</span>' +
+        '<span style="font-size:13px;color:var(--text);font-weight:600;">全选 / 取消全选</span>' +
+      '</div>' +
+      '<div style="max-height:48vh;overflow-y:auto;">' + rows + '</div>' +
+    '</div>' +
+    '<div class="popup-btns">' +
+      '<button class="popup-btn sub" onclick="popClose()">取消</button>' +
+      '<button class="popup-btn main"' + (selCount === 0 ? ' disabled style="opacity:0.4;pointer-events:none;"' : '') +
+        ' onclick="confirmExportLore(\'' + worldId + '\')">导出已选 (' + selCount + ')</button>' +
+    '</div>' +
+    '</div>';
+  phone.appendChild(p);
+}
+
+/* 勾选 / 取消单套 */
+function toggleExportLore(worldId, bookId) {
+  window._exportLoreChecked = window._exportLoreChecked || {};
+  window._exportLoreChecked[bookId] = !window._exportLoreChecked[bookId];
+  renderExportLorePicker(worldId);
+}
+
+/* 全选 / 取消全选 */
+function toggleExportLoreAll(worldId) {
+  var books = (DB.lorebooks || []).filter(function(b) { return b.worldId === worldId; });
+  var checked = window._exportLoreChecked || {};
+  var selCount = books.filter(function(b) { return checked[b.id]; }).length;
+  var allChecked = (selCount === books.length);
+  books.forEach(function(b) { checked[b.id] = !allChecked; });
+  window._exportLoreChecked = checked;
+  renderExportLorePicker(worldId);
+}
+
+/* 点「导出已选」→ 真正生成文件 */
+function confirmExportLore(worldId) {
+  var world = (DB.worlds || []).find(function(w) { return w.id === worldId; });
+  if (!world) { popTip('世界观不存在', {icon:'⚠️'}); return; }
+
+  var checked = window._exportLoreChecked || {};
+  var books = (DB.lorebooks || []).filter(function(b) {
+    return b.worldId === worldId && checked[b.id];
+  });
+  if (!books.length) {
+    popTip('还没选任何世界书', {icon:'📖'});
+    return;
+  }
+
+  _doExportLorebooks(world, books);
+  popClose();
+}
+
+/* 真正生成 JSON 并下载（被 confirmExportLore 调用） */
+function _doExportLorebooks(world, books) {
+  var bookIds = books.map(function(b) { return b.id; });
+  var entries = (DB.lorebook || []).filter(function(e) {
+    return bookIds.indexOf(e.bookId) !== -1;
+  });
+
+  var payload = {
+    _type: 'lorebook_export',
+    _version: 1,
+    _exportTime: new Date().toISOString(),
+    _sourceWorld: world.name || '',
+    books: books.map(function(b) {
+      return {
+        id: b.id,
+        name: b.name || '未命名',
+        enabled: b.enabled !== false,
+        createdAt: b.createdAt || Date.now(),
+        updatedAt: b.updatedAt || Date.now()
+      };
+    }),
+    entries: entries.map(function(e) {
+      return {
+        bookId: e.bookId,
+        name: e.name || '',
+        content: e.content || '',
+        enabled: e.enabled !== false,
+        mode: e.mode === 'constant' ? 'constant' : 'selective',
+        order: e.order || 50,
+        createdAt: e.createdAt || Date.now(),
+        updatedAt: e.updatedAt || Date.now()
+      };
+    })
+  };
+
+  var jsonStr = JSON.stringify(payload, null, 2);
+  var safeName = (world.name || '世界观').replace(/[\\/:*?"<>|]/g, '_');
+  var dateStr = new Date().toISOString().slice(0, 10);
+  var suffix = (books.length === 1)
+    ? ('_' + (books[0].name || '未命名').replace(/[\\/:*?"<>|]/g, '_'))
+    : ('_' + books.length + '套');
+  downloadJSON(jsonStr, '世界书_' + safeName + suffix + '_' + dateStr + '.json');
+  popTip('已导出 ' + books.length + ' 套世界书、' + entries.length + ' 条条目', {icon:'📤', title:'导出成功'});
+}
+/* ===== 世界书 · 单独导入 ===== */
+function importLorebooks(defaultWorldId) {
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.json';
+  inp.onchange = function() {
+    var file = inp.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var data;
+      try { data = JSON.parse(ev.target.result); }
+      catch(err) { popTip('文件解析失败：' + err.message, {icon:'⚠️'}); return; }
+
+      if (!data || data._type !== 'lorebook_export' || !Array.isArray(data.books)) {
+        popTip('这不是有效的世界书备份文件', {icon:'⚠️', title:'格式不符'});
+        return;
+      }
+      if (!data.books.length) {
+        popTip('文件中没有可导入的世界书', {icon:'📖'});
+        return;
+      }
+
+      chooseLoreImportTarget(defaultWorldId, function(targetWorldId) {
+        doImportLorebooks(data, targetWorldId);
+      });
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+/* 弹出「导入到哪个世界观」选择面板 */
+function chooseLoreImportTarget(defaultWorldId, onPick) {
+  var worlds = DB.worlds || [];
+  if (!worlds.length) {
+    popTip('还没有世界观，先去「世界观」App 创建一个', {icon:'🌍', title:'提示'});
+    return;
+  }
+
+  var p = document.createElement('div');
+  p.className = 'popup'; p.id = 'popup';
+  var rows = worlds.map(function(w) {
+    var sel = (w.id === defaultWorldId);
+    return '<div onclick="window._pickLoreWorld(\'' + w.id + '\')" ' +
+      'style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;' +
+      'background:' + (sel ? 'color-mix(in srgb, var(--theme) 12%, transparent)' : 'transparent') + ';' +
+      'border:1px solid ' + (sel ? 'var(--theme)' : 'var(--line)') + ';margin-bottom:8px;">' +
+      '<span style="font-size:20px;">' + (w.icon || '🌍') + '</span>' +
+      '<span style="flex:1;font-size:14px;color:var(--text);">' + esc(w.name) + '</span>' +
+      (sel ? '<span style="font-size:11px;color:var(--theme);">当前</span>' : '') +
+      '</div>';
+  }).join('');
+
+  p.innerHTML = '<div class="popup-box" style="text-align:left;">' +
+    '<div class="popup-head"><div class="popup-title">导入到哪个世界观？</div>' +
+    '<div class="popup-msg" style="font-size:12px;">导入的世界书将归属到所选世界观下</div></div>' +
+    '<div style="max-height:50vh;overflow-y:auto;padding:0 14px 10px;">' + rows + '</div>' +
+    '<div class="popup-btns"><button class="popup-btn sub" onclick="popClose()">取消</button></div>' +
+    '</div>';
+  phone.appendChild(p);
+
+  window._pickLoreWorld = function(wid) {
+    popClose();
+    if (onPick) onPick(wid);
+  };
+}
+
+/* 检查重名 → 询问用户 */
+function doImportLorebooks(data, targetWorldId) {
+  var existingNames = {};
+  (DB.lorebooks || []).forEach(function(b) {
+    if (b.worldId === targetWorldId) existingNames[b.name] = b;
+  });
+
+  var conflicts = data.books.filter(function(b) {
+    return existingNames[b.name];
+  });
+
+  if (conflicts.length) {
+    var names = conflicts.map(function(b) { return '《' + b.name + '》'; }).join('、');
+    popConfirm(
+      '目标世界观下已有同名世界书：' + names + '\n\n点「确定」= 覆盖；点「取消」= 重命名导入',
+      function() { _doImportWithStrategy(data, targetWorldId, 'overwrite'); },
+      { icon:'📚', title:'有重名世界书', ok:'覆盖', cancel:'重命名导入',
+        onNo: function() { _doImportWithStrategy(data, targetWorldId, 'rename'); } }
+    );
+  } else {
+    _doImportWithStrategy(data, targetWorldId, 'new');
+  }
+}
+
+/* 带策略的导入核心：重建 ID */
+function _doImportWithStrategy(data, targetWorldId, strategy) {
+  DB.lorebooks = DB.lorebooks || [];
+  DB.lorebook  = DB.lorebook  || [];
+
+  var existingByName = {};
+  DB.lorebooks.forEach(function(b) {
+    if (b.worldId === targetWorldId) existingByName[b.name] = b;
+  });
+
+  var bookIdMap = {};
+  var importedBooks = 0;
+  var importedEntries = 0;
+
+  data.books.forEach(function(srcBook, idx) {
+    var existing = existingByName[srcBook.name];
+    var finalName = srcBook.name;
+    var newBookId;
+
+    if (existing && strategy === 'overwrite') {
+      newBookId = existing.id;
+      DB.lorebook = DB.lorebook.filter(function(e) { return e.bookId !== newBookId; });
+      existing.enabled = srcBook.enabled !== false;
+      existing.updatedAt = Date.now();
+      bookIdMap[srcBook.id] = newBookId;
+    } else if (existing && strategy === 'rename') {
+      var n = 2;
+      while (existingByName[finalName]) {
+        finalName = srcBook.name + ' (' + n + ')';
+        n++;
+      }
+      newBookId = 'lbook_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).slice(2,6);
+      DB.lorebooks.push({
+        id: newBookId, worldId: targetWorldId, name: finalName,
+        enabled: srcBook.enabled !== false,
+        createdAt: Date.now(), updatedAt: Date.now()
+      });
+      existingByName[finalName] = true;
+      bookIdMap[srcBook.id] = newBookId;
+    } else {
+      newBookId = 'lbook_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).slice(2,6);
+      DB.lorebooks.push({
+        id: newBookId, worldId: targetWorldId, name: finalName,
+        enabled: srcBook.enabled !== false,
+        createdAt: Date.now(), updatedAt: Date.now()
+      });
+      existingByName[finalName] = true;
+      bookIdMap[srcBook.id] = newBookId;
+    }
+    importedBooks++;
+  });
+
+  (data.entries || []).forEach(function(srcEntry, i) {
+    var mappedBookId = bookIdMap[srcEntry.bookId];
+    if (!mappedBookId) return;
+    DB.lorebook.push({
+      id: 'lore_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2,6),
+      worldId: targetWorldId,
+      bookId: mappedBookId,
+      name: srcEntry.name || '',
+      content: srcEntry.content || '',
+      enabled: srcEntry.enabled !== false,
+      mode: srcEntry.mode === 'constant' ? 'constant' : 'selective',
+      order: srcEntry.order || 50,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    });
+    importedEntries++;
+  });
+
+  save();
+  popTip('成功导入 ' + importedBooks + ' 套世界书、' + importedEntries + ' 条条目', {icon:'📥', title:'导入完成'});
+  openLorebook(targetWorldId);
+}
+
 function openLoreEntries(worldId, bookId){
   var w = (DB.worlds||[]).find(function(x){return x.id===worldId;});
   if(!w){alert('世界观不存在');return;}
@@ -9062,7 +9327,8 @@ async function aiPolishWorld() {
 const wxT={chats:'微信',contacts:'通讯录',discover:'发现',me:'我'};
 const wxTEn = {chats:'Message', contacts:'Contacts', discover:'Discover', me:'Profile'};
 
-function renderWechat(){showChrome(true,true);statusbar.classList.add('dark');tbTitle.textContent = document.body.classList.contains('wx-theme-card') ? wxTEn[wechatPage] : wxT[wechatPage];tbLeft.textContent='‹';tbLeft.onclick=goHome;if(wechatPage==='contacts'){tbRight.textContent='＋';tbRight.onclick=addContact;}else{tbRight.textContent='';tbRight.onclick=null;}document.querySelectorAll('#tabbar .tab').forEach(t=>t.classList.toggle('active',t.dataset.page===wechatPage));if(wechatPage==='chats')renderChats();else if(wechatPage==='contacts')renderContacts();else if(wechatPage==='discover')renderDiscover();else renderWxMe();refreshMomentBadge();}
+function renderWechat(){showChrome(true,true);statusbar.classList.add('dark');tbTitle.textContent = document.body.classList.contains('wx-theme-card') ? wxTEn[wechatPage] : wxT[wechatPage];tbLeft.innerHTML=backIcon();tbLeft.onclick=goHome;
+if(wechatPage==='contacts'){tbRight.textContent='＋';tbRight.onclick=addContact;}else{tbRight.textContent='';tbRight.onclick=null;}document.querySelectorAll('#tabbar .tab').forEach(t=>t.classList.toggle('active',t.dataset.page===wechatPage));if(wechatPage==='chats')renderChats();else if(wechatPage==='contacts')renderContacts();else if(wechatPage==='discover')renderDiscover();else renderWxMe();refreshMomentBadge();}
 function avatarHtml(c){const bg=c.avatar?`background-image:url('${c.avatar}')`:'';return `<div class="avatar" style="${bg}">${c.avatar?'':(c.name?c.name[0]:'?')}</div>`;}
 function lastText(m){
   if(!m || m.hidden) return '';
@@ -10926,12 +11192,12 @@ if(tab==='theme'){
       <div class="section-title" style="margin-top:10px;">🖼️ 桌面壁纸</div>
       <div class="field" style="border-radius:12px;margin:0 14px;border:1px solid var(--line);">
         <div class="avapick" style="width:100%;height:86px;border-radius:8px;--ava:${DB.desktop.wallpaper?`url('${DB.desktop.wallpaper}')`:'none'}" onclick="pickWallpaper()">${DB.desktop.wallpaper?'':'点击上传壁纸'}</div>
-        ${DB.desktop.wallpaper ? `
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:12px;" onclick="resetWallpaper()">🔄 恢复默认</button>
-          <button class="btn gray" style="flex:1;margin:0;padding:6px 0;font-size:12px;color:#e34;" onclick="clearWallpaper()">🗑️ 移除壁纸</button>
-        </div>` : ''}
+        <div style="font-size:11px;color:var(--sub);margin-top:6px;text-align:center;">
+          ${DB.desktop._userWallpaper ? '当前:自定义壁纸' : '当前:主题默认壁纸'}
+        </div>
+        <button class="btn gray" style="width:100%;margin:8px 0 0;padding:7px 0;font-size:12px;" onclick="resetWallpaper()">🔄 恢复主题默认壁纸</button>
       </div>
+
       <div class="section-title" style="margin-top:10px;">📐 桌面图标大小</div>
       <div style="display:flex;gap:8px;margin:0 14px;">
         ${['small','medium','large'].map(function(sz){
@@ -11003,16 +11269,116 @@ if(tab==='sticker'){
 }
 
 function setTheme(k){DB.settings.theme=k;applyTheme(k);save();render();}
+// ===== 壁纸工具：把存的值转成合法的 CSS background 值 =====
+// 规则：
+//   - 如果是图片（data: 开头、http 开头、或以图片后缀结尾）→ 包成 url('...')
+//   - 如果本来就是 CSS 渐变/颜色（gradient、#、rgb 等）→ 原样返回
+//   - 空值 → 返回空字符串
+function wallpaperToCss(v) {
+  if (!v) return '';
+  v = String(v).trim();
+
+  // 图片直接走 url
+  var isImg = /^data:image\//i.test(v)
+           || /^https?:\/\//i.test(v)
+           || /^blob:/i.test(v)
+           || /\.(png|jpe?g|gif|webp|bmp|svg|avif)(\?.*)?$/i.test(v);
+  if (isImg) {
+    return "url('" + v.replace(/'/g, "\\'") + "')";
+  }
+
+  // 清洗
+  v = v.replace(/\/\*[\s\S]*?\*\//g, '')
+       .replace(/，/g, ',').replace(/；/g, ';')
+       .replace(/（/g, '(').replace(/）/g, ')')
+       .replace(/：/g, ':').replace(/　/g, ' ')
+       .replace(/[\u00A0\u2000-\u200B\u2028\u2029\u202F\u205F\u3000\uFEFF]/g, ' ')
+       .replace(/\btransparent\b/g, 'rgba(0,0,0,0)')
+       .replace(/\s+/g, ' ')
+       .replace(/,\s*$/, '')
+       .trim();
+  if (!v) return '';
+
+  // ★ 用括号配对切分：只切"括号外"的逗号
+  var parts = [];
+  var depth = 0, cur = '';
+  for (var i = 0; i < v.length; i++) {
+    var ch = v[i];
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    if (ch === ',' && depth === 0) {
+      parts.push(cur.trim());
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  if (cur.trim()) parts.push(cur.trim());
+
+  // ★ 逐层处理
+  for (var j = 0; j < parts.length; j++) {
+    var layer = parts[j];
+
+    // ① 把 url(...) 那层的 SVG 噪点直接删掉（很多旧浏览器不认）
+    //    —— 但保留图片的 url(...) 走上面的 isImg 分支，这里只处理渐变序列里的 url
+    if (/^url\(/i.test(layer)) {
+      // 这一层是 url 图，直接跳过（留着也没用，会一起被拒）
+      parts[j] = '';
+      continue;
+    }
+
+    // ② 去掉 position/size 简写里的 "/ size" 部分
+    //    例如 "linear-gradient(...) 0 0 / 4px 100%" → "linear-gradient(...)"
+    //    例如 "linear-gradient(...) center / cover" → "linear-gradient(...)"
+    layer = layer.replace(/(\))\s+[^\/]+\/\s*[^\s,]+/g, '$1');
+
+    // ③ 如果末尾是纯色，包成 linear-gradient
+    //    （这条只在"这一层"是纯色时生效，不是最后一层也没关系）
+    if (!/^(radial|linear|conic)-gradient/i.test(layer) && layer) {
+      layer = 'linear-gradient(' + layer + ', ' + layer + ')';
+    }
+
+    parts[j] = layer;
+  }
+
+  // 去掉空层
+  parts = parts.filter(function(x){ return x; });
+  if (!parts.length) return '';
+
+  v = parts.join(', ');
+
+  // ★ 最后再让浏览器验一次，如果还是被拒，就逐层削减
+  var testEl = document.createElement('div');
+  testEl.style.backgroundImage = v;
+  while (!testEl.style.backgroundImage && parts.length > 1) {
+    parts.pop();
+    v = parts.join(', ');
+    testEl.style.backgroundImage = v;
+  }
+
+  return v;
+}// 判断当前壁纸是不是图片（图片才需要 cover/center，渐变不需要）
+function wallpaperIsImage(v) {
+  if (!v) return false;
+  var css = wallpaperToCss(v);
+  return css.indexOf("url(") === 0;
+}
+
 function pickWallpaper() {
   pickImage(function(d) {
+    if (!d) return;                      // 用户取消或读取失败，不要写坏状态
+    DB.desktop = DB.desktop || {};
     DB.desktop.wallpaper = d;
-    DB.desktop._userWallpaper = true;
+    DB.desktop._userWallpaper = true;    // 标记为自定义
     save();
-    render();
-  }, 900);
+    render();                            // 统一走 render，内部会分发到当前页
+    popTip('壁纸已设置', { icon: '🖼️', title: '完成' });
+  }, 1600);
 }
+
 function resetWallpaper() {
-  DB.desktop._userWallpaper = false;
+  DB.desktop = DB.desktop || {};
+  DB.desktop._userWallpaper = false;     // 回到「跟随主题」
   var skin = SKINS.find(function(s) { return s.id === DB.settings.skin; }) || SKINS[0];
   DB.desktop.wallpaper = skin.wallpaper || '';
   save();
@@ -11020,15 +11386,6 @@ function resetWallpaper() {
   popTip('已恢复主题默认壁纸', { icon: '🔄', title: '完成' });
 }
 
-function clearWallpaper() {
-  popConfirm('确定要移除壁纸吗？', function() {
-    DB.desktop.wallpaper = '';
-    DB.desktop._userWallpaper = false;
-    save();
-    render();
-    popTip('壁纸已移除', { icon: '🗑️', title: '完成' });
-  }, { icon: '🗑️', title: '移除壁纸' });
-}
 function pickAppIcon(i){pickImage(d=>{DB.desktop.apps[i].icon=d;save();render();},160,true);}
 // 从私聊表情窗口里添加表情
 function addStickerFromPicker(){
@@ -16128,6 +16485,7 @@ async function regenIdeas(){
 function _buildPopup(opts){
   popClose();
   window._popYes = opts.onYes || null;
+  window._popNo  = null;
 
   var p = document.createElement('div');
   p.className = 'popup'; p.id = 'popup';
@@ -16171,9 +16529,9 @@ function _buildPopup(opts){
       var act = btn.getAttribute('data-act');
       popClose();
       if (act === 'yes' && typeof window._popYes === 'function') window._popYes();
+      if (act === 'no'  && typeof window._popNo  === 'function') window._popNo();
     });
   });
-
   phone.appendChild(p);
   return p;
 }
@@ -16181,6 +16539,7 @@ function _buildPopup(opts){
 // 下面三个是「入口」，用法和参数跟以前完全一样，其它地方一行都不用改
 function popConfirm(msg, onYes, opts){
   opts = opts || {};
+  window._popNo = (typeof opts.onNo === 'function') ? opts.onNo : null;
   _buildPopup({
     icon: opts.icon, title: opts.title, msg: msg, onYes: onYes,
     buttons: [
@@ -16189,7 +16548,6 @@ function popConfirm(msg, onYes, opts){
     ]
   });
 }
-
 function popTip(msg, opts){
   opts = opts || {};
   _buildPopup({
@@ -19086,6 +19444,13 @@ setInterval(function() {
   maybeAutoPost();
 }, 30 * 60 * 1000);
 function bootStartup(){
+  // 清理历史坏存档：壁纸里若残留换行或注释，一律清空，强制重取主题默认
+  if (DB.desktop && DB.desktop.wallpaper && !DB.desktop._userWallpaper) {
+    var _wp = String(DB.desktop.wallpaper);
+    if (_wp.indexOf('\n') !== -1 || _wp.indexOf('/*') !== -1) {
+      DB.desktop.wallpaper = '';
+    }
+  }
   applySkin(DB.settings.skin || 'fusion');
   applyBubbleStyle(DB.settings.bubbleStyle || '');
   // 同步微信主题的图标模式（img图片 或 svg线条图标），确保刷新页面后图标不会显示错
@@ -19955,13 +20320,14 @@ function fillChatImages(){
       if(!b64) return;
 
       // 关键：先判断"设置图片之前"用户是不是贴在底部
-      // 容差 60px：只要接近底部就算"在底部"
-      var wasAtBottom = content.scrollHeight - content.scrollTop - content.clientHeight < 60;
+      // 兼容信笺主题：真实滚动容器是 .letter-chat-scroll，不是 content
+      var scroller = document.getElementById('letterChatScroll') || content;
+      var wasAtBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 60;
 
       // onload：图片真正显示、撑开高度后触发
       img.onload = function(){
         if(wasAtBottom){
-          content.scrollTop = content.scrollHeight;  // 图片撑高后，补滚到底
+          scroller.scrollTop = scroller.scrollHeight;  // 图片撑高后，补滚到底
         }
       };
 
@@ -19969,7 +20335,6 @@ function fillChatImages(){
     });
   });
 }
-
 // 生成图片：传入提示词、模型、所属角色ID（可选）
 async function generateImage(prompt, model, roleId){
   const s = DB.settings;
@@ -21639,6 +22004,10 @@ body.wx-theme-letter .msg.me .mbody {
   border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
   box-shadow: 0 0 16px var(--letter-glow-self) !important;
 }
+/* 图片/表情等媒体消息：不要被 flex 压扁 */
+body.wx-theme-letter .msg .mbody {
+  flex-shrink: 0 !important;
+}
     /* ----------------------------------------------------------
        [12] 底部输入区（★ 已合并：原 2 处 #chatBottom）
        ---------------------------------------------------------- */
@@ -22378,6 +22747,9 @@ window.setChatTitle = function(c, typing) {
   
     /* ---- 4. 重新绑定长按菜单（innerHTML 重建会丢失监听器） ---- */
     if (typeof attachLongPress === 'function') attachLongPress();
+
+    /* ---- 4.5 重新填充异步图片（信笺重建 DOM 后必须补跑，否则图片不显示） ---- */
+    if (typeof fillChatImages === 'function') fillChatImages();
 
     /* ---- 5. 重新校准滚动到底部（信笺下真实滚动容器是 .letter-view-container） ---- */
     function _letterScrollBottom() {
