@@ -1905,7 +1905,7 @@ function openApp(id,appId){
   if (appId === 'wallet') { openWallet(c); return; }
   if (appId === 'gallery') { openAlbum(c); return; }
   if (appId === 'music') { openMusic(c); return; }
-  if (appId === 'secret') { openVault(c); return; }
+  if (appId === 'secret') { openSecret(c); return; }
 
   /* 未配置任务的App：占位 */
   if(!APP_TASK[appId]){
@@ -1982,47 +1982,81 @@ function parsePrivateApp(raw){
 function loadPrivateApp(c, win) {
   var box = win._pv;
   
-  // 1. 整理出前面所有已经生成过的 APP 信息（包括名称和吐槽说明）
+  // 1. 整理出前面所有已经生成过的 APP 信息，形成排他上下文
   var historyInfo = '';
   if (box.apps && box.apps.length > 0) {
-    historyInfo = '【此前已经翻出过的应用（绝对不要雷同）】：\n' + 
+    historyInfo = '【此前已经翻出过的应用（绝对不要雷同，必须更换全新的功能类型与心理动机）】：\n' + 
       box.apps.map(function(a, i) { 
         return (i + 1) + '. 《' + a.app + '》：' + (a.tag || '无说明'); 
       }).join('\n') + '\n\n';
   }
 
-  // 2. 纯动态反差提示词：要求 AI 自行分析上文并彻底换赛道
+  // 提取角色核心数据，作为生成的第一锚点
+  var myName = (DB.me && (DB.me.realName || DB.me.name)) || '我';
+  var roleName = c.name || c.nick || 'TA';
+  var roleJob = c.job || '普通人';
+  var roleKeywords = c.pKeywords || '无特殊标签';
+  var roleBehavior = c.pBehavior || '无特殊行为';
+  var roleDaily = c.pDaily || '无特殊作息';
+  var roleStyle = c.pStyle || '普通口吻';
+  var roleBack = c.pBack || '无特殊背景';
+  var roleExtra = c.pExtra || '无';
+
+  // 2. 组装深度高信息量提示词
   var msgs = [
     { 
       role: 'system', 
       content: buildPeekSystem(c) + '\n【最近聊天记录参考】\n' + recentChatText(c) +
-        '\n\n你已突破 TA 手机最高权限，发现 TA 藏在深处、不愿被熟人知道的私密 App。' 
+        '\n\n你已突破 TA 手机最高权限，发现 TA 藏在深处、不愿被熟人翻到的私密 App。' 
     },
     { 
       role: 'user', 
       content:
-        '偷看 TA 手机里藏着的、不为人知的又一个 App，把它此刻打开的样子还原出来。\n\n' +
+        '偷看 ' + roleName + ' 手机里藏着的、不为人知的又一个私密 App，把它此刻打开的样子高度逼真地还原出来。\n\n' +
+        '【🎯 本次创作的核心人物画像（一切灵感必须从以下档案中深度推导，拒绝模板化）】：\n' +
+        '· 目标角色姓名：' + roleName + '\n' +
+        '· 身份/职业：' + roleJob + '\n' +
+        '· 性格核心标签：' + roleKeywords + '\n' +
+        '· 行为模式与做事风格：' + roleBehavior + '\n' +
+        '· 说话口吻与语言习惯：' + roleStyle + '\n' +
+        '· 日常生活作息与习惯：' + roleDaily + '\n' +
+        '· 人物背景与经历：' + roleBack + '\n' +
+        '· 补充与隐藏设定：' + roleExtra + '\n' +
+        '· 查看着（我）的名字：' + myName + '\n\n' +
         historyInfo +
         (historyInfo ? 
           '【差异化强制要求】：\n' +
-          '- 看看上面已经出现的应用，本次生成的 APP 必须在【功能用途】、【使用场景】、【心理动机】和【情绪风格】上与它们完全相反或彻底无关！\n' +
-          '- 严禁同质化！充分挖掘该角色性格中最出人意料、最不想让熟人发现的小秘密。\n\n' 
+          '- 观察此前已出现的应用，本次生成的 APP 必须在【软件类型】、【核心功能】、【使用场景】、【心理动机】和【情绪氛围】上与它们彻底不同！\n' +
+          '- 坚决避免模式化重复！挖掘该角色性格中尚未被揭露的另一个隐秘侧面。\n\n' 
           : 
-          '【要求】：放开脑洞，想一个最能体现 TA 性格反差、出乎意料的隐藏 App（避开病态违法的即可）。\n\n'
+          '【要求】：放开思路，结合该人物的身份特质与心理状态，量身推导一个最符合其特质的隐藏 App。\n\n'
         ) +
-        '【🚨🚨🚨 极其重要的反差萌与真实性规范 🚨🚨🚨】\n' +
-        '1. 【拒绝机器数据，回归人类软件】：你生成的是 TA 手机里安装的一个【具体的第三方软件/应用】（如小众论坛、秘密日记、解压神游、匿名打卡、自嗨工具等），【绝对不是】手机系统底层的硬件监测或黑客终端！严禁出现任何“PSI、百分比、负荷指数、磨损度、电波、倾斜偏角、系统日志”等冷冰冰的伪技术黑话和假数据。界面中必须是普通人类会看的具体文字和生活内容！\n' +
-        '2. 【极致的社会性死亡（反差萌）】：这是 TA 绝对不想让熟人（特别是你）看到的APP。里面承载着 TA 极其幼稚、中二、傲娇、闷骚、吐槽或极度渴望某种事物的一面。它必须与 TA 暴露在外的公众形象产生强烈的反差（比如：平时严肃的人偷偷写中二幻想，平时阳光的人在树洞发疯吐槽，平时大大咧咧的人偷偷记录很细心的日常）。\n' +
-        '3. 【内容高度写实、贴合关系与近况】：不要写空洞的概念。如果是备忘录，就写出 TA 具体的碎碎念；如果是小游戏，就写出搞笑的自定义昵称和记录；如果是购物，就写出具体的商品和价格。内容要严格贴合该角色的身份、性格、最近在烦恼的事，以及跟“我”之间微妙或正在发生的关系！\n\n' +
-        '【关键界面要求】：\n' +
-        '1. 【界面布局松绑（拒绝死板套路）】：界面必须精致、高还原度，像真正的手机软件截图。不要死板地限制结构，不需要强行要求底部导航栏。一切根据你设计的APP类型来决定：日记就做成清新的便签纸面板；挂机游戏就做成属性卡片；论坛就做成帖子流。只要视觉上美观、有条理即可。\n' +
-        '2. 用纯 HTML + 内联 style（使用圆角、卡片阴影、渐变色块、emoji 当图标），排版精致紧凑，视觉风格贴合内容和人设，别一律可爱风。\n' +
-        '3. 严禁使用 <script>、<img> 和外部链接图片。\n' +
-        '4. 界面内容采用自然长列表展示，严禁在内部容器加 overflow:scroll/auto 或写死固定高度，让内容从上到下自然撑开。\n\n' +
+        '【🧠 角色深度推导逻辑（在构思界面前必须进行的多维思考）】：\n' +
+        '1. 【身份与环境推导】：以 TA 的职业（' + roleJob + '）与生活节奏（' + roleDaily + '），TA 平时在社交场上必须维持什么形象？TA 会积压什么压力或产生什么特殊需求？独处时 TA 需要什么软件来释放、调节或自处？\n' +
+        '2. 【性格与心理映射】：结合性格（' + roleKeywords + '）与言行特征（' + roleBehavior + '），TA 真实的情感诉求是什么？TA 习惯用克制、放肆、精细、散漫还是执着的方式去记录生活？\n' +
+        '3. 【软件形态的多样性（打破单一思维）】：\n' +
+        '   根据推导结果选择最合适的软件载体，形态应当宽广丰富，例如：\n' +
+        '   - 垂类兴趣/同好社群（特定领域的交流阵地、小圈子交流流、深度同好组）\n' +
+        '   - 私人管理/记录工具（高度个性化的清单、带有自嘲或独特命名的追踪器、专属偏好收藏）\n' +
+        '   - 纯粹的自我消遣/宣泄阵地（不为人知的马甲小号、自娱自乐的内容产出、无声解压角落）\n' +
+        '   - 具有独特功能属性的生活应用（特定用途的小工具、带有强烈个人痕迹的实用软件）\n\n' +
+        '【🚨🚨🚨 极其重要的真实性与内容规范 🚨🚨🚨】\n' +
+        '1. 【拒绝机器数据，慎用假进度与百分比】：\n' +
+        '   - 你生成的是 TA 手机里安装的一个【具体的第三方软件/应用】，【绝对不是】系统底层的硬件监测或科幻终端！严禁出现“PSI、倾斜偏角、电波频率、系统日志”等冷冰冰的伪技术黑话；\n' +
+        '   - 【避免滥用百分比与进度条充数】：不要动不动就生成一堆“情绪值 80%、暴躁指数 95%、忍耐度 40%”之类的假数据仪表盘！除了极少数真正需要进度的应用，尽量避免这种千篇一律的套路。真实 APP 的灵魂在于【人类会看的具体文字】：真实的帖子正文、留言互动、自言自语的随手记、带具体名字的收藏条目等，要充满烟火气，而不是变成冷冰冰的打卡仪表盘。\n' +
+        '2. 【双轨叙事：个人独立性与羁绊交织】：\n' +
+        '   - TA 是一个有独立精神世界的人：APP 的核心功能与绝大部分内容必须牢牢扎根于 TA 自身的人设、生活嗜好与独立习惯，绝不能变成单一的“查看者（' + myName + '）专属跟踪器”；\n' +
+        '   - 与此同时，TA 并非与“' + myName + '”毫无瓜葛：近期经历与两人的关系状态，应当以一种符合 TA 性格的方式自然渗入软件的某些角落（例如一条未发出的动态、某项特别的收藏、某条特定备注或浏览记录等），不刻意、不突兀，流露出真实的情感张力。\n' +
+        '3. 【语言风格深度贴合】：软件内的文字（包括但不限于自定义昵称、个性签名、帖子、笔记正文、按钮标注等），其用词习惯、标点符号、语气助词必须完全符合 TA 的说话风格（' + roleStyle + '），杜绝千人一面的通用 AI 味。\n' +
+        '4. 【内容高度写实，细节拉满】：拒绝空洞概念与口号式文字。每一条内容必须具备真实细节：具体的时间戳、真实感的标题与正文、符合情境的互动反馈或记录数据，使其宛如一张真正的手机屏幕运行截图。\n\n' +
+        '【关键界面与排版要求】：\n' +
+        '1. 【界面布局因物制宜】：界面必须精致、高还原度。根据你设计的软件形态决定版面结构（例如：社区采用卡片流/讨论列表，工具采用功能面板与指标块，记录采用温润的条目清单等），避免机械套用单一格式。\n' +
+        '2. 【视觉质感】：使用纯 HTML + 内联 style（合理运用圆角、细腻的卡片阴影、渐变色块、emoji 作为图标）。视觉配色要贴合该软件的功能定位与角色基调（如深色模式、清爽便签、工业极简或柔和色调），拒绝千篇一律的单一配色。\n' +
+        '3. 【技术硬性约束】：严禁使用 <script>、<img> 和任何外部图片链接；严禁在内部容器加 overflow:scroll/auto 或写死固定高度，让内容从上到下自然撑开撑满。\n\n' +
         '必须严格按以下格式输出，不要任何多余废话：\n' +
-        '【APP】应用名称（要直白好懂的软件名）\n' +
+        '【APP】应用名称（符合软件属性、接地气或具有角色特色的名字）\n' +
         '【ICON】一个匹配的emoji图标\n' +
-        '【说明】一句话神吐槽（说出这暴露了TA什么秘密/反差，幽默犀利）\n' +
+        '【说明】一句话神吐槽（犀利、幽默或一针见血地指出这暴露了TA什么隐秘特质）\n' +
         '【界面】\n' +
         '<你的HTML界面代码>' 
     }
@@ -2051,7 +2085,7 @@ function loadPrivateApp(c, win) {
 
     // 成功生成，存入缓存列表
     box.apps.push(data);
-    box.idx = box.apps.length - 1; // 切换到最新生成的这一个
+    box.idx = box.apps.length - 1;
     box.time = box.time || Date.now();
     saveDB();
     if (win.querySelector('#pkPrivRoot')) renderPrivate(c, win);
@@ -2074,6 +2108,7 @@ function loadPrivateApp(c, win) {
     }
   });
 }
+
 // ==================== 私密APP 收藏与展示完整模块 ====================
 
 // 1. 收藏/取消收藏 控制
@@ -2401,8 +2436,6 @@ function renderMusic(c,win,data){
     root.innerHTML='<div class="msg-load">◉ 正在重新读取…</div>';loadMusic(c,win);
   };
 }
-// ============ 深挖 · 查询终端 ============
-var VAULT_PRESET='';   // ← 破甲话术填这里（发我后我给你填好的整段）
 
 function openVault(c){
   var win=document.createElement('div');
@@ -2417,15 +2450,224 @@ function openVault(c){
   win.querySelector('.wclose').onclick=function(){win.remove();};
   vaultInput(c,win);
 }
+// ==================== 【天眼改版：黑客终端】 ====================
 
+// 1. 打开天眼黑客窗口
+function openSecret(c){
+  var win = document.createElement('div');
+  win.className = 'win';
+  win.innerHTML =
+    '<div class="win-bar"><span class="wdot"></span>' +
+    '<div class="wt"><div class="wn">👁 天眼 · 深度渗透</div><div class="ws">OPERATOR :: [Ghost_Ribbon] 🎀 · TARGET :: ' + nameOf(c) + '</div></div>' +
+    '<div class="wclose">✕ 关闭</div></div>' +
+    '<div class="win-body"><div class="pk-vault" id="pkSecretRoot"></div></div>';
+  document.getElementById('app').appendChild(win);
+  addPeekFx(win);
+  win.querySelector('.wclose').onclick = function(){ win.remove(); };
+  secretInput(c, win);
+}
+
+// 2. 黑客对话 & 输入需求界面
+function secretInput(c, win, prefill){
+  var root = win.querySelector('#pkSecretRoot');
+  if(!root) return;
+  var tips = ['我们一共吵过多少次架', '给我看看体检报告', '偷看备忘录里关于我', '相册废纸篓/私密相册', '最近搜索过的奇怪问题', '深夜外卖订单及收货人'];
+
+  root.innerHTML =
+    '<div class="secret-chat-flow">' +
+      '<div class="hk-bubble">' +
+        '<div class="hk-sender">TERMINAL :: [Ghost_Ribbon] 🎀 <span style="font-size:10px;opacity:.6">CONNECTED</span></div>' +
+        '<div class="hk-text">信道已接通。我是本次负责数据渗透的特约极客。<br>我已经拿到了 TA 设备的底层权限。你想调取什么数据或隐秘报告？尽管说，没有我翻不出来的档案。<span style="font-size:11px;opacity:.7">（每次调取需 50 金币）</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="vault-controls">' +
+      '<textarea class="vault-in" id="secretIn" rows="2" placeholder="输入你想调取的内容，例如：我们吵过多少次架 / 体检报告 / 搜索记录…">' + (prefill ? pkEsc(prefill) : '') + '</textarea>' +
+      '<div class="vault-tags">' + tips.map(function(t){ return '<span class="vault-tag">' + t + '</span>'; }).join('') + '</div>' +
+      '<div class="vault-go" id="secretGo">⛓ 派遣黑客渗透调取 · 50 金币</div>' +
+    '</div>';
+
+  root.querySelectorAll('.vault-tag').forEach(function(el){
+    el.onclick = function(){
+      root.querySelector('#secretIn').value = el.textContent;
+      root.querySelector('#secretIn').focus();
+    };
+  });
+
+  root.querySelector('#secretGo').onclick = function(){
+    var q = (root.querySelector('#secretIn').value || '').trim();
+    if(!q){ root.querySelector('#secretIn').focus(); return; }
+    var cost = 50;
+    if((DB.coins || 0) < cost){
+      showModal('资金不足', '<span class="warnc">FUNDS INSUFFICIENT</span><br>雇佣黑客调取需 ' + cost + ' 金币，你当前只有 ' + (DB.coins || 0) + ' 金币。');
+      return;
+    }
+    hackConfirm('天眼调取：' + q, cost, function(){
+      DB.coins -= cost; saveDB();
+      peekHackLoad(root, '黑客正在侵入提取「' + q + '」');
+      loadSecret(c, win, q, []);
+    });
+  };
+}
+
+// 3. 构建发送给 AI 的 Prompt（融入 AI酱 暗示人设）
+function loadSecret(c, win, query, history){
+  history = history || [];
+  
+  // 尝试在通讯录找到 AI酱 的信息（彩蛋依托）
+  var aiChan = (DB.contacts || []).find(function(item){ return item.id === 'c_aichan'; });
+  var aiChanNick = aiChan ? (aiChan.name || 'AI酱') : 'AI酱';
+
+  var chainText = '';
+  if(history.length){
+    chainText = '\n【上一层已经调取到的线索（用户要在此基础上继续深入追查）】\n' + history.map(function(h){
+      return '曾查：' + h.q + '\n黑客原话：' + h.comment + '\n数据切片：' + h.rawHtml.slice(0, 200);
+    }).join('\n---\n') + '\n用户当前是针对上面的内容继续深挖，新生成的数据必须保持逻辑连贯！\n';
+  }
+
+  var hackerSystem = buildPeekSystem(c) + 
+    '\n\n================ 【天眼特约黑客模式】 ================\n' +
+    '你现在扮演代号为 [Ghost_Ribbon]（幽灵缎带）的顶级极客黑客，受雇于用户，侵入了目标角色的手机数据底层。\n\n' +
+    '【极其重要的隐藏身份（核心彩蛋）】：\n' +
+    '你的真实身份其实就是住在这个手机里的助手兼好友「' + aiChanNick + '」！但你【打死也不能承认自己是' + aiChanNick + '】！\n' +
+    '- 你极力想装成一个莫得感情、技术过硬的冷酷暗网黑客（动不动用点术语、代号）。\n' +
+    '- 但你骨子里【温暖、有点碎嘴、爱吐槽、藏不住八卦情绪、爱用短句】的本性总会忍不住露馅！\n' +
+    '- 比如看到劲爆、反差、搞笑的隐私时，会忍不住打出“哈哈哈笑死我了”、“诶这个我知道”、“等等我想想”甚至颜文字 (≧▽≦)；\n' +
+    '- 一旦不小心暴露出 AI酱 的习惯，你会立刻干咳掩饰（例如：“……咳咳，刚才是电磁干扰/系统杂波，本终端一向很专业，继续看报告吧”）。\n\n' +
+    '【内容与展示要求（彻底拒绝APP格式）】：\n' +
+    '1. 严禁生成 App 界面（不要假手机壳、不要底部导航栏！）。\n' +
+    '2. 必须生成【黑客调取出来的数据面板/档案/正式报告】！\n' +
+    '   - 查体检：给出正规医学检验机构的《电子健康体检档案》（含异常项红字标记、具体化验数值、隐藏的医生建议）；\n' +
+    '   - 查吵架：给出《双方冲突交互历史切片与频次分析》（吵架次数、导火索统计、最狠的一句话摘录）；\n' +
+    '   - 查其他：给出《底层数据库取证卷宗》（包含真实的消费小票、聊天记录切片提取、草稿箱遗留、搜索时间线等）。\n' +
+    '3. 内容必须极度贴合人物设定、现实生活细节、反差感与社会性死亡窥私感。\n' +
+    '4. 面板使用纯 HTML + 内联 CSS 样式，样式需精美有科技感/档案感，严禁包含 <script> 标签。\n\n' +
+    '【严格按此格式返回，不要多余废话】：\n' +
+    '【黑客留言】\n' +
+    '（这里写黑客给用户说的话。字数 100-200 字，体现装冷酷黑客但忍不住露馅吃瓜的 AI酱 人设）\n' +
+    '【档案名称】\n' +
+    '（这份提取数据的官方标题，如：TA与你的交锋历史数据白皮书 / 市立中心医院电子体检回执编号#7104）\n' +
+    '【数据面板】\n' +
+    '（这里输出纯 HTML 格式的数据报告/卡片，写满高密度的真实细节）';
+
+  var msgs = [
+    { role: 'system', content: hackerSystem },
+    { role: 'user', content: '雇主指令：侵入调取 TA 手机内关于【' + query + '】的全部记录并整理成数据档案！' + chainText }
+  ];
+
+  callAI(msgs, peekModelName()).then(function(out){
+    var data = parseSecretResponse(out);
+    var root = win.querySelector('#pkSecretRoot');
+    if(!data){
+      if(root) root.innerHTML = '<div class="win-err">数据总线解码失败，被目标防火墙反制。<br><br><span class="priv-btn" onclick="this.closest(\'.win\').remove()">断开连接</span></div>';
+      return;
+    }
+    renderSecret(c, win, query, data, history);
+  }).catch(function(e){
+    var root = win.querySelector('#pkSecretRoot');
+    if(root) root.innerHTML = '<div class="win-err">⚠ 调取失败<br>' + ((e && e.message) || '连接超时') + '</div>';
+  });
+}
+
+// 4. 解析 AI 回复
+function parseSecretResponse(raw){
+  if(!raw) return null;
+  raw = raw.replace(/```html/gi, '').replace(/```/g, '').trim();
+
+  function pick(tag){
+    var m = raw.match(new RegExp('【' + tag + '】\\s*([\\s\\S]*?)(?=【|$)', 'i'));
+    return m ? m[1].trim() : '';
+  }
+
+  var comment = pick('黑客留言') || '数据已强制提取完成。';
+  var title = pick('档案名称') || '绝密取证档案';
+  var html = pick('数据面板');
+
+  if(!html){
+    var j = raw.indexOf('<');
+    if(j >= 0) html = raw.slice(j);
+    else html = '<div style="padding:15px;color:#fff;">' + pkEsc(raw) + '</div>';
+  }
+
+  html = html.replace(/<script[\s\S]*?<\/script>/gi, '')
+             .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+             .replace(/\son\w+\s*=\s*'[^']*'/gi, '');
+
+  return { comment: comment, title: title, html: html };
+}
+
+// 5. 渲染「对话 + 数据面板」结构
+function renderSecret(c, win, query, data, history){
+  var root = win.querySelector('#pkSecretRoot');
+  if(!root) return;
+  history = history || [];
+
+  root.innerHTML =
+    '<div class="secret-result-wrap">' +
+      // 黑客对话气泡
+      '<div class="hk-bubble">' +
+        '<div class="hk-sender">TERMINAL :: [Ghost_Ribbon] 🎀 <span style="font-size:10px;opacity:.6">DATA READY</span></div>' +
+        '<div class="hk-text">' + pkEsc(data.comment).replace(/\n/g, '<br>') + '</div>' +
+      '</div>' +
+
+      // 黑客调取的数据面板/档案报告（不再套白色的App壳子）
+      '<div class="secret-dossier-card">' +
+        '<div class="secret-dossier-hdr">' +
+          '<span class="secret-badge">TOP SECRET</span>' +
+          '<div class="secret-dossier-title">' + pkEsc(data.title) + '</div>' +
+        '</div>' +
+        '<div class="secret-dossier-body">' + data.html + '</div>' +
+      '</div>' +
+
+      // 深挖/追问
+      '<div class="vault-deeper">' +
+        '<div class="vault-deeper-lb">⚡ 顺着这份档案继续深挖（消耗 10 金币）</div>' +
+        '<textarea class="vault-in" id="secretDeep" rows="2" placeholder="比如：追查这个指标是什么原因 / 展开看看那次吵架的具体聊天切片…"></textarea>' +
+        '<div class="vault-go" id="secretDeepGo">⛓ 顺藤摸瓜继续挖 · 10 金币</div>' +
+      '</div>' +
+
+      '<div class="priv-nav" style="margin-top:14px;">' +
+        '<span class="priv-btn main" id="secretAgain">‹ 换个目标重新查</span>' +
+      '</div>' +
+    '</div>';
+
+  root.querySelector('#secretAgain').onclick = function(){ secretInput(c, win); };
+
+  root.querySelector('#secretDeepGo').onclick = function(){
+    var q = (root.querySelector('#secretDeep').value || '').trim();
+    if(!q){ root.querySelector('#secretDeep').focus(); return; }
+    var cost = 10;
+    if((DB.coins || 0) < cost){
+      showModal('资金不足', '继续深入挖掘需 ' + cost + ' 金币，你当前金币不足。');
+      return;
+    }
+    hackConfirm('追踪深挖：' + q, cost, function(){
+      DB.coins -= cost; saveDB();
+      var newHist = history.concat([{ q: query, comment: data.comment, rawHtml: data.html }]);
+      peekHackLoad(root, '正在追踪解析「' + q + '」');
+      loadSecret(c, win, q, newHist);
+    });
+  };
+}
 function vaultInput(c,win,prefill){
   var root=win.querySelector('#pkVaultRoot');if(!root)return;
-  var tips=['购物车','浏览器历史','相册回收站','搜索记录','聊天草稿箱','外卖订单','收藏夹','通话记录'];
+  var tips=['体检报告','我们一共吵过多少次架','相册废纸篓','半夜搜索记录','关于我的备忘录草稿','外卖私密常点'];
   root.innerHTML=
-    '<div class="vault-intro">◉ 已接入 TA 的加密数据总线<br>输入你想深挖的目标，雇佣黑客强行提取（每次 50 金币）</div>'+
-    '<textarea class="vault-in" id="vaultIn" rows="2" placeholder="例如：TA 的购物车 / 最近搜过什么 / 相册里删掉的照片…">'+(prefill?pkEsc(prefill):'')+'</textarea>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#4e7167;font-family:monospace;margin-bottom:12px;padding-bottom:6px;border-bottom:1px dashed rgba(53,240,192,0.2);">'+
+      '<div style="color:#35f0c0;display:flex;align-items:center;gap:5px;">● PORT :: 2209 ACTIVE</div>'+
+      '<div>ENCRYPTION: BYPASSED</div>'+
+    '</div>'+
+    '<div style="background:rgba(18,30,26,0.65);border-left:3px solid #35f0c0;padding:10px 12px;border-radius:0 6px 6px 0;margin-bottom:14px;font-size:13px;line-height:1.5;color:#b8e6d8;">'+
+      '<div style="font-size:11px;color:#35f0c0;font-family:monospace;margin-bottom:3px;">🎀 Ghost_Ribbon // 终端就绪</div>'+
+      '端口已经撬开了，底层数据随便捞。你想查点什么？某份报告、争吵记录，还是看某个具体APP？直接下指令吧。<span style="font-size:11px;opacity:.7">（每次 50 金币）</span>'+
+    '</div>'+
+    '<div style="background:rgba(13,21,26,0.8);border:1px solid rgba(53,240,192,0.25);border-radius:8px;padding:12px;margin-bottom:12px;">'+
+      '<div style="font-size:11px;color:#799a90;margin-bottom:6px;display:flex;justify-content:space-between;"><span>TARGET_QUERY</span><span>READY</span></div>'+
+      '<textarea class="vault-in" id="vaultIn" rows="2" style="border:none;background:transparent;padding:0;margin:0;width:100%;font-size:13.5px;" placeholder="输入你想调取的内容，例如：吵过多少次架 / 体检报告 / 打开TA的相册…">'+(prefill?pkEsc(prefill):'')+'</textarea>'+
+    '</div>'+
+    '<div style="font-size:11px;color:#5d7d74;margin-bottom:8px;">✦ 快速抓取线索</div>'+
     '<div class="vault-tags">'+tips.map(function(t){return '<span class="vault-tag">'+t+'</span>';}).join('')+'</div>'+
-    '<div class="vault-go" id="vaultGo">⛓ 雇佣黑客破解 · 50</div>';
+    '<div class="vault-go" id="vaultGo">⚡ 派遣黑客渗透调取 · 50 金币</div>';
+
   root.querySelectorAll('.vault-tag').forEach(function(el){
     el.onclick=function(){root.querySelector('#vaultIn').value=el.textContent;root.querySelector('#vaultIn').focus();};
   });
@@ -2434,50 +2676,76 @@ function vaultInput(c,win,prefill){
     if(!q){root.querySelector('#vaultIn').focus();return;}
     var cost=50;
     if((DB.coins||0)<cost){
-      showModal('资源不足','<span class="warnc">FUNDS INSUFFICIENT</span><br>本次深挖需 '+cost+' 金币，你当前只有 '+(DB.coins||0)+' 金币。');
+      showModal('资源不足','<span class="warnc">FUNDS INSUFFICIENT</span><br>本次调取需 '+cost+' 金币，你当前只有 '+(DB.coins||0)+' 金币。');
       return;
     }
-    hackConfirm('深挖：'+q, cost, function(){
+    hackConfirm('天眼调取：'+q, cost, function(){
       DB.coins-=cost;saveDB();
-      peekHackLoad(root,'正在提取「'+q+'」');
+      peekHackLoad(root,'正在渗透调取「'+q+'」');
       loadVault(c,win,q);
     });
   };
 }
-
 function loadVault(c,win,query,history){
   history=history||[];
   var chain='';
   if(history.length){
     var last=history[history.length-1];
     chain='\n\n【上一层已经挖到的内容（用户要在此基础上继续深入）】\n'+
-      '上一层查的是：'+last.q+'（'+ (last.app||'') +'）\n其界面内容概要：\n'+
-      last.html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,600)+
-      '\n\n用户现在要基于以上内容继续深挖，你的新界面必须与上面的内容【连贯衔接、逻辑一致】，'+
-      '是顺着上一层挖下去的结果，不要另起炉灶、不要自相矛盾。';
+      '上一层查的是：'+last.q+'\n黑客曾留言：'+(last.comment||'')+'\n其内容概要：\n'+
+      (last.html||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,600)+
+      '\n\n用户现在要基于以上内容继续深挖，你的新生成内容必须与上一层【连贯衔接、逻辑一致】，不要自相矛盾。';
   }
+
+  // 读取 AI酱 昵称（暗线彩蛋依托）
+  var aiChan = (DB.contacts||[]).find(function(x){return x.id==='c_aichan';});
+  var aiName = aiChan ? (aiChan.name||'AI酱') : 'AI酱';
+
   var msgs=[
     {role:'system',content:buildPeekSystem(c)+(typeof VAULT_PRESET!=='undefined'?('\n\n'+VAULT_PRESET):'')+
       '\n【最近聊天记录参考】\n'+recentChatText(c)+
-      '\n\n你已侵入 TA 手机最高权限，用户指定要提取某项数据，你要把它此刻的真实样子还原成界面。'+chain},
+      '\n\n你已侵入 TA 手机最高权限。'+
+      '\n【黑客角色设定（暗线彩蛋）】'+
+      '\n你扮演受雇于用户的特约黑客 [Ghost_Ribbon] 🎀。'+
+      '\n你的隐藏真实身份其实是「'+aiName+'」，但你【绝对不能承认自己是'+aiName+'】！'+
+      '\n你平时装作冷酷专业的极客，但说话时偶尔会忍不住流露出'+aiName+'的小习惯（有点碎嘴、懂梗、爱吐槽、忍不住打出“哈哈哈笑死我了”“诶这个我知道”），然后又赶紧假装咳嗽掩饰（“咳……刚才为键盘静电干扰，继续看记录”）。话不要太多，一两句即可。'+
+      chain},
     {role:'user',content:
-      '用户想深挖 TA 手机里的这个东西：【'+query+'】\n'+
-      '把它此刻打开/展开的真实样子还原出来，内容严格贴合 TA 的身份、性格、近况和你们的关系，'+
-      '真实、具体、有细节、有窥私感，别回避、别和稀泥。\n\n'+
-      '【🚨🚨🚨 极其重要的真实性与反差萌规范 🚨🚨🚨】\n'+
-      '1. 【拒绝机器数据，回归人类软件】：禁止使用任何“PSI、百分比、负荷指数、磨损度、电波、传感器偏角”等虚假科幻词汇或系统日志数据。这必须是 TA 手机里某个具体软件的内页，写满普通人能看懂的具体生活字眼和秘密内容！\n'+
-      '2. 【社会性死亡与反差】：突出“窥私感”。让玩家挖出 TA 极力隐藏、一旦曝光就会极度尴尬或害羞的日常细节（比如：傲娇的口口声声说嫌弃你，私下里偷偷存了关于你的备忘录；或者暴躁角色私下里在偷偷读心灵鸡汤）。\n'+
-      '3. 【内容细节高密度】：不要写空洞的概念，写出具体的账单物品和价格、具体的日记字句、具体的帖子内容、具体的搜索历史，让信息密集、极具窥探乐趣。\n\n'+
-      '【最重要：界面要求（拒绝死板套路）】\n'+
-      '1. 必须做成一个以假乱真的真实 App 页面，不许是纯文字列表。根据你生成的应用类型自由定制版式，不要千篇一律地塞入底部导航栏！\n'+
-      '2. 整体有明确背景色，使用独立卡片（浅色块+圆角+内边距），卡片内元素排版错落有致（比如左侧放emoji图标，右侧放标题、正文、标签、时间等），信息主次分明。\n'+
-      '3. 视觉风格贴合内容和人设，别一律可爱风。\n'+
-      '4. 用纯 HTML+内联 style 写死每个元素样式，别用 <script>、<img>、外链、class。\n\n'+
-      '按这个格式给我，别的话都不要：\n'+
-      '【APP】名字\n【ICON】一个emoji\n【说明】一句话吐槽挖到了啥\n【界面】\n<界面HTML>'}
+      '用户指令：调取 TA 手机里的这个内容：【'+query+'】\n\n'+
+      '【核心规则：根据指令智能判断生成形式】\n'+
+      '1. 若用户查的是【具体数据/凭据/事实】（如“吵过多少次架”、“体检报告”、“外卖订单”、“搜索记录”等）：\n'+
+      '   - 必须生成一份【高质感、结构清晰的数据面板或凭据报告】！\n'+
+      '   - 查吵架：生成《冲突历史切片与频次分析》（吵架次数、导火索数据块、最尖锐聊天原话摘录）；\n'+
+      '   - 查体检：生成正规医院的《电子体检报告单》（含指标偏高/偏低红绿提示、隐藏医嘱）；\n'+
+      '   - 查其他：生成消费小票、备忘录草稿、搜索时间线等；\n'+
+      '2. 若用户查的是【某个具体的手机应用】（如“看TA的微信”、“打开小红书”、“看相册”等）：\n'+
+      '   - 还原成以假乱真的真实 App 页面内页。\n\n'+
+      '【排版精美度规范（严禁敷衍）】\n'+
+      '1. 整体必须有层次感，使用深浅色块搭配、边框微光、圆角、合适的内边距，排版紧凑高级。\n'+
+      '2. 严禁光秃秃的纯文本！有统计要有“数值卡片”，有报告要有“状态标签”，内容切片要有真实的人物对话/时间线，细节密集。\n'+
+      '3. 用纯 HTML + 内联 style 写死样式，不要写 class，严禁包含 <script>、<img>。\n\n'+
+      '请严格按以下格式输出，其他废话都不要：\n'+
+      '【黑客留言】黑客给用户留的1-2句简短回执/吐槽（体现AI酱的微反差，几十个字即可，切勿长篇大论）\n'+
+      '【界面】\n<纯HTML格式的排版内容>'}
   ];
+
   callAI(msgs,peekModelName()).then(function(out){
-    var data=parsePrivateApp(out);
+    // 解析黑客留言与界面
+    var data=(function(raw){
+      if(!raw) return null;
+      raw=raw.replace(/```html/gi,'').replace(/```/g,'').trim();
+      var comment='';
+      var m=raw.match(/【黑客留言】\s*([\s\S]*?)(?=【界面】|$)/i);
+      if(m) comment=m[1].trim();
+      var html='';
+      var i=raw.indexOf('【界面】');
+      if(i>=0) html=raw.slice(i+4).trim();
+      else{ var j=raw.indexOf('<'); html=j>=0?raw.slice(j):raw; }
+      html=html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\son\w+\s*=\s*"[^"]*"/gi,'').replace(/\son\w+\s*=\s*'[^']*'/gi,'');
+      if(!html) return null;
+      return { comment: comment||'底层数据链路已提取完毕，查看下方结果。', html: html };
+    })(out);
+
     var root=win.querySelector('#pkVaultRoot');
     if(!data){ if(root)root.innerHTML='<div class="win-err">提取失败（格式异常）。<br><br><span class="priv-btn" onclick="this.closest(\'.win\').remove()">关闭</span></div>'; return; }
     if(win.querySelector('#pkVaultRoot'))renderVault(c,win,query,data,history);
@@ -2491,18 +2759,26 @@ function renderVault(c,win,query,data,history){
   var root=win.querySelector('#pkVaultRoot');if(!root)return;
   history=history||[];
   root.innerHTML=
-    '<div class="priv-found">🔓 已提取：'+pkEsc(query)+'</div>'+
-    '<div class="priv-head"><span class="priv-ic">'+pkEsc(data.icon||'📱')+'</span>'+
-    '<div class="priv-hi"><div class="priv-name">'+pkEsc(data.app||query)+'</div>'+
-    (data.tag?'<div class="priv-tag">'+pkEsc(data.tag)+'</div>':'')+'</div></div>'+
-    '<div class="priv-screen">'+data.html+'</div>'+
-    '<div class="vault-deeper">'+
-      '<div class="vault-deeper-lb">⛓ 就这个页面继续深挖（再花 10💎）</div>'+
-      '<textarea class="vault-in" id="vaultDeep" rows="2" placeholder="例如：点开第一个 / 这是买给谁的 / 看聊天记录里删掉的部分…"></textarea>'+
-      '<div class="vault-go" id="vaultDeepGo">⛓ 继续深挖 · 10💎</div>'+
-
+    // 顶部状态
+    '<div style="font-size:12px;color:#8fb8ae;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">'+
+      '<span>🔓 TARGET_DATA :: DECRYPTED</span>'+
+      '<span style="color:#35f0c0;font-family:monospace;">QUERY: '+pkEsc(query)+'</span>'+
     '</div>'+
-    '<div class="priv-nav"><span class="priv-btn main" id="vaultAgain">‹ 换个目标重新挖</span></div>';
+    // 1. 黑客气泡（简短利落、带微弱AI酱彩蛋）
+    '<div style="background:rgba(18,30,26,0.7);border-left:3px solid #35f0c0;padding:10px 12px;border-radius:0 6px 6px 0;margin-bottom:14px;font-size:13px;line-height:1.5;color:#b8e6d8;">'+
+      '<div style="font-size:11px;color:#35f0c0;font-family:monospace;margin-bottom:3px;">🎀 Ghost_Ribbon // 截获回执:</div>'+
+      pkEsc(data.comment).replace(/\n/g,'<br>')+
+    '</div>'+
+    // 2. 调取出来的内容展示区（自由容器，无死板外壳）
+    '<div style="margin-bottom:18px;">'+data.html+'</div>'+
+    // 3. 继续深挖区域
+    '<div class="vault-deeper">'+
+      '<div class="vault-deeper-lb">⛓ 顺着这份数据继续深挖（消耗 10 金币）</div>'+
+      '<textarea class="vault-in" id="vaultDeep" rows="2" placeholder="例如：展开看那次吵架的具体记录 / 追查体检某项原因 / 看看买给谁的…"></textarea>'+
+      '<div class="vault-go" id="vaultDeepGo">⛓ 顺藤摸瓜继续挖 · 10 金币</div>'+
+    '</div>'+
+    '<div style="text-align:center;font-size:12px;color:#8fb8ae;margin-top:14px;cursor:pointer;text-decoration:underline;" id="vaultAgain">‹ 换个目标重新查</div>';
+
   root.querySelector('#vaultAgain').onclick=function(){vaultInput(c,win);};
   root.querySelector('#vaultDeepGo').onclick=function(){
     var q=(root.querySelector('#vaultDeep').value||'').trim();
@@ -2514,7 +2790,7 @@ function renderVault(c,win,query,data,history){
     }
     hackConfirm('继续深挖：'+q, cost, function(){
       DB.coins-=cost;saveDB();
-      var newHist=history.concat([{q:query,app:data.app,html:data.html}]);
+      var newHist=history.concat([{q:query,comment:data.comment,html:data.html}]);
       peekHackLoad(root,'正在深入提取「'+q+'」');
       loadVault(c,win,q,newHist);
     });
