@@ -318,11 +318,11 @@
     gap: 14px 2px;
   }
 
-  #appgrid.icon-small{ grid-auto-rows: 68px; }
+  #appgrid.icon-small{ grid-auto-rows: 84px; }
   #appgrid.icon-small .app-ic{ width:48px; height:48px; border-radius:12px; }
   #appgrid.icon-small .app-nm{ font-size:10px; }
 
-  #appgrid.icon-medium{ grid-auto-rows: 76px; }
+  #appgrid.icon-medium{ grid-auto-rows: 84px; }
   #appgrid.icon-medium .app-ic{ width:56px; height:56px; border-radius:14px; }
   #appgrid.icon-medium .app-nm{ font-size:10.5px; }
 
@@ -2602,7 +2602,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v20261003_1';
+const APP_VER = 'v20261003_2';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -3697,8 +3697,10 @@ if (d.desktop._userWallpaper === undefined) d.desktop._userWallpaper = false;
     c.chapters=c.chapters||[];c.mode=c.mode||'online';
     if(c.activity===undefined)c.activity='中';if (c.clinginess === undefined) c.clinginess = 50;if(c.allowAutoGreet===undefined)c.allowAutoGreet=true;
     if(c.hearts===undefined)c.hearts=10;if(c.heartsTotal===undefined)c.heartsTotal=10;c.heartLog=c.heartLog||[];c.heartMile=c.heartMile||{};
+    // ===== 新增：批量初始化今日心情，避免只有打开过聊天的角色才有心情标签 =====
+    ensureTodayMood(c);
   });
-const _aiChan = d.contacts.find(c => c.id === 'c_aichan');
+  const _aiChan = d.contacts.find(c => c.id === 'c_aichan');
 if (!_aiChan) {
   seedAiChan(d);
 } else if (_needReset) {
