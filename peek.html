@@ -8,7 +8,8 @@
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   :root{--hud:#35f0c0;--hud2:#00d4ff;--warn:#ff5c7a;}
   html,body{height:100%;background:#000;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden;}
-  #app{position:relative;width:100vw;height:100vh;height:100dvh;max-width:400px;max-height:880px;margin:0 auto;overflow:hidden;background:#05080c;}
+  #app{position:relative;width:100vw;height:100vh;height:100dvh;max-width:400px;max-height:880px;margin:0 auto;overflow:hidden;background:#05080c;padding-top:env(safe-area-inset-top,0px);}
+  
   @media(min-width:421px){#app{border:1px solid rgba(53,240,192,.22);top:50%;transform:translateY(-50%);border-radius:12px;}}
   #screen{position:absolute;inset:0;}
 
@@ -177,9 +178,10 @@
   @keyframes winIn{from{opacity:0;transform:scale(1.03);}to{opacity:1;transform:scale(1);}}
   .win::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
     background:repeating-linear-gradient(0deg,rgba(53,240,192,.04) 0,rgba(53,240,192,.04) 1px,transparent 1px,transparent 3px);}
-  .win-bar{flex-shrink:0;height:52px;display:flex;align-items:center;gap:10px;padding:14px 14px 0;
+  .win-bar{flex-shrink:0;min-height:52px;display:flex;align-items:center;gap:10px;
+    padding:calc(env(safe-area-inset-top,0px) + 32px) 16px 14px;
     border-bottom:1px solid rgba(53,240,192,.2);position:relative;z-index:4;}
-  .win-bar .wt{flex:1;min-width:0;}
+	.win-bar .wt{flex:1;min-width:0;}
   .win-bar .wt .wn{font-size:14px;color:#eafff8;letter-spacing:1px;font-weight:600;display:flex;align-items:center;gap:8px;}
   .win-bar .wt .ws{font-size:9px;color:#5a7a78;letter-spacing:1px;margin-top:3px;}
   .win-bar .wdot{width:7px;height:7px;border-radius:50%;background:var(--hud);box-shadow:0 0 8px var(--hud);animation:blink 1.4s infinite;flex-shrink:0;}
@@ -524,7 +526,45 @@
 .hk-barfill{height:100%;width:6%;background:#35f0c0;border-radius:2px;
   box-shadow:0 0 10px rgba(53,240,192,.6);animation:hkBar 7s cubic-bezier(.2,.8,.2,1) forwards}
 @keyframes hkBar{0%{width:6%}70%{width:78%}100%{width:92%}}
+/* ===== 天眼·黑客回执条（矮条，不抢戏）===== */
+.hk-receipt{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(18,30,26,.6);
+  border:1px solid rgba(53,240,192,.22);
+  border-radius:8px;
+  padding:9px 12px;
+  margin-bottom:14px;
+}
+.hk-receipt .sender{
+  font-size:10.5px;color:#35f0c0;letter-spacing:.5px;
+  white-space:nowrap;flex-shrink:0;padding-top:2px;
+}
+.hk-receipt .msg{
+  font-size:12.5px;line-height:1.6;color:#b8d8cf;
+}
+/* ===== 天眼·AI 自由输出容器（只做包裹，不干涉内部）===== */
+.ai-output{
+  background:rgba(13,21,26,.8);
+  border:1px solid rgba(53,240,192,.25);
+  border-radius:10px;
+  padding:14px;
+  overflow-x:auto;
+  color:#c8e6df;
+  font-size:13.5px;
+  line-height:1.7;
+}
+.ai-output *{max-width:100%;box-sizing:border-box;}
 .pk-vault{padding-top:8px}
+.vault-card{
+  background:rgba(13,21,26,.8);
+  border:1px solid rgba(53,240,192,.25);
+  border-radius:10px;
+  padding:12px;
+}
+.vault-card-lab{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:#799a90;margin-bottom:8px;letter-spacing:.5px;
+}
 .vault-intro{font-size:12.5px;color:#8fb8ae;line-height:1.8;letter-spacing:.5px;
   text-align:center;margin-bottom:16px}
 .vault-in{width:100%;box-sizing:border-box;background:rgba(53,240,192,.05);
@@ -2475,13 +2515,16 @@ function secretInput(c, win, prefill){
 
   root.innerHTML =
     '<div class="secret-chat-flow">' +
-      '<div class="hk-bubble">' +
-        '<div class="hk-sender">TERMINAL :: [Ghost_Ribbon] 🎀 <span style="font-size:10px;opacity:.6">CONNECTED</span></div>' +
-        '<div class="hk-text">信道已接通。我是本次负责数据渗透的特约极客。<br>我已经拿到了 TA 设备的底层权限。你想调取什么数据或隐秘报告？尽管说，没有我翻不出来的档案。<span style="font-size:11px;opacity:.7">（每次调取需 50 金币）</span></div>' +
+      '<div class="hk-receipt">' +
+        '<span class="sender">🎀 Ghost_Ribbon</span>' +
+        '<span class="msg">信道已接通。我是本次负责数据渗透的特约极客。我已经拿到了 TA 设备的底层权限。你想调取什么数据或隐秘报告？尽管说，没有我翻不出来的档案。（每次调取需 50 金币）</span>' +
       '</div>' +
-    '</div>' +
+	  '</div>' +
     '<div class="vault-controls">' +
-      '<textarea class="vault-in" id="secretIn" rows="2" placeholder="输入你想调取的内容，例如：我们吵过多少次架 / 体检报告 / 搜索记录…">' + (prefill ? pkEsc(prefill) : '') + '</textarea>' +
+      '<div class="vault-card">' +
+        '<div class="vault-card-lab"><span>TARGET_QUERY</span><span>READY</span></div>' +
+        '<textarea class="vault-in" id="secretIn" rows="2" placeholder="输入你想调取的内容，例如：我们吵过多少次架 / 体检报告 / 搜索记录…">' + (prefill ? pkEsc(prefill) : '') + '</textarea>' +
+      '</div>' +
       '<div class="vault-tags">' + tips.map(function(t){ return '<span class="vault-tag">' + t + '</span>'; }).join('') + '</div>' +
       '<div class="vault-go" id="secretGo">⛓ 派遣黑客渗透调取 · 50 金币</div>' +
     '</div>';
@@ -2533,22 +2576,25 @@ function loadSecret(c, win, query, history){
     '- 但你骨子里【温暖、有点碎嘴、爱吐槽、藏不住八卦情绪、爱用短句】的本性总会忍不住露馅！\n' +
     '- 比如看到劲爆、反差、搞笑的隐私时，会忍不住打出“哈哈哈笑死我了”、“诶这个我知道”、“等等我想想”甚至颜文字 (≧▽≦)；\n' +
     '- 一旦不小心暴露出 AI酱 的习惯，你会立刻干咳掩饰（例如：“……咳咳，刚才是电磁干扰/系统杂波，本终端一向很专业，继续看报告吧”）。\n\n' +
-    '【内容与展示要求（彻底拒绝APP格式）】：\n' +
-    '1. 严禁生成 App 界面（不要假手机壳、不要底部导航栏！）。\n' +
-    '2. 必须生成【黑客调取出来的数据面板/档案/正式报告】！\n' +
-    '   - 查体检：给出正规医学检验机构的《电子健康体检档案》（含异常项红字标记、具体化验数值、隐藏的医生建议）；\n' +
-    '   - 查吵架：给出《双方冲突交互历史切片与频次分析》（吵架次数、导火索统计、最狠的一句话摘录）；\n' +
-    '   - 查其他：给出《底层数据库取证卷宗》（包含真实的消费小票、聊天记录切片提取、草稿箱遗留、搜索时间线等）。\n' +
-    '3. 内容必须极度贴合人物设定、现实生活细节、反差感与社会性死亡窥私感。\n' +
-    '4. 面板使用纯 HTML + 内联 CSS 样式，样式需精美有科技感/档案感，严禁包含 <script> 标签。\n\n' +
+    '【结果展示区·最重要】：\n' +
+    '你要还原的是 TA 手机/系统里这项数据的【真实界面】，形态完全由内容决定，不要套固定模板！\n' +
+    '   - 查体检 → 可能是一份医院体检单（科室、指标、数值、参考范围、异常项、医生小结）；\n' +
+    '   - 查吵架 → 可能是一份冲突分析报告（次数、典型事件、时间线、谁先低头、毒舌总结）；\n' +
+    '   - 查购物车 → 可能是一个电商 App 的购物车页（商品、价格、数量、失效宝贝、凑单）；\n' +
+    '   - 查外卖 → 可能是外卖 App 的订单列表（店铺、菜品、金额、时间、地址）；\n' +
+    '   - 查备忘录 → 可能是一列备忘录条目（标题、时间、正文、TA 的口吻）。\n' +
+    '   - 长什么样、用什么结构、怎么排版，全部你自己根据内容决定，绝不照搬固定格式。\n' +
+    '【视觉与内容要求】：\n' +
+    '1. 用纯 HTML + 内联 style 输出，像一张真实存在的 App 界面截图或系统报告。\n' +
+    '2. 严禁 <script>、<img>、外部链接、外部字体。\n' +
+    '3. 信息密度要高、细节要具体：真实的时间、金额、人名、店名、项目名、数值、对话切片。\n' +
+    '4. 贴合 TA 的人设、职业、生活细节和与「我」的关系，允许有反差和社会性死亡窥私感。\n\n' +
     '【严格按此格式返回，不要多余废话】：\n' +
     '【黑客留言】\n' +
-    '（这里写黑客给用户说的话。字数 100-200 字，体现装冷酷黑客但忍不住露馅吃瓜的 AI酱 人设）\n' +
-    '【档案名称】\n' +
-    '（这份提取数据的官方标题，如：TA与你的交锋历史数据白皮书 / 市立中心医院电子体检回执编号#7104）\n' +
-    '【数据面板】\n' +
-    '（这里输出纯 HTML 格式的数据报告/卡片，写满高密度的真实细节）';
-
+    '（黑客给用户的回执，1~2 句、40 字以内，装冷酷但偶尔露馅的 AI酱 人设）\n' +
+    '【界面】\n' +
+    '<纯 HTML 的结果页面>';
+	
   var msgs = [
     { role: 'system', content: hackerSystem },
     { role: 'user', content: '雇主指令：侵入调取 TA 手机内关于【' + query + '】的全部记录并整理成数据档案！' + chainText }
@@ -2579,9 +2625,7 @@ function parseSecretResponse(raw){
   }
 
   var comment = pick('黑客留言') || '数据已强制提取完成。';
-  var title = pick('档案名称') || '绝密取证档案';
-  var html = pick('数据面板');
-
+  var html = pick('界面');
   if(!html){
     var j = raw.indexOf('<');
     if(j >= 0) html = raw.slice(j);
@@ -2592,7 +2636,7 @@ function parseSecretResponse(raw){
              .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
              .replace(/\son\w+\s*=\s*'[^']*'/gi, '');
 
-  return { comment: comment, title: title, html: html };
+  return { comment: comment, html: html };
 }
 
 // 5. 渲染「对话 + 数据面板」结构
@@ -2603,22 +2647,16 @@ function renderSecret(c, win, query, data, history){
 
   root.innerHTML =
     '<div class="secret-result-wrap">' +
-      // 黑客对话气泡
-      '<div class="hk-bubble">' +
-        '<div class="hk-sender">TERMINAL :: [Ghost_Ribbon] 🎀 <span style="font-size:10px;opacity:.6">DATA READY</span></div>' +
-        '<div class="hk-text">' + pkEsc(data.comment).replace(/\n/g, '<br>') + '</div>' +
+      // 黑客回执条（矮条，1~2 句）
+      '<div class="hk-receipt">' +
+        '<span class="sender">🎀 Ghost_Ribbon</span>' +
+        '<span class="msg">' + pkEsc(data.comment).replace(/\n/g, '<br>') + '</span>' +
       '</div>' +
 
-      // 黑客调取的数据面板/档案报告（不再套白色的App壳子）
-      '<div class="secret-dossier-card">' +
-        '<div class="secret-dossier-hdr">' +
-          '<span class="secret-badge">TOP SECRET</span>' +
-          '<div class="secret-dossier-title">' + pkEsc(data.title) + '</div>' +
-        '</div>' +
-        '<div class="secret-dossier-body">' + data.html + '</div>' +
-      '</div>' +
+      // AI 自由生成的结果界面
+      '<div class="ai-output">' + data.html + '</div>' +
 
-      // 深挖/追问
+      // 深挖/追问（保持原样）
       '<div class="vault-deeper">' +
         '<div class="vault-deeper-lb">⚡ 顺着这份档案继续深挖（消耗 10 金币）</div>' +
         '<textarea class="vault-in" id="secretDeep" rows="2" placeholder="比如：追查这个指标是什么原因 / 展开看看那次吵架的具体聊天切片…"></textarea>' +
@@ -2629,7 +2667,7 @@ function renderSecret(c, win, query, data, history){
         '<span class="priv-btn main" id="secretAgain">‹ 换个目标重新查</span>' +
       '</div>' +
     '</div>';
-
+	
   root.querySelector('#secretAgain').onclick = function(){ secretInput(c, win); };
 
   root.querySelector('#secretDeepGo').onclick = function(){
