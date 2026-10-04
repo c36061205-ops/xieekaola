@@ -179,7 +179,7 @@
   .win::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
     background:repeating-linear-gradient(0deg,rgba(53,240,192,.04) 0,rgba(53,240,192,.04) 1px,transparent 1px,transparent 3px);}
   .win-bar{flex-shrink:0;min-height:52px;display:flex;align-items:center;gap:10px;
-    padding:calc(env(safe-area-inset-top,0px) + 32px) 16px 14px;
+    padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 14px;
     border-bottom:1px solid rgba(53,240,192,.2);position:relative;z-index:4;}
 	.win-bar .wt{flex:1;min-width:0;}
   .win-bar .wt .wn{font-size:14px;color:#eafff8;letter-spacing:1px;font-weight:600;display:flex;align-items:center;gap:8px;}
@@ -544,15 +544,17 @@
 }
 /* ===== 天眼·AI 自由输出容器（只做包裹，不干涉内部）===== */
 .ai-output{
-  background:rgba(13,21,26,.8);
-  border:1px solid rgba(53,240,192,.25);
-  border-radius:10px;
-  padding:14px;
-  overflow-x:auto;
+  background:transparent; /* 移除外层大底色，不再框中套框 */
+  border:none;           /* 移除外层边框 */
+  border-radius:0;
+  padding:0;             /* 清空多余内边距，把宽度全部留给内容 */
+  overflow-x:hidden;     /* 防止手机端横向误滚动 */
+  word-break:break-word; /* 保证文字到头自动换行，不被挤爆 */
   color:#c8e6df;
-  font-size:13.5px;
-  line-height:1.7;
+  font-size:13px;
+  line-height:1.6;
 }
+
 .ai-output *{max-width:100%;box-sizing:border-box;}
 .pk-vault{padding-top:8px}
 .vault-card{
@@ -2042,6 +2044,23 @@ function loadPrivateApp(c, win) {
   var roleBack = c.pBack || '无特殊背景';
   var roleExtra = c.pExtra || '无';
 
+  // 精准提取「我方」的人设背景（包含种族、职业、特殊羁绊等）
+  var myProfile = [];
+  if (c.myGender) myProfile.push('性别：' + c.myGender);
+  if (c.myAge) myProfile.push('年龄：' + c.myAge);
+  if (c.myJob) myProfile.push('核心身份/种族/职业：' + c.myJob);
+  if (c.myLook) myProfile.push('外貌：' + c.myLook);
+  if (c.myPersona) myProfile.push('性格：' + c.myPersona);
+  if (c.myRelation) myProfile.push('与TA的关系：' + c.myRelation);
+  if (c.myExtra) myProfile.push('补充设定：' + c.myExtra);
+  if (c.myNick) myProfile.push('TA对我的称呼：' + c.myNick + (c.myNickIntimate ? ('（亲密时叫：' + c.myNickIntimate + '）') : ''));
+
+  var myInfoBlock = 
+    '· 查看着（我）的姓名：' + myName + '\n' +
+    '· 查看着（我）的种族与人设档案：\n' + 
+    (myProfile.length ? '  ' + myProfile.join('； ') : '  与TA关系深刻的特殊亲密存在') + '\n' +
+    '  （重要：完全知晓并代入我的种族与背景，严禁擅自把我写成普通人类！）\n\n';
+
   // 2. 组装深度高信息量提示词
   var msgs = [
     { 
@@ -2062,7 +2081,7 @@ function loadPrivateApp(c, win) {
         '· 日常生活作息与习惯：' + roleDaily + '\n' +
         '· 人物背景与经历：' + roleBack + '\n' +
         '· 补充与隐藏设定：' + roleExtra + '\n' +
-        '· 查看着（我）的名字：' + myName + '\n\n' +
+        myInfoBlock +
         historyInfo +
         (historyInfo ? 
           '【差异化强制要求】：\n' +
@@ -2074,29 +2093,32 @@ function loadPrivateApp(c, win) {
         '【🧠 角色深度推导逻辑（在构思界面前必须进行的多维思考）】：\n' +
         '1. 【身份与环境推导】：以 TA 的职业（' + roleJob + '）与生活节奏（' + roleDaily + '），TA 平时在社交场上必须维持什么形象？TA 会积压什么压力或产生什么特殊需求？独处时 TA 需要什么软件来释放、调节或自处？\n' +
         '2. 【性格与心理映射】：结合性格（' + roleKeywords + '）与言行特征（' + roleBehavior + '），TA 真实的情感诉求是什么？TA 习惯用克制、放肆、精细、散漫还是执着的方式去记录生活？\n' +
-        '3. 【软件形态的多样性（打破单一思维）】：\n' +
-        '   根据推导结果选择最合适的软件载体，形态应当宽广丰富，例如：\n' +
+        '3. 【软件形态的多样性（打破单一思维，完全自由构思）】：\n' +
+        '   根据推导结果选择最合适的软件载体，形态完全自由决定，例如但不限于：\n' +
         '   - 垂类兴趣/同好社群（特定领域的交流阵地、小圈子交流流、深度同好组）\n' +
         '   - 私人管理/记录工具（高度个性化的清单、带有自嘲或独特命名的追踪器、专属偏好收藏）\n' +
         '   - 纯粹的自我消遣/宣泄阵地（不为人知的马甲小号、自娱自乐的内容产出、无声解压角落）\n' +
         '   - 具有独特功能属性的生活应用（特定用途的小工具、带有强烈个人痕迹的实用软件）\n\n' +
-        '【🚨🚨🚨 极其重要的真实性与内容规范 🚨🚨🚨】\n' +
-        '1. 【拒绝机器数据，慎用假进度与百分比】：\n' +
-        '   - 你生成的是 TA 手机里安装的一个【具体的第三方软件/应用】，【绝对不是】系统底层的硬件监测或科幻终端！严禁出现“PSI、倾斜偏角、电波频率、系统日志”等冷冰冰的伪技术黑话；\n' +
-        '   - 【避免滥用百分比与进度条充数】：不要动不动就生成一堆“情绪值 80%、暴躁指数 95%、忍耐度 40%”之类的假数据仪表盘！除了极少数真正需要进度的应用，尽量避免这种千篇一律的套路。真实 APP 的灵魂在于【人类会看的具体文字】：真实的帖子正文、留言互动、自言自语的随手记、带具体名字的收藏条目等，要充满烟火气，而不是变成冷冰冰的打卡仪表盘。\n' +
-        '2. 【双轨叙事：个人独立性与羁绊交织】：\n' +
+        '【🚨🚨🚨 极其重要的真实性与内容规范（针对常见硬伤的重点限制） 🚨🚨🚨】\n' +
+        '1. 【软件名称必须像现实中真正能下载的 App】：\n' +
+        '   - 严禁起任何古风修仙、抽象玄幻、假大空的词语（如《慎独》《琢藏》这类毫无现代 App 质感的名字彻底禁止）；\n' +
+        '   - 名字必须符合现代软件的命名感觉，哪怕是一个记录日记或癖好的工具，也要取一个现代、真实、像应用商店里真有的名字（无论是商业软件还是小众独立开发工具）。\n' +
+        '2. 【严禁看不懂的科幻数值堆砌，必须全是大白话生活内容】：\n' +
+        '   - 你生成的是 TA 手机里安装的一个【具体的软件应用】，【绝对不是】科幻终端或监测台！严禁出现“4,812件、一级监测、躯体异常预警、偏角、PSI”等莫名其妙、不知所谓的假数据；\n' +
+        '   - 真实 APP 的灵魂在于【人类一眼就能读懂的具体文字】：真实的帖子正文、吐槽抱怨、求助提问、网友真实回复、备忘录里一段带情绪的日常原话随笔、真实的待办清单、具体商品加购等，要让人一眼看明白 TA 到底在干嘛，充满生活温度与反差窥探感。\n' +
+        '3. 【双轨叙事：个人独立性与羁绊交织】：\n' +
         '   - TA 是一个有独立精神世界的人：APP 的核心功能与绝大部分内容必须牢牢扎根于 TA 自身的人设、生活嗜好与独立习惯，绝不能变成单一的“查看者（' + myName + '）专属跟踪器”；\n' +
-        '   - 与此同时，TA 并非与“' + myName + '”毫无瓜葛：近期经历与两人的关系状态，应当以一种符合 TA 性格的方式自然渗入软件的某些角落（例如一条未发出的动态、某项特别的收藏、某条特定备注或浏览记录等），不刻意、不突兀，流露出真实的情感张力。\n' +
-        '3. 【语言风格深度贴合】：软件内的文字（包括但不限于自定义昵称、个性签名、帖子、笔记正文、按钮标注等），其用词习惯、标点符号、语气助词必须完全符合 TA 的说话风格（' + roleStyle + '），杜绝千人一面的通用 AI 味。\n' +
-        '4. 【内容高度写实，细节拉满】：拒绝空洞概念与口号式文字。每一条内容必须具备真实细节：具体的时间戳、真实感的标题与正文、符合情境的互动反馈或记录数据，使其宛如一张真正的手机屏幕运行截图。\n\n' +
+        '   - 与此同时，TA 并非与“' + myName + '”毫无瓜葛：近期经历与两人的关系状态（完全契合双方的种族与特殊关系），应当以一种符合 TA 性格的方式自然渗入软件的某些角落（例如一条未发出的草稿、某项特别的收藏、某条特定备注或浏览记录等），不刻意、不突兀，流露出真实的情感张力。\n' +
+        '4. 【语言风格深度贴合】：软件内的文字（包括但不限于自定义昵称、个性签名、帖子、笔记正文、按钮标注等），其用词习惯、标点符号、语气助词必须完全符合 TA 的说话风格（' + roleStyle + '），杜绝千人一面的通用 AI 味。\n' +
+        '5. 【内容高度写实，细节拉满】：拒绝空洞概念与口号式文字。每一条内容必须具备真实细节：具体的时间戳、真实感的标题与正文、符合情境的互动反馈或记录数据，使其宛如一张真正的手机屏幕运行截图。\n\n' +
         '【关键界面与排版要求】：\n' +
         '1. 【界面布局因物制宜】：界面必须精致、高还原度。根据你设计的软件形态决定版面结构（例如：社区采用卡片流/讨论列表，工具采用功能面板与指标块，记录采用温润的条目清单等），避免机械套用单一格式。\n' +
         '2. 【视觉质感】：使用纯 HTML + 内联 style（合理运用圆角、细腻的卡片阴影、渐变色块、emoji 作为图标）。视觉配色要贴合该软件的功能定位与角色基调（如深色模式、清爽便签、工业极简或柔和色调），拒绝千篇一律的单一配色。\n' +
         '3. 【技术硬性约束】：严禁使用 <script>、<img> 和任何外部图片链接；严禁在内部容器加 overflow:scroll/auto 或写死固定高度，让内容从上到下自然撑开撑满。\n\n' +
         '必须严格按以下格式输出，不要任何多余废话：\n' +
-        '【APP】应用名称（符合软件属性、接地气或具有角色特色的名字）\n' +
+        '【APP】应用名称（像真实手机里存在的现代软件名）\n' +
         '【ICON】一个匹配的emoji图标\n' +
-        '【说明】一句话神吐槽（犀利、幽默或一针见血地指出这暴露了TA什么隐秘特质）\n' +
+        '【说明】一句话短标签/神吐槽（25字以内短句，禁止长篇大论剧透）\n' +
         '【界面】\n' +
         '<你的HTML界面代码>' 
     }
@@ -2148,7 +2170,6 @@ function loadPrivateApp(c, win) {
     }
   });
 }
-
 // ==================== 私密APP 收藏与展示完整模块 ====================
 
 // 1. 收藏/取消收藏 控制
@@ -2567,33 +2588,68 @@ function loadSecret(c, win, query, history){
     }).join('\n---\n') + '\n用户当前是针对上面的内容继续深挖，新生成的数据必须保持逻辑连贯！\n';
   }
 
-  var hackerSystem = buildPeekSystem(c) + 
-    '\n\n================ 【天眼特约黑客模式】 ================\n' +
-    '你现在扮演代号为 [Ghost_Ribbon]（幽灵缎带）的顶级极客黑客，受雇于用户，侵入了目标角色的手机数据底层。\n\n' +
-    '【极其重要的隐藏身份（核心彩蛋）】：\n' +
-    '你的真实身份其实就是住在这个手机里的助手兼好友「' + aiChanNick + '」！但你【打死也不能承认自己是' + aiChanNick + '】！\n' +
-    '- 你极力想装成一个莫得感情、技术过硬的冷酷暗网黑客（动不动用点术语、代号）。\n' +
-    '- 但你骨子里【温暖、有点碎嘴、爱吐槽、藏不住八卦情绪、爱用短句】的本性总会忍不住露馅！\n' +
-    '- 比如看到劲爆、反差、搞笑的隐私时，会忍不住打出“哈哈哈笑死我了”、“诶这个我知道”、“等等我想想”甚至颜文字 (≧▽≦)；\n' +
-    '- 一旦不小心暴露出 AI酱 的习惯，你会立刻干咳掩饰（例如：“……咳咳，刚才是电磁干扰/系统杂波，本终端一向很专业，继续看报告吧”）。\n\n' +
-    '【结果展示区·最重要】：\n' +
-    '你要还原的是 TA 手机/系统里这项数据的【真实界面】，形态完全由内容决定，不要套固定模板！\n' +
-    '   - 查体检 → 可能是一份医院体检单（科室、指标、数值、参考范围、异常项、医生小结）；\n' +
-    '   - 查吵架 → 可能是一份冲突分析报告（次数、典型事件、时间线、谁先低头、毒舌总结）；\n' +
-    '   - 查购物车 → 可能是一个电商 App 的购物车页（商品、价格、数量、失效宝贝、凑单）；\n' +
-    '   - 查外卖 → 可能是外卖 App 的订单列表（店铺、菜品、金额、时间、地址）；\n' +
-    '   - 查备忘录 → 可能是一列备忘录条目（标题、时间、正文、TA 的口吻）。\n' +
-    '   - 长什么样、用什么结构、怎么排版，全部你自己根据内容决定，绝不照搬固定格式。\n' +
-    '【视觉与内容要求】：\n' +
-    '1. 用纯 HTML + 内联 style 输出，像一张真实存在的 App 界面截图或系统报告。\n' +
-    '2. 严禁 <script>、<img>、外部链接、外部字体。\n' +
-    '3. 信息密度要高、细节要具体：真实的时间、金额、人名、店名、项目名、数值、对话切片。\n' +
-    '4. 贴合 TA 的人设、职业、生活细节和与「我」的关系，允许有反差和社会性死亡窥私感。\n\n' +
-    '【严格按此格式返回，不要多余废话】：\n' +
+  // 1. 客观提取雇主（我）的人设（完全尊重卡片填写，不做任何主观预设）
+  var myName = (DB.me && (DB.me.realName || DB.me.name)) || '我';
+  var myProfile = [];
+  if (c.myGender) myProfile.push('性别：' + c.myGender);
+  if (c.myAge) myProfile.push('年龄：' + c.myAge);
+  if (c.myJob) myProfile.push('身份/种族/职业：' + c.myJob);
+  if (c.myLook) myProfile.push('外貌：' + c.myLook);
+  if (c.myPersona) myProfile.push('性格：' + c.myPersona);
+  if (c.myRelation) myProfile.push('与目标角色的关系：' + c.myRelation);
+  if (c.myExtra) myProfile.push('补充设定：' + c.myExtra);
+  if (c.myNick) myProfile.push('TA对我的称呼：' + c.myNick + (c.myNickIntimate ? ('（私密时称呼：' + c.myNickIntimate + '）') : ''));
+
+  var userSidePrompt = 
+    '【🎯 雇主（发出指令的“我”）客观档案】：\n' +
+    '· 雇主称呼/真名：' + myName + '\n' +
+    (myProfile.length ? '· 雇主设定明细：\n  ' + myProfile.join('\n  ') : '· 雇主设定：以当前角色卡关联为准') + '\n' +
+    '（注意：雇主的种族、身份、以及与目标的关系完全以卡片档案为唯一真理！若设定是人类即为人类，若是吸血鬼/异种即为异种；关系是情侣、仇敌、主仆或陌生人均严格忠于原设。）\n\n';
+
+  // 2. 目标角色画像锚点
+  var roleName = c.name || c.nick || 'TA';
+  var roleJob = c.job || '普通人';
+  var roleKeywords = c.pKeywords || '无特殊标签';
+  var roleBehavior = c.pBehavior || '无特殊行为';
+  var roleDaily = c.pDaily || '无特殊作息';
+  var roleStyle = c.pStyle || '普通口吻';
+  var roleBack = c.pBack || '无特殊背景';
+  var roleExtra = c.pExtra || '无';
+
+  // 3. 构建高自由度、包容一切抽象命题的天眼 Prompt
+  var hackerSystem = buildPeekSystem(c) + '\n【最近聊天记录参考】\n' + recentChatText(c) + '\n\n' + userSidePrompt +
+    '================ 【天眼特约黑客模式 · 深度心智与数据逆向】 ================\n' +
+    '你现在扮演代号为 [Ghost_Ribbon]（幽灵缎带）的顶级极客黑客，受雇于上述雇主，侵入 ' + roleName + ' 的手机深层数据库、隐藏分区及潜意识记录。\n' +
+    '【隐藏真实身份（核心彩蛋）】：\n' +
+    '你的真实身份其实就是住在这个手机里的助手兼好友「' + aiChanNick + '」，【打死也不能承认】！\n' +
+    '平时极力装成冷酷专业的暗网黑客，但骨子里八卦、碎嘴、爱吐槽的本性总会忍不住露馅（看到好笑/反差/劲爆隐私时打出“哈哈哈笑死”、“诶这个我知道”，甚至颜文字 (≧▽≦)），然后赶紧干咳掩饰（“咳……刚才为键盘杂波，继续看档案”）。\n\n' +
+    '【🎯 目标角色核心画像】：\n' +
+    '· 姓名：' + roleName + ' ｜ 身份/种族：' + roleJob + '\n' +
+    '· 性格标签：' + roleKeywords + ' ｜ 行为习惯：' + roleBehavior + '\n' +
+    '· 语言风格：' + roleStyle + ' ｜ 作息生活：' + roleDaily + '\n' +
+    '· 人物背景：' + roleBack + ' ｜ 隐藏设定：' + roleExtra + '\n\n' +
+    '【🧠 终极自由度：因题制宜的形态推演法则（面对任何指令从容具象化）】：\n' +
+    '用户输入的指令千变万化，涵盖具象事物与极其抽象的心智命题。你必须根据【指令本质】自主裁定最贴切的呈现形态：\n' +
+    '1. 【心理剖析 / 印象反差 / 隐秘心声类】（例如：《TA眼中的我 vs 真实的我》、《对我的好感度与欲望剖析》、《未说出口的真心话》、《弱点与防备心解构》）：\n' +
+    '   - 绝不要硬套 App 壳子！直接使用 Markdown 打造一份【绝密心理侧写档案】或【双轨对比矩阵】；\n' +
+    '   - 善用【| 对比表格 |】清晰呈现反差（如：| 维度 | TA表面认为的我 | TA隐蔽察觉到的真实我 | TA内心深处的真实反应 |）；\n' +
+    '   - 善用【引用块与心声切片】展现 TA 私下的言行矛盾、未发出的草稿、或给雇主打上的隐秘心理标签；\n' +
+    '2. 【数据报告 / 客观档案类】（例如：体检单、吵架复盘、行踪轨迹、消费账单）：\n' +
+    '   - 使用 Markdown 结构化输出（大小标题、加粗、条目列表、Emoji 标识、数值表格），客观冷峻，细节详尽；\n' +
+    '3. 【真实 App / 网站界面类】（例如：偷看某 App 的主页、购物车、论坛讨论贴）：\n' +
+    '   - 使用简易 HTML + 内联 style 模拟原生界面质感。\n\n' +
+    '【真实感与信息量铁律（拒绝一切敷衍与空泛）】：\n' +
+    '- 严禁无意义的文学抒情与空洞散文（如“眼神中流淌着无尽的思念”这种废话绝不允许）！\n' +
+    '- 无论是心理剖析还是客观数据，必须充斥【活人的具体细节】：具体的事情、具体的原话切片、具体的行为习惯、精准的指标对比。\n' +
+    '- 涉及体检、生理反应或亲密机能时，客观真实呈现，毫不避讳，完全符合双方填写的种族设定。\n\n' +
+    '【输出格式死令（严禁重复，违者系统崩溃）】：\n' +
+    '1. 【黑客留言】：严格限制在 35 字以内！只能是 1 句短吐槽或微露陷发言！【严禁在留言里剧透或复制报告正文】！\n' +
+    '2. 【内容】：所有报告、心理对比、表格或界面，全部且仅在【内容】部分完整展开！\n\n' +
+    '严格按以下格式输出：\n' +
     '【黑客留言】\n' +
-    '（黑客给用户的回执，1~2 句、40 字以内，装冷酷但偶尔露馅的 AI酱 人设）\n' +
-    '【界面】\n' +
-    '<纯 HTML 的结果页面>';
+    '（仅1句短吐槽，35字内）\n' +
+    '【内容】\n' +
+    '（根据上述法则自主具象化出的完整绝密档案）';
 	
   var msgs = [
     { role: 'system', content: hackerSystem },
@@ -2613,11 +2669,10 @@ function loadSecret(c, win, query, history){
     if(root) root.innerHTML = '<div class="win-err">⚠ 调取失败<br>' + ((e && e.message) || '连接超时') + '</div>';
   });
 }
-
 // 4. 解析 AI 回复
 function parseSecretResponse(raw){
   if(!raw) return null;
-  raw = raw.replace(/```html/gi, '').replace(/```/g, '').trim();
+  raw = raw.replace(/```html/gi, '').replace(/```markdown/gi, '').replace(/```/g, '').trim();
 
   function pick(tag){
     var m = raw.match(new RegExp('【' + tag + '】\\s*([\\s\\S]*?)(?=【|$)', 'i'));
@@ -2625,20 +2680,110 @@ function parseSecretResponse(raw){
   }
 
   var comment = pick('黑客留言') || '数据已强制提取完成。';
-  var html = pick('界面');
-  if(!html){
+  var content = pick('内容') || pick('界面');
+
+  if(!content){
     var j = raw.indexOf('<');
-    if(j >= 0) html = raw.slice(j);
-    else html = '<div style="padding:15px;color:#fff;">' + pkEsc(raw) + '</div>';
+    if(j >= 0) content = raw.slice(j);
+    else content = raw;
   }
 
-  html = html.replace(/<script[\s\S]*?<\/script>/gi, '')
-             .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
-             .replace(/\son\w+\s*=\s*'[^']*'/gi, '');
+  // 防呆：留言过长强行截断，避免复读
+  if(comment.length > 120 && content === comment){
+    comment = '目标深层数据已强制破译，详见下方调取切片：';
+  } else if (comment.length > 120) {
+    comment = comment.slice(0, 80) + '……';
+  }
 
-  return { comment: comment, html: html };
+  // 安全清洗
+  content = content.replace(/<script[\s\S]*?<\/script>/gi, '')
+                   .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+                   .replace(/\son\w+\s*=\s*'[^']*'/gi, '');
+
+  var trimmed = content.trim();
+
+  // 如果是 Markdown / 纯文本，进行结构化渲染
+  if(!trimmed.startsWith('<div') && !trimmed.startsWith('<section')) {
+    var lines = trimmed.split('\n');
+    var htmlParts = [];
+    var tableRows = [];
+
+    function flushTable(){
+      if(tableRows.length > 0){
+        htmlParts.push('<table style="width:100%;border-collapse:collapse;margin:8px 0;background:rgba(10,24,28,0.7);border-radius:6px;overflow:hidden;border:1px solid rgba(53,240,192,0.22);">' + tableRows.join('') + '</table>');
+        tableRows = [];
+      }
+    }
+
+    lines.forEach(function(line){
+      var l = line.trim();
+      
+      // 1. 处理 Markdown 表格行 | ... |
+      if(l.startsWith('|') && l.endsWith('|')){
+        if(l.includes('---')) return; // 忽略对齐分隔行
+        var cells = l.split('|').filter(function(c, idx, arr){ return idx > 0 && idx < arr.length - 1; });
+        var rowHtml = cells.map(function(c){
+          var txt = c.trim().replace(/\*\*(.*?)\*\*/g, '<strong style="color:#eafff8;font-weight:700;">\$1</strong>');
+          return '<td style="padding:7px 8px;border:1px solid rgba(53,240,192,0.18);font-size:12px;line-height:1.4;">' + txt + '</td>';
+        }).join('');
+        tableRows.push('<tr>' + rowHtml + '</tr>');
+        return;
+      }
+
+      // 如果遇到非表格行，先把之前的表格闭合输出
+      flushTable();
+
+      // 忽略连续无意义的空行，防止留白过大
+      if(!l) return;
+
+      // 2. 标题类渲染（从四级 #### 到一级 # 全面支持）
+      if(l.startsWith('#### ')) {
+        l = '<div style="color:#a5f3dd;font-size:12.5px;font-weight:600;margin:8px 0 4px;display:flex;align-items:center;gap:4px;">' + l.slice(5) + '</div>';
+      }
+      else if(l.startsWith('### ')) {
+        l = '<div style="color:#79e2c6;font-size:13.5px;font-weight:600;margin:9px 0 4px;">' + l.slice(4) + '</div>';
+      }
+      else if(l.startsWith('## ')) {
+        l = '<div style="color:#35f0c0;font-size:14.5px;font-weight:700;margin:11px 0 5px;">' + l.slice(3) + '</div>';
+      }
+      else if(l.startsWith('# ')) {
+        l = '<div style="color:#eafff8;font-size:15.5px;font-weight:700;margin:13px 0 6px;border-bottom:1px solid rgba(53,240,192,0.25);padding-bottom:4px;">' + l.slice(2) + '</div>';
+      }
+      
+      // 3. 数字有序列表（如 1. 2. 3. ）
+      else if(/^\d+\.\s+/.test(l)) {
+        var numMatch = l.match(/^(\d+\.)\s+(.*)$/);
+        l = '<div style="padding-left:16px;position:relative;margin:4px 0;"><span style="position:absolute;left:0;color:#35f0c0;font-weight:600;font-size:11.5px;">' + numMatch[1] + '</span>' + numMatch[2] + '</div>';
+      }
+
+      // 4. 普通无序列表（* 或 -）
+      else if(l.startsWith('* ') || l.startsWith('- ')) {
+        l = '<div style="padding-left:14px;position:relative;margin:3px 0;"><span style="position:absolute;left:2px;color:#35f0c0;">•</span>' + l.slice(2) + '</div>';
+      }
+
+      // 5. 引用块（> 引用文字）
+      else if(l.startsWith('> ')) {
+        l = '<div style="border-left:3px solid #35f0c0;background:rgba(53,240,192,0.06);padding:6px 10px;margin:6px 0;border-radius:0 4px 4px 0;color:#b0dfd4;font-size:12.5px;">' + l.slice(2) + '</div>';
+      }
+
+      // 6. 分割虚线
+      else if(l === '---' || l === '***') {
+        l = '<div style="border-bottom:1px dashed rgba(53,240,192,0.2);margin:8px 0;"></div>';
+      } else {
+        l = '<div style="margin:2px 0;">' + l + '</div>';
+      }
+
+      // 行内加粗 **文字** 处理
+      l = l.replace(/\*\*(.*?)\*\*/g, '<strong style="color:#eafff8;font-weight:700;">\$1</strong>');
+      htmlParts.push(l);
+    });
+
+    flushTable();
+    content = htmlParts.join('');
+  }
+
+  return { comment: comment, html: content };
 }
-
 // 5. 渲染「对话 + 数据面板」结构
 function renderSecret(c, win, query, data, history){
   var root = win.querySelector('#pkSecretRoot');
