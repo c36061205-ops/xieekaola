@@ -14,7 +14,11 @@
 <meta http-equiv="Expires" content="0">
 <title>XieEKaoLa</title>
 <style>
-  :root{--theme:#07c160;--bg:#ededed;--nav:#f7f7f7;--card:#fff;--text:#111;--sub:#888;--line:#e5e5e5;}
+  :root{
+  --theme:#07c160;--bg:#ededed;--nav:#f7f7f7;--card:#fff;--text:#111;--sub:#888;--line:#e5e5e5;
+  --bubble-text-ai:#111;   /* AI气泡文字，默认深色主题=深色字 */
+  --bubble-text-me:#ffffff;/* 用户气泡文字，默认深色主题=白字 */
+}
   #bootLoading{
   position:fixed; inset:0; z-index:99999;
   display:flex; flex-direction:column;
@@ -319,7 +323,20 @@
   #appgrid.icon-large .app-nm{ font-size:11px; }
 
   .cell{display:flex;align-items:center;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);cursor:pointer;}
-  .avatar{width:36px;height:36px;border-radius:6px;background:var(--theme);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background-size:cover;background-position:center;}
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
   .cell-body{flex:1;margin-left:12px;overflow:hidden;}.cell-title{font-size:16px;color:var(--text);}
   .cell-sub{font-size:13px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .empty{text-align:center;color:var(--sub);padding:60px 20px;font-size:14px;line-height:2;}
@@ -363,7 +380,18 @@ textarea {
 .ts-pill{display:inline-block;padding:3px 11px;font-size:11px;color:var(--theme);background:color-mix(in srgb,var(--theme) 14%,transparent);border-radius:11px;line-height:1.5;letter-spacing:.5px;font-weight:500;}
   .msg{display:flex;padding:5px 10px;gap:8px;align-items:flex-start;}
   .msg.me{flex-direction:row-reverse;}
-  .cavatar{width:36px;height:36px;border-radius:6px;flex-shrink:0;background:var(--theme) center/cover;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.cavatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: var(--theme) center/cover;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
 .msg-slide{display:flex;flex-direction:column;align-items:flex-start;gap:0;transition:transform .2s;position:relative;}
 .msg.me .msg-slide{align-items:flex-end;}
 
@@ -403,7 +431,7 @@ textarea {
   border-radius:8px;
   border-top-left-radius:2px;
   background:color-mix(in srgb, var(--card) 62%, transparent);
-  color:var(--text);
+  color:var(--bubble-text-ai, var(--text));
   font-size:15px;
   line-height:1.5;
   word-break:break-word;
@@ -413,14 +441,16 @@ textarea {
   backdrop-filter:blur(12px) saturate(1.3);
   -webkit-backdrop-filter:blur(12px) saturate(1.3);
 }
+
 .msg.me .mbody{
   background:color-mix(in srgb, var(--theme) 62%, transparent);
-  color:#fff;
+  color:var(--bubble-text-me, #fff);
   border:1px solid color-mix(in srgb, var(--theme) 40%, transparent);
   border-radius:8px;
   border-top-right-radius:2px;
   box-shadow:0 1px 3px rgba(0,0,0,.06);
 }
+
 #chatBottom{padding:10px 14px 24px 14px;box-sizing:border-box;}
 
 #bubbleRow{display:flex;gap:8px;margin-bottom:10px;}
@@ -1651,46 +1681,33 @@ body.wx-theme-card .msg .mbody {
   padding: 10px 14px !important;
   font-size: 14.5px !important;
   line-height: 1.5 !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.5),
-    0 2px 8px rgba(0, 0, 0, 0.04) !important;
   word-break: break-word !important;
-  backdrop-filter: blur(16px) saturate(1.5);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-}
-
-/* 彻底清除一切多余的伪元素尖角，杜绝双尾巴 */
-body.wx-theme-card .msg .mbody::before,
-body.wx-theme-card .msg .mbody::after,
-body.wx-theme-card .msg::before,
-body.wx-theme-card .msg::after {
-  display: none !important;
-  content: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 body.wx-theme-card .msg:not(.me) .mbody {
-  background: color-mix(in srgb, var(--card) 62%, transparent) !important;
+  background: color-mix(in srgb, var(--card) 60%, transparent) !important;
   color: var(--text) !important;
-  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--line) 65%, transparent) !important;
   border-bottom-left-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
 
 body.wx-theme-card .msg.me .mbody {
-  background: color-mix(in srgb, var(--theme) 62%, transparent) !important;
-  color: #fff !important;
-  border: 1px solid color-mix(in srgb, #fff 40%, transparent) !important;
+  background: color-mix(in srgb, var(--theme) 55%, transparent) !important;
+  color: var(--text) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 35%, transparent) !important;
   border-bottom-right-radius: 4px !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.3),
-    0 4px 14px color-mix(in srgb, var(--theme) 35%, transparent) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
 }
-
-/* 聊天界面头像圆角优化 */
 body.wx-theme-card .cavatar {
+  width: 42px !important;
+  height: 42px !important;
   border-radius: 14px !important;
   border: 1px solid var(--line) !important;
+  font-size: 15px !important;
 }
-
 /* 群聊角色名 */
 body.wx-theme-card .msg-name {
   font-size: 11px !important;
@@ -2621,7 +2638,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v20261003_3';
+const APP_VER = 'v20261004_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -3510,6 +3527,16 @@ if (phone) phone.dataset.theme = id;
 
 var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose' || id === 'sea_salt' || id === 'angel_sheep');
 
+  // ★ 气泡文字颜色：根据主题深浅自动适配
+  if (isLight) {
+    // 浅色主题：气泡里一律用深色字（AI用近黑，用户气泡用深色，防止浅底白字看不清）
+    root.style.setProperty('--bubble-text-ai', '#1a1a1a');
+    root.style.setProperty('--bubble-text-me', '#2b2b2b');
+  } else {
+    // 深色主题：气泡里一律用白字（AI与用户都用亮色字，压在深色气泡上清晰）
+    root.style.setProperty('--bubble-text-ai', '#ffffff');
+    root.style.setProperty('--bubble-text-me', '#ffffff');
+  }
 // 给桌面打深色标记，供玻璃卡片和图标阴影使用
 var _homeEl = document.getElementById('home');
 if (_homeEl) {
@@ -21987,11 +22014,11 @@ body.wx-theme-letter .msg.me {
   flex-direction: row-reverse !important;
 }
 body.wx-theme-letter .cavatar {
-  width: 34px !important;
-  height: 34px !important;
+  width: 38px !important;
+  height: 38px !important;
   border-radius: 50% !important;
   border: 2px solid var(--card) !important;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
   background-color: var(--theme) !important;
   background-size: cover !important;
   background-position: center !important;
@@ -22000,7 +22027,7 @@ body.wx-theme-letter .cavatar {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   flex-shrink: 0 !important;
 }
 body.wx-theme-letter .mbody {
@@ -22025,12 +22052,13 @@ body.wx-theme-letter .msg:not(.me) .mbody {
 /* 用户气泡：去掉 linear-gradient 渐变，改用纯底色 + 纯发光阴影 */
 body.wx-theme-letter .msg.me .mbody {
   background: color-mix(in srgb, var(--theme) 42%, transparent) !important;
-  color: var(--text) !important;
+  color: var(--bubble-text-me, var(--text)) !important;
   border: 1px solid color-mix(in srgb, #fff 45%, transparent) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.35),
     0 0 16px var(--letter-glow-self) !important;
 }
+
 /* 图片/表情等媒体消息：不要被 flex 压扁 */
 body.wx-theme-letter .msg .mbody {
   flex-shrink: 0 !important;
