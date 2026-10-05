@@ -135,6 +135,168 @@
   #content::-webkit-scrollbar{width:5px;}
   #content::-webkit-scrollbar-thumb{background:var(--theme);border-radius:3px;opacity:.6;}
   #content::-webkit-scrollbar-track{background:transparent;}
+  
+    /* ============================================================
+     🎫 票根礼物卡片（所有微信主题通用）
+     ============================================================ */
+  .gift-wrap {
+    position: relative;
+    width: 220px;
+    max-width: 100%;
+  }
+  .gift-wrap .gift-outline {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .gift-wrap .gift-outline path {
+    fill: none;
+    stroke: color-mix(in srgb, var(--theme) 32%, transparent);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  .gift-wrap.rare .gift-outline path {
+    stroke: rgba(230,180,34,0.55);
+  }
+
+  .gift-wrap .gift {
+    position: relative;
+    width: 100%;
+    background: color-mix(in srgb, var(--theme) 9%, var(--card));
+    border: none;
+    border-radius: 5px;
+    filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--theme) 20%, transparent));
+    padding: 11px 15px 12px;
+    box-sizing: border-box;
+    --notch: 9px;
+    --notch-top: 62px;
+    mask-image:
+      radial-gradient(circle var(--notch) at 0 var(--notch-top), transparent 99%, #000 100%),
+      radial-gradient(circle var(--notch) at 100% var(--notch-top), transparent 99%, #000 100%);
+    -webkit-mask-image:
+      radial-gradient(circle var(--notch) at 0 var(--notch-top), transparent 99%, #000 100%),
+      radial-gradient(circle var(--notch) at 100% var(--notch-top), transparent 99%, #000 100%);
+    mask-composite: intersect;
+    -webkit-mask-composite: source-in;
+  }
+
+  .gift-wrap .gift-head {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .gift-wrap .gift-icon {
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0; line-height: 1;
+    background: color-mix(in srgb, var(--theme) 15%, var(--card));
+    border-radius: 9px;
+    border: 1px solid color-mix(in srgb, var(--theme) 22%, transparent);
+  }
+  .gift-wrap .gift-info { flex: 1; min-width: 0; }
+  .gift-wrap .gift-name {
+    font-size: 14px; font-weight: 700;
+    color: var(--text); line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .gift-wrap .gift-desc {
+    font-size: 11px; margin-top: 2px;
+    color: var(--sub); line-height: 1.35;
+  }
+  .gift-wrap .gift-story {
+    font-size: 10.5px; margin-top: 4px;
+    color: var(--theme);
+    font-style: italic; line-height: 1.35;
+    opacity: 0.85;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .gift-wrap .gift-divider {
+    border-top: 1.5px dashed color-mix(in srgb, var(--theme) 38%, transparent);
+    margin: 10px -3px 0;
+  }
+  .gift-wrap .gift-foot { padding-top: 8px; }
+  .gift-wrap .gift-foot .row-top {
+    display: flex; justify-content: space-between; align-items: center;
+    min-height: 20px;
+  }
+  .gift-wrap .gift-foot .left {
+    color: var(--theme); font-weight: 600;
+    font-size: 11px; letter-spacing: 0.4px;
+  }
+  .gift-wrap .gift-foot .right {
+    color: var(--sub); font-weight: 500; font-size: 11px;
+  }
+  .gift-wrap .gift-foot .btn-row { display: flex; gap: 5px; }
+  .gift-wrap .gift-foot .btn-row .act {
+    padding: 2px 9px;
+    font-size: 10.5px; font-weight: 600;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--theme) 45%, transparent);
+    color: var(--theme);
+    background: color-mix(in srgb, var(--theme) 6%, transparent);
+    cursor: pointer;
+    transition: background .12s, transform .1s;
+    line-height: 1.2;
+  }
+  .gift-wrap .gift-foot .btn-row .act.decline {
+    color: var(--sub);
+    border-color: color-mix(in srgb, var(--sub) 35%, transparent);
+    background: transparent;
+  }
+  .gift-wrap .gift-foot .btn-row .act:active {
+    background: color-mix(in srgb, var(--theme) 18%, transparent);
+    transform: scale(0.95);
+  }
+  .gift-wrap .gift-foot .stamp {
+    margin-top: 7px;
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    color: var(--sub);
+    opacity: 0.55;
+    display: flex; justify-content: space-between;
+    gap: 8px;
+  }
+  .gift-wrap .gift-foot .stamp .no {
+    color: color-mix(in srgb, var(--theme) 80%, var(--sub));
+    opacity: 0.9;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .gift-wrap .gift-foot .stamp .seq { flex-shrink: 0; }
+
+  /* 珍稀 · 金色调 */
+  .gift-wrap.rare .gift {
+    background: rgba(230,180,34,0.09);
+    filter: drop-shadow(0 2px 8px rgba(230,180,34,0.35));
+  }
+  .gift-wrap.rare .gift-icon {
+    background: rgba(230,180,34,0.18);
+    border-color: rgba(230,180,34,0.48);
+  }
+  .gift-wrap.rare .gift-divider {
+    border-top-color: rgba(230,180,34,0.5);
+  }
+  .gift-wrap.rare .gift-foot .left { color: #B8860B; }
+  [data-dark="1"] .gift-wrap.rare .gift-foot .left,
+  body.dark .gift-wrap.rare .gift-foot .left { color: #F5D76E; }
+  .gift-wrap.rare .gift-story { color: #B8860B; }
+  [data-dark="1"] .gift-wrap.rare .gift-story,
+  body.dark .gift-wrap.rare .gift-story { color: #F5D76E; }
+  .gift-wrap.rare .gift-foot .stamp .no { color: #B8860B; }
+  [data-dark="1"] .gift-wrap.rare .gift-foot .stamp .no,
+  body.dark .gift-wrap.rare .gift-foot .stamp .no { color: #F5D76E; }
+  .gift-wrap.rare .gift-foot .btn-row .act {
+    border-color: rgba(230,180,34,0.55);
+    color: #B8860B;
+    background: rgba(230,180,34,0.08);
+  }
+  [data-dark="1"] .gift-wrap.rare .gift-foot .btn-row .act,
+  body.dark .gift-wrap.rare .gift-foot .btn-row .act { color: #F5D76E; }
+  
   /* ===== 语音气泡 · 波形条样式 ===== */
 .voice-bubble {
   cursor: pointer;
@@ -1185,6 +1347,200 @@ margin-bottom:4px;}
     color-mix(in srgb,var(--theme) 5%,transparent));
   border-color:rgba(255,255,255,.12);
   box-shadow:0 4px 14px rgba(0,0,0,.35);
+}
+
+/* ============================================================
+   ★ 天气小组件 · 新版样式（v6）
+   ============================================================ */
+
+.weather-widget {
+  width: 100%;
+  border-radius: 20px;
+  padding: 14px 16px;
+  position: relative;
+  background: color-mix(in srgb, var(--theme) 5%, transparent);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid color-mix(in srgb, var(--theme) 35%, transparent);
+  color: var(--text);
+  cursor: pointer;
+  touch-action: pan-x;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+/* 第1行 */
+.weather-widget .w-row-1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+.weather-widget .w-loc {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--text);
+  min-width: 0;
+  flex: 1;
+}
+.weather-widget .w-loc svg {
+  width: 14px; height: 14px;
+  stroke: var(--theme); fill: none;
+  stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.weather-widget .w-loc span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.weather-widget .w-acts {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.weather-widget .w-act {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  color: var(--sub);
+  font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: .2s;
+  flex-shrink: 0;
+}
+.weather-widget .w-act:active {
+  background: color-mix(in srgb, var(--theme) 18%, transparent);
+  color: var(--theme);
+}
+.weather-widget .w-dots {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  pointer-events: none;
+}
+.weather-widget .w-dots span {
+  display: inline-block;
+  height: 5px; width: 5px;
+  border-radius: 50%;
+  background: var(--sub);
+  opacity: .4;
+  transition: all .3s;
+}
+.weather-widget .w-dots span.active {
+  background: var(--theme);
+  opacity: 1;
+  width: 12px;
+  border-radius: 3px;
+}
+
+/* 第2行 */
+.weather-widget .w-row-2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 0;
+}
+.weather-widget .w-temp-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+.weather-widget .w-temp {
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1.5px;
+}
+.weather-widget .w-temp-unit {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text);
+  opacity: .8;
+}
+.weather-widget .w-big-icon {
+  width: 46px; height: 46px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.weather-widget .w-big-icon svg {
+  width: 46px; height: 46px;
+  display: block;
+}
+
+/* 第3行 */
+.weather-widget .w-desc {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 分隔线 */
+.weather-widget .w-divider {
+  height: 1px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+/* 第4行 */
+.weather-widget .w-row-4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.weather-widget .w-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+.weather-widget .w-info .w-ico {
+  width: 16px; height: 16px;
+  color: var(--sub);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.weather-widget .w-info .w-ico svg {
+  width: 16px; height: 16px;
+  stroke: currentColor; fill: none;
+  stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.weather-widget .w-info .w-val {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+.weather-widget .w-update {
+  font-size: 10.5px;
+  color: var(--sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  opacity: .8;
 }
 /* ===== 咪思异想主题专用样式 ===== */
 #phone[data-theme="misi"] .clock-starry .ring {
@@ -2638,7 +2994,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v20261004_1';
+const APP_VER = 'v20261005_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -4141,6 +4497,31 @@ function save(){
       alert('⚠️ 保存失败：' + (e && e.message ? e.message : e));
     });
   });
+}
+
+// ===== 🎫 礼物卡片 · 票号 & 流水号生成 =====
+function makeGiftTicket(c, m) {
+  if (!c || !m || !m.time) {
+    return { no: 'NO.----------', seq: '--/--' };
+  }
+  var t = new Date(m.time);
+  var pad = function(n){ return (n < 10 ? '0' : '') + n; };
+  var date = t.getFullYear() + '-' + pad(t.getMonth()+1) + '-' + pad(t.getDate());
+  var hm   = pad(t.getHours()) + ':' + pad(t.getMinutes());
+  var code = String(m.id || '').slice(-4);   // msg.id 后 4 位
+  var no   = 'NO.' + date + '-' + hm + '-' + code;
+
+  // 流水号：该角色当天收到的第 N 个礼物 / 当天总数
+  var dayStart = new Date(t); dayStart.setHours(0, 0, 0, 0);
+  var startTs = dayStart.getTime();
+  var endTs   = startTs + 86400000;
+  var all = (DB.chats[c.id] || []).filter(function(x){
+    return x.type === 'shop_item' && x.time >= startTs && x.time < endTs;
+  });
+  all.sort(function(a, b){ return a.time - b.time; });
+  var idx = all.findIndex(function(x){ return x.id === m.id; });
+  var seq = (idx >= 0 ? idx + 1 : 1) + '/' + all.length;
+  return { no: no, seq: seq };
 }
 // 更新"用户送给AI的礼物"卡片状态
 function shopMarkUserGift(c, msgId, accepted) {
@@ -6076,57 +6457,53 @@ DB.events = DB.events || [
   
   var weatherHtml = '';
   if (weatherApp) {
-    weatherHtml = `<div class="weather-widget glass-card" id="weatherWidget" style="width:100%;cursor:pointer;touch-action:pan-x;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;min-height:120px;">
+    weatherHtml = `<div class="weather-widget" id="weatherWidget">
 
-	<style>
-@keyframes floatDot {
-  0%, 100% { transform: translateY(0px) scale(1); opacity: 1; }
-  50% { transform: translateY(-8px) scale(1.2); opacity: 1; }
-}
-        @keyframes twinkleStar {
-          0%, 100% { opacity: 0.2; transform: scale(1); }
-          50% { opacity: 0.8; transform: scale(1.2); }
-        }
-.ghost-star {
-  position: absolute;
-  color: rgba(140,115,165,0.55);
-  pointer-events: none;
-  z-index: 0;
-  text-shadow: 0 0 40px rgba(140,115,165,0.10);
-  font-size: 28px;
-}
-.ghost-star.small { font-size: 18px; opacity: 0.60; }
-.ghost-star.xsmall { font-size: 13px; opacity: 0.50; }
-.ghost-star.large { font-size: 40px; opacity: 0.45; }
-.ghost-star.xlarge { font-size: 52px; opacity: 0.35; }
-      </style>
-      <span style="position:absolute;right:18px;top:12px;width:5px;height:5px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 2.8s ease-in-out infinite;will-change:transform,opacity;"></span>
-      <span style="position:absolute;right:40px;top:30px;width:4px;height:4px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.6s ease-in-out infinite 0.6s;will-change:transform,opacity;"></span>
-      <span style="position:absolute;right:8px;top:44px;width:3px;height:3px;border-radius:50%;background:var(--theme);pointer-events:none;z-index:0;animation:floatDot 3.2s ease-in-out infinite 1.2s;will-change:transform,opacity;"></span>
-      <div style="display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;flex-shrink:0;">
-        <span id="widgetIcon" style="font-size:26px;line-height:1;">🌤</span>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span id="widgetTemp" style="font-size:26px;font-weight:400;color:var(--text);opacity:0.85;line-height:1;display:flex;align-items:center;gap:3px;">
-            <span id="widgetState" style="font-size:14px;font-weight:400;opacity:0.6;">晴</span>
-            <span id="widgetTempNum" style="font-weight:400;">--</span><span style="font-size:16px;opacity:0.4;font-weight:300;">℃</span>
-          </span>
-          <span id="widgetRefresh" style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.04);color:var(--theme);font-size:12px;cursor:pointer;opacity:0.4;" onclick="event.stopPropagation();refreshWeather()">↻</span>
-          <span style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.02);color:var(--sub);font-size:12px;cursor:pointer;opacity:0.2;" onclick="event.stopPropagation();openWeatherEditor()">⚙</span>
-        </div>
+    <!-- 第1行：地点 | 圆点 | 设置 | 刷新 -->
+    <div class="w-row-1">
+      <div class="w-loc">
+        <svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <span id="widgetWorldName">未关联</span>
       </div>
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:2px 0;position:relative;z-index:1;overflow:hidden;">
-        <div id="widgetDesc" style="font-size:14px;font-weight:400;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">加载天气…</div>
-        <div id="widgetDetail" style="font-size:13px;font-weight:350;color:var(--sub);margin-top:1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">&nbsp;</div>
+      <div class="w-dots" id="widgetDots"></div>
+      <div class="w-acts">
+        <div class="w-act" onclick="event.stopPropagation();openWeatherEditor()">⚙</div>
+        <div class="w-act" onclick="event.stopPropagation();refreshWeather()">↻</div>
       </div>
-      <div style="position:relative;z-index:1;flex-shrink:0;padding-top:6px;margin-top:4px;border-top:1px solid color-mix(in srgb,var(--theme) 14%,transparent);">
-	  
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span id="widgetWorldName" style="font-size:12px;font-weight:350;color:var(--clock-sub-color, var(--sub));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px;">未关联</span>
-          <span id="widgetUpdateTime" style="font-size:12px;font-weight:300;color:var(--clock-sub-color, var(--sub));white-space:nowrap;flex-shrink:0;">刚刚</span>
-        </div>
-        <div id="widgetDots" style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:6px;"></div>
+    </div>
+
+    <!-- 第2行：气温（左） + 天气SVG（右） -->
+    <div class="w-row-2">
+      <div class="w-temp-wrap">
+        <span class="w-temp" id="widgetTempNum">--</span>
+        <span class="w-temp-unit">℃</span>
       </div>
-    </div>`;
+      <div class="w-big-icon" id="widgetBigIcon"></div>
+    </div>
+
+    <!-- 第3行：氛围句 -->
+    <div class="w-desc" id="widgetDesc">加载天气…</div>
+
+    <div class="w-divider"></div>
+
+    <!-- 第4行：风速 | 湿度 | 更新时间 -->
+    <div class="w-row-4">
+      <div class="w-info">
+        <span class="w-ico">
+          <svg viewBox="0 0 24 24"><path d="M3 8h13a3 3 0 1 0-3-3"/><path d="M3 12h9a3 3 0 1 1-3 3"/><path d="M3 16h5"/></svg>
+        </span>
+        <span class="w-val" id="widgetWind">--</span>
+      </div>
+      <div class="w-info">
+        <span class="w-ico">
+          <svg viewBox="0 0 24 24"><path d="M12 2.7s5 6.5 5 10.3a5 5 0 0 1-10 0c0-3.8 5-10.3 5-10.3z"/></svg>
+        </span>
+        <span class="w-val" id="widgetHumidity">--</span>
+      </div>
+      <div class="w-update" id="widgetUpdateTime">刚刚</div>
+    </div>
+
+  </div>`;
   }
   
   var appsHtml = otherApps.map(function(a) {
@@ -6188,6 +6565,160 @@ function mapIconToState(icon) {
   };
   return map[icon] || '未知';
 }
+/* ============================================================
+   ★ 天气 SVG 库（12 种）
+   ============================================================ */
+var WEATHER_SVGS = {
+  sunny: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <g stroke="#FFA000" stroke-width="3.5" stroke-linecap="round">
+      <line x1="32" y1="7" x2="32" y2="13"/>
+      <line x1="32" y1="51" x2="32" y2="57"/>
+      <line x1="7" y1="32" x2="13" y2="32"/>
+      <line x1="51" y1="32" x2="57" y2="32"/>
+      <line x1="14.3" y1="14.3" x2="18.6" y2="18.6"/>
+      <line x1="45.4" y1="45.4" x2="49.7" y2="49.7"/>
+      <line x1="14.3" y1="49.7" x2="18.6" y2="45.4"/>
+      <line x1="45.4" y1="18.6" x2="49.7" y2="14.3"/>
+    </g>
+    <circle cx="32" cy="32" r="13" fill="#FFA000"/>
+  </svg>`,
+
+  partlyCloudy: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <g stroke="#FFA000" stroke-width="2.5" stroke-linecap="round">
+      <line x1="22" y1="8" x2="22" y2="12"/>
+      <line x1="8" y1="22" x2="12" y2="22"/>
+      <line x1="12" y1="12" x2="15" y2="15"/>
+      <line x1="32" y1="12" x2="29" y2="15"/>
+    </g>
+    <circle cx="22" cy="22" r="9" fill="#FFA000"/>
+    <path d="M46 48H20a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 46 48z" fill="#90A4AE"/>
+  </svg>`,
+
+  overcast: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M48 38H26a9 9 0 0 1-1.8-17.8 12 12 0 0 1 22.4-3.8A8 8 0 0 1 48 38z" fill="#B0BEC5"/>
+    <path d="M44 48H18a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 44 48z" fill="#78909C"/>
+  </svg>`,
+
+  lightRain: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M46 36H20a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 46 36z" fill="#90A4AE"/>
+    <g stroke="#29B6F6" stroke-width="2.5" stroke-linecap="round">
+      <line x1="24" y1="43" x2="22" y2="50"/>
+      <line x1="34" y1="43" x2="32" y2="50"/>
+      <line x1="44" y1="43" x2="42" y2="50"/>
+    </g>
+  </svg>`,
+
+  heavyRain: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M46 34H20a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 46 34z" fill="#607D8B"/>
+    <g stroke="#0288D1" stroke-width="3" stroke-linecap="round">
+      <line x1="21" y1="41" x2="17" y2="53"/>
+      <line x1="31" y1="41" x2="27" y2="53"/>
+      <line x1="41" y1="41" x2="37" y2="53"/>
+      <line x1="26" y1="45" x2="22" y2="57"/>
+      <line x1="36" y1="45" x2="32" y2="57"/>
+    </g>
+  </svg>`,
+
+  sleet: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M46 34H20a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 46 34z" fill="#78909C"/>
+    <g stroke="#29B6F6" stroke-width="2.5" stroke-linecap="round">
+      <line x1="22" y1="43" x2="19" y2="52"/>
+      <line x1="43" y1="43" x2="40" y2="52"/>
+    </g>
+    <g stroke="#4DD0E1" stroke-width="2" stroke-linecap="round">
+      <line x1="31" y1="42" x2="31" y2="52"/>
+      <line x1="26" y1="47" x2="36" y2="47"/>
+      <line x1="27.5" y1="43.5" x2="34.5" y2="50.5"/>
+      <line x1="27.5" y1="50.5" x2="34.5" y2="43.5"/>
+    </g>
+  </svg>`,
+
+  lightSnow: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M46 34H20a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 46 34z" fill="#90A4AE"/>
+    <g stroke="#4DD0E1" stroke-width="2" stroke-linecap="round">
+      <line x1="23" y1="42" x2="23" y2="48"/><line x1="20" y1="45" x2="26" y2="45"/>
+      <line x1="33" y1="46" x2="33" y2="52"/><line x1="30" y1="49" x2="36" y2="49"/>
+      <line x1="43" y1="42" x2="43" y2="48"/><line x1="40" y1="45" x2="46" y2="45"/>
+    </g>
+  </svg>`,
+
+  heavySnow: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M46 32H20a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 46 32z" fill="#607D8B"/>
+    <g stroke="#00BCD4" stroke-width="2" stroke-linecap="round">
+      <g transform="translate(22, 44)">
+        <line x1="0" y1="-5" x2="0" y2="5"/>
+        <line x1="-5" y1="0" x2="5" y2="0"/>
+        <line x1="-3.5" y1="-3.5" x2="3.5" y2="3.5"/>
+        <line x1="-3.5" y1="3.5" x2="3.5" y2="-3.5"/>
+      </g>
+      <g transform="translate(40, 44)">
+        <line x1="0" y1="-5" x2="0" y2="5"/>
+        <line x1="-5" y1="0" x2="5" y2="0"/>
+        <line x1="-3.5" y1="-3.5" x2="3.5" y2="3.5"/>
+        <line x1="-3.5" y1="3.5" x2="3.5" y2="-3.5"/>
+      </g>
+      <g transform="translate(31, 54)">
+        <line x1="0" y1="-4" x2="0" y2="4"/>
+        <line x1="-4" y1="0" x2="4" y2="0"/>
+        <line x1="-3" y1="-3" x2="3" y2="3"/>
+        <line x1="-3" y1="3.5" x2="3" y2="-3"/>
+      </g>
+    </g>
+  </svg>`,
+
+  thunderstorm: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M46 34H20a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 46 34z" fill="#546E7A"/>
+    <line x1="18" y1="44" x2="16" y2="52" stroke="#29B6F6" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="46" y1="44" x2="44" y2="52" stroke="#29B6F6" stroke-width="2.5" stroke-linecap="round"/>
+    <polygon points="31,34 24,46 30,46 27,57 39,43 33,43" fill="#FFB300"/>
+  </svg>`,
+
+  windy: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <g fill="none" stroke="#26A69A" stroke-width="3.5" stroke-linecap="round">
+      <path d="M10 24h32a6 6 0 1 0-6-6"/>
+      <path d="M6 34h44a5 5 0 1 1-5 5"/>
+      <path d="M14 44h20a5 5 0 1 0-5-5"/>
+    </g>
+  </svg>`,
+
+  fog: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <g stroke="#90A4AE" stroke-width="3.5" stroke-linecap="round">
+      <line x1="16" y1="20" x2="48" y2="20"/>
+      <line x1="10" y1="28" x2="54" y2="28"/>
+      <line x1="14" y1="36" x2="50" y2="36"/>
+      <line x1="18" y1="44" x2="46" y2="44"/>
+    </g>
+  </svg>`,
+
+  hail: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M46 34H20a10 10 0 0 1-2-19.8 13 13 0 0 1 24.3-4.2A9 9 0 0 1 46 34z" fill="#607D8B"/>
+    <circle cx="22" cy="45" r="3" fill="#80DEEA"/>
+    <circle cx="32" cy="51" r="3" fill="#80DEEA"/>
+    <circle cx="42" cy="44" r="3" fill="#80DEEA"/>
+    <circle cx="27" cy="54" r="2" fill="#B2EBF2"/>
+    <circle cx="38" cy="53" r="2" fill="#B2EBF2"/>
+  </svg>`
+};
+
+/* 状态 → SVG key 映射 */
+function getWeatherSvgKey(state) {
+  if (!state) return 'partlyCloudy';
+  var s = String(state);
+  if (/雷/.test(s)) return 'thunderstorm';
+  if (/雨夹雪|雨雪/.test(s)) return 'sleet';
+  if (/冰雹/.test(s)) return 'hail';
+  if (/暴雪|大雪/.test(s)) return 'heavySnow';
+  if (/小雪|阵雪|雪/.test(s)) return 'lightSnow';
+  if (/暴雨|大雨|强雨/.test(s)) return 'heavyRain';
+  if (/小雨|阵雨|细雨|雨/.test(s)) return 'lightRain';
+  if (/雾|霾/.test(s)) return 'fog';
+  if (/风/.test(s)) return 'windy';
+  if (/阴|多云转阴|阴天/.test(s)) return 'overcast';
+  if (/晴间多云|晴转多云|多云/.test(s)) return 'partlyCloudy';
+  if (/晴/.test(s)) return 'sunny';
+  return 'partlyCloudy';
+}
+
 // ============================================================
 // 天气小组件：渲染天气卡片内容
 // ============================================================
@@ -6201,7 +6732,9 @@ function renderWeatherWidget() {
         state: '晴',
         desc: '微风拂面，是个好天气。',
         detail: '舒适',
-        updatedAt: 0,              // 设为0，让第一次完整更新立即触发
+        wind: '',
+        humidity: '',
+        updatedAt: 0,
         tempUpdatedAt: 0,
         lastPushedDesc: '',
         lastPushedDetail: '',
@@ -6220,11 +6753,13 @@ function renderWeatherWidget() {
       if (w.weather.realWeatherFetchedAt === undefined) w.weather.realWeatherFetchedAt = 0;
       if (w.weather.locationLat === undefined) w.weather.locationLat = null;
       if (w.weather.locationLng === undefined) w.weather.locationLng = null;
+      if (w.weather.wind === undefined) w.weather.wind = '';
+      if (w.weather.humidity === undefined) w.weather.humidity = '';
     }
-	});
+  });
 
   if (!worlds.length) {
-    worlds = [{ id: '_placeholder', name: '未关联', weather: { icon: '🌤', temp: '--', state: '晴', desc: '还没有世界观，快去创建吧', detail: '' } }];
+    worlds = [{ id: '_placeholder', name: '未关联', weather: { icon: '🌤', temp: '--', state: '晴', desc: '还没有世界观，快去创建吧', detail: '', wind: '', humidity: '' } }];
   }
 
   _weatherWorlds = worlds;
@@ -6233,24 +6768,29 @@ function renderWeatherWidget() {
   if (_weatherCurrentIndex < 0) _weatherCurrentIndex = 0;
 
   var w = worlds[_weatherCurrentIndex];
-  var iconEl = document.getElementById('widgetIcon');
-  var stateEl = document.getElementById('widgetState');
-  var tempEl = document.getElementById('widgetTempNum');
-  var descEl = document.getElementById('widgetDesc');
-  var detailEl = document.getElementById('widgetDetail');
-  var nameEl = document.getElementById('widgetWorldName');
-  var dotsEl = document.getElementById('widgetDots');
-  var timeEl = document.getElementById('widgetUpdateTime');
-  // ===== 判断当前主题是否为浅色 =====
-  var currentSkin = DB.settings.skin || 'fusion';
-var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || currentSkin === 'ghost_troupe');
-    
-  // 图标
-  if (iconEl) iconEl.textContent = w.weather.icon || '🌤';
-  
-  var state = w.weather.state || mapIconToState(w.weather.icon) || '晴';
-  if (stateEl) stateEl.textContent = state;
-  
+
+  // ★ 4行新版布局对应的DOM
+  var bigIconEl  = document.getElementById('widgetBigIcon');
+  var tempEl     = document.getElementById('widgetTempNum');
+  var descEl     = document.getElementById('widgetDesc');
+  var windEl     = document.getElementById('widgetWind');
+  var humidityEl = document.getElementById('widgetHumidity');
+  var nameEl     = document.getElementById('widgetWorldName');
+  var dotsEl     = document.getElementById('widgetDots');
+  var timeEl     = document.getElementById('widgetUpdateTime');
+
+  /* ===== 天气状态 → 大 SVG 图标 ===== */
+  var state = w.weather.state || (typeof mapIconToState === 'function' ? mapIconToState(w.weather.icon) : '') || '晴';
+  if (bigIconEl) {
+    var key = (typeof getWeatherSvgKey === 'function') ? getWeatherSvgKey(state) : 'partlyCloudy';
+    if (typeof WEATHER_SVGS !== 'undefined' && WEATHER_SVGS[key]) {
+      bigIconEl.innerHTML = WEATHER_SVGS[key];
+    } else {
+      bigIconEl.innerHTML = '<span style="font-size:40px;line-height:1;">' + (w.weather.icon || '🌤') + '</span>';
+    }
+  }
+
+  /* ===== 温度 ===== */
   if (tempEl) {
     if (w.weather.temp !== undefined && w.weather.temp !== null && w.weather.temp !== '--') {
       tempEl.textContent = w.weather.temp;
@@ -6258,31 +6798,41 @@ var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || curre
       tempEl.textContent = '--';
     }
   }
-  
+
+  /* ===== 氛围句 ===== */
   if (descEl) {
     var d = w.weather.desc || '天气宜人';
-    descEl.textContent = '「' + d + '」';
+    descEl.textContent = d;
     descEl.style.opacity = 1;
   }
-  
-  if (detailEl) {
-    var detail = w.weather.detail || '';
-    if (detail.trim()) {
-      detailEl.textContent = detail;
-      detailEl.style.display = 'block';
-      detailEl.style.opacity = 1;
-    } else {
-      detailEl.textContent = ' ';
-      detailEl.style.display = 'block';
-      detailEl.style.opacity = '0';
-    }
+
+  /* ===== 风速 / 湿度 ===== */
+  var detail = w.weather.detail || '';
+  var windTxt = '--';
+  var humTxt = '--';
+
+  var m1 = detail.match(/湿度\s*([\d.]+\s*%?)/);
+  if (m1) humTxt = m1[1].replace(/\s+/g, '');
+
+  var m2 = detail.match(/(?:风速|风)\s*[:：]?\s*([\d.]+\s*(?:级|km\/h|m\/s)?)/);
+  if (m2) windTxt = m2[1].replace(/\s+/g, '');
+
+  if (humTxt === '--' && w.weather.humidity !== undefined && w.weather.humidity !== '' && w.weather.humidity !== null) {
+    humTxt = w.weather.humidity + '%';
   }
-  
+  if (windTxt === '--' && w.weather.wind !== undefined && w.weather.wind !== '') {
+    windTxt = w.weather.wind;
+  }
+
+  if (humidityEl) humidityEl.textContent = humTxt;
+  if (windEl) windEl.textContent = windTxt;
+
+  /* ===== 世界观名 ===== */
   if (nameEl) {
     nameEl.textContent = (w.id === '_placeholder') ? '未关联' : (w.name || '未命名');
-    nameEl.style.opacity = 1;
   }
-  
+
+  /* ===== 更新时间 ===== */
   if (timeEl && w.weather.updatedAt) {
     var diff = Date.now() - w.weather.updatedAt;
     var hours = Math.floor(diff / (60 * 60 * 1000));
@@ -6292,21 +6842,23 @@ var isLight = (currentSkin === 'aqua_girl' || currentSkin === 'orchard' || curre
     else if (mins > 0) timeText = mins + '分钟前';
     else timeText = '刚刚';
     timeEl.textContent = '更新 ' + timeText;
-    timeEl.style.opacity = 1;
   }
-  
+
+  /* ===== 世界观切换圆点 ===== */
   if (dotsEl) {
     dotsEl.innerHTML = worlds.map(function(_, i) {
       var isActive = (i === _weatherCurrentIndex);
       var bgColor = isActive ? 'var(--theme)' : 'var(--sub)';
       var opacity = isActive ? '1' : '0.35';
-      var w = isActive ? '16px' : '6px';
-      var r = isActive ? '3px' : '50%';
-      return '<span style="display:inline-block;width:' + w + ';height:6px;border-radius:' + r + ';background:' + bgColor + ';opacity:' + opacity + ';transition:all 0.3s;"></span>';
+      var ww = isActive ? '16px' : '6px';
+      var rr = isActive ? '3px' : '50%';
+      return '<span style="display:inline-block;width:' + ww + ';height:6px;border-radius:' + rr + ';background:' + bgColor + ';opacity:' + opacity + ';transition:all 0.3s;"></span>';
     }).join('');
-  }  
+  }
+
   autoCheckWeatherUpdate();
 }
+
 // 天气小组件：滑动绑定
 // ============================================================
 function bindWeatherWidgetEvents() {
@@ -6639,12 +7191,19 @@ if (cache && cacheDate === todayStr && cache.time && cache.temperature_2m) {
 
   if (matchedIdx !== -1 && temps[matchedIdx] !== undefined && temps[matchedIdx] !== null) {
     world.weather.temp = Math.round(temps[matchedIdx]);
+    // ★ 顺带同步真实风速、湿度
+    if (cache.windspeed_10m && cache.windspeed_10m[matchedIdx] != null) {
+      world.weather.wind = Math.round(cache.windspeed_10m[matchedIdx]) + 'km/h';
+    }
+    if (cache.relativehumidity_2m && cache.relativehumidity_2m[matchedIdx] != null) {
+      world.weather.humidity = cache.relativehumidity_2m[matchedIdx];
+    }
     world.weather.tempUpdatedAt = Date.now();
     save();
     if (callback) callback(true);
     return; // ✅ 取到真实温度，直接返回，不调用 AI
   }
-}
+  }
 // ↓ 缓存没有或取不到时，才继续往下走（AI 兜底）
   // 用轻量模型
   var model = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
@@ -6912,13 +7471,26 @@ async function aiGenerateWeather(worldId, callback) {
     '【时间】' + season + '，' + period + '\n' +
     '【气候特征（必须遵循，若有）】' + climate + '\n' +
     (realWeather
-      ? '【当前真实天气数据（必须以此为基础，不得偏离）】\n' +
-        '温度：' + realWeather.temp + '℃，' +
-        '天气状况：' + realWeather.weatherDesc + '，' +
-        '湿度：' + realWeather.humidity + '%，' +
+      ? '【当前真实天气数据（作为骨架参考）】\n' +
+        '温度：' + realWeather.temp + '℃\n' +
+        '天气状况：' + realWeather.weatherDesc + '\n' +
+        '湿度：' + realWeather.humidity + '%\n' +
         '风速：' + realWeather.windspeed + 'km/h\n' +
-        '注意：以上是用户所在地的真实气象数据，请严格基于这些数据来写天气描述，不要自行发明天气。\n\n'
+        '【如何使用】\n' +
+        '· temp 字段直接采用上面的真实温度，不要改。\n' +
+        '· state 字段直接采用上面的天气状况（如晴/雨/雪），不要改。\n' +
+        '· wind / humidity 直接采用上面的真实数值，不要改。\n' +
+        '· desc（氛围句）必须基于真实天气，但要用【这个世界观的方式】去描写。' +
+        '普通现代都市就写正常天气；如果是妖界、修仙、赛博朋克等特殊世界观，' +
+        '请把同样的天气用该世界的语言和意象重新演绎一遍，' +
+        '例如"晴"在妖界可以是"日光穿透妖气稀薄的清晨"，' +
+        '"雨"在修仙界可以是"灵气化雨润泽山门"。\n' +
+        '· detail 也按世界观的用词习惯写，可以包含该世界特有的"指标"' +
+        '（如妖力浓度、灵气指数、灵压、辐射值等），与真实的湿度风速并列，' +
+        '但不要篡改真实数值。\n' +
+        '· 目标：用户看得出今天的天气和现实中一致，同时能感受到这个世界独有的气氛。\n\n'
       : '\n') +
+
 	  '【气候推断规则】\n' +
     '如果气候特征未指定，请根据世界观自行推断合理的地理位置和气候，例如：\n' +
     '- 南方城市：湿润、多阴雨、夏季闷热、冬季少雪\n' +
@@ -6944,7 +7516,8 @@ async function aiGenerateWeather(worldId, callback) {
     '3. 禁止出现任何人物（他/她/你）、禁止出现屏幕/手机等现代设备意象。只描写自然现象。\n' +
     '4. 只有当世界观明确含魔法/灵气/妖气/赛博等设定时，才可轻微融入；普通世界就写正常真实天气。\n' +
     '5. detail 是补充信息（如"湿度 65% · 南风 3级"），可留空。\n' +
-    '6. 只输出JSON：{"icon":"天气emoji","state":"晴/雨/雪/多云/阴等","temp":数字,"desc":"天气描写","detail":"补充信息"}。\n\n' +
+    '6. 只输出JSON：{"icon":"天气emoji","state":"晴/雨/雪/多云/阴等","temp":数字,"desc":"天气描写","detail":"补充信息","wind":"2级","humidity":65}。\n' +
+    '7. wind 字段写风速（如"2级"或"12km/h"），humidity 字段写湿度百分比数字（如 65）。没有把握就根据天气状态合理估计，不要留空。\n\n' +
     '【禁止使用的固定句式（绝对不能出现）】\n' +
     '"如丝""如绢""如纱""裹着""潮湿的海风""细雨如丝""烈日当空""万里晴空"\n' +
     '这些是陈词滥调，必须用更新鲜、更具体的表达替代。\n\n' +
@@ -6991,9 +7564,10 @@ async function aiGenerateWeather(worldId, callback) {
     world.weather.temp = data.temp !== undefined ? data.temp : 22;
     world.weather.desc = newDesc;
     world.weather.detail = newDetail;
+    world.weather.wind = data.wind || '';
+    world.weather.humidity = (data.humidity !== undefined && data.humidity !== null) ? data.humidity : '';
     world.weather.updatedAt = Date.now();
     world.weather.tempUpdatedAt = Date.now();
-
     // ---- 如果推送 ----
     if (shouldPush) {
       world.weather.lastPushedDesc = newDesc;
@@ -15397,40 +15971,77 @@ else if (m.type === 'share') {
   body = buildShareBubble(m);
 }
 else if (m.type === 'shop_item') {
-    var _isRare = !!m.rare;
-    var _topBg = _isRare ? 'linear-gradient(135deg,#E6B422,#F5D76E)' : 'var(--theme)';
-    var _cardStyle = _isRare
-      ? 'border:1.5px solid #E6B422;box-shadow:0 0 10px rgba(230,180,34,0.55);animation:shopGlow 2s ease-in-out infinite;'
-      : 'box-shadow:0 2px 8px rgba(0,0,0,0.12);';
-    var _foot = '';
-    if (m.from === 'ai') {
-      if (m.giftStatus === 'pending') {
-        _foot = '<div style="display:flex;border-top:1px solid var(--line)">' +
-          '<div onclick="shopGiftRespond(\'' + m.id + '\',\'accept\')" style="flex:1;text-align:center;padding:9px 0;color:var(--theme);font-size:13px;font-weight:600;cursor:pointer;border-right:1px solid var(--line)">收下</div>' +
-          '<div onclick="shopGiftRespond(\'' + m.id + '\',\'decline\')" style="flex:1;text-align:center;padding:9px 0;color:var(--sub);font-size:13px;cursor:pointer">婉拒</div>' +
-          '</div>';
-      } else if (m.giftStatus === 'accepted') {
-        _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:#4caf50;border-top:1px solid var(--line)">✔ 已收下</div>';
-      } else if (m.giftStatus === 'declined') {
-        _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:var(--sub);border-top:1px solid var(--line)">已婉拒</div>';
-      }
-    } else {
-      var _st = '等待对方查收…', _cl = 'var(--sub)';
-      if (m.giftStatus === 'ai_accepted') { _st = '❤ 对方收下了'; _cl = '#e0507a'; }
-      else if (m.giftStatus === 'ai_declined') { _st = '对方婉拒了'; _cl = 'var(--sub)'; }
-      _foot = '<div style="text-align:center;padding:8px 0;font-size:12px;color:' + _cl + ';border-top:1px solid var(--line)">' + _st + '</div>';
-    }
-    body = '<div class="mbody" style="padding:0 !important;width:186px;background:#fff !important;border-radius:14px !important;overflow:hidden;' + _cardStyle + '">' +
-      '<div style="' + (_isRare ? 'background:' + _topBg + ';color:#fff;' : 'color:var(--theme);border-bottom:1px solid var(--line);font-weight:600;') + 'padding:8px 0;text-align:center;font-size:12px;letter-spacing:1px">' + (_isRare ? '✨ 珍稀好礼 ✨' : '🎁 礼物') + '</div>' +
+  // ===== 🎫 票根礼物卡片 =====
+  var _isRare = !!m.rare;
 
-      '<div style="padding:14px 12px 12px;text-align:center">' +
-      '<div style="font-size:44px;line-height:1">' + esc(m.emoji || '🎁') + '</div>' +
-      '<div style="font-size:15px;font-weight:700;margin-top:8px;color:var(--text)">' + esc(m.content || '礼物') + '</div>' +
-      (m.desc ? '<div style="font-size:12px;color:var(--sub);margin-top:3px">' + esc(m.desc) + '</div>' : '') +
-      (_isRare && m.story ? '<div style="font-size:11px;color:#B8860B;margin-top:8px;font-style:italic;line-height:1.5">「' + esc(m.story) + '」</div>' : '') +
-      '</div>' + _foot +
-      '</div>';
+  // ---- 状态文案 ----
+  var _statusText = '';
+  var _statusBtns = false; // 是否显示"收下/婉拒"按钮
+
+  if (m.from === 'ai') {
+    if (m.giftStatus === 'pending') {
+      _statusBtns = true;
+    } else if (m.giftStatus === 'accepted') {
+      _statusText = '❤ 已收下';
+    } else if (m.giftStatus === 'declined') {
+      _statusText = '已婉拒';
+    }
+  } else {
+    if (m.giftStatus === 'ai_accepted')      _statusText = '❤ 对方收下了';
+    else if (m.giftStatus === 'ai_declined') _statusText = '对方婉拒了';
+    else                                      _statusText = '等待对方查收…';
   }
+
+  // ---- 票号 + 流水号 ----
+  var _tk = makeGiftTicket(c, m);
+
+  // ---- 状态行 HTML ----
+  var _statusRow = '';
+  if (_statusBtns) {
+    _statusRow =
+      '<div class="btn-row">' +
+        '<div class="act" onclick="shopGiftRespond(\'' + m.id + '\',\'accept\')">收下</div>' +
+        '<div class="act decline" onclick="shopGiftRespond(\'' + m.id + '\',\'decline\')">婉拒</div>' +
+      '</div>';
+  } else {
+    _statusRow = '<span class="right">' + esc(_statusText) + '</span>';
+  }
+
+  // ---- 左侧前缀 ----
+  var _leftLabel = _isRare ? '✨ 珍稀好礼' : '🎁 礼物';
+
+  // ---- 卡片主体 ----
+  body =
+    '<div class="gift-wrap' + (_isRare ? ' rare' : '') + '">' +
+      '<div class="gift">' +
+        '<div class="gift-head">' +
+          '<div class="gift-icon">' + esc(m.emoji || '🎁') + '</div>' +
+          '<div class="gift-info">' +
+            '<div class="gift-name">' +
+              (_isRare ? '✨ ' : '') + esc(m.content || '礼物') +
+            '</div>' +
+            (m.desc ? '<div class="gift-desc">' + esc(m.desc) + '</div>' : '') +
+            (_isRare && m.story ? '<div class="gift-story">「' + esc(m.story) + '」</div>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="gift-divider"></div>' +
+        '<div class="gift-foot">' +
+          '<div class="row-top">' +
+            '<span class="left">' + _leftLabel + '</span>' +
+            _statusRow +
+          '</div>' +
+          '<div class="stamp">' +
+            '<span class="no">' + esc(_tk.no) + '</span>' +
+            '<span class="seq">' + esc(_tk.seq) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      // 描边 SVG：珍稀版高度略高
+      '<svg class="gift-outline" viewBox="0 0 220 ' + (_isRare ? 136 : 118) + '" preserveAspectRatio="none">' +
+        '<path d="M 5,0 L 215,0 Q 220,0 220,5 L 220,53 A 9,9 0 0 0 220,71 L 220,' + (_isRare ? 131 : 113) + ' Q 220,' + (_isRare ? 136 : 118) + ' 215,' + (_isRare ? 136 : 118) + ' L 5,' + (_isRare ? 136 : 118) + ' Q 0,' + (_isRare ? 136 : 118) + ' 0,' + (_isRare ? 131 : 113) + ' L 0,71 A 9,9 0 0 0 0,53 L 0,5 Q 0,0 5,0 Z"/>' +
+      '</svg>' +
+    '</div>';
+}
 
 else{body=`<div class="mbody">${me?esc(m.content):(c.mode==='offline'?colorLines(m.content,c.lineColor):esc(m.content))}</div>`;}
 return `<div class="msg ${me?'me':''}" data-mid="${m.id||''}"><div class="cavatar" style="${av?`background-image:url('${av}')`:''}">${av?'':nm}</div>${body}</div>`;}
@@ -17074,6 +17685,8 @@ function regenMsg(id) {
   var idx = arr.findIndex(function(x) { return x.id === id; });
   if (idx < 0 || arr[idx].role !== 'assistant') return;
   popConfirm('将删除这条消息及其后面的所有对话，AI会重新回复，确定吗？', function(){
+    var c = getC(view.id);
+    if (c) c.mode = 'online';      // ← 就加这一行
     arr.splice(idx, arr.length - idx);
     save();
     renderChat();
