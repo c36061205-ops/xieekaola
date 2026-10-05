@@ -1350,197 +1350,253 @@ margin-bottom:4px;}
 }
 
 /* ============================================================
-   ★ 天气小组件 · 新版样式（v6）
+   ★ 天气小组件 · 极简通透线框版（无壁纸污染 · 一次到位）
    ============================================================ */
 
 .weather-widget {
-  width: 100%;
-  border-radius: 20px;
-  padding: 14px 16px;
-  position: relative;
-  background: color-mix(in srgb, var(--theme) 5%, transparent);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid color-mix(in srgb, var(--theme) 35%, transparent);
-  color: var(--text);
+  width: 100% !important;
+  border-radius: 22px !important;
+  padding: 13px 16px 12px !important;
+  position: relative !important;
+  
+  /* 1. 彻底透明底色（仅含 6% 极微弱主题色雾气，文字完全悬浮于壁纸之上） */
+  background: color-mix(in srgb, var(--theme) 6%, transparent) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  
+  /* 2. 随主题色变亮的发光细线框（与时钟线条质感完全一致） */
+  border: 1px solid color-mix(in srgb, var(--theme) 50%, rgba(255, 255, 255, 0.25)) !important;
+  box-shadow: 0 4px 16px -4px color-mix(in srgb, var(--theme) 25%, transparent) !important;
+  
+  color: var(--text) !important;
   cursor: pointer;
   touch-action: pan-x;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-sizing: border-box;
+  box-sizing: border-box !important;
+  user-select: none;
+  
+  /* 3. 内部排版保持不变 */
+  display: grid !important;
+  grid-template-columns: auto 1fr 40px !important;
+  grid-template-rows: auto auto auto !important;
+  column-gap: 12px !important;
+  row-gap: 6px !important;
+  align-items: center !important;
 }
 
-/* 第1行 */
+/* 隐藏分割线与残留 */
+.weather-widget .w-divider,
+.weather-widget .w-row-2::after {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------
+   【第 1 行】：地名 + 滑动点 + 按钮（全部保持原样不动）
+   ------------------------------------------------------------ */
 .weather-widget .w-row-1 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
+  grid-column: 1 / -1 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
+
 .weather-widget .w-loc {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12.5px;
-  color: var(--text);
-  min-width: 0;
-  flex: 1;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
 }
+
 .weather-widget .w-loc svg {
-  width: 14px; height: 14px;
-  stroke: var(--theme); fill: none;
-  stroke-width: 2;
-  stroke-linecap: round; stroke-linejoin: round;
-  flex-shrink: 0;
+  width: 13px !important;
+  height: 13px !important;
+  stroke: var(--theme) !important;
+  fill: none !important;
+  stroke-width: 2.2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
 }
+
 .weather-widget .w-loc span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 85px !important;
 }
-.weather-widget .w-acts {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.weather-widget .w-act {
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--text) 6%, transparent);
-  color: var(--sub);
-  font-size: 11px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: .2s;
-  flex-shrink: 0;
-}
-.weather-widget .w-act:active {
-  background: color-mix(in srgb, var(--theme) 18%, transparent);
-  color: var(--theme);
-}
+
 .weather-widget .w-dots {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  gap: 3px;
-  align-items: center;
-  pointer-events: none;
+  display: flex !important;
+  gap: 3px !important;
+  align-items: center !important;
+  margin-left: 6px !important;
+  margin-right: auto !important;
+  pointer-events: none !important;
 }
+
 .weather-widget .w-dots span {
-  display: inline-block;
-  height: 5px; width: 5px;
-  border-radius: 50%;
-  background: var(--sub);
-  opacity: .4;
-  transition: all .3s;
+  display: inline-block !important;
+  height: 4px !important;
+  width: 4px !important;
+  border-radius: 50% !important;
+  background: var(--theme) !important;
+  opacity: .3 !important;
 }
+
 .weather-widget .w-dots span.active {
-  background: var(--theme);
-  opacity: 1;
-  width: 12px;
-  border-radius: 3px;
+  background: var(--theme) !important;
+  opacity: 1 !important;
+  width: 9px !important;
+  border-radius: 2px !important;
 }
 
-/* 第2行 */
+.weather-widget .w-acts {
+  display: flex !important;
+  gap: 4px !important;
+}
+
+.weather-widget .w-act {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: color-mix(in srgb, var(--theme) 16%, transparent) !important;
+  color: var(--theme) !important;
+  font-size: 9.5px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------
+   【第 2 行】：大温度 | 引言 | 天气图标（保持原样不动）
+   ------------------------------------------------------------ */
 .weather-widget .w-row-2 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 2px 0;
-}
-.weather-widget .w-temp-wrap {
-  display: flex;
-  align-items: baseline;
-  gap: 1px;
-}
-.weather-widget .w-temp {
-  font-size: 40px;
-  font-weight: 300;
-  color: var(--text);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -1.5px;
-}
-.weather-widget .w-temp-unit {
-  font-size: 16px;
-  font-weight: 300;
-  color: var(--text);
-  opacity: .8;
-}
-.weather-widget .w-big-icon {
-  width: 46px; height: 46px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.weather-widget .w-big-icon svg {
-  width: 46px; height: 46px;
-  display: block;
+  display: contents !important;
 }
 
-/* 第3行 */
+.weather-widget .w-row-2 .w-temp-wrap {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  display: flex !important;
+  align-items: baseline !important;
+  line-height: 0.9 !important;
+}
+
+.weather-widget .w-row-2 .w-temp {
+  font-size: 38px !important;
+  font-weight: 200 !important;
+  color: var(--text) !important;
+  letter-spacing: -2px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.weather-widget .w-row-2 .w-temp-unit {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--theme) !important;
+  margin-left: 2px !important;
+}
+
 .weather-widget .w-desc {
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: var(--sub);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  color: var(--text) !important;
+  opacity: 0.9 !important;
+  border-left: 2px solid color-mix(in srgb, var(--theme) 50%, transparent) !important;
+  padding: 2px 0 2px 8px !important;
+  margin: 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  white-space: normal !important;
 }
 
-/* 分隔线 */
-.weather-widget .w-divider {
-  height: 1px;
-  background: color-mix(in srgb, var(--text) 12%, transparent);
+.weather-widget .w-row-2 .w-big-icon {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  width: 38px !important;
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
 }
 
-/* 第4行 */
+.weather-widget .w-row-2 .w-big-icon svg {
+  width: 38px !important;
+  height: 38px !important;
+  display: block !important;
+  filter: drop-shadow(0 2px 8px color-mix(in srgb, #FFA000 35%, transparent)) !important;
+}
+
+/* ------------------------------------------------------------
+   【第 3 行】：小胶囊与更新时间（保持原样不动）
+   ------------------------------------------------------------ */
 .weather-widget .w-row-4 {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  grid-column: 1 / -1 !important;
+  grid-row: 3 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding-top: 3px !important;
+  margin: 0 !important;
 }
+
 .weather-widget .w-info {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex: 1;
-  min-width: 0;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2.5px 8px !important;
+  border-radius: 6px !important;
+  background: color-mix(in srgb, var(--theme) 14%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
+  margin-right: 6px !important;
+  flex: none !important;
 }
+
 .weather-widget .w-info .w-ico {
-  width: 16px; height: 16px;
-  color: var(--sub);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  width: 11px !important;
+  height: 11px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--theme) !important;
+  flex-shrink: 0 !important;
 }
+
 .weather-widget .w-info .w-ico svg {
-  width: 16px; height: 16px;
-  stroke: currentColor; fill: none;
-  stroke-width: 2;
-  stroke-linecap: round; stroke-linejoin: round;
+  width: 11px !important;
+  height: 11px !important;
+  display: block !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
 }
+
 .weather-widget .w-info .w-val {
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-variant-numeric: tabular-nums;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  line-height: 1 !important;
+  font-variant-numeric: tabular-nums !important;
 }
+
 .weather-widget .w-update {
-  font-size: 10.5px;
-  color: var(--sub);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
-  opacity: .8;
+  margin-left: auto !important;
+  font-size: 9.5px !important;
+  color: var(--sub) !important;
+  opacity: .75 !important;
+  white-space: nowrap !important;
 }
 /* ===== 咪思异想主题专用样式 ===== */
 #phone[data-theme="misi"] .clock-starry .ring {
@@ -2939,6 +2995,102 @@ body.wx-theme-letter #chatBottom {
   border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
   padding: 8px 12px 16px !important;
 }
+/* ============================================================
+   ★ 天气组件 · 方案 2 夏夜萤火流光粒子（纯 CSS 零开销）
+   ============================================================ */
+
+/* 1. 萤火粒子位移与呼吸曲线（平滑错开） */
+@keyframes fireflyFloatA {
+  0% {
+    transform: translate(0, 0) scale(0.85);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(14px, -16px) scale(1.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-10px, 8px) scale(0.9);
+    opacity: 0.3;
+  }
+}
+
+@keyframes fireflyFloatB {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(-12px, -18px) scale(1.8);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate(8px, 10px) scale(0.85);
+    opacity: 0.2;
+  }
+}
+
+/* 2. 注入第 1 组萤火（共 3 颗：分布在文案中段与右上角） */
+.weather-widget::before {
+  content: '' !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  border-radius: 50% !important;
+  width: 4px !important;
+  height: 4px !important;
+  background: var(--theme) !important;
+  top: 32% !important;
+  left: 28% !important;
+  /* 利用多重 box-shadow 同时生成多颗粒子与光晕 */
+  box-shadow: 
+    0 0 6px var(--theme),
+    75px 22px 0 -1px var(--theme),
+    75px 22px 5px -1px var(--theme),
+    165px -12px 0 1px var(--theme),
+    165px -12px 8px 1px var(--theme) !important;
+  animation: fireflyFloatA 7s ease-in-out infinite alternate !important;
+  z-index: 1 !important;
+}
+
+/* 3. 注入第 2 组萤火（共 2 颗：分布在左侧温度旁与右下角，反向漂游） */
+.weather-widget::after {
+  content: '' !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  border-radius: 50% !important;
+  width: 5px !important;
+  height: 5px !important;
+  background: var(--theme) !important;
+  top: 58% !important;
+  right: 28% !important;
+  box-shadow: 
+    0 0 7px var(--theme),
+    -120px 10px 0 -1.5px var(--theme),
+    -120px 10px 6px -1.5px var(--theme) !important;
+  animation: fireflyFloatB 8.5s ease-in-out infinite alternate-reverse !important;
+  animation-delay: -2.5s !important;
+  z-index: 1 !important;
+}
+
+/* 4. 太阳温和光晕呼吸（完美呼应夏夜流光） */
+.weather-widget .w-row-2 .w-big-icon svg {
+  animation: sunGentleGlow 5s ease-in-out infinite alternate !important;
+}
+
+@keyframes sunGentleGlow {
+  0% {
+    transform: scale(0.96);
+    filter: drop-shadow(0 2px 6px color-mix(in srgb, #FFA000 30%, transparent));
+  }
+  100% {
+    transform: scale(1.03);
+    filter: drop-shadow(0 3px 12px color-mix(in srgb, #FFA000 65%, transparent));
+  }
+}
+/* 锁定卡片圆角边界，彻底防止粒子溢出到外部 */
+.weather-widget {
+  overflow: hidden !important;
+}
 </style>
 </head>
 <body>
@@ -2994,7 +3146,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v20261005_1';
+const APP_VER = 'v20261005_2';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -6458,13 +6610,16 @@ DB.events = DB.events || [
   var weatherHtml = '';
   if (weatherApp) {
     weatherHtml = `<div class="weather-widget" id="weatherWidget">
-
+<!---->
     <!-- 第1行：地点 | 圆点 | 设置 | 刷新 -->
     <div class="w-row-1">
       <div class="w-loc">
         <svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
         <span id="widgetWorldName">未关联</span>
-      </div>
+      
+</div>
+
+
       <div class="w-dots" id="widgetDots"></div>
       <div class="w-acts">
         <div class="w-act" onclick="event.stopPropagation();openWeatherEditor()">⚙</div>
@@ -6504,8 +6659,7 @@ DB.events = DB.events || [
     </div>
 
   </div>`;
-  }
-  
+  }  
   var appsHtml = otherApps.map(function(a) {
     var badge = '';
     if (a.id === 'wechat') {
@@ -6528,8 +6682,7 @@ DB.events = DB.events || [
     return '<div class="app" onclick="openApp(\'' + a.id + '\')"><div class="app-ic" style="' + style + '">' + content + badge + '</div><div class="app-nm">' + a.name + '</div></div>';
   }).join('');
   
-d.innerHTML = `
-  <div style="padding:40px 0 16px 0;position:relative;z-index:1;">
+d.innerHTML = `<div style="padding:40px 0 16px 0;position:relative;z-index:1;">
     ${weatherHtml}
   </div>
 <div id="appgrid" class="icon-${DB.desktop.iconSize || 'large'}">
@@ -6769,24 +6922,27 @@ function renderWeatherWidget() {
 
   var w = worlds[_weatherCurrentIndex];
 
-  // ★ 4行新版布局对应的DOM
-  var bigIconEl  = document.getElementById('widgetBigIcon');
-  var tempEl     = document.getElementById('widgetTempNum');
-  var descEl     = document.getElementById('widgetDesc');
-  var windEl     = document.getElementById('widgetWind');
-  var humidityEl = document.getElementById('widgetHumidity');
-  var nameEl     = document.getElementById('widgetWorldName');
-  var dotsEl     = document.getElementById('widgetDots');
-  var timeEl     = document.getElementById('widgetUpdateTime');
+  var bigIconEl   = document.getElementById('widgetBigIcon');
+  var tempEl      = document.getElementById('widgetTempNum');
+  var descEl      = document.getElementById('widgetDesc');
+  var windEl      = document.getElementById('widgetWind');
+  var humidityEl  = document.getElementById('widgetHumidity');
+  var nameEl      = document.getElementById('widgetWorldName');
+  var dotsEl      = document.getElementById('widgetDots');
+  var timeEl      = document.getElementById('widgetUpdateTime');
+  var stateTextEl = document.getElementById('widgetStateText');
 
-  /* ===== 天气状态 → 大 SVG 图标 ===== */
+  /* ===== 天气状态 + 邮票 SVG ===== */
   var state = w.weather.state || (typeof mapIconToState === 'function' ? mapIconToState(w.weather.icon) : '') || '晴';
+  if (stateTextEl) {
+    stateTextEl.textContent = state;
+  }
   if (bigIconEl) {
     var key = (typeof getWeatherSvgKey === 'function') ? getWeatherSvgKey(state) : 'partlyCloudy';
     if (typeof WEATHER_SVGS !== 'undefined' && WEATHER_SVGS[key]) {
       bigIconEl.innerHTML = WEATHER_SVGS[key];
     } else {
-      bigIconEl.innerHTML = '<span style="font-size:40px;line-height:1;">' + (w.weather.icon || '🌤') + '</span>';
+      bigIconEl.innerHTML = '<span style="font-size:24px;line-height:1;">' + (w.weather.icon || '🌤') + '</span>';
     }
   }
 
@@ -6801,8 +6957,7 @@ function renderWeatherWidget() {
 
   /* ===== 氛围句 ===== */
   if (descEl) {
-    var d = w.weather.desc || '天气宜人';
-    descEl.textContent = d;
+    descEl.textContent = w.weather.desc || '微风拂面，是个好天气。';
     descEl.style.opacity = 1;
   }
 
@@ -6833,26 +6988,27 @@ function renderWeatherWidget() {
   }
 
   /* ===== 更新时间 ===== */
-  if (timeEl && w.weather.updatedAt) {
-    var diff = Date.now() - w.weather.updatedAt;
-    var hours = Math.floor(diff / (60 * 60 * 1000));
-    var mins = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
-    var timeText = '';
-    if (hours > 0) timeText = hours + '小时前';
-    else if (mins > 0) timeText = mins + '分钟前';
-    else timeText = '刚刚';
-    timeEl.textContent = '更新 ' + timeText;
+  if (timeEl) {
+    if (w.weather.updatedAt) {
+      var diff = Date.now() - w.weather.updatedAt;
+      var hours = Math.floor(diff / (60 * 60 * 1000));
+      var mins = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+      var timeText = '';
+      if (hours > 0) timeText = hours + '小时前';
+      else if (mins > 0) timeText = mins + '分钟前';
+      else timeText = '刚刚';
+      timeEl.textContent = timeText;
+    } else {
+      timeEl.textContent = '刚刚';
+    }
   }
 
   /* ===== 世界观切换圆点 ===== */
   if (dotsEl) {
     dotsEl.innerHTML = worlds.map(function(_, i) {
       var isActive = (i === _weatherCurrentIndex);
-      var bgColor = isActive ? 'var(--theme)' : 'var(--sub)';
-      var opacity = isActive ? '1' : '0.35';
-      var ww = isActive ? '16px' : '6px';
-      var rr = isActive ? '3px' : '50%';
-      return '<span style="display:inline-block;width:' + ww + ';height:6px;border-radius:' + rr + ';background:' + bgColor + ';opacity:' + opacity + ';transition:all 0.3s;"></span>';
+      var cls = isActive ? 'active' : '';
+      return '<span class="' + cls + '"></span>';
     }).join('');
   }
 
@@ -17686,13 +17842,14 @@ function regenMsg(id) {
   if (idx < 0 || arr[idx].role !== 'assistant') return;
   popConfirm('将删除这条消息及其后面的所有对话，AI会重新回复，确定吗？', function(){
     var c = getC(view.id);
-    if (c) c.mode = 'online';      // ← 就加这一行
+    if (c) c._isRegen = true;   // 标记本次为重刷：不切模式、不自动收尾
     arr.splice(idx, arr.length - idx);
     save();
     renderChat();
     aiReply();
   }, {icon:'🔄', title:'重新回复'});
 }
+
 function recallMsg(id){const arr=DB.chats[view.id];const m=arr&&arr.find(x=>x.id===id);if(!m||m.recalled)return;popConfirm('撤回这条消息？',function(){m.recalledContent=(m.type==='text'||m.type==='voice')?m.content:'['+(m.type||'消息')+']';m.recalled=true;m.reveal=false;save();renderChat();},{icon:'↩️',title:'撤回消息'});}
 function peekRecall(id){
   const m=DB.chats[view.id].find(x=>x.id===id);if(!m)return;
@@ -18300,6 +18457,14 @@ let allh = (DB.chats[c.id] || []).map(function(m){ return toApiMsg(m, _withTime)
       ...hist
     ];
 
+    // ===== 兜底：保证 messages 末尾是 user，兼容严格要求末尾为 user 的 API =====
+    // 场景：重刷删光消息后历史为空 / 末尾是 assistant / 末尾是 system，都在这里补一条
+    (function ensureLastIsUser(msgs){
+      var last = msgs[msgs.length - 1];
+      if (!last || last.role !== 'user') {
+        msgs.push({ role: 'user', content: '（继续）' });
+      }
+    })(messages);
     // ---- 4. 模式提示（线上/线下） ----
     let modeReminder = '';
     if (c.mode === 'online') {
@@ -18630,15 +18795,20 @@ if (c.ideaOn && _pendingIdeas && _pendingIdeas.length) {
                           .map(function(p){ return p.content || ''; }).join(' ');
     var meetCooling = Date.now() < (c.meetCd || 0);   // 今天是否处于"已拒绝"冷却中
     var wantMeet = (meetPlace !== null) || (c.mode === 'online' && hasMeetIntent(aiFullText));
-    if (c.mode === 'online' && wantMeet) {
-   if (meetCooling) {
-     insertSystemMessage('（对方今天似乎还想见面，你可以回应 TA）');
-   } else {
-     proposeMeet(c, meetPlace || '', meetReason || '', 'ai', meetType || '', meetDuration || '');
-   }
-   }
-    if (wantBack && c.mode === 'offline') proposeBackOnline(c);
 
+    // ★ 重刷时：忽略 AI 的收尾/见面意图，保持在当前场景
+    if (c._isRegen) {
+      c._isRegen = false;   // 用完即清，只对本次生效
+    } else {
+      if (c.mode === 'online' && wantMeet) {
+        if (meetCooling) {
+          insertSystemMessage('（对方今天似乎还想见面，你可以回应 TA）');
+        } else {
+          proposeMeet(c, meetPlace || '', meetReason || '', 'ai', meetType || '', meetDuration || '');
+        }
+      }
+      if (wantBack && c.mode === 'offline') proposeBackOnline(c);
+    }
     // ---- 12. 紧张度回落 ----
     reduceTension(c);
     // ★★ 聊天随手拍：文字发完后，后台悄悄配图（不阻塞）★★
@@ -18647,9 +18817,12 @@ if (c.ideaOn && _pendingIdeas && _pendingIdeas.length) {
     console.error('aiReply 出错：', e);   // 新增：把错误打到控制台
     alert('回复失败：' + (e && e.message ? e.message : e));
   } finally {
+    // ★ 兜底：如果本次是重刷但因异常提前结束，清掉残留标记
+    if (c && c._isRegen) c._isRegen = false;
+
     // ===== 兜底：一次回复后，自动收下所有待处理的礼物卡片 =====
     if (c && c._hasPendingGift) {
-        var msgs = DB.chats[c.id] || [];
+	var msgs = DB.chats[c.id] || [];
         var anyUpdated = false;
         msgs.forEach(function(m) {
             // 只要是用户送出的、状态为 'given' 的礼物卡片，全部标记为已接收
