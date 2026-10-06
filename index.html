@@ -106,14 +106,45 @@
   flex-shrink: 0;
   z-index: 50;
   position: relative;
-  pointer-events: none;  /* ← 新加：让状态栏不拦截触摸 */
+  pointer-events: none;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
   #statusbar.dark{color:var(--theme);text-shadow:none;}
   .sb-right{display:flex;align-items:center;gap:6px;font-size:12px;}
   .batt{width:24px;height:12px;border:1px solid currentColor;border-radius:3px;position:relative;padding:1px;opacity:.9;}
   .batt::after{content:'';position:absolute;right:-3px;top:3px;width:2px;height:6px;background:currentColor;border-radius:0 1px 1px 0;}
   .batt i{display:block;height:100%;background:currentColor;border-radius:1px;}
-  #topbar{height:56px;background:var(--nav);display:flex;align-items:center;padding:0 12px;color:var(--text);border-bottom:1px solid var(--line);flex-shrink:0;font-size:17px;}
+#topbar {
+  height: 56px;
+  background: color-mix(in srgb, var(--nav) 45%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  color: var(--text);
+  font-size: 17px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+}
+
+/* 彻底消灭分界线：磨砂背景向上无缝延伸至状态栏 */
+#topbar::before {
+  content: '';
+  position: absolute;
+  top: -44px;
+  left: 0;
+  right: 0;
+  height: 44px;
+  background: inherit;
+  backdrop-filter: inherit;
+  -webkit-backdrop-filter: inherit;
+  pointer-events: none;
+}
   #tbTitle{flex:1;text-align:center;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .tb-btn{min-width:44px;font-size:20px;color:var(--text);cursor:pointer;}
   .tb-btn.r{text-align:right;color:var(--theme);}
@@ -125,8 +156,7 @@
   -webkit-overflow-scrolling: touch;
   scroll-behavior: auto;
   position: relative;
-  background-size: cover;
-  background-position: center;
+  background: transparent !important;
   display: block;
   max-width: 100%;
   touch-action: pan-y;
@@ -395,11 +425,13 @@
 #chatBottom { 
   padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 10px)) 14px; 
   box-sizing: border-box; 
-  background: var(--nav);
-  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--nav) 45%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-top: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
   flex-shrink: 0;
   position: relative;
-  z-index: 10;
+  z-index: 20;
   width: 100%;
   max-width: 100%;
   overflow: hidden;
@@ -615,22 +647,50 @@ textarea {
 
 #chatBottom{padding:10px 14px 24px 14px;box-sizing:border-box;}
 
-#bubbleRow{display:flex;gap:8px;margin-bottom:10px;}
-.bubble-btn{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 13px;font-size:13px;color:var(--text);cursor:pointer;white-space:nowrap;user-select:none;transition:opacity 0.15s;}
-.bubble-btn:active{opacity:0.6;}
-.bubble-btn svg{width:15px;height:15px;flex-shrink:0;}
-#inputRow{display:flex;gap:8px;align-items:center;}
-.input-wrap { flex: 1; position: relative; display: flex; }
-.input-wrap #chatInput { padding-right: 36px; } /* 给灯泡让位 */
-.idea-btn {
-  position: absolute; right: 8px; bottom: 7px;
-  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; border-radius: 50%;
+#bubbleRow {
+  display: flex;
+  justify-content: space-around; /* 整体居中均匀散开 */
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 0 4px;
 }
-.idea-btn:active { background: var(--nav); }
-.idea-btn svg { width: 18px; height: 18px; stroke: var(--sub); transition: stroke .15s; }
-.idea-btn.on svg { stroke: #f5a623; }
-
+.bubble-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 4px 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.bubble-btn:active {
+  transform: scale(0.96);
+  opacity: 0.6;
+}
+.bubble-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--sub);
+  transition: color 0.15s;
+}
+.bubble-btn:hover svg {
+  color: var(--theme);
+}
+#inputRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 /* ===== 行动建议弹窗内容样式（适配全局弹窗） ===== */
 .idea-box { text-align: left; }
 .idea-content { padding: 18px 16px 14px; }
@@ -684,14 +744,14 @@ textarea {
   line-height: 1.45;
 }
 
-/* 默认主题：输入行防溢出保护 */
 #inputRow {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* 关键：改成底对齐，全部沉到手绘线高度 */
   gap: 8px;
+  padding-bottom: 2px;
 }
 .input-wrap {
   flex: 1 1 auto;
@@ -699,49 +759,199 @@ textarea {
   width: auto;
   box-sizing: border-box;
   display: flex;
-  align-items: center;
-}
-#chatInput {
-  min-width: 0;
+  align-items: flex-end;
+  position: relative;
+  height: 38px;
+  padding-bottom: 2px;
 }
 
-#chatInput{flex:1;border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:15px;font-family:inherit;resize:none;max-height:250px;outline:none;background:var(--card);color:var(--text);line-height:1.4;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;}
-#chatInput::placeholder{color:var(--sub);}
-#chatInput:focus{border-color:var(--theme);}
+.input-wrap::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3.5px;
+  border-radius: 2px;
+  background: radial-gradient(circle 1.5px at 3px center, color-mix(in srgb, var(--line) 90%, #000) 99%, transparent 100%),
+              radial-gradient(circle 1.5px at calc(100% - 3px) center, color-mix(in srgb, var(--line) 90%, #000) 99%, transparent 100%),
+              linear-gradient(to right, transparent 8px, color-mix(in srgb, var(--line) 90%, #000) 8px, color-mix(in srgb, var(--line) 90%, #000) calc(100% - 8px), transparent calc(100% - 8px));
+  transition: background 0.25s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-wrap:focus-within::after {
+  background: radial-gradient(circle 1.5px at 3px center, var(--theme) 99%, transparent 100%),
+              radial-gradient(circle 1.5px at calc(100% - 3px) center, var(--theme) 99%, transparent 100%),
+              linear-gradient(to right, transparent 8px, var(--theme) 8px, var(--theme) calc(100% - 8px), transparent calc(100% - 8px));
+}
+
+#chatInput {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  border-radius: 0;
+  padding: 0 28px 3px 2px;
+  font-size: 14.5px;
+  font-family: inherit;
+  resize: none;
+  max-height: 250px;
+  outline: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--text);
+  line-height: 22px;
+  height: 27px;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+#chatInput::placeholder {
+  color: var(--sub);
+  opacity: 0.65;
+}
+
+/* 魔法棒挂件：向上微提 1~2px，不再被手绘线压住，视觉居中自然 */
+.idea-btn {
+  position: absolute !important;
+  right: 4px !important;
+  bottom: 7px !important; /* 原来是 5px，提升到 7px 完美避开粗线 */
+  width: 22px !important;
+  height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 3 !important;
+  color: var(--sub) !important;
+  opacity: 0.8;
+  background: transparent !important;
+  transition: color 0.2s, opacity 0.2s, transform 0.1s;
+}
+
+.idea-btn svg {
+  width: 19px !important;
+  height: 19px !important;
+}
+
+.idea-btn:active {
+  transform: scale(0.9);
+}
+
+.input-wrap:focus-within .idea-btn,
+.idea-btn.on {
+  opacity: 1;
+  color: var(--theme) !important;
+}
 .cbtn{border:none;border-radius:8px;height:38px;font-size:14px;cursor:pointer;flex-shrink:0;padding:0 14px;}
 .cbtn.send{background:var(--theme);color:#fff;}
-.plus-btn{color: var(--text);width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:opacity 0.15s;}
-.plus-btn:active{opacity:0.6;}
-.plus-btn svg{width:18px;height:18px;}
-.voice-btn{color: var(--text);width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;transition:opacity 0.15s;}
-.voice-btn svg{width:17px;height:17px;position:relative;z-index:1;}
-.voice-btn::before{content:'';position:absolute;width:34px;height:34px;border-radius:50%;background:var(--theme);opacity:0;transform:scale(1);}
-.voice-btn.recording::before{animation:voicePulse 1s ease-out infinite;}
-.voice-btn.recording{border-color:var(--theme);}
-@keyframes voicePulse{0%{transform:scale(1);opacity:0.5;}100%{transform:scale(2.2);opacity:0;}}
-/* ===== 发送按钮：饱满发光弹动 ===== */
+/* 加号与语音按钮：下沉贴平线条，微调下边距消除视觉悬空 */
+.plus-btn, .voice-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.15s ease;
+  color: var(--sub);
+  padding: 0;
+  margin-bottom: -1px; /* 沉到底线同一基准 */
+}
+
+.plus-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.voice-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.plus-btn:active, .voice-btn:active {
+  transform: scale(0.9);
+  color: var(--theme);
+}
+/* 语音录音波纹动画保持不变 */
+.voice-btn::before { content:''; position:absolute; width:34px; height:34px; border-radius:50%; background:var(--theme); opacity:0; transform:scale(1); }
+.voice-btn.recording::before { animation: voicePulse 1s ease-out infinite; }
+.voice-btn.recording { border-color: var(--theme); }
+
+/* 纸飞机按钮：同步基准对齐 */
 .reply-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--theme);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: opacity 0.15s, transform 0.1s;
+  width: 32px;
+  height: 32px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  color: var(--theme) !important;
+  transition: opacity 0.15s, transform 0.1s, color 0.15s;
+  margin-bottom: -1px; /* 同步下沉 */
+}
+
+.reply-btn svg {
+  width: 22px !important;
+  height: 22px !important;
+  fill: currentColor !important;
+}
+
+.reply-btn:active {
+  transform: scale(0.9);
+  opacity: 0.8;
+}
+/* 输入框打字时，纸飞机自动点亮为主题色 */
+.input-wrap:focus-within ~ .reply-btn {
+  color: var(--theme) !important;
 }
 .reply-btn:active {
-    opacity: 0.8;
-    transform: scale(0.93);
+  transform: scale(0.9);
+  color: var(--theme);
 }
-.reply-btn svg{width:16px;height:16px;}
+.reply-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
 #chatPanel{display:none;grid-template-columns:repeat(4,1fr);gap:16px;}
-#chatPanel.on{display:grid;padding:14px 16px 20px 16px;background:var(--nav);border-top:1px solid var(--line);}
+#chatPanel.on {
+  display: grid;
+  padding: 14px 16px 20px 16px;
+  background: transparent; /* 核心：去掉原本的死白背景，直接透出底栏的磨砂质感 */
+  border-top: 1px solid rgba(255, 255, 255, 0.2); /* 换成细致的透光白分割线 */
+}
 .pnl{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
-.pnl-ico{width:48px;height:48px;border-radius:14px;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.pnl-ico {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  /* 类似半透明气泡的微透效果，图标不刺眼、柔和通透 */
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
 .pnl-ico svg{width:24px;height:24px;}
 .pnl span{font-size:12px;color:var(--sub);}
   .modal{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:80;display:flex;align-items:flex-end;}
@@ -3146,7 +3356,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v20261005_2';
+const APP_VER = 'v20261006_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -5904,7 +6114,8 @@ applySkin(DB.settings.skin || 'fusion');
 </script>
 <script>
 const content=document.getElementById('content'),topbar=document.getElementById('topbar'),tabbar=document.getElementById('tabbar'),statusbar=document.getElementById('statusbar'),tbTitle=document.getElementById('tbTitle'),tbLeft=document.getElementById('tbLeft'),tbRight=document.getElementById('tbRight');
-const SEND_BTN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>`;
+const SEND_BTN_SVG = `<svg viewBox="0 0 1024 1024" fill="currentColor"><path d="M921.472 108.48c-19.904-21.44-51.2-29.504-81.088-32.384-31.36-3.008-68.992-1.024-109.44 4.288-81.152 10.624-179.2 35.264-273.472 65.6-94.272 30.336-186.176 66.88-254.976 101.824-34.24 17.408-64 35.072-85.568 51.968a156.928 156.928 0 0 0-27.904 27.136c-7.04 9.216-14.464 22.4-14.336 38.144 0.256 41.472 28.48 70.784 58.56 90.432 30.72 20.096 70.72 35.2 110.464 47.104 40.128 11.968 82.432 21.248 118.72 28.8l12.992 2.688c21.952 4.48 32.896 6.784 43.264 3.712 10.24-3.136 18.24-11.072 34.112-26.88l157.056-157.056a42.688 42.688 0 0 1 60.288 60.288L523.712 560.64c-16.192 16.192-24.32 24.256-27.328 34.752-3.072 10.496-0.64 21.632 4.352 43.904 19.136 86.4 35.776 157.76 52.352 205.824 9.6 28.032 20.544 52.352 34.368 70.208 14.336 18.688 33.92 32.832 59.712 33.92 16 0.768 29.44-6.592 38.528-13.376 9.664-7.168 18.752-16.768 27.136-27.264 16.896-21.12 34.624-50.304 52.288-84.096 35.52-67.84 73.088-158.784 104.96-252.352 31.744-93.568 58.24-191.104 71.04-272.192 6.336-40.448 9.472-78.016 7.68-109.44-1.6-29.888-7.936-61.184-27.328-82.048z"></path></svg>`;
+
 function tick() {
   const n = new Date();
   const hh = String(n.getHours()).padStart(2, '0');
@@ -7962,7 +8173,13 @@ if (id === 'album') {
   render();
 }
 function goHome(){view={type:'home'};render();}
-function goWechat(p){view={type:'wechat'};wechatPage=p;render();}
+function goWechat(p){
+  const ph = document.getElementById('phone');
+  if (ph) ph.style.backgroundImage = '';
+  view={type:'wechat'};
+  wechatPage=p;
+  render();
+}
 function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='心动值';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;
   const locked=[['💭','TA的心声','窥探此刻TA想说又没说的话'],['📅','TA的行程','查看TA今天的安排'],['📡','监控','查看TA所在地的画面']];
   content.innerHTML=`<div style="text-align:center;padding:30px 0 20px;background:linear-gradient(160deg,#ff9a9e,#fecfef)"><div style="font-size:14px;color:#fff;opacity:.9">我的心动值</div><div style="font-size:48px;font-weight:200;color:#fff;margin-top:6px">💗 ${DB.hearts||0}</div><div style="font-size:12px;color:#fff;opacity:.8;margin-top:6px">累计获得 ${DB.heartsTotal||0}</div></div>
@@ -15541,19 +15758,53 @@ function deleteGiftLog(cid, gid) {
 function deleteMemo(cid, mid) {
   var c = getC(cid);
   if (!c) return;
-  var mem = c.memories.find(function(m) { return m.id === mid; });
+  var mem = (c.memories || []).find(function(m) { return m.id === mid; });
   if (!mem) return;
   popConfirm('确定要删除这条记忆吗？', function() {
+    var targetText = (mem.content || '').trim();
     c.memories = c.memories.filter(function(m) { return m.id !== mid; });
-    // 同步从 chapters 中移除对应的条目（按内容匹配，不精确则跳过）
-    // 简单起见，我们按日期和内容前缀删除最近一条匹配的章节
-    var idx = c.chapters.findIndex(function(ch) { return ch.content === '[记忆] ' + mem.content; });
-    if (idx > -1) c.chapters.splice(idx, 1);
+    
+    // 强力清理 chapters：只要包含这段记忆的 [记忆] 标签，全部删掉
+    if (c.chapters && c.chapters.length) {
+      c.chapters = c.chapters.filter(function(ch) {
+        if (!ch.content || ch.content.indexOf('[记忆]') !== 0) return true; // 保留正常剧情
+        return ch.content.trim() !== ('[记忆] ' + targetText);
+      });
+    }
     save();
     renderMemoDetail(cid);
   }, { icon: '🗑️', title: '删除确认' });
 }
+// 清理所有不在备忘录里的幽灵记忆
+function cleanOrphanChapters() {
+  var cleanedCount = 0;
+  (DB.chars || []).forEach(function(c) {
+    if (!c.chapters || !c.memories) return;
+    var validMemos = c.memories.map(function(m){ return '[记忆] ' + (m.content || '').trim(); });
+    var beforeLen = c.chapters.length;
+    
+    // 只保留两种：1. 真正的剧情章节；2. 还能在备忘录里找得到的有效记忆
+    c.chapters = c.chapters.filter(function(ch) {
+      if (!ch.content || ch.content.indexOf('[记忆]') !== 0) return true;
+      return validMemos.indexOf(ch.content.trim()) !== -1;
+    });
+    
+    cleanedCount += (beforeLen - c.chapters.length);
+  });
+  if (cleanedCount > 0) {
+    save();
+    console.log('已自动清理 ' + cleanedCount + ' 条幽灵记忆');
+  }
+}
 
+// 手机打开网页加载完成后，静默自动跑一次
+setTimeout(function(){
+  if (typeof _dbReady !== 'undefined' && _dbReady) {
+    cleanOrphanChapters();
+  } else {
+    setTimeout(cleanOrphanChapters, 1500); // 确保数据库加载好后再扫
+  }
+}, 1000);
 function editMemo(cid, mid) {
   var c = getC(cid);
   if (!c) return;
@@ -15590,8 +15841,18 @@ function submitEditMemo(cid, mid) {
   var newContent = inputEl ? inputEl.value.trim() : '';
   if (!newContent) { alert('记忆内容不能为空'); return; }
 
+  var oldContent = mem.content; // 记录改之前的内容
   mem.content = newContent;
   if (priEl) mem.priority = priEl.value;
+
+  // 同步更新 chapters 里的旧记忆内容
+  if (c.chapters && c.chapters.length) {
+    var ch = c.chapters.find(function(x) { return x.content === '[记忆] ' + oldContent; });
+    if (ch) {
+      ch.content = '[记忆] ' + newContent;
+    }
+  }
+
   save();
   closeModal();
   renderMemoDetail(cid, 'memory');
@@ -16234,7 +16495,15 @@ function renderChat(keepScroll) {
 
   tbRight.textContent = '⋯';
   tbRight.onclick = function() { editContact(c.id, 'chat'); };
-  content.style.backgroundImage = c.chatBg ? "url('" + c.chatBg + "')" : '';
+  // 核心：把壁纸铺在整个手机底层，让聊天内容区透明
+const phoneEl = document.getElementById('phone');
+if (phoneEl) {
+  phoneEl.style.backgroundImage = c.chatBg ? "url('" + c.chatBg + "')" : '';
+  phoneEl.style.backgroundSize = 'cover';
+  phoneEl.style.backgroundPosition = 'center';
+}
+content.style.backgroundImage = '';
+content.style.background = 'transparent';
 
   // ===== 5. 构建消息列表 =====
   var msgs = DB.chats[c.id] || [];
@@ -16396,17 +16665,16 @@ function renderChat(keepScroll) {
       '<div class="input-wrap">' +
         '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
         '<div class="idea-btn' + (c.ideaOn ? ' on' : '') + '" id="ideaBtn" onclick="openIdeaPop()" title="接话灵感">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12c.5.5 1 1.5 1 2h6c0-.5.5-1.5 1-2a7 7 0 0 0-4-12z"/></svg>' + // 🟢 已经完美修复
+          '<svg viewBox="0 0 1024 1024" fill="currentColor"><path d="M866.4064 179.9168c75.1616 74.0864 1.1776 250.9312-154.112 423.5264l141.1072 139.1104a75.776 75.776 0 0 1 0 108.288 78.4384 78.4384 0 0 1-109.824 0l-140.8512-139.0592c-176.0256 155.2384-357.2736 229.5808-432.896 155.0336-54.3744-53.6064-32.1536-157.3376 44.1344-279.0912l9.0624-14.1312 17.7664-27.1872 55.1936 35.0208-17.7152 27.1872c-68.0448 104.0896-87.808 187.0336-61.952 212.48 39.8848 39.3216 189.3888-24.2176 339.7632-155.2384l-86.8864-85.6576a75.776 75.776 0 0 1 1.4336-106.8032 78.4384 78.4384 0 0 1 108.288-1.4336l86.784 85.4528c22.8352-25.8048 43.6736-51.456 62.208-76.4928l18.5856-26.0608c74.0864-107.3664 103.7824-199.3216 73.5232-229.1712-26.4192-25.9584-112.64-5.0176-219.2896 63.5904l-13.9776 9.216-27.136 18.2272-36.864-53.5552 27.136-18.176c137.3696-92.2112 257.3312-123.4432 316.5184-65.0752z"></path><path d="M392.5504 141.056a32.1024 32.1024 0 0 1 6.5024 19.8144l-1.024 82.8928 68.608 47.9232a32.2048 32.2048 0 0 1-9.216 57.344l-80.2816 24.6272-24.9856 79.2064a33.024 33.024 0 0 1-58.2144 9.0624L245.4016 394.24l-84.0704 1.024a32.9216 32.9216 0 0 1-29.696-17.664 32 32 0 0 1 2.9696-34.0992l50.3296-66.4576-27.0848-78.5408a32.0512 32.0512 0 0 1 7.8848-33.28 33.1776 33.1776 0 0 1 33.792-7.7824l79.6672 26.624 67.4304-49.664a33.1776 33.1776 0 0 1 45.9776 6.656z"></path></svg>' +
         '</div>' +
       '</div>' +
-
       '<div class="voice-btn" id="voiceMsgBtn">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
+	  '<svg viewBox="0 0 1024 1024" fill="currentColor"><path d="M567.864889 853.276444v56.888889h37.205333c31.402667 0 56.775111 25.486222 56.775111 56.888889s-25.372444 56.888889-56.775111 56.888889H418.816a56.775111 56.775111 0 0 1-56.718222-56.888889c0-31.402667 25.372444-56.888889 56.718222-56.888889h35.498667v-56.888889C292.807111 837.461333 142.620444 681.585778 113.777778 511.032889l113.493333 0.910222c29.752889 142.392889 143.758222 227.555556 283.761778 227.555556 140.117333 0 254.065778-85.162667 283.875555-227.555556l115.256889-0.910222c-28.842667 170.552889-180.792889 326.428444-342.300444 342.243555z m-56.832-170.666666a227.328 227.328 0 0 1-227.043556-227.555556v-227.555555c0-125.667556 101.660444-227.555556 227.043556-227.555556a227.328 227.328 0 0 1 227.100444 227.555556v227.555555c0 125.667556-101.660444 227.555556-227.100444 227.555556z"></path></svg>' +
       '</div>' + 
       '<button class="reply-btn" id="actBtn" onclick="actBtnClick()">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>' +
+        SEND_BTN_SVG +
       '</button>' +
-    '</div>' +
+	  '</div>' +
     '<div class="chatPanel" id="chatPanel">' +
       '<div class="pnl" onclick="togglePanel();watchNow(view.id,{fromChat:true})">' +
         '<div class="pnl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8M12 18v4"/></svg></div>' +
