@@ -422,20 +422,6 @@
   display: block;
 }
 
-#chatBottom { 
-  padding: 10px 14px calc(14px + env(safe-area-inset-bottom, 10px)) 14px; 
-  box-sizing: border-box; 
-  background: color-mix(in srgb, var(--nav) 45%, transparent);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border-top: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 20;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-}
 #tabbar { height:68px; background:var(--nav); display:flex; border-top:1px solid var(--line); flex-shrink:0; padding:4px 4px 12px 4px; }
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;color:var(--sub);gap:3px;cursor:pointer;}
   .tab.active{color:var(--theme);}.tab .ic{font-size:22px;}
@@ -645,17 +631,6 @@ textarea {
   box-shadow:0 1px 3px rgba(0,0,0,.06);
 }
 
-#chatBottom{padding:10px 14px 24px 14px;box-sizing:border-box;}
-
-#bubbleRow {
-  display: flex;
-  justify-content: space-around; /* 整体居中均匀散开 */
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 12px;
-  padding: 0 4px;
-}
 .bubble-btn {
   display: flex;
   align-items: center;
@@ -686,11 +661,7 @@ textarea {
 .bubble-btn:hover svg {
   color: var(--theme);
 }
-#inputRow {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+
 /* ===== 行动建议弹窗内容样式（适配全局弹窗） ===== */
 .idea-box { text-align: left; }
 .idea-content { padding: 18px 16px 14px; }
@@ -744,15 +715,6 @@ textarea {
   line-height: 1.45;
 }
 
-#inputRow {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  display: flex;
-  align-items: flex-end; /* 关键：改成底对齐，全部沉到手绘线高度 */
-  gap: 8px;
-  padding-bottom: 2px;
-}
 .input-wrap {
   flex: 1 1 auto;
   min-width: 0;
@@ -3301,6 +3263,223 @@ body.wx-theme-letter #chatBottom {
 .weather-widget {
   overflow: hidden !important;
 }
+/* ========================================================
+   【新版聊天底栏 · v2】统一设计 + 磨砂透明
+   想恢复原样 = 删掉这整段
+   ======================================================== */
+
+:root{
+  --bb-glass:22%;          /* 底栏磨砂浓度，越小越透 */
+  --bb-blur:28px;          /* 磨砂模糊半径 */
+  --bb-pad-x:14px;
+  --bb-pad-top:9px;
+  --bb-pad-bottom:16px;
+  --bb-gap:9px;
+  --bb-radius:19px;
+  --bb-btn:33px;
+  --bb-line:20px;          /* 单行文字高度 */
+  --bb-input-max:100px;    /* 输入框最高（约4行），改这里即可 */
+}
+
+/* ---------- 底栏容器：磨砂玻璃 ---------- */
+body #chatBottom,
+body.wx-theme-card #chatBottom,
+body.wx-theme-letter #chatBottom{
+  padding:var(--bb-pad-top) var(--bb-pad-x)
+          max(calc(var(--bb-pad-bottom) + env(safe-area-inset-bottom,0px)),20px)
+          var(--bb-pad-x) !important;
+  box-sizing:border-box !important;
+  width:100% !important;max-width:100% !important;
+  background:color-mix(in srgb,var(--nav) var(--bb-glass),transparent) !important;
+  backdrop-filter:blur(var(--bb-blur)) saturate(180%) !important;
+  -webkit-backdrop-filter:blur(var(--bb-blur)) saturate(180%) !important;
+  border-top:1px solid color-mix(in srgb,var(--line) 28%,transparent) !important;
+  border-radius:0 !important;box-shadow:none !important;
+  position:relative !important;z-index:20 !important;
+  flex-shrink:0 !important;overflow:visible !important;
+}
+body #chatBottom::before{
+  content:'' !important;position:absolute !important;
+  top:0 !important;left:0 !important;right:0 !important;height:1px !important;
+  background:linear-gradient(to right,transparent,
+    color-mix(in srgb,var(--text) 9%,transparent) 20%,
+    color-mix(in srgb,var(--text) 9%,transparent) 80%,transparent) !important;
+  pointer-events:none !important;border:none !important;box-shadow:none !important;
+}
+
+/* ---------- 快捷选项行：等距铺开 ---------- */
+body #bubbleRow,
+body.wx-theme-card #bubbleRow,
+body.wx-theme-letter #bubbleRow{
+  display:flex !important;
+  justify-content:space-evenly !important;
+  align-items:center !important;
+  gap:6px !important;
+  width:100% !important;box-sizing:border-box !important;
+  margin:0 0 var(--bb-gap) 0 !important;
+  padding:0 2px !important;
+  overflow:hidden !important;
+}
+body .bubble-btn,
+body.wx-theme-card .bubble-btn,
+body.wx-theme-letter .bubble-btn{
+  flex:0 1 auto !important;min-width:0 !important;
+  display:flex !important;align-items:center !important;
+  justify-content:center !important;gap:4px !important;
+  padding:5px 11px !important;
+  background:color-mix(in srgb,var(--card) 35%,transparent) !important;
+  backdrop-filter:blur(8px) !important;
+  -webkit-backdrop-filter:blur(8px) !important;
+  border:1px solid color-mix(in srgb,var(--theme) 18%,transparent) !important;
+  border-radius:13px !important;
+  font-size:12.5px !important;font-weight:500 !important;
+  color:var(--text) !important;white-space:nowrap !important;
+  overflow:hidden !important;text-overflow:ellipsis !important;
+  cursor:pointer !important;user-select:none !important;
+  transition:background .18s,transform .12s !important;
+}
+body .bubble-btn svg{width:15px !important;height:15px !important;
+  flex-shrink:0 !important;color:var(--theme) !important;}
+body .bubble-btn:active{transform:scale(.95) !important;
+  background:color-mix(in srgb,var(--theme) 18%,transparent) !important;}
+
+/* ---------- 输入行 ---------- */
+body #inputRow,
+body.wx-theme-card #inputRow,
+body.wx-theme-letter #inputRow{
+  display:flex !important;align-items:flex-end !important;
+  gap:7px !important;width:100% !important;max-width:100% !important;
+  box-sizing:border-box !important;padding:0 !important;
+}
+
+/* ---------- 输入框胶囊：磨砂 ---------- */
+body .input-wrap,
+body.wx-theme-card .input-wrap,
+body.wx-theme-letter .input-wrap{
+  flex:1 1 auto !important;min-width:0 !important;width:auto !important;
+  box-sizing:border-box !important;
+  display:flex !important;align-items:flex-end !important;
+  position:relative !important;height:auto !important;
+  background:color-mix(in srgb,var(--card) 42%,transparent) !important;
+  backdrop-filter:blur(14px) saturate(150%) !important;
+  -webkit-backdrop-filter:blur(14px) saturate(150%) !important;
+  border:1px solid color-mix(in srgb,var(--line) 45%,transparent) !important;
+  border-radius:var(--bb-radius) !important;
+  padding:7px 34px 7px 14px !important;
+  box-shadow:inset 0 1px 2px color-mix(in srgb,var(--text) 4%,transparent) !important;
+  transition:border-color .2s,background .2s,box-shadow .2s !important;
+}
+body .input-wrap:focus-within{
+  border-color:color-mix(in srgb,var(--theme) 45%,transparent) !important;
+  background:color-mix(in srgb,var(--card) 60%,transparent) !important;
+  box-shadow:inset 0 1px 2px color-mix(in srgb,var(--text) 4%,transparent),
+             0 0 0 3px color-mix(in srgb,var(--theme) 10%,transparent) !important;
+}
+body .input-wrap::after,
+body.wx-theme-card .input-wrap::after,
+body.wx-theme-letter .input-wrap::after{display:none !important;}
+
+/* ---------- textarea：注意 height 不加 !important，留给 JS 控制 ---------- */
+body #chatInput,
+body.wx-theme-card #chatInput,
+body.wx-theme-letter #chatInput{
+  flex:1 1 auto !important;width:100% !important;min-width:0 !important;
+  box-sizing:border-box !important;
+  background:transparent !important;border:none !important;
+  box-shadow:none !important;outline:none !important;border-radius:0 !important;
+  padding:0 !important;margin:0 !important;
+  font-size:14.5px !important;font-family:inherit !important;
+  line-height:var(--bb-line) !important;color:var(--text) !important;
+  resize:none !important;display:block !important;
+  min-height:var(--bb-line) !important;
+  max-height:var(--bb-input-max) !important;
+  scrollbar-width:none !important;
+  word-break:break-word !important;overflow-wrap:break-word !important;
+}
+body #chatInput{height:20px;overflow-y:hidden;}   /* ← 故意不加 !important */
+body #chatInput::-webkit-scrollbar{display:none !important;}
+body #chatInput::placeholder{color:var(--sub) !important;opacity:.6 !important;}
+
+/* ---------- 加号 / 语音 ---------- */
+body .plus-btn,body .voice-btn,
+body.wx-theme-card .plus-btn,body.wx-theme-card .voice-btn,
+body.wx-theme-letter .plus-btn,body.wx-theme-letter .voice-btn{
+  width:var(--bb-btn) !important;height:var(--bb-btn) !important;
+  flex-shrink:0 !important;display:flex !important;
+  align-items:center !important;justify-content:center !important;
+  padding:0 !important;margin:0 !important;border:none !important;
+  border-radius:50% !important;background:transparent !important;
+  box-shadow:none !important;color:var(--sub) !important;
+  cursor:pointer !important;position:relative !important;
+  transition:color .18s,background .18s,transform .12s !important;
+}
+body .plus-btn svg{width:21px !important;height:21px !important;}
+body .voice-btn svg{width:20px !important;height:20px !important;}
+body .plus-btn:active,body .voice-btn:active{
+  transform:scale(.9) !important;color:var(--theme) !important;
+  background:color-mix(in srgb,var(--theme) 10%,transparent) !important;}
+
+/* ---------- 发送按钮 ---------- */
+body .reply-btn,
+body.wx-theme-card .reply-btn,
+body.wx-theme-letter .reply-btn{
+  width:var(--bb-btn) !important;height:var(--bb-btn) !important;
+  flex-shrink:0 !important;display:flex !important;
+  align-items:center !important;justify-content:center !important;
+  padding:0 !important;margin:0 !important;border:none !important;
+  border-radius:50% !important;background:var(--theme) !important;
+  color:#fff !important;cursor:pointer !important;
+  box-shadow:0 2px 8px color-mix(in srgb,var(--theme) 32%,transparent) !important;
+  transition:transform .12s,box-shadow .18s,opacity .18s !important;
+}
+/* ---------- 发送按钮图标：自动适配填充型/描边型 SVG ---------- */
+body .reply-btn svg,
+body.wx-theme-card .reply-btn svg,
+body.wx-theme-letter .reply-btn svg{
+  width:17px !important;height:17px !important;
+  display:block !important;
+  color:#fff !important;
+}
+/* 描边型图标（有 stroke 属性的）：只描边，不填充 */
+body .reply-btn svg[stroke],
+body .reply-btn svg [stroke]{
+  stroke:#fff !important;
+  fill:none !important;
+}
+/* 填充型图标（没有 stroke 的）：只填充 */
+body .reply-btn svg:not([stroke]),
+body .reply-btn svg:not([stroke]) path,
+body .reply-btn svg:not([stroke]) polygon{
+  fill:#fff !important;
+}
+body .reply-btn:active{transform:scale(.9) !important;
+  box-shadow:0 1px 4px color-mix(in srgb,var(--theme) 25%,transparent) !important;}
+
+/* ---------- 灯泡 ---------- */
+body .idea-btn,
+body.wx-theme-card .idea-btn,
+body.wx-theme-letter .idea-btn{
+  position:absolute !important;right:9px !important;bottom:8px !important;
+  top:auto !important;transform:none !important;
+  width:21px !important;height:21px !important;
+  display:flex !important;align-items:center !important;
+  justify-content:center !important;padding:0 !important;margin:0 !important;
+  background:transparent !important;border:none !important;
+  cursor:pointer !important;z-index:3 !important;
+  color:var(--sub) !important;opacity:.5 !important;filter:none !important;
+  transition:color .22s,opacity .22s,filter .22s !important;
+}
+body .idea-btn svg{width:18px !important;height:18px !important;
+  fill:currentColor !important;stroke:none !important;}
+body .idea-btn.on,
+body.wx-theme-card .idea-btn.on,
+body.wx-theme-letter .idea-btn.on{
+  color:#f7b500 !important;opacity:1 !important;
+  filter:drop-shadow(0 0 4px rgba(247,181,0,.55)) !important;}
+body .idea-btn.on svg{fill:#f7b500 !important;stroke:none !important;}
+body .idea-btn:active{transform:scale(.88) !important;}
+body .input-wrap:focus-within .idea-btn:not(.on){opacity:.78 !important;}
+
 </style>
 </head>
 <body>
@@ -3356,7 +3535,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v20261006_1';
+const APP_VER = 'v20261007_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -20547,6 +20726,17 @@ setInterval(function() {
   if (view.type === 'charEdit') return;
   maybeAutoPost();
 }, 30 * 60 * 1000);
+
+// ===== 孤儿图清理：每6小时兜底跑一次 =====
+setInterval(function(){
+  if (document.hidden) return;
+  if (typeof _dbReady !== 'undefined' && !_dbReady) return;
+  if (typeof cleanupOrphanImages === 'function') {
+    cleanupOrphanImages().catch(function(e){
+      console.warn('孤儿图清理失败：', e);
+    });
+  }
+}, 6 * 60 * 60 * 1000);
 function bootStartup(){
   // 清理历史坏存档：壁纸里若残留换行或注释，一律清空，强制重取主题默认
   if (DB.desktop && DB.desktop.wallpaper && !DB.desktop._userWallpaper) {
@@ -20565,6 +20755,14 @@ function bootStartup(){
   restoreFocusState();
   setTimeout(updateAllIcons, 100);
   if(focusPhase==='work'&&view.type==='focus') render();
+  // ===== 孤儿图清理：启动 15 秒后跑一次 =====
+  setTimeout(function(){
+    if (typeof cleanupOrphanImages === 'function') {
+      cleanupOrphanImages().catch(function(e){
+        console.warn('孤儿图清理失败（不影响使用）：', e);
+      });
+    }
+  }, 15000);
 // 1.3 决定是否显示开场动画（三重判断，更稳）
 
 // ① 本次会话之前是否已经播放过
@@ -21307,7 +21505,69 @@ async function cleanupImages(){
     cur.continue();
   };
 }
+// ===== 孤儿图清理：删除"已入库但没有任何聊天/朋友圈引用"的图 =====
+var ORPHAN_KEEP_HOURS = 24;
 
+async function cleanupOrphanImages(){
+  if (typeof _dbReady !== 'undefined' && !_dbReady) return;
+
+  var items;
+  try{
+    items = await listImages();
+  }catch(e){
+    console.warn('孤儿图清理：读取图片列表失败', e);
+    return;
+  }
+  if (!items || !items.length) return;
+
+  var referenced = {};
+
+  try{
+    Object.keys(DB.chats || {}).forEach(function(cid){
+      (DB.chats[cid] || []).forEach(function(m){
+        if (!m) return;
+        if (m.type === 'image' && m.content && String(m.content).indexOf('img_') === 0) {
+          referenced[m.content] = true;
+        }
+        if (m.type === 'share' && m.desc && String(m.desc).indexOf('img_') === 0) {
+          referenced[m.desc] = true;
+        }
+      });
+    });
+  }catch(e){ console.warn('孤儿图清理：扫聊天记录出错', e); }
+
+  try{
+    (DB.moments || []).forEach(function(p){
+      (p.images || []).forEach(function(id){
+        if (id && String(id).indexOf('img_') === 0) referenced[id] = true;
+      });
+    });
+  }catch(e){ console.warn('孤儿图清理：扫朋友圈出错', e); }
+
+  var now = Date.now();
+  var keepMs = ORPHAN_KEEP_HOURS * 60 * 60 * 1000;
+  var deleted = 0;
+
+  for (var i = 0; i < items.length; i++){
+    var it = items[i];
+    if (!it || !it.id) continue;
+    if (it.fav) continue;
+    if (referenced[it.id]) continue;
+    if ((now - (it.createdAt || 0)) < keepMs) continue;
+
+    try{
+      await deleteImage(it.id);
+      deleted++;
+      console.log('🗑️ 清理孤儿图：', it.id);
+    }catch(e){
+      console.warn('删除孤儿图失败：', it.id, e);
+    }
+  }
+
+  if (deleted > 0){
+    console.log('✅ 孤儿图清理完成，共删除 ' + deleted + ' 张');
+  }
+}
 // 列出图片（相册用）：可传 {favOnly:true} 只看收藏
 async function listImages(opts){
   opts = opts || {};
@@ -23883,5 +24143,41 @@ window.setChatTitle = function(c, typing) {
   }
 
 })();
+/* ===== 新版底栏配套 JS ===== */
+
+// 输入框自动拉高（最高 100px）
+function bbAutoGrow(el){
+  if(!el) return;
+  var max = 100;
+  el.style.height = 'auto';
+  var h = el.scrollHeight;
+  if(h > max){
+    el.style.height = max + 'px';
+    el.style.overflowY = 'auto';
+  }else{
+    el.style.height = h + 'px';
+    el.style.overflowY = 'hidden';
+  }
+}
+
+// 全局兜底：不管原来的 oninput 怎么写，都能触发拉高
+document.addEventListener('input', function(e){
+  if(e.target && e.target.id === 'chatInput'){
+    bbAutoGrow(e.target);
+  }
+}, true);
+
+// 灯泡状态同步
+function syncIdeaBtn(){
+  var btn = document.getElementById('ideaBtn');
+  if(!btn) return;
+  try{
+    var c = getC(view.id);
+    if(!c) return;
+    if(c.ideaOn) btn.classList.add('on');
+    else btn.classList.remove('on');
+  }catch(err){}
+}
+
 </script>
 </html>
