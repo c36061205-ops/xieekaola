@@ -1,0 +1,1629 @@
+/* ============================================================
+   themes.css —— 从 index.html 抽离的「主题 / 皮肤 / 气泡」专属样式
+   ============================================================ */
+
+/* ============================================================
+   ① 浅色主题 · 气泡渐变加强 + 白描影托字
+   ============================================================ */
+
+/* 浅色主题下文字用白色描影托住（不然深色字压在浅壁纸上会糊） */
+#phone[data-theme="aqua_girl"] .mbody,
+#phone[data-theme="orchard"] .mbody,
+#phone[data-theme="sunset_parfait"] .mbody,
+#phone[data-theme="redsun_forest"] .mbody,
+#phone[data-theme="goose"] .mbody,
+#phone[data-theme="sea_salt"] .mbody,
+#phone[data-theme="demon_sheep"] .mbody,
+#phone[data-theme="angel_sheep"] .mbody{
+  text-shadow:0 1px 3px rgba(255,255,255,.8);
+}
+
+/* ===== 浅色主题：气泡轮廓加强 ===== */
+#phone[data-theme="aqua_girl"] .mbody,
+#phone[data-theme="orchard"] .mbody,
+#phone[data-theme="sunset_parfait"] .mbody,
+#phone[data-theme="redsun_forest"] .mbody,
+#phone[data-theme="goose"] .mbody,
+#phone[data-theme="sea_salt"] .mbody,
+#phone[data-theme="angel_sheep"] .mbody{
+  --bub-ai-core: 46%;
+  --bub-ai-mid:  56%;
+  --bub-ai-edge: 62%;
+  --bub-me-core: 28%;
+  --bub-me-mid:  38%;
+  --bub-me-edge: 44%;
+  border-color: color-mix(in srgb, var(--line) 85%, transparent);
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.6),
+    0 1px 4px -1px rgba(0,0,0,.10),
+    0 3px 10px -4px rgba(0,0,0,.08);
+}
+
+#phone[data-theme="aqua_girl"] .msg.me .mbody,
+#phone[data-theme="orchard"] .msg.me .mbody,
+#phone[data-theme="sunset_parfait"] .msg.me .mbody,
+#phone[data-theme="redsun_forest"] .msg.me .mbody,
+#phone[data-theme="goose"] .msg.me .mbody,
+#phone[data-theme="sea_salt"] .msg.me .mbody,
+#phone[data-theme="angel_sheep"] .msg.me .mbody{
+  border-color: color-mix(in srgb, var(--theme) 42%, transparent);
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.6),
+    0 1px 4px -1px color-mix(in srgb, var(--theme) 22%, transparent),
+    0 3px 10px -4px rgba(0,0,0,.08);
+}
+
+/* ============================================================
+   ② 咪思异想主题专用样式
+   ============================================================ */
+#phone[data-theme="misi"] .clock-starry .ring {
+  opacity: var(--ring-opacity, 0.4);
+}
+
+/* 聊天气泡 —— AI 保留边框，用户去掉边框 + 用柔和红 */
+#phone[data-theme="misi"] .msg:not(.me) .mbody {
+  background: #FFFFFF;
+  border: 1px solid #1A1A1A;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.04);
+  color: var(--text);
+}
+
+#phone[data-theme="misi"] .msg.me .mbody {
+  background: var(--theme);   /* 跟随主题色 #A84848 或自定义柔和红 */
+  color: #FFFFFF;
+  border: none;               /* 去掉边框 */
+}
+
+#phone[data-theme="misi"] .tab.active .ic img {
+  filter: none;
+}
+
+/* ============================================================
+   ③ 深色皮肤专属覆盖
+   ============================================================ */
+
+/* 桌面图标阴影加深 */
+[data-dark="1"] .app-ic{
+  box-shadow:0 4px 12px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.3);
+}
+
+/* 桌面玻璃卡片 */
+[data-dark="1"] .glass-card{
+  background:linear-gradient(158deg,
+    color-mix(in srgb,var(--theme) 16%,transparent),
+    color-mix(in srgb,var(--theme) 5%,transparent));
+  border-color:rgba(255,255,255,.12);
+  box-shadow:0 4px 14px rgba(0,0,0,.35);
+}
+
+/* 纪念日便利贴 */
+[data-dark="1"] .anniv-widget .tag-back,
+[data-dark="1"] .anniv-widget .tag-front {
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+/* 珍稀礼物卡片 · 深色下用亮金色 */
+[data-dark="1"] .gift-wrap.rare .gift-foot .left,
+body.dark .gift-wrap.rare .gift-foot .left { color: #F5D76E; }
+
+[data-dark="1"] .gift-wrap.rare .gift-story,
+body.dark .gift-wrap.rare .gift-story { color: #F5D76E; }
+
+[data-dark="1"] .gift-wrap.rare .gift-foot .stamp .no,
+body.dark .gift-wrap.rare .gift-foot .stamp .no { color: #F5D76E; }
+
+[data-dark="1"] .gift-wrap.rare .gift-foot .btn-row .act,
+body.dark .gift-wrap.rare .gift-foot .btn-row .act { color: #F5D76E; }
+
+/* ============================================================
+   ④ 微信主题 · 软萌卡片风（body.wx-theme-card）
+   ============================================================ */
+
+/* 1. 悬浮胶囊底栏 (无文字、纯SVG、不常驻桌面) */
+body.wx-theme-card #tabbar {
+  position: absolute;
+  bottom: 16px;
+  left: 24px;
+  right: 24px;
+  height: 54px;
+  background: var(--card);
+  border-radius: 27px;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--line);
+  padding: 0;
+  z-index: 100;
+}
+body.wx-theme-card #tabbar[style*="display: none"] {
+  display: none !important;
+}
+body.wx-theme-card #tabbar .tab {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  font-size: 0 !important;
+  color: transparent !important;
+}
+body[data-tab-icon-mode="svg"] #tabbar .tab .ic,
+body[data-tab-icon-mode="svg"] #tabbar .tab img,
+body[data-tab-icon-mode="svg"] #tabbar .tab .tab-label {
+  display: none !important;
+}
+.tab-card-svg { display: none; }
+body[data-tab-icon-mode="svg"] #tabbar .tab .tab-card-svg {
+  display: block !important;
+  width: 22px !important;
+  height: 22px !important;
+  stroke: var(--sub) !important;
+  stroke-width: 1.8 !important;
+  fill: none !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+body[data-tab-icon-mode="svg"] #tabbar .tab.active .tab-card-svg {
+  stroke: var(--text) !important;
+  stroke-width: 2.2 !important;
+}
+/* 顶部标题栏：仅在"卡片风主题 + 正在看微信"时，换成跟卡片风统一的样子 */
+body.wx-theme-card #topbar.wx-topbar {
+  background: var(--card) !important;
+  border-bottom: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+}
+body.wx-theme-card #topbar.wx-topbar #tbTitle {
+  color: var(--text) !important;
+}
+body.wx-theme-card #topbar.wx-topbar .tb-btn {
+  color: var(--sub) !important;
+}
+body.wx-theme-card #topbar.wx-topbar .tb-btn.r {
+  color: var(--theme) !important;
+}
+
+/* 2. 聊天/通讯录 列表大白卡片 */
+body.wx-theme-card .card-theme-wrap {
+  padding: 10px 16px 85px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+body.wx-theme-card .card-container {
+  background: var(--card) !important;
+  border-radius: 24px !important;
+  padding: 8px 16px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid var(--line) !important;
+  overflow: hidden !important;
+}
+body.wx-theme-card .card-container .cell {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 9px 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 3. 列表头像双层渐变光圈 */
+body.wx-theme-card .avatar-halo-wrap {
+  position: relative !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  background: linear-gradient(135deg, #ff7299, var(--theme)) !important;
+  border: none !important;
+  flex-shrink: 0 !important;
+  margin-right: 11px !important;
+}
+body.wx-theme-card .avatar-inner-img {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  background-color: var(--card) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1.5px solid var(--card) !important;
+  overflow: hidden !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+/* 4. 顶部名片卡片与小书签吊牌 */
+.user-banner-card {
+  background: var(--card) !important;
+  border-radius: 20px !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  position: relative !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.02) !important;
+}
+.banner-ribbon {
+  position: absolute !important;
+  top: 0 !important;
+  left: 18px !important;
+  width: 8px !important;
+  height: 20px !important;
+  background: var(--theme) !important;
+  border-radius: 0 0 3.5px 3.5px !important;
+  opacity: 0.85 !important;
+}
+.banner-left { 
+  margin-left: 18px !important; 
+  flex: 1 !important; 
+  min-width: 0 !important; 
+  padding-right: 8px !important; 
+}
+.banner-input-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  width: 100% !important;
+}
+.banner-input-sub {
+  font-size: 11px !important;
+  color: var(--sub) !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+}
+.banner-my-avatar {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  background-color: var(--bg) !important;
+  border: 1px solid var(--line) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+/* 5. 虚线胶囊 */
+.dash-deco { 
+  display: flex !important; 
+  align-items: center !important; 
+  justify-content: center !important; 
+  gap: 5px !important; 
+  user-select: none !important; 
+  padding: 0 4px !important;
+}
+.dash-line { 
+  flex: 1 !important; 
+  border-bottom: 1px dashed var(--line) !important; 
+  opacity: 0.7 !important; 
+}
+.dash-dot { 
+  width: 3px !important; 
+  height: 3px !important; 
+  background: var(--sub) !important; 
+  border-radius: 50% !important; 
+  opacity: 0.5 !important; 
+}
+.dash-pill {
+  padding: 2.5px 11px !important;
+  border: 1px dashed var(--line) !important;
+  border-radius: 12px !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  color: var(--sub) !important;
+  background: var(--card) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.02) !important;
+  display: inline-flex !important;
+  align-items: center;
+}
+
+/* 6. 聊天界面：干净优雅的软萌气泡（无重叠双尾巴） */
+body.wx-theme-card .msg .mbody {
+  position: relative !important;
+  border-radius: 18px !important;
+  padding: 10px 14px !important;
+  font-size: 14.5px !important;
+  line-height: 1.5 !important;
+  word-break: break-word !important;
+  backdrop-filter: blur(13px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(13px) saturate(1.5) !important;
+}
+
+body.wx-theme-card .msg:not(.me) .mbody {
+  border-bottom-left-radius: 4px !important;
+  border: 1px solid color-mix(in srgb, var(--line) 36%, transparent) !important;
+  background:radial-gradient(142% 178% at 42% 32%,
+    color-mix(in srgb,var(--card) var(--bub-ai-core),transparent) 0%,
+    color-mix(in srgb,var(--card) var(--bub-ai-mid),transparent) 52%,
+    color-mix(in srgb,var(--card) var(--bub-ai-edge),transparent) 100%) !important;
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.6),
+    0 2px 8px -4px rgba(0,0,0,.1) !important;
+  color: var(--text) !important;
+}
+
+body.wx-theme-card .msg.me .mbody {
+  border-bottom-right-radius: 4px !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 16%, transparent) !important;
+  background:radial-gradient(142% 178% at 42% 32%,
+    color-mix(in srgb,var(--theme) var(--bub-me-core),transparent) 0%,
+    color-mix(in srgb,var(--theme) var(--bub-me-mid),transparent) 52%,
+    color-mix(in srgb,var(--theme) var(--bub-me-edge),transparent) 100%) !important;
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.55),
+    0 2px 8px -3px color-mix(in srgb, var(--theme) 20%, transparent) !important;
+  color: var(--text) !important;
+}
+
+body.wx-theme-card .cavatar {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--line) !important;
+  font-size: 15px !important;
+}
+/* 群聊角色名 */
+body.wx-theme-card .msg-name {
+  font-size: 11px !important;
+  color: var(--sub) !important;
+  margin-bottom: 3px !important;
+}
+/* 7. 聊天界面与底部输入栏：精准适配真实结构，彻底杜绝手机溢出 */
+
+/* 强制最外层容器在卡片风下严禁横向撑开 */
+body.wx-theme-card #phone {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* 底部总容器 */
+body.wx-theme-card #chatBottom {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px calc(28px + env(safe-area-inset-bottom, 0px)) 8px !important;
+}
+
+/* 顶部快捷功能栏 (相册/表情/转账/小纸条) */
+body.wx-theme-card #bubbleRow {
+  display: flex !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  padding: 4px 2px 8px 2px !important;
+}
+body.wx-theme-card .bubble-btn {
+  flex: 0 0 auto !important;
+  box-sizing: border-box !important;
+  padding: 6px 13px !important;
+}
+
+/* 主输入行：强制居中对齐、弹性压缩 */
+body.wx-theme-card #inputRow {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+/* 输入框包裹层与 textarea：允许自适应缩小，绝不撑破屏幕 */
+body.wx-theme-card .input-wrap {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+}
+body.wx-theme-card #chatInput {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* 按钮保持原本尺寸，不被压扁 */
+body.wx-theme-card .plus-btn,
+body.wx-theme-card .voice-btn,
+body.wx-theme-card .reply-btn {
+  flex-shrink: 0 !important;
+}
+/* ===== 软萌卡片风：顶栏改成透明清爽款（韩系空气感） ===== */
+body.wx-theme-card #topbar.wx-topbar {
+  background: transparent !important;   /* 白框消失，融进背景 */
+  border-bottom: none !important;       /* 去掉底部横线 */
+  box-shadow: none !important;
+  height: 52px !important;
+  padding: 0 8px !important;
+}
+
+body.wx-theme-card #topbar.wx-topbar #tbTitle {
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  letter-spacing: 1.5px !important;     /* 字间拉开，更精致 */
+  color: var(--text) !important;
+}
+
+body.wx-theme-card #topbar.wx-topbar .tb-btn {
+  font-weight: 300 !important;          /* 返回箭头变细 */
+  font-size: 20px !important;
+}
+
+/* ============================================================
+   ⑤ 微信主题 · 微光信笺（body.wx-theme-letter）
+   ⚠️ 注意：以下为 <head> 里的旧版本，会被下方 JS 注入版覆盖。
+   实际生效的是 ⑥ 里的注入版。为完整起见一并保留。
+   ============================================================ */
+body.wx-theme-letter {
+  --letter-back-3: linear-gradient(180deg, 
+    color-mix(in srgb, var(--theme) 75%, #fff 25%) 0%, 
+    color-mix(in srgb, var(--theme) 50%, #fff 50%) 30%, 
+    transparent 100%);
+  --letter-back-2: linear-gradient(180deg, 
+    color-mix(in srgb, var(--theme) 48%, #fff 52%) 0%, 
+    color-mix(in srgb, var(--theme) 28%, #fff 72%) 35%, 
+    transparent 100%);
+  --letter-back-1: linear-gradient(180deg, 
+    color-mix(in srgb, var(--theme) 25%, #fff 75%) 0%, 
+    color-mix(in srgb, var(--theme) 10%, #fff 90%) 40%, 
+    transparent 100%);
+  
+  --letter-glass-bg: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.48) 0%, 
+    rgba(255, 255, 255, 0.72) 40%, 
+    rgba(255, 255, 255, 0.88) 100%);
+  
+  --letter-glow-other: color-mix(in srgb, var(--theme) 26%, transparent);
+  --letter-glow-self: rgba(255, 255, 255, 0.7);
+  --letter-bubble-other: color-mix(in srgb, var(--theme) 15%, var(--card) 85%);
+  --letter-bubble-self: rgba(255, 255, 255, 0.94);
+}
+
+/* 微信下隐藏系统顶部栏，交给信笺外壳接管 */
+body.wx-theme-letter #topbar.wx-topbar {
+  display: none !important;
+}
+
+/* 舞台容器 */
+body.wx-theme-letter .letter-stage {
+  position: relative;
+  padding: 0 14px 14px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* 顶部常驻箴言 */
+body.wx-theme-letter .letter-top-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 10px 18px 12px;
+}
+body.wx-theme-letter .letter-phrase {
+  font-family: "Georgia", "Baskerville", serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+body.wx-theme-letter .letter-dots {
+  color: var(--sub);
+  font-size: 14px;
+  letter-spacing: 2px;
+  opacity: 0.6;
+}
+/* 聊天详情页的矮占位：只露一点后卡片，尽量省空间 */
+body.wx-theme-letter .letter-top-spacer {
+  height: 26px;
+  flex-shrink: 0;
+}
+
+/* 3层错落背板 */
+body.wx-theme-letter .letter-back-3 {
+  position: absolute;
+  top: 42px;
+  left: 34px;
+  right: 14px;
+  height: 440px;
+  background: var(--letter-back-3);
+  border-radius: 36px 36px 0 0;
+  transform: rotate(3.2deg);
+  filter: blur(5px);
+  opacity: 0.85;
+  z-index: 1;
+  pointer-events: none;
+}
+body.wx-theme-letter .letter-back-2 {
+  position: absolute;
+  top: 48px;
+  left: 14px;
+  right: 32px;
+  height: 410px;
+  background: var(--letter-back-2);
+  border-radius: 34px 34px 0 0;
+  transform: rotate(-2.2deg);
+  filter: blur(3px);
+  opacity: 0.9;
+  z-index: 2;
+  pointer-events: none;
+}
+body.wx-theme-letter .letter-back-1 {
+  position: absolute;
+  top: 54px;
+  left: 24px;
+  right: 20px;
+  height: 380px;
+  background: var(--letter-back-1);
+  border-radius: 34px 34px 0 0;
+  transform: rotate(0.8deg);
+  filter: blur(1.5px);
+  opacity: 0.95;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* 前景磨砂主卡（内凹切口） */
+body.wx-theme-letter .letter-main-card {
+  position: relative;
+  flex: 1;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  clip-path: path("M 0,36 A 36,36 0 0,1 36,0 L 102,0 C 112,0 117,5 121,11 C 125,16 130,18 140,18 L 232,18 C 242,18 247,16 251,11 C 255,5 260,0 270,0 L 336,0 A 36,36 0 0,1 372,36 L 372,680 A 36,36 0 0,1 336,716 L 36,716 A 36,36 0 0,1 0,680 Z");
+  background: var(--letter-glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.75);
+  border-radius: 36px;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.06);
+}
+
+body.wx-theme-letter .letter-notch-time {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--sub);
+  letter-spacing: 0.5px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* 顶部导航栏 */
+body.wx-theme-letter .letter-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 24px 18px 8px;
+  z-index: 10;
+}
+body.wx-theme-letter .letter-nav-item {
+  width: 44px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: var(--sub);
+  cursor: pointer;
+  transition: all .2s;
+}
+body.wx-theme-letter .letter-nav-item svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.wx-theme-letter .letter-nav-item.active {
+  color: var(--theme);
+  transform: translateY(-1px);
+}
+
+body.wx-theme-letter .letter-view-container {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* 列表项 */
+body.wx-theme-letter .letter-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: background .15s;
+}
+body.wx-theme-letter .letter-cell:active { background: rgba(255, 255, 255, 0.45); }
+
+body.wx-theme-letter .letter-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid rgba(255,255,255,0.9);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+body.wx-theme-letter .letter-cell-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+body.wx-theme-letter .letter-cell-top { display: flex; justify-content: space-between; align-items: center; }
+body.wx-theme-letter .letter-cell-name { font-size: 14px; font-weight: 600; color: var(--text); }
+body.wx-theme-letter .letter-cell-time { font-size: 10px; color: var(--sub); }
+body.wx-theme-letter .letter-cell-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+body.wx-theme-letter .letter-cell-msg { font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+body.wx-theme-letter .letter-unread {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--theme);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 9.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 消息气泡粉刷 */
+body.wx-theme-letter .msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 85%;
+}
+body.wx-theme-letter .msg.me {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+body.wx-theme-letter .cavatar {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(255,255,255,0.9) !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+body.wx-theme-letter .mbody {
+  border-radius: 16px !important;
+  padding: 9px 13px !important;
+  font-size: 13.5px !important;
+  line-height: 1.5 !important;
+  border: none !important;
+}
+body.wx-theme-letter .msg:not(.me) .mbody {
+  background: var(--letter-bubble-other) !important;
+  color: var(--text) !important;
+  box-shadow: 0 0 16px var(--letter-glow-other), 0 2px 4px rgba(0,0,0,0.02) !important;
+}
+body.wx-theme-letter .msg.me .mbody {
+  background: var(--letter-bubble-self) !important;
+  color: var(--text) !important;
+  box-shadow: 0 0 14px var(--letter-glow-self), 0 2px 6px rgba(0,0,0,0.03) !important;
+}
+
+/* 通讯录 / 发现 / 我的卡片组件 */
+body.wx-theme-letter .letter-mood-box { text-align: center; padding: 12px 10px 18px; }
+body.wx-theme-letter .letter-mood-tag {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--theme);
+  padding: 2px 10px;
+  border: 1px solid var(--theme);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+body.wx-theme-letter .letter-mood-txt { font-size: 13px; line-height: 1.7; color: var(--text); }
+
+body.wx-theme-letter .letter-action-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--letter-bubble-self);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin: 0 14px 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--letter-glow-self);
+}
+body.wx-theme-letter .letter-action-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  background: color-mix(in srgb, var(--theme) 14%, transparent);
+  display: flex; align-items: center; justify-content: center;
+}
+body.wx-theme-letter .letter-action-icon svg { width: 17px; height: 17px; stroke: var(--theme); fill: none; }
+body.wx-theme-letter .letter-action-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
+body.wx-theme-letter .letter-action-sub { font-size: 10.5px; color: var(--sub); }
+
+body.wx-theme-letter .letter-entry-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--letter-bubble-self);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 0 14px 10px;
+  cursor: pointer;
+  box-shadow: 0 0 12px var(--letter-glow-self);
+}
+body.wx-theme-letter .letter-entry-left { display: flex; align-items: center; gap: 12px; }
+body.wx-theme-letter .letter-icon-box {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: color-mix(in srgb, var(--theme) 12%, transparent);
+  display: flex; align-items: center; justify-content: center;
+}
+body.wx-theme-letter .letter-icon-box svg { width: 18px; height: 18px; stroke: var(--theme); fill: none; }
+
+body.wx-theme-letter .letter-profile-box {
+  background: var(--letter-bubble-self);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 20px;
+  padding: 16px;
+  margin: 0 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 0 12px var(--letter-glow-self);
+}
+body.wx-theme-letter .letter-profile-ava {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--theme);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: bold;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+
+body.wx-theme-letter .letter-form-card {
+  background: var(--letter-bubble-self);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 18px;
+  padding: 4px 14px;
+  margin: 0 14px 12px;
+  box-shadow: 0 0 10px var(--letter-glow-self);
+}
+body.wx-theme-letter .letter-form-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+body.wx-theme-letter .letter-form-row:last-child { border-bottom: none; }
+body.wx-theme-letter .letter-form-label { font-size: 13px; color: var(--sub); width: 75px; flex-shrink: 0; }
+body.wx-theme-letter .letter-form-input {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-size: 13.5px; color: var(--text); font-weight: 500;
+}
+
+/* 聊天底栏 */
+body.wx-theme-letter #chatBottom {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
+  padding: 8px 12px 16px !important;
+}
+
+/* ============================================================
+   ⑥ 微光信笺 · JS 注入版（真正生效的版本）
+   来源：页面底部 <script> 的 initLetterThemePlugin()
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   [1] 主题变量定义
+   ---------------------------------------------------------- */
+body.wx-theme-letter {
+  --letter-back-3: linear-gradient(135deg, color-mix(in srgb, var(--theme) 85%, var(--card) 15%) 0%, color-mix(in srgb, var(--theme) 60%, var(--card) 40%) 100%);
+  --letter-back-2: linear-gradient(135deg, color-mix(in srgb, var(--theme) 55%, var(--card) 45%) 0%, color-mix(in srgb, var(--theme) 35%, var(--card) 65%) 100%);
+  --letter-back-1: linear-gradient(135deg, color-mix(in srgb, var(--theme) 30%, var(--card) 70%) 0%, color-mix(in srgb, var(--theme) 12%, var(--card) 88%) 100%);
+  --letter-glass-bg: linear-gradient(180deg, color-mix(in srgb, var(--card) 55%, transparent) 0%, color-mix(in srgb, var(--card) 80%, transparent) 35%, var(--card) 100%);
+  --letter-glow-other: color-mix(in srgb, var(--theme) 26%, transparent);
+  --letter-glow-self: color-mix(in srgb, var(--theme) 45%, transparent);
+  --letter-bubble-other: color-mix(in srgb, var(--theme) 14%, var(--card) 86%);
+  --letter-bubble-self: color-mix(in srgb, var(--card) 92%, var(--theme) 8%);
+}
+/* ----------------------------------------------------------
+   [2] 全局：隐藏原生顶栏底栏
+   ---------------------------------------------------------- */
+body.wx-theme-letter #topbar,
+body.wx-theme-letter #tabbar { display: none !important; }
+
+/* ----------------------------------------------------------
+   [3] 舞台容器
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-stage {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 0 6px 0;
+  padding-bottom: 0 !important;
+}
+body.wx-theme-letter #content:has(#letterChatScroll) {
+  overflow: hidden !important;
+}
+
+/* ----------------------------------------------------------
+   [4] 顶部箴言与加号
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-top-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px 10px 14px;
+  z-index: 5;
+}
+body.wx-theme-letter .letter-phrase {
+  font-family: "Georgia", "Baskerville", serif;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+body.wx-theme-letter .letter-top-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+body.wx-theme-letter .letter-add-btn {
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--text);
+  cursor: pointer;
+  opacity: 0.85;
+  padding: 0 4px;
+}
+body.wx-theme-letter .letter-dots {
+  color: var(--sub);
+  font-size: 14px;
+  letter-spacing: 2px;
+  opacity: 0.6;
+}
+
+/* ----------------------------------------------------------
+   [5] 实体三层叠纸
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-back-3 {
+  position: absolute;
+  top: 13px;
+  left: 44px;
+  right: 8px;
+  height: 220px;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--theme) 60%, var(--card) 40%) 0%,
+    color-mix(in srgb, var(--theme) 60%, var(--card) 40%) 70%,
+    transparent 100%);
+  border: none;
+  border-radius: 36px 36px 0 0;
+  transform: rotate(4.2deg);
+  z-index: 1;
+  pointer-events: none;
+}
+
+body.wx-theme-letter .letter-back-2 {
+  position: absolute;
+  top: 18px;
+  left: 8px;
+  right: 38px;
+  height: 210px;
+  background: linear-gradient(to bottom,
+    color-mix(in srgb, var(--theme) 30%, var(--card) 70%) 0%,
+    color-mix(in srgb, var(--theme) 30%, var(--card) 70%) 70%,
+    transparent 100%);
+  border: none;
+  border-radius: 34px 34px 0 0;
+  transform: rotate(-3.2deg);
+  z-index: 2;
+  pointer-events: none;
+}
+
+body.wx-theme-letter .letter-back-1 {
+  position: absolute;
+  top: 48px;
+  left: 22px;
+  right: 22px;
+  height: 140px;
+  background: color-mix(in srgb, var(--theme) 20%, #fff 80%);
+  border: 1px solid rgba(255,255,255,0.8);
+  border-radius: 34px 34px 0 0;
+  transform: rotate(0.8deg);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ----------------------------------------------------------
+   [6] 前景磨砂主卡（内凹切口，底部通底无收口）
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-main-card {
+  position: relative;
+  flex: 1;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  clip-path: path("M 0,36 A 36,36 0 0,1 36,0 L 102,0 C 112,0 117,5 121,11 C 125,16 130,18 140,18 L 232,18 C 242,18 247,16 251,11 C 255,5 260,0 270,0 L 336,0 A 36,36 0 0,1 372,36 L 372,9999 L 0,9999 Z");
+  background: var(--letter-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-radius: 36px 36px 0 0;
+  box-shadow: none;
+  border-bottom: none !important;
+}
+body.wx-theme-letter .letter-notch-time {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--sub);
+  letter-spacing: 0.5px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ----------------------------------------------------------
+   [7] 顶部导航栏（四大 Tab）
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 24px 18px 8px;
+  z-index: 10;
+}
+body.wx-theme-letter .letter-nav-item {
+  width: 44px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: var(--sub);
+  cursor: pointer;
+  transition: all .2s;
+}
+body.wx-theme-letter .letter-nav-item svg {
+  width: 20px !important;
+  height: 20px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+}
+body.wx-theme-letter .letter-nav-item.active {
+  color: var(--theme);
+  transform: translateY(-1px);
+}
+
+/* ----------------------------------------------------------
+   [8] 列表（聊天/通讯录通用条目）
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+body.wx-theme-letter .letter-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: background .15s;
+}
+body.wx-theme-letter .letter-cell:active {
+  background: color-mix(in srgb, var(--theme) 12%, transparent);
+}
+body.wx-theme-letter .letter-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 15px;
+  border: 2px solid var(--card);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--text) 8%, transparent);
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+body.wx-theme-letter .letter-cell-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+body.wx-theme-letter .letter-cell-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+body.wx-theme-letter .letter-cell-name {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+body.wx-theme-letter .letter-cell-time {
+  font-size: 10.5px;
+  color: var(--sub);
+}
+body.wx-theme-letter .letter-cell-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+body.wx-theme-letter .letter-cell-msg {
+  font-size: 12px;
+  color: var(--sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.wx-theme-letter .letter-unread {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--theme);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 9.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ----------------------------------------------------------
+   [9] 聊天详情页：顶栏
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.4);
+  z-index: 10;
+}
+body.wx-theme-letter .letter-chat-back {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--theme) 18%, var(--card) 82%);
+  border: none;
+  color: var(--theme);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ----------------------------------------------------------
+   [10] 聊天滚动容器
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-chat-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+body.wx-theme-letter .letter-chat-scroll::before {
+  content: '' !important;
+  margin-top: auto !important;
+}
+body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar {
+  width: 5px !important;
+}
+body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar-thumb {
+  background: var(--theme) !important;
+  border-radius: 3px !important;
+  opacity: 0.6 !important;
+}
+body.wx-theme-letter .letter-chat-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+body.wx-theme-letter .ts { margin: 0 !important; }
+
+/* ----------------------------------------------------------
+   [11] 聊天气泡（AI左靠 / 我右靠 / 去掉渐变 / 保留发光）
+   ---------------------------------------------------------- */
+body.wx-theme-letter .msg {
+  display: flex !important;
+  align-items: flex-start !important;
+  align-self: flex-start !important;
+  gap: 6px !important;
+  max-width: 88% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+body.wx-theme-letter .msg.me {
+  align-self: flex-end !important;
+  flex-direction: row-reverse !important;
+}
+body.wx-theme-letter .cavatar {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--card) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+  background-color: var(--theme) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  flex-shrink: 0 !important;
+}
+body.wx-theme-letter .mbody {
+  border-radius: 18px !important;
+  padding: 9px 13px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+}
+/* AI 气泡 */
+body.wx-theme-letter .msg:not(.me) .mbody {
+  border: 1px solid color-mix(in srgb, #fff 38%, transparent) !important;
+  background:radial-gradient(142% 178% at 42% 32%,
+    color-mix(in srgb,var(--card) var(--bub-core),transparent) 0%,
+    color-mix(in srgb,var(--card) var(--bub-mid),transparent) 52%,
+    color-mix(in srgb,var(--card) var(--bub-edge),transparent) 100%) !important;
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.66),
+    0 0 14px var(--letter-glow-other) !important;
+  color: var(--text) !important;
+  backdrop-filter: blur(15px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(1.6) !important;
+}
+
+body.wx-theme-letter .msg.me .mbody {
+  border: 1px solid color-mix(in srgb, #fff 32%, transparent) !important;
+  background:radial-gradient(142% 178% at 42% 32%,
+    color-mix(in srgb,var(--theme) var(--bub-me-core),transparent) 0%,
+    color-mix(in srgb,var(--theme) var(--bub-me-mid),transparent) 52%,
+    color-mix(in srgb,var(--theme) var(--bub-me-edge),transparent) 100%) !important;
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.5),
+    0 0 16px var(--letter-glow-self) !important;
+  color: var(--bubble-text-me, var(--text)) !important;
+  backdrop-filter: blur(15px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(1.6) !important;
+}
+
+body.wx-theme-letter .msg .mbody {
+  flex-shrink: 0 !important;
+}
+
+/* ----------------------------------------------------------
+   [12] 底部输入区
+   ---------------------------------------------------------- */
+body.wx-theme-letter #chatBottom {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-top: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 8px 12px calc(16px + env(safe-area-inset-bottom, 10px)) 12px !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  border-radius: 0 !important;
+  position: relative !important;
+  z-index: 15 !important;
+  flex-shrink: 0 !important;
+  overflow: visible !important;
+}
+body.wx-theme-letter #chatBottom::before,
+body.wx-theme-letter #chatBottom::after {
+  border-top: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* 四个快捷按钮：居中一排 */
+body.wx-theme-letter #bubbleRow {
+  display: flex !important;
+  justify-content: space-around !important;
+  gap: 6px !important;
+  margin-bottom: 8px !important;
+  overflow-x: visible !important;
+}
+body.wx-theme-letter .bubble-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: color-mix(in srgb, var(--theme) 14%, var(--card) 86%) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 25%, transparent) !important;
+  border-radius: 14px !important;
+  padding: 5px 10px !important;
+  font-size: 11.5px !important;
+  color: var(--text) !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+body.wx-theme-letter .bubble-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* 输入行 */
+body.wx-theme-letter #inputRow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+/* 加号按钮 */
+body.wx-theme-letter .plus-btn {
+  width: 30px !important;
+  height: 30px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  background: var(--card) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 22%, transparent) !important;
+  color: var(--theme) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body.wx-theme-letter .plus-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* 输入框外壳 */
+body.wx-theme-letter .input-wrap {
+  flex: 1 !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  background: var(--card) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 22%, transparent) !important;
+  border-radius: 18px !important;
+  padding: 0 28px 0 12px !important;
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text) 6%, transparent) !important;
+  min-height: 32px !important;
+}
+body.wx-theme-letter #chatInput {
+  width: 100% !important;
+  flex: 1 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+  padding: 6px 0 !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  resize: none !important;
+  display: block !important;
+  vertical-align: middle !important;
+}
+body.wx-theme-letter #chatInput::placeholder {
+  color: color-mix(in srgb, var(--text) 45%, transparent) !important;
+}
+
+/* 小灯泡 */
+body.wx-theme-letter .idea-btn {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: color-mix(in srgb, var(--theme) 70%, var(--text) 30%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  z-index: 2 !important;
+}
+body.wx-theme-letter .idea-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+  stroke: currentColor !important;
+}
+body.wx-theme-letter .idea-btn.on {
+  color: #f5a623 !important;
+}
+body.wx-theme-letter .idea-btn.on svg {
+  stroke: #f5a623 !important;
+  filter: drop-shadow(0 0 3px rgba(245, 166, 35, 0.5));
+}
+/* 语音按钮 */
+body.wx-theme-letter .voice-btn {
+  width: 30px !important;
+  height: 30px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  background: var(--card) !important;
+  border: 1px solid color-mix(in srgb, var(--theme) 22%, transparent) !important;
+  color: var(--theme) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+body.wx-theme-letter .voice-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* 发送按钮 */
+body.wx-theme-letter .reply-btn {
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: var(--theme) !important;
+  color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--theme) 35%, transparent) !important;
+}
+body.wx-theme-letter .reply-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* ----------------------------------------------------------
+   [13] 展开面板
+   ---------------------------------------------------------- */
+body.wx-theme-letter .chatPanel .pnl-ico {
+  background: color-mix(in srgb, var(--theme) 14%, var(--card) 86%) !important;
+  color: var(--theme) !important;
+}
+body.wx-theme-letter .chatPanel .pnl span {
+  color: var(--text) !important;
+}
+
+/* ----------------------------------------------------------
+   [14] 通讯录 / 发现 / 我的卡片
+   ---------------------------------------------------------- */
+body.wx-theme-letter .letter-mood-box {
+  text-align: center;
+  padding: 12px 10px 18px;
+}
+body.wx-theme-letter .letter-mood-tag {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--theme);
+  padding: 2px 10px;
+  border: 1px solid var(--theme);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+body.wx-theme-letter .letter-mood-txt {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+body.wx-theme-letter .letter-action-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--letter-bubble-self);
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin: 0 14px 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--theme) 12%, transparent);
+}
+body.wx-theme-letter .letter-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--theme) 14%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body.wx-theme-letter .letter-action-icon svg {
+  width: 17px !important;
+  height: 17px !important;
+  stroke: var(--theme) !important;
+  fill: none !important;
+}
+body.wx-theme-letter .letter-action-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+body.wx-theme-letter .letter-action-sub {
+  font-size: 10.5px;
+  color: var(--sub);
+}
+
+body.wx-theme-letter .letter-entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--letter-bubble-self);
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 0 14px 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--theme) 12%, transparent);
+}
+body.wx-theme-letter .letter-entry-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+body.wx-theme-letter .letter-icon-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--theme) 12%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body.wx-theme-letter .letter-icon-box svg {
+  width: 18px !important;
+  height: 18px !important;
+  stroke: var(--theme) !important;
+  fill: none !important;
+}
+
+body.wx-theme-letter .letter-profile-box {
+  background: var(--letter-bubble-self);
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+  border-radius: 20px;
+  padding: 16px;
+  margin: 0 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--theme) 12%, transparent);
+}
+body.wx-theme-letter .letter-profile-ava {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--theme);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  border: 2px solid var(--card);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 8%, transparent);
+  cursor: pointer;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+body.wx-theme-letter .letter-form-card {
+  background: var(--letter-bubble-self);
+  border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+  border-radius: 18px;
+  padding: 4px 14px;
+  margin: 0 14px 12px;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--theme) 12%, transparent);
+}
+body.wx-theme-letter .letter-form-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+}
+body.wx-theme-letter .letter-form-row:last-child {
+  border-bottom: none;
+}
+body.wx-theme-letter .letter-form-label {
+  font-size: 13px;
+  color: var(--sub);
+  width: 75px;
+  flex-shrink: 0;
+}
+body.wx-theme-letter .letter-form-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13.5px;
+  color: var(--text);
+  font-weight: 500;
+}
+/* 空占位也要有高度，保证后两张卡片能露头 */
+body.wx-theme-letter .letter-top-heading {
+  min-height: 34px;
+}
+
+/* ============================================================
+   ⑦ 气泡风格专属样式
+   ⚠️ 说明：文件里 BUBBLE_STYLES 定义了 'sticker'/'vintage'，
+   但【全文件没有任何对应的 CSS 选择器】。这里列出的是实际
+   存在的、与「气泡」外观相关的规则。
+   ============================================================ */
+
+/* ---- 基础渐变气泡（所有主题共用，非专属但被主题覆盖） ---- */
+.mbody{
+  backdrop-filter:blur(var(--bub-blur)) saturate(var(--bub-sat)) !important;
+  -webkit-backdrop-filter:blur(var(--bub-blur)) saturate(var(--bub-sat)) !important;
+}
+
+/* ============================================================
+   ⑧ 结尾：本文件所有规则均为「主题/皮肤/气泡」相关。
+   如需进一步拆分，建议：themes/skins.css、themes/wx-card.css、
+   themes/wx-letter.css、themes/dark.css
+   ============================================================ */
