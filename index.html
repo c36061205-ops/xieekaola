@@ -9,16 +9,38 @@
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="./manifest.json">
 <meta charset="UTF-8">
+<script src="themes.js"></script>
+<link rel="stylesheet" href="themes.css">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>XieEKaoLa</title>
 <style>
+
   :root{
   --theme:#07c160;--bg:#ededed;--nav:#f7f7f7;--card:#fff;--text:#111;--sub:#888;--line:#e5e5e5;
   --bubble-text-ai:#111;   /* AI气泡文字，默认深色主题=深色字 */
   --bubble-text-me:#ffffff;/* 用户气泡文字，默认深色主题=白字 */
 }
+/* ===== 气泡渐变透明总控 ===== */
+:root{
+  /* AI 方 */
+  --bub-ai-core: 38%;
+  --bub-ai-mid:  48%;
+  --bub-ai-edge: 54%;
+
+  /* 用户方 */
+  --bub-me-core: 22%;
+  --bub-me-mid:  32%;
+  --bub-me-edge: 38%;
+
+  --bub-blur: 4px;
+  --bub-sat:  1.3;
+
+  --bub-radius: 14px;
+  --bub-radius-tail: 5px;
+}
+
   #bootLoading{
   position:fixed; inset:0; z-index:99999;
   display:flex; flex-direction:column;
@@ -116,11 +138,16 @@
   .batt{width:24px;height:12px;border:1px solid currentColor;border-radius:3px;position:relative;padding:1px;opacity:.9;}
   .batt::after{content:'';position:absolute;right:-3px;top:3px;width:2px;height:6px;background:currentColor;border-radius:0 1px 1px 0;}
   .batt i{display:block;height:100%;background:currentColor;border-radius:1px;}
+  :root{
+  --tb-glass: 32%;   /* 顶栏浓度，越小越透 */
+  --tb-blur: 8px;    /* 顶栏模糊半径 */
+}
+
 #topbar {
   height: 56px;
-  background: color-mix(in srgb, var(--nav) 45%, transparent);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: color-mix(in srgb, var(--nav) var(--tb-glass), transparent);
+  backdrop-filter: blur(var(--tb-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--tb-blur)) saturate(140%);
   border-bottom: 1px solid color-mix(in srgb, var(--line) 40%, transparent);
   display: flex;
   align-items: center;
@@ -311,19 +338,7 @@
     border-top-color: rgba(230,180,34,0.5);
   }
   .gift-wrap.rare .gift-foot .left { color: #B8860B; }
-  [data-dark="1"] .gift-wrap.rare .gift-foot .left,
-  body.dark .gift-wrap.rare .gift-foot .left { color: #F5D76E; }
-  .gift-wrap.rare .gift-story { color: #B8860B; }
-  [data-dark="1"] .gift-wrap.rare .gift-story,
-  body.dark .gift-wrap.rare .gift-story { color: #F5D76E; }
-  .gift-wrap.rare .gift-foot .stamp .no { color: #B8860B; }
-  [data-dark="1"] .gift-wrap.rare .gift-foot .stamp .no,
-  body.dark .gift-wrap.rare .gift-foot .stamp .no { color: #F5D76E; }
-  .gift-wrap.rare .gift-foot .btn-row .act {
-    border-color: rgba(230,180,34,0.55);
-    color: #B8860B;
-    background: rgba(230,180,34,0.08);
-  }
+
   [data-dark="1"] .gift-wrap.rare .gift-foot .btn-row .act,
   body.dark .gift-wrap.rare .gift-foot .btn-row .act { color: #F5D76E; }
   
@@ -460,9 +475,7 @@
                 0 1px 3px color-mix(in srgb,var(--text) 8%,transparent);
     position: relative;
 }
-[data-dark="1"] .app-ic{
-    box-shadow:0 4px 12px rgba(0,0,0,.45),0 1px 3px rgba(0,0,0,.3);
-}
+
 .app-ic-img {
     position: absolute;
     top: 50%;
@@ -607,28 +620,61 @@ textarea {
 
 .mbody{
   max-width:76%;
-  padding:9px 10px;
-  border-radius:8px;
-  border-top-left-radius:2px;
-  background:color-mix(in srgb, var(--card) 62%, transparent);
+  padding:9px 11px;
+  border-radius:var(--bub-radius);
+  border-top-left-radius:var(--bub-radius-tail);
   color:var(--bubble-text-ai, var(--text));
   font-size:15px;
   line-height:1.5;
   word-break:break-word;
   white-space:pre-wrap;
-  border:1px solid color-mix(in srgb, var(--line) 70%, transparent);
-  box-shadow:0 1px 2px rgba(0,0,0,.04);
-  backdrop-filter:blur(12px) saturate(1.3);
-  -webkit-backdrop-filter:blur(12px) saturate(1.3);
+  border:1px solid color-mix(in srgb, var(--line) 45%, transparent);
+
+  background:radial-gradient(140% 175% at 42% 32%,
+    color-mix(in srgb,var(--card) var(--bub-ai-core),transparent) 0%,
+    color-mix(in srgb,var(--card) calc(var(--bub-ai-core) + 4%),transparent) 26%,
+    color-mix(in srgb,var(--card) var(--bub-ai-mid),transparent) 52%,
+    color-mix(in srgb,var(--card) calc(var(--bub-ai-edge) - 3%),transparent) 78%,
+    color-mix(in srgb,var(--card) var(--bub-ai-edge),transparent) 100%);
+
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.5),
+    0 2px 8px -4px rgba(0,0,0,.14);
+
+  text-shadow:0 1px 3px rgba(0,0,0,.45);
+
+  backdrop-filter:blur(14px) saturate(1.45);
+  -webkit-backdrop-filter:blur(14px) saturate(1.45);
 }
 
 .msg.me .mbody{
-  background:color-mix(in srgb, var(--theme) 62%, transparent);
   color:var(--bubble-text-me, #fff);
-  border:1px solid color-mix(in srgb, var(--theme) 40%, transparent);
-  border-radius:8px;
-  border-top-right-radius:2px;
-  box-shadow:0 1px 3px rgba(0,0,0,.06);
+  border-radius:var(--bub-radius);
+  border-top-left-radius:var(--bub-radius);
+  border-top-right-radius:var(--bub-radius-tail);
+  border:1px solid color-mix(in srgb, var(--theme) 16%, transparent);
+
+  background:radial-gradient(140% 175% at 42% 32%,
+    color-mix(in srgb,var(--theme) var(--bub-me-core),transparent) 0%,
+    color-mix(in srgb,var(--theme) calc(var(--bub-me-core) + 3%),transparent) 26%,
+    color-mix(in srgb,var(--theme) var(--bub-me-mid),transparent) 52%,
+    color-mix(in srgb,var(--theme) calc(var(--bub-me-edge) - 1%),transparent) 78%,
+    color-mix(in srgb,var(--theme) var(--bub-me-edge),transparent) 100%);
+
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.55),
+    0 2px 8px -3px color-mix(in srgb, var(--theme) 22%, transparent);
+
+  text-shadow:0 1px 3px rgba(0,0,0,.5);
+
+  backdrop-filter:blur(13px) saturate(1.55);
+  -webkit-backdrop-filter:blur(13px) saturate(1.55);
+}
+
+/* 媒体/卡片类气泡不参与渐变，保持原来的实色 */
+.mbody.calllog-card,
+.mbody.voice-bubble{
+  text-shadow:none !important;
 }
 
 .bubble-btn {
@@ -1497,12 +1543,6 @@ margin-bottom:4px;}
   opacity: 0.7;
 }
 
-/* 深色主题：加强一点透明度，避免便利贴看不清 */
-[data-dark="1"] .anniv-widget .tag-back,
-[data-dark="1"] .anniv-widget .tag-front {
-  border: 1px solid rgba(255,255,255,.1);
-}
-
 /* ===== 桌面玻璃卡片统一样式 ===== */
 .glass-card{
   border-radius:24px;
@@ -1512,13 +1552,6 @@ margin-bottom:4px;}
   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border:1px solid color-mix(in srgb,var(--theme) 18%,transparent);
   box-shadow:0 4px 14px color-mix(in srgb,var(--text) 8%,transparent);
-}
-[data-dark="1"] .glass-card{
-  background:linear-gradient(158deg,
-    color-mix(in srgb,var(--theme) 16%,transparent),
-    color-mix(in srgb,var(--theme) 5%,transparent));
-  border-color:rgba(255,255,255,.12);
-  box-shadow:0 4px 14px rgba(0,0,0,.35);
 }
 
 /* ============================================================
@@ -1769,10 +1802,6 @@ margin-bottom:4px;}
   color: var(--sub) !important;
   opacity: .75 !important;
   white-space: nowrap !important;
-}
-/* ===== 咪思异想主题专用样式 ===== */
-#phone[data-theme="misi"] .clock-starry .ring {
-  opacity: var(--ring-opacity, 0.4);
 }
 
 /* 聊天气泡 —— AI 保留边框，用户去掉边框 + 用柔和红 */
@@ -2041,345 +2070,8 @@ margin-bottom:4px;}
 .m-btn.soft{background:var(--card);color:var(--theme);border:1.5px solid color-mix(in srgb,var(--theme) 40%,var(--line));}
 .m-btn.soft:hover{background:color-mix(in srgb,var(--theme) 8%,var(--card));}
 /* ============ 气泡风格系统结束 ============ */
-/* ===== 软萌卡片风 终极完整版（无冗余） ===== */
 
-/* 1. 悬浮胶囊底栏 (无文字、纯SVG、不常驻桌面) */
-body.wx-theme-card #tabbar {
-  position: absolute;
-  bottom: 16px;
-  left: 24px;
-  right: 24px;
-  height: 54px;
-  background: var(--card);
-  border-radius: 27px;
-  align-items: center;
-  justify-content: space-around;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--line);
-  padding: 0;
-  z-index: 100;
-}
-body.wx-theme-card #tabbar[style*="display: none"] {
-  display: none !important;
-}
-body.wx-theme-card #tabbar .tab {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 44px !important;
-  height: 44px !important;
-  font-size: 0 !important;
-  color: transparent !important;
-}
-body[data-tab-icon-mode="svg"] #tabbar .tab .ic,
-body[data-tab-icon-mode="svg"] #tabbar .tab img,
-body[data-tab-icon-mode="svg"] #tabbar .tab .tab-label {
-  display: none !important;
-}
-.tab-card-svg { display: none; }
-body[data-tab-icon-mode="svg"] #tabbar .tab .tab-card-svg {
-  display: block !important;
-  width: 22px !important;
-  height: 22px !important;
-  stroke: var(--sub) !important;
-  stroke-width: 1.8 !important;
-  fill: none !important;
-  stroke-linecap: round !important;
-  stroke-linejoin: round !important;
-}
-body[data-tab-icon-mode="svg"] #tabbar .tab.active .tab-card-svg {
-  stroke: var(--text) !important;
-  stroke-width: 2.2 !important;
-}
-/* 顶部标题栏：仅在"卡片风主题 + 正在看微信"时，换成跟卡片风统一的样子 */
-body.wx-theme-card #topbar.wx-topbar {
-  background: var(--card) !important;
-  border-bottom: none !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
-}
-body.wx-theme-card #topbar.wx-topbar #tbTitle {
-  color: var(--text) !important;
-}
-body.wx-theme-card #topbar.wx-topbar .tb-btn {
-  color: var(--sub) !important;
-}
-body.wx-theme-card #topbar.wx-topbar .tb-btn.r {
-  color: var(--theme) !important;
-}
 
-/* 2. 聊天/通讯录 列表大白卡片 */
-body.wx-theme-card .card-theme-wrap {
-  padding: 10px 16px 85px 16px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
-}
-body.wx-theme-card .card-container {
-  background: var(--card) !important;
-  border-radius: 24px !important;
-  padding: 8px 16px !important;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03) !important;
-  border: 1px solid var(--line) !important;
-  overflow: hidden !important;
-}
-body.wx-theme-card .card-container .cell {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 9px 0 !important;
-  margin: 0 !important;
-  width: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-/* 3. 列表头像双层渐变光圈 */
-body.wx-theme-card .avatar-halo-wrap {
-  position: relative !important;
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 50% !important;
-  padding: 2px !important;
-  background: linear-gradient(135deg, #ff7299, var(--theme)) !important;
-  border: none !important;
-  flex-shrink: 0 !important;
-  margin-right: 11px !important;
-}
-body.wx-theme-card .avatar-inner-img {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 50% !important;
-  background-color: var(--card) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border: 1.5px solid var(--card) !important;
-  overflow: hidden !important;
-  background-size: cover !important;
-  background-position: center !important;
-}
-
-/* 4. 顶部名片卡片与小书签吊牌 */
-.user-banner-card {
-  background: var(--card) !important;
-  border-radius: 20px !important;
-  padding: 14px 16px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  position: relative !important;
-  border: 1px solid var(--line) !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.02) !important;
-}
-.banner-ribbon {
-  position: absolute !important;
-  top: 0 !important;
-  left: 18px !important;
-  width: 8px !important;
-  height: 20px !important;
-  background: var(--theme) !important;
-  border-radius: 0 0 3.5px 3.5px !important;
-  opacity: 0.85 !important;
-}
-.banner-left { 
-  margin-left: 18px !important; 
-  flex: 1 !important; 
-  min-width: 0 !important; 
-  padding-right: 8px !important; 
-}
-.banner-input-title {
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  color: var(--text) !important;
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  width: 100% !important;
-}
-.banner-input-sub {
-  font-size: 11px !important;
-  color: var(--sub) !important;
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  width: 100% !important;
-  margin-top: 2px !important;
-}
-.banner-my-avatar {
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 12px !important;
-  background-color: var(--bg) !important;
-  border: 1px solid var(--line) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 18px !important;
-  flex-shrink: 0 !important;
-  cursor: pointer !important;
-  background-size: cover !important;
-  background-position: center !important;
-}
-
-/* 5. 虚线胶囊 */
-.dash-deco { 
-  display: flex !important; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  gap: 5px !important; 
-  user-select: none !important; 
-  padding: 0 4px !important;
-}
-.dash-line { 
-  flex: 1 !important; 
-  border-bottom: 1px dashed var(--line) !important; 
-  opacity: 0.7 !important; 
-}
-.dash-dot { 
-  width: 3px !important; 
-  height: 3px !important; 
-  background: var(--sub) !important; 
-  border-radius: 50% !important; 
-  opacity: 0.5 !important; 
-}
-.dash-pill {
-  padding: 2.5px 11px !important;
-  border: 1px dashed var(--line) !important;
-  border-radius: 12px !important;
-  font-size: 10.5px !important;
-  font-weight: 500 !important;
-  color: var(--sub) !important;
-  background: var(--card) !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.02) !important;
-  display: inline-flex !important;
-  align-items: center;
-}
-
-/* 6. 聊天界面：干净优雅的软萌气泡（无重叠双尾巴） */
-body.wx-theme-card .msg .mbody {
-  position: relative !important;
-  border-radius: 18px !important;
-  padding: 10px 14px !important;
-  font-size: 14.5px !important;
-  line-height: 1.5 !important;
-  word-break: break-word !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-body.wx-theme-card .msg:not(.me) .mbody {
-  background: color-mix(in srgb, var(--card) 60%, transparent) !important;
-  color: var(--text) !important;
-  border: 1px solid color-mix(in srgb, var(--line) 65%, transparent) !important;
-  border-bottom-left-radius: 4px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
-}
-
-body.wx-theme-card .msg.me .mbody {
-  background: color-mix(in srgb, var(--theme) 55%, transparent) !important;
-  color: var(--text) !important;
-  border: 1px solid color-mix(in srgb, var(--theme) 35%, transparent) !important;
-  border-bottom-right-radius: 4px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
-}
-body.wx-theme-card .cavatar {
-  width: 42px !important;
-  height: 42px !important;
-  border-radius: 14px !important;
-  border: 1px solid var(--line) !important;
-  font-size: 15px !important;
-}
-/* 群聊角色名 */
-body.wx-theme-card .msg-name {
-  font-size: 11px !important;
-  color: var(--sub) !important;
-  margin-bottom: 3px !important;
-}
-/* 7. 聊天界面与底部输入栏：精准适配真实结构，彻底杜绝手机溢出 */
-
-/* 强制最外层容器在卡片风下严禁横向撑开 */
-body.wx-theme-card #phone {
-  max-width: 100vw !important;
-  overflow-x: hidden !important;
-  box-sizing: border-box !important;
-}
-
-/* 底部总容器 */
-body.wx-theme-card #chatBottom {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  padding: 6px 8px calc(28px + env(safe-area-inset-bottom, 0px)) 8px !important;
-}
-
-/* 顶部快捷功能栏 (相册/表情/转账/小纸条) */
-body.wx-theme-card #bubbleRow {
-  display: flex !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
-  overflow-x: auto !important;
-  padding: 4px 2px 8px 2px !important;
-}
-body.wx-theme-card .bubble-btn {
-  flex: 0 0 auto !important;
-  box-sizing: border-box !important;
-  padding: 6px 13px !important;
-}
-
-/* 主输入行：强制居中对齐、弹性压缩 */
-body.wx-theme-card #inputRow {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-}
-
-/* 输入框包裹层与 textarea：允许自适应缩小，绝不撑破屏幕 */
-body.wx-theme-card .input-wrap {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  width: auto !important;
-  box-sizing: border-box !important;
-  display: flex !important;
-  align-items: center !important;
-}
-body.wx-theme-card #chatInput {
-  width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-}
-
-/* 按钮保持原本尺寸，不被压扁 */
-body.wx-theme-card .plus-btn,
-body.wx-theme-card .voice-btn,
-body.wx-theme-card .reply-btn {
-  flex-shrink: 0 !important;
-}
-/* ===== 软萌卡片风：顶栏改成透明清爽款（韩系空气感） ===== */
-body.wx-theme-card #topbar.wx-topbar {
-  background: transparent !important;   /* 白框消失，融进背景 */
-  border-bottom: none !important;       /* 去掉底部横线 */
-  box-shadow: none !important;
-  height: 52px !important;
-  padding: 0 8px !important;
-}
-
-body.wx-theme-card #topbar.wx-topbar #tbTitle {
-  font-weight: 500 !important;
-  font-size: 16px !important;
-  letter-spacing: 1.5px !important;     /* 字间拉开，更精致 */
-  color: var(--text) !important;
-}
-
-body.wx-theme-card #topbar.wx-topbar .tb-btn {
-  font-weight: 300 !important;          /* 返回箭头变细 */
-  font-size: 20px !important;
-}
 /* ================= 📝 OA审批流专属样式（完全自适应深浅色主题） ================= */
 .oa-modal-mask {
   position: absolute;
@@ -2785,388 +2477,7 @@ body.wx-theme-card #topbar.wx-topbar .tb-btn {
   color: var(--theme);
   font-weight: 600;
 }
-/* ==================================================
-   📜 「微光信笺」主题样式 (wx-theme-letter)
-   ================================================== */
-body.wx-theme-letter {
-  --letter-back-3: linear-gradient(180deg, 
-    color-mix(in srgb, var(--theme) 75%, #fff 25%) 0%, 
-    color-mix(in srgb, var(--theme) 50%, #fff 50%) 30%, 
-    transparent 100%);
-  --letter-back-2: linear-gradient(180deg, 
-    color-mix(in srgb, var(--theme) 48%, #fff 52%) 0%, 
-    color-mix(in srgb, var(--theme) 28%, #fff 72%) 35%, 
-    transparent 100%);
-  --letter-back-1: linear-gradient(180deg, 
-    color-mix(in srgb, var(--theme) 25%, #fff 75%) 0%, 
-    color-mix(in srgb, var(--theme) 10%, #fff 90%) 40%, 
-    transparent 100%);
-  
-  --letter-glass-bg: linear-gradient(180deg, 
-    rgba(255, 255, 255, 0.48) 0%, 
-    rgba(255, 255, 255, 0.72) 40%, 
-    rgba(255, 255, 255, 0.88) 100%);
-  
-  --letter-glow-other: color-mix(in srgb, var(--theme) 26%, transparent);
-  --letter-glow-self: rgba(255, 255, 255, 0.7);
-  --letter-bubble-other: color-mix(in srgb, var(--theme) 15%, var(--card) 85%);
-  --letter-bubble-self: rgba(255, 255, 255, 0.94);
-}
 
-/* 微信下隐藏系统顶部栏，交给信笺外壳接管 */
-body.wx-theme-letter #topbar.wx-topbar {
-  display: none !important;
-}
-
-/* 舞台容器 */
-body.wx-theme-letter .letter-stage {
-  position: relative;
-  padding: 0 14px 14px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-/* 顶部常驻箴言 */
-body.wx-theme-letter .letter-top-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2px 10px 18px 12px;
-}
-body.wx-theme-letter .letter-phrase {
-  font-family: "Georgia", "Baskerville", serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.2px;
-}
-body.wx-theme-letter .letter-dots {
-  color: var(--sub);
-  font-size: 14px;
-  letter-spacing: 2px;
-  opacity: 0.6;
-}
-    /* 聊天详情页的矮占位：只露一点后卡片，尽量省空间 */
-    body.wx-theme-letter .letter-top-spacer {
-      height: 26px;
-      flex-shrink: 0;
-    }
-
-/* 3层错落背板 */
-body.wx-theme-letter .letter-back-3 {
-  position: absolute;
-  top: 42px;
-  left: 34px;
-  right: 14px;
-  height: 440px;
-  background: var(--letter-back-3);
-  border-radius: 36px 36px 0 0;
-  transform: rotate(3.2deg);
-  filter: blur(5px);
-  opacity: 0.85;
-  z-index: 1;
-  pointer-events: none;
-}
-body.wx-theme-letter .letter-back-2 {
-  position: absolute;
-  top: 48px;
-  left: 14px;
-  right: 32px;
-  height: 410px;
-  background: var(--letter-back-2);
-  border-radius: 34px 34px 0 0;
-  transform: rotate(-2.2deg);
-  filter: blur(3px);
-  opacity: 0.9;
-  z-index: 2;
-  pointer-events: none;
-}
-body.wx-theme-letter .letter-back-1 {
-  position: absolute;
-  top: 54px;
-  left: 24px;
-  right: 20px;
-  height: 380px;
-  background: var(--letter-back-1);
-  border-radius: 34px 34px 0 0;
-  transform: rotate(0.8deg);
-  filter: blur(1.5px);
-  opacity: 0.95;
-  z-index: 3;
-  pointer-events: none;
-}
-
-/* 前景磨砂主卡（内凹切口） */
-body.wx-theme-letter .letter-main-card {
-  position: relative;
-  flex: 1;
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  clip-path: path("M 0,36 A 36,36 0 0,1 36,0 L 102,0 C 112,0 117,5 121,11 C 125,16 130,18 140,18 L 232,18 C 242,18 247,16 251,11 C 255,5 260,0 270,0 L 336,0 A 36,36 0 0,1 372,36 L 372,680 A 36,36 0 0,1 336,716 L 36,716 A 36,36 0 0,1 0,680 Z");
-  background: var(--letter-glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.75);
-  border-radius: 36px;
-  box-shadow: 0 16px 36px rgba(0,0,0,0.06);
-}
-
-body.wx-theme-letter .letter-notch-time {
-  position: absolute;
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  color: var(--sub);
-  letter-spacing: 0.5px;
-  z-index: 10;
-  pointer-events: none;
-}
-
-/* 顶部导航栏 */
-body.wx-theme-letter .letter-nav {
-  display: flex;
-  justify-content: space-around;
-  padding: 24px 18px 8px;
-  z-index: 10;
-}
-body.wx-theme-letter .letter-nav-item {
-  width: 44px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  color: var(--sub);
-  cursor: pointer;
-  transition: all .2s;
-}
-body.wx-theme-letter .letter-nav-item svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-body.wx-theme-letter .letter-nav-item.active {
-  color: var(--theme);
-  transform: translateY(-1px);
-}
-
-body.wx-theme-letter .letter-view-container {
-  flex: 1;
-  overflow-y: auto;
-  position: relative;
-}
-
-/* 列表项 */
-body.wx-theme-letter .letter-cell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 18px;
-  cursor: pointer;
-  transition: background .15s;
-}
-body.wx-theme-letter .letter-cell:active { background: rgba(255, 255, 255, 0.45); }
-
-body.wx-theme-letter .letter-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--theme);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  border: 2px solid rgba(255,255,255,0.9);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  flex-shrink: 0;
-  background-size: cover;
-  background-position: center;
-}
-
-body.wx-theme-letter .letter-cell-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-body.wx-theme-letter .letter-cell-top { display: flex; justify-content: space-between; align-items: center; }
-body.wx-theme-letter .letter-cell-name { font-size: 14px; font-weight: 600; color: var(--text); }
-body.wx-theme-letter .letter-cell-time { font-size: 10px; color: var(--sub); }
-body.wx-theme-letter .letter-cell-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-body.wx-theme-letter .letter-cell-msg { font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-body.wx-theme-letter .letter-unread {
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  background: var(--theme);
-  color: #fff;
-  border-radius: 8px;
-  font-size: 9.5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 消息气泡粉刷 */
-body.wx-theme-letter .msg {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  max-width: 85%;
-}
-body.wx-theme-letter .msg.me {
-  align-self: flex-end;
-  flex-direction: row-reverse;
-}
-body.wx-theme-letter .cavatar {
-  width: 34px !important;
-  height: 34px !important;
-  border-radius: 50% !important;
-  border: 2px solid rgba(255,255,255,0.9) !important;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
-  background: var(--theme);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-body.wx-theme-letter .mbody {
-  border-radius: 16px !important;
-  padding: 9px 13px !important;
-  font-size: 13.5px !important;
-  line-height: 1.5 !important;
-  border: none !important;
-}
-body.wx-theme-letter .msg:not(.me) .mbody {
-  background: var(--letter-bubble-other) !important;
-  color: var(--text) !important;
-  box-shadow: 0 0 16px var(--letter-glow-other), 0 2px 4px rgba(0,0,0,0.02) !important;
-}
-body.wx-theme-letter .msg.me .mbody {
-  background: var(--letter-bubble-self) !important;
-  color: var(--text) !important;
-  box-shadow: 0 0 14px var(--letter-glow-self), 0 2px 6px rgba(0,0,0,0.03) !important;
-}
-
-/* 通讯录 / 发现 / 我的卡片组件 */
-body.wx-theme-letter .letter-mood-box { text-align: center; padding: 12px 10px 18px; }
-body.wx-theme-letter .letter-mood-tag {
-  display: inline-block;
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--theme);
-  padding: 2px 10px;
-  border: 1px solid var(--theme);
-  border-radius: 12px;
-  margin-bottom: 8px;
-  opacity: 0.8;
-}
-body.wx-theme-letter .letter-mood-txt { font-size: 13px; line-height: 1.7; color: var(--text); }
-
-body.wx-theme-letter .letter-action-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--letter-bubble-self);
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 16px;
-  padding: 10px 14px;
-  margin: 0 14px 8px;
-  cursor: pointer;
-  box-shadow: 0 0 10px var(--letter-glow-self);
-}
-body.wx-theme-letter .letter-action-icon {
-  width: 32px; height: 32px; border-radius: 10px;
-  background: color-mix(in srgb, var(--theme) 14%, transparent);
-  display: flex; align-items: center; justify-content: center;
-}
-body.wx-theme-letter .letter-action-icon svg { width: 17px; height: 17px; stroke: var(--theme); fill: none; }
-body.wx-theme-letter .letter-action-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
-body.wx-theme-letter .letter-action-sub { font-size: 10.5px; color: var(--sub); }
-
-body.wx-theme-letter .letter-entry-card {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--letter-bubble-self);
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 18px;
-  padding: 14px 16px;
-  margin: 0 14px 10px;
-  cursor: pointer;
-  box-shadow: 0 0 12px var(--letter-glow-self);
-}
-body.wx-theme-letter .letter-entry-left { display: flex; align-items: center; gap: 12px; }
-body.wx-theme-letter .letter-icon-box {
-  width: 34px; height: 34px; border-radius: 10px;
-  background: color-mix(in srgb, var(--theme) 12%, transparent);
-  display: flex; align-items: center; justify-content: center;
-}
-body.wx-theme-letter .letter-icon-box svg { width: 18px; height: 18px; stroke: var(--theme); fill: none; }
-
-body.wx-theme-letter .letter-profile-box {
-  background: var(--letter-bubble-self);
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 20px;
-  padding: 16px;
-  margin: 0 14px 10px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: 0 0 12px var(--letter-glow-self);
-}
-body.wx-theme-letter .letter-profile-ava {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: var(--theme);
-  color: #fff; display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: bold;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  cursor: pointer;
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-  background-size: cover;
-  background-position: center;
-}
-
-body.wx-theme-letter .letter-form-card {
-  background: var(--letter-bubble-self);
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 18px;
-  padding: 4px 14px;
-  margin: 0 14px 12px;
-  box-shadow: 0 0 10px var(--letter-glow-self);
-}
-body.wx-theme-letter .letter-form-row {
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-}
-body.wx-theme-letter .letter-form-row:last-child { border-bottom: none; }
-body.wx-theme-letter .letter-form-label { font-size: 13px; color: var(--sub); width: 75px; flex-shrink: 0; }
-body.wx-theme-letter .letter-form-input {
-  flex: 1; border: none; background: transparent; outline: none;
-  font-size: 13.5px; color: var(--text); font-weight: 500;
-}
-
-/* 聊天底栏 */
-body.wx-theme-letter #chatBottom {
-  background: rgba(255, 255, 255, 0.45) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
-  padding: 8px 12px 16px !important;
-}
 /* ============================================================
    ★ 天气组件 · 方案 2 夏夜萤火流光粒子（纯 CSS 零开销）
    ============================================================ */
@@ -3269,8 +2580,8 @@ body.wx-theme-letter #chatBottom {
    ======================================================== */
 
 :root{
-  --bb-glass:22%;          /* 底栏磨砂浓度，越小越透 */
-  --bb-blur:28px;          /* 磨砂模糊半径 */
+  --bb-glass:18%;          /* 底栏磨砂浓度，越小越透 */
+  --bb-blur:8px;           /* 磨砂模糊半径 */
   --bb-pad-x:14px;
   --bb-pad-top:9px;
   --bb-pad-bottom:16px;
@@ -3361,8 +2672,8 @@ body.wx-theme-letter .input-wrap{
   display:flex !important;align-items:flex-end !important;
   position:relative !important;height:auto !important;
   background:color-mix(in srgb,var(--card) 42%,transparent) !important;
-  backdrop-filter:blur(14px) saturate(150%) !important;
-  -webkit-backdrop-filter:blur(14px) saturate(150%) !important;
+  backdrop-filter:blur(6px) saturate(130%) !important;
+  -webkit-backdrop-filter:blur(6px) saturate(130%) !important;
   border:1px solid color-mix(in srgb,var(--line) 45%,transparent) !important;
   border-radius:var(--bb-radius) !important;
   padding:7px 34px 7px 14px !important;
@@ -3480,6 +2791,31 @@ body .idea-btn.on svg{fill:#f7b500 !important;stroke:none !important;}
 body .idea-btn:active{transform:scale(.88) !important;}
 body .input-wrap:focus-within .idea-btn:not(.on){opacity:.78 !important;}
 
+/* ===== 气泡模糊度统一覆盖（加在所有气泡规则之后） ===== */
+.mbody,
+body.wx-theme-card .msg .mbody,
+body.wx-theme-card .msg:not(.me) .mbody,
+body.wx-theme-card .msg.me .mbody,
+body.wx-theme-letter .msg:not(.me) .mbody,
+body.wx-theme-letter .msg.me .mbody{
+  backdrop-filter:blur(var(--bub-blur)) saturate(var(--bub-sat)) !important;
+  -webkit-backdrop-filter:blur(var(--bub-blur)) saturate(var(--bub-sat)) !important;
+}
+
+#phone[data-theme="aqua_girl"] .msg.me .mbody,
+#phone[data-theme="orchard"] .msg.me .mbody,
+#phone[data-theme="sunset_parfait"] .msg.me .mbody,
+#phone[data-theme="redsun_forest"] .msg.me .mbody,
+#phone[data-theme="goose"] .msg.me .mbody,
+#phone[data-theme="sea_salt"] .msg.me .mbody,
+#phone[data-theme="angel_sheep"] .msg.me .mbody{
+  border-color: color-mix(in srgb, var(--theme) 42%, transparent);
+  box-shadow:
+    inset 0 2px 7px -3px rgba(255,255,255,.6),
+    0 1px 4px -1px color-mix(in srgb, var(--theme) 22%, transparent),
+    0 3px 10px -4px rgba(0,0,0,.08);
+}
+
 </style>
 </head>
 <body>
@@ -3535,7 +2871,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v20261007_1';
+const APP_VER = 'v20261008_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -3977,397 +3313,28 @@ var IDEA_PROMPT_REGEN =
 
 function newId(){return 'm'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 const CFIELDS=['gender','age','job','family','body','pLook','pKeywords','pBehavior','pStyle','pBack','pDaily','pLike','pLang','negative','opening','pExtra','myGender','myAge','myJob','myLook','myPersona','myRelation','chatBg'];
-const SKINS = [
-  {
-    id: 'fusion',
-    name: '🌙 女巫之夜',
-    color: '#B34A6A',
-    '--theme': '#B34A6A',
-    '--bg': '#1F1A2A',
-    '--nav': '#2E2540',
-    '--card': '#2E2540',
-    '--text': '#E8DDE6',
-    '--sub': '#A084A0',
-    '--line': '#3D2F4A',
-    // ✅ 内置壁纸（纯色/渐变色字符串，或图片URL）
-wallpaper: 'radial-gradient(ellipse at 30% 10%, #6B4A6A 0%, transparent 40%), radial-gradient(ellipse at 80% 90%, #2A1A2A 0%, transparent 50%), radial-gradient(ellipse at 50% 60%, #3D2F4A 0%, transparent 60%), linear-gradient(160deg, #1F1A2A 0%, #120E18 100%)'  },
-{
-  id: 'aqua_girl',
-  name: '🌸 亚系少女',
-  color: '#DDB6C9',
-  '--theme': '#DDB6C9',
-  '--bg': '#F9F4F7',
-  '--nav': '#FFFFFF',
-  '--card': '#FFFFFF',
-  '--text': '#261D22',        // 柔和的深紫灰（比原版深，但不死黑）
-  '--sub': '#4A3640',         // 中灰粉（柔和清晰）
-  '--line': '#D5C5CC',        // 深边框（保留区分度）
-  wallpaper: 'radial-gradient(ellipse at 30% 15%, #FCE4EC 0%, transparent 35%), radial-gradient(ellipse at 70% 80%, #F3E5F5 0%, transparent 45%), radial-gradient(ellipse at 50% 50%, #F7EAF0 0%, transparent 60%), linear-gradient(160deg, #F7EAF0 0%, #EBE1E6 100%)'
-},
-{
-  id: 'orchard',
-  name: '🐻 林间小集',
-  color: '#C85B53',
-  '--theme': '#C85B53',
-  '--bg': '#F3E9D8',
-  '--nav': '#F5EDE0',
-  '--card': '#EAD7C0',
-  '--text': '#2D1A12',        // 调深
-  '--sub': '#2E4A55',         // 调深
-  '--line': '#C4AFA0',        // 调深
-  wallpaper: 'radial-gradient(ellipse at 30% 10%, #E8C9A0 0%, transparent 40%), radial-gradient(ellipse at 70% 90%, #A8B88A 0%, transparent 50%), linear-gradient(145deg, #F3E9D8 0%, #E8DCC8 100%)'
-},
-{
-  id: 'misi',
-  name: '🐱 咪思异想',
-  color: '#C82333',                     // 饱和度高、带一点点科幻感的激光红/红墨水色
-  '--theme': '#C82333',
-  '--bg': '#FFFFFF',                    // 100% 纯白，完美契合你的纯白图标
-  '--nav': '#FFFFFF',
-  '--card': '#FFFFFF',
-  '--text': '#1A1A1A',                  // 绝对纯黑，形成强烈的漫画对比
-  '--sub': '#666666',                   // 中性灰
-  '--line': '#1A1A1A',                  // 纯黑描边线
-  '--ring-opacity': '0.8',
-  wallpaper: 'radial-gradient(circle at 82% 28%, rgba(200, 35, 51, 0.75) 0%, rgba(200, 35, 51, 0.1) 4px, transparent 15px), radial-gradient(circle at 18% 72%, rgba(200, 35, 51, 0.70) 0%, rgba(200, 35, 51, 0.1) 3px, transparent 12px), radial-gradient(circle at 50% 88%, rgba(200, 35, 51, 0.65) 0%, rgba(200, 35, 51, 0.1) 5px, transparent 18px), radial-gradient(circle at 28% 40%, rgba(200, 35, 51, 0.8) 0%, transparent 4px), radial-gradient(circle at 75% 62%, rgba(200, 35, 51, 0.8) 0%, transparent 5px), radial-gradient(circle at 62% 14%, rgba(200, 35, 51, 0.8) 0%, transparent 3px), radial-gradient(circle at 92% 52%, rgba(200, 35, 51, 0.8) 0%, transparent 4px), #FFFFFF'
-  
-},
-{
-  id: 'momo_night',
-  name: '🐑 咩咩夜行',
-  color: '#E69AAB',
-  '--theme': '#E69AAB',
-  '--bg': '#252833',
-  '--nav': '#313645',
-  '--card': '#313645',
-  '--text': '#FDF6E3',
-  '--sub': '#A59EB0',
-  '--line': '#4D4755',
-  
-  wallpaper: 'radial-gradient(circle at 50% -10%, rgba(139, 100, 72, 0.2) 0%, transparent 40%), radial-gradient(circle at 50% 110%, rgba(139, 100, 72, 0.15) 0%, transparent 40%), linear-gradient(90deg, #252833 2px, transparent 2px) 0 0 / 4px 100%, linear-gradient(#252833 2px, transparent 2px) 0 0 / 100% 4px, linear-gradient(rgba(253, 246, 227, 0.04) 1px, transparent 1px) 0 0 / 32px 32px, linear-gradient(90deg, rgba(253, 246, 227, 0.04) 1px, transparent 1px) 0 0 / 32px 32px, url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.7\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'0.04\'/%3E%3C/svg%3E"), #252833',
-  },
-{
-  id: 'sunset_parfait',
-  name: '🍨 落日芭菲',
-  color: '#DE8B59',           // 优化：夕阳暖杏金（落日余晖+焦糖甜品感，告别俗粉与冷绿）
-  '--theme': '#DE8B59',        // 顶栏和时钟环像夕阳光晕一样温暖耐看
-  '--bg': '#FAF8F5',
-  '--nav': '#FAF8F5',
-  '--card': '#FFFFFF',
-  '--text': '#36303B',         // 深紫灰文字
-  '--sub': '#6F6575',
-  '--line': '#EAE1E8',
-  '--ring-opacity': '0.9',
-  
-  /* 晚霞天幕：暮色蓝 ➔ 薰衣草紫 ➔ 香草米白（完美烘托落日暖金） */
-  wallpaper: `
-    linear-gradient(180deg, 
-      #C6DBF8 0%, 
-      #E5E0F8 22%, 
-      #F4ECF2 50%, 
-      #FAF2EE 78%, 
-      #FAF7F2 100%
-    )
-  `
-},
-{
-  id: 'redsun_forest',
-  name: '🌲 红日森谣',
-  color: '#D45A3A',
-  '--theme': '#D45A3A',
-  '--bg': '#F7EDE4',
-  '--nav': '#FBF3EA',
-  '--card': '#FCF7F2',
-  '--text': '#2D2A26',
-  '--sub': '#8E7A6B',
-  '--line': '#E5D6C8',
-wallpaper: `
-  linear-gradient(180deg, #F7EDE4 50%, #F0E0D4 100%)
-`
-},
-
-{
-  id: 'goose',
-  name: '🦆 大鹅来啦',
-  color: '#E8915A',
-  '--theme': '#E8915A',
-  '--bg': '#FFF8F3',
-  '--nav': '#FFF8F3',
-  '--card': '#FFFBF7',
-  '--text': '#4A2E1D',
-  '--sub': '#8C7364',
-  '--line': '#F0D5C0',
-  '--ring-opacity': '0.7',
-  wallpaper: `
-    linear-gradient(180deg, #FFF8F3 0%, #FFFFFF 40%, #FFF8F3 100%)
-  `
-},
-
-// 在 SKINS 数组中替换 sea_salt 的 wallpaper 字段
-{
-  id: 'sea_salt',
-  name: '🧂 海盐软糖',
-  color: '#FED7E2',
-  '--theme': '#E883A0',
-  '--bg': '#FCFDF7',
-  '--nav': '#FCFDF7',
-  '--card': '#FFFFFF',
-  '--text': '#2D3748',
-  '--sub': '#7A8A9E',
-  '--line': '#E8EEF5',
-  '--ring-opacity': '0.6',
-  // ★ 新壁纸：用径向渐变做马卡龙色泡泡
-  wallpaper: 'radial-gradient(circle at 12% 18%, rgba(254, 215, 226, 0.55) 0%, rgba(254, 215, 226, 0.1) 40%, transparent 55%), radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.6) 0%, transparent 20%), radial-gradient(circle at 85% 22%, rgba(214, 232, 250, 0.50) 0%, rgba(214, 232, 250, 0.08) 35%, transparent 50%), radial-gradient(circle at 85% 22%, rgba(255, 255, 255, 0.5) 0%, transparent 18%), radial-gradient(circle at 78% 82%, rgba(253, 241, 184, 0.45) 0%, rgba(253, 241, 184, 0.08) 35%, transparent 50%), radial-gradient(circle at 78% 82%, rgba(255, 255, 255, 0.5) 0%, transparent 18%), radial-gradient(circle at 32% 72%, rgba(200, 235, 220, 0.40) 0%, rgba(200, 235, 220, 0.06) 30%, transparent 45%), radial-gradient(circle at 32% 72%, rgba(255, 255, 255, 0.5) 0%, transparent 15%), radial-gradient(circle at 55% 48%, rgba(220, 210, 240, 0.35) 0%, rgba(220, 210, 240, 0.05) 30%, transparent 45%), radial-gradient(circle at 55% 48%, rgba(255, 255, 255, 0.4) 0%, transparent 15%), radial-gradient(circle at 22% 45%, rgba(255, 220, 200, 0.35) 0%, transparent 25%), radial-gradient(circle at 22% 45%, rgba(255, 255, 255, 0.4) 0%, transparent 12%), radial-gradient(circle at 68% 55%, rgba(200, 225, 245, 0.30) 0%, transparent 25%), radial-gradient(circle at 68% 55%, rgba(255, 255, 255, 0.35) 0%, transparent 12%), radial-gradient(circle at 45% 90%, rgba(253, 241, 184, 0.25) 0%, transparent 15%), radial-gradient(circle at 45% 90%, rgba(255, 255, 255, 0.3) 0%, transparent 8%), radial-gradient(circle at 92% 48%, rgba(254, 215, 226, 0.25) 0%, transparent 15%), radial-gradient(circle at 92% 48%, rgba(255, 255, 255, 0.3) 0%, transparent 8%), #FCFDF7'
-  
-},
-{
-  id: 'angel_sheep',
-  name: '🐑 天使小羊',
-  color: '#9BB5D6',
-  '--theme': '#9BB5D6',
-  '--bg': '#F6F8FB',
-  '--nav': '#FBFCFE',
-  '--card': '#FFFFFF',
-  '--text': '#3D4A5C',
-  '--sub': '#8A9AAF',
-  '--line': '#E3EAF2',
-  '--ring-opacity': '0.55',
-  wallpaper: 'radial-gradient(circle at 20% 15%, rgba(212, 200, 230, 0.30) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(250, 230, 210, 0.25) 0%, transparent 45%), radial-gradient(circle at 50% 85%, rgba(180, 200, 230, 0.20) 0%, transparent 55%), linear-gradient(160deg, #F6F8FB 0%, #EEF2F7 100%)'
+// ====== 主题数据防崩保底机制 (GitHub网络异常兜底) ======
+if (typeof SKINS === 'undefined' || !Array.isArray(SKINS)) {
+  console.warn('⚠️ themes.js 未加载成功，启用保底主题');
+  window.SKINS = [{
+    id: 'default',
+    name: '默认主题',
+    color: '#07c160',
+    '--theme': '#07c160',
+    '--bg': '#F5F5F5',
+    '--nav': '#FFFFFF',
+    '--card': '#FFFFFF',
+    '--text': '#000000',
+    '--sub': '#888888',
+    '--line': '#EEEEEE',
+    wallpaper: ''
+  }];
 }
-];
-// ========== 主题图标集 ==========
-let currentThemeId = 'fusion'; // 默认主题
 
-const ICON_SETS = {
-  // 🌙 女巫之夜
-  fusion: {
-    // 桌面应用
-    wechat:   'https://s1.imagehub.cc/images/2026/07/18/a9faef329860549c150b76e1dbefe024.png',
-    notes:    'https://s1.imagehub.cc/images/2026/07/18/10f9005e6187550bf402db7ac7e6e571.png',
-    focus:    'https://s1.imagehub.cc/images/2026/07/18/9da6ec2a5786e9a7ad47bbecbd016357.png',
-    settings: 'https://s1.imagehub.cc/images/2026/07/18/95774ecbe1695907e5566e8672e4fcbe.png',
-    album:    'https://s1.imagehub.cc/images/2026/07/18/2506541a59909f695098d694786ad318.png',
-    hearts:   'https://s1.imagehub.cc/images/2026/07/18/3a6f1c6f711964772f45093aa6dd6605.png',
-    music:    'https://s1.imagehub.cc/images/2026/07/18/ccd39b0ac4ac39e39c7b50bc0bb98e04.png',
-    preset:   'https://s1.imagehub.cc/images/2026/07/18/b8eb36654466c06e78a496ef03ecc419.png',
-    floating: 'https://s1.imagehub.cc/images/2026/07/18/b00d71ff3ee00b67fcc1a399063455c4.png',
-    shop:     'https://s1.imagehub.cc/images/2026/07/18/6009f5e15efc4107b8661e8669648021.png',
-    world:    'https://s1.imagehub.cc/images/2026/07/18/13f2db70da2ce77fb56804c047f090f7.png',
-	game: 'https://s1.imagehub.cc/images/2026/08/15/52fb26deeafe058a7960365185be057c.png',
-    // 底栏
-    tabChats:    'https://s1.imagehub.cc/images/2026/07/18/289baa8b615cc010fb0c34ebd597e295.png',
-    tabContacts: 'https://s1.imagehub.cc/images/2026/07/18/7d3648d6551326689150f460472f041a.png',
-    tabDiscover: 'https://s1.imagehub.cc/images/2026/07/18/afe3eb514bbc023763eac9be87cc5d9b.png',
-    tabMe:       'https://s1.imagehub.cc/images/2026/07/18/47a7bf844a8e166b1c2eed0a59c248e9.png',
-    // 发现页 · 朋友圈入口
-    discoverMoments: 'https://s1.imagehub.cc/images/2026/07/18/1e0c998bfe1009fe7a21302cfd2e3bc6.png',
-  },
+if (typeof ICON_SETS === 'undefined') {
+  window.ICON_SETS = {};
+}
 
-  // 🌸 亚系少女
-aqua_girl: {
-  // 桌面应用
-  wechat:   'https://s1.imagehub.cc/images/2026/07/18/3d52ff962ca94ab2fa932a350be5d87e.png',
-  notes:    'https://s1.imagehub.cc/images/2026/07/18/8d0293cfe24582f3854e48188e76b04b.png',
-  focus:    'https://s1.imagehub.cc/images/2026/07/18/df8bd09b0f73bee23e3201474840c485.png',
-  settings: 'https://s1.imagehub.cc/images/2026/07/18/38939f087763d1c20c24b923cf7a1f0d.png',
-  album:    'https://s1.imagehub.cc/images/2026/07/18/ca9099844eb07492b316f3577f2731c8.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/07/18/cbc75e09f213c4967bfda4ab3c751d24.png',
-  music:    'https://s1.imagehub.cc/images/2026/07/18/578f70bd87cfa01ab0dc51408a3a9f60.png',
-  preset:   'https://s1.imagehub.cc/images/2026/07/18/9674b917fbee1c5bde956944f4c91328.png',
-  floating: 'https://s1.imagehub.cc/images/2026/07/18/aab17e5ac56dab93071c5e27cc6624eb.png',
-  shop:     'https://s1.imagehub.cc/images/2026/07/18/cd6a061ad9156dfb8d6395cc07db5f7c.png',
-  world:    'https://s1.imagehub.cc/images/2026/07/18/e3d1fc4788c6b2ce4d2405f94f11078a.png',
-  game: 'https://s1.imagehub.cc/images/2026/08/15/77c88d9b02e16a6f80672ddeec518f1e.png',
-  // 底栏
-  tabChats:    'https://s1.imagehub.cc/images/2026/07/19/4007d6cbe0aac5e2b644746e3765bdea.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/07/18/3f30df0b0b39432887373fbbdeb6ec9f.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/07/18/01a65fb2d7627fe4ced535e936150292.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/07/18/d53eb71abec7a8c2040a4c6d44dbbe02.png',
-  // 发现页
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/07/19/13c0e268240ff1bebeb6b70b91c53058.png',
-},
-// 🐻 林间小集
-orchard: {
-  wechat:   'https://s1.imagehub.cc/images/2026/07/22/33f48b88b1d86a6e3fd90334a433a73d.png',
-  notes:    'https://s1.imagehub.cc/images/2026/07/22/59fd728dd038ff40d0af553d9cfba104.png',
-  focus:    'https://s1.imagehub.cc/images/2026/07/22/4700a8733173102aceb87bd040acaefb.png',
-  settings: 'https://s1.imagehub.cc/images/2026/07/22/0baaf3fee37cd4872fab4e3fb13b147b.png',
-  album:    'https://s1.imagehub.cc/images/2026/07/22/d2838e610300924452c382096f31d6ff.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/07/22/693e2fb6ee9bc78edcc63a830d99fdb4.png',
-  music:    'https://s1.imagehub.cc/images/2026/07/22/5318b136798e2b59e7d5dda93a4c0441.png',
-  preset:   'https://s1.imagehub.cc/images/2026/07/22/558e1b907bb3f18c048869eced0d0959.png',
-  floating: 'https://s1.imagehub.cc/images/2026/07/22/60ba2efaa4b5127c0a94f95fa926d2e3.png',
-  shop:     'https://s1.imagehub.cc/images/2026/07/22/99f05bf18e962f0ab7d1c5f8fd4e4243.png',
-  world:    'https://s1.imagehub.cc/images/2026/07/22/782d6430893b3bdddca63fd37b5e2ea2.png',
-  game: 'https://s1.imagehub.cc/images/2026/08/15/ac2422c17f002066978bfdb8d674f62e.png',
-  tabChats:    'https://s1.imagehub.cc/images/2026/07/22/e856f25f017c7aa747f4e6340a014860.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/07/22/8ab1b08d350d2215c7506fb78af48946.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/07/22/344cf07ec9cfa26587d5563c6572f0e1.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/07/22/881c5b2e97cc7febac866c7af070943b.png',
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/07/22/90508b72d72612459f2ab7aae746bb23.png',
-},
-// 🐱 咪思异想
-misi: {
-  wechat:   'https://s1.imagehub.cc/images/2026/07/31/0df8e0c4d100fd108c7e3c285b46c85b.png',
-  notes:    'https://s1.imagehub.cc/images/2026/07/31/4d26f89157b8d4a9668fd350b09d814f.png',
-  focus:    'https://s1.imagehub.cc/images/2026/07/31/e21f0dd654b51d79f4d939352392baa1.png',
-  settings: 'https://s1.imagehub.cc/images/2026/07/31/9f9263740707084341a78cd9201ff837.png',
-  album:    'https://s1.imagehub.cc/images/2026/07/31/07060de517f1bcfc80b6189bb8f29dd3.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/07/31/6190f29d818235f700abe8900f12ac68.png',
-  music:    'https://s1.imagehub.cc/images/2026/07/31/e2df08a1894b2cf38f8f4c1aad7c6803.png',
-  preset:   'https://s1.imagehub.cc/images/2026/07/31/4f18cffd3a48fc4e5866ee08f2dc171d.png',
-  floating: 'https://s1.imagehub.cc/images/2026/07/31/739b42addb1ce9fbab45e2cb9b7c5674.png',
-  shop:     'https://s1.imagehub.cc/images/2026/07/31/d5b89d12b8843416569c67dadec9d39e.png',
-  world:    'https://s1.imagehub.cc/images/2026/07/31/bd90c5058c93a4b905a6e7ffcee621c1.png',
-  game: 'https://s1.imagehub.cc/images/2026/08/15/c0f9b4af23bd75767d4ae6365fa0c470.png',
-  tabChats:    'https://s1.imagehub.cc/images/2026/07/31/6717e993d85f59cc08f230cb3c03d7b0.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/07/31/455aef8d60176a4abbc26c68cf1bab57.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/07/31/322286b7d5ee05f19eed740e02edc151.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/07/31/2dd7ec9732f79de88b95b1ebc87109ed.png',
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/07/31/2dc0511a3559b69fba801f127e5db701.png'
-},
-// 🐑 咩咩夜行
-momo_night: {
-  wechat:   'https://s1.imagehub.cc/images/2026/08/12/2d7e9350cbac930280b57cd26a3e6072.png',
-  notes:    'https://s1.imagehub.cc/images/2026/08/12/792e346cf9178d08d8dad2453294d725.png',
-  focus:    'https://s1.imagehub.cc/images/2026/08/12/1d9a9f96c674aa93b6ed7b785272b101.png',
-  settings: 'https://s1.imagehub.cc/images/2026/08/12/89dd73a5835bab0e4ac601252151e5d2.png',
-  album:    'https://s1.imagehub.cc/images/2026/08/12/c1621afc53d419a3719ade1b35964215.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/08/12/930c7e3d2f14b4f4d5a7f8b375b81315.png',
-  music:    'https://s1.imagehub.cc/images/2026/08/12/15132af0f309437db97f8ba50e8d4515.png',
-  preset:   'https://s1.imagehub.cc/images/2026/08/12/e79e5af9b0e822f2f0114c72af5eafaf.png',
-  floating: 'https://s1.imagehub.cc/images/2026/08/12/e80b3bd61688c01c8964381cd1d9818c.png',
-  shop:     'https://s1.imagehub.cc/images/2026/08/12/4a8841a2b3b1c94913d9c334b0ef6ed5.png',
-  world:    'https://s1.imagehub.cc/images/2026/08/12/7b208085ee917bf8ab3b97787220afe0.png',
-  game: 'https://s1.imagehub.cc/images/2026/08/15/63bebab61ae2f55daa9af15d61d7b5d6.png',
-  tabChats:    'https://s1.imagehub.cc/images/2026/08/11/85be76b13cfaeeff89aae6b9b5d21dab.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/08/11/df33f9f4570f9a6c6f4bdf455ee6ab1c.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/11/4efc0fcba051c9e5c0c917a84026e2a8.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/08/11/e3c8122553d9e2a22740e7b15f470af9.png',
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/11/7c70b8b0b244adad7b77942998556734.png'
-},
-
-// 🍨 落日芭菲
-sunset_parfait: {
-  // 桌面应用图标
-  wechat:   'https://s1.imagehub.cc/images/2026/08/17/eaacfa12b255f9070044015ea8b5cf6b.png',
-  notes:    'https://s1.imagehub.cc/images/2026/08/17/13d509ea093f0a7dc72ca0bd854a33b5.png',
-  focus:    'https://s1.imagehub.cc/images/2026/08/17/b801c42ac7d095a328c7a185b72ae8f0.png',
-  settings: 'https://s1.imagehub.cc/images/2026/08/17/315ad2de6f61445e1a3479e99d29d46f.png',
-  album:    'https://s1.imagehub.cc/images/2026/08/17/1fe2d3ca0ecd1dd19db7c429a760dc00.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/08/17/a867c7134e057106bc68cc570dacb71f.png',
-  music:    'https://s1.imagehub.cc/images/2026/08/17/12d36e6504dc700d4466fad09d029d51.png',
-  preset:   'https://s1.imagehub.cc/images/2026/08/17/67f5de5716cb36b844e247aba2a54485.png',
-  floating: 'https://s1.imagehub.cc/images/2026/08/17/96d9b1cf4ccfd009a2cbcb99e3d75509.png',
-  shop:     'https://s1.imagehub.cc/images/2026/08/17/4d8db04fd9ddecc11db9321dc6d5efab.png',
-  world:    'https://s1.imagehub.cc/images/2026/08/17/de03ab383d76419937dbf9d938093fac.png',
-  game:     'https://s1.imagehub.cc/images/2026/08/17/754f806d13159efb1a3e612dd532723b.png',
-  // 底栏图标
-  tabChats:    'https://s1.imagehub.cc/images/2026/08/17/9c6162e67e2bff3e7f07f46f8ea1e046.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/08/17/63b353ba58510c4723c9f244e156bf78.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/17/b25905b6d0872b1eb32fa263f0809df6.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/08/17/ff0a315da9b8a9606f5d470ce965c30b.png',
-  // 发现页 - 朋友圈入口
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/17/ffc13fb7f7fb9f3416a4ec6200d886fe.png'
-},
-
-redsun_forest: {
-  // 桌面应用图标
-  wechat:   'https://s1.imagehub.cc/images/2026/08/26/383a1c42a485f3d7034f965dde558e71.png',
-  notes:    'https://s1.imagehub.cc/images/2026/08/26/69715371a0fd8b3b4459aa5b70c168a3.png',
-  focus:    'https://s1.imagehub.cc/images/2026/08/26/9e3d005ac092115be06027504f2061da.png',
-  settings: 'https://s1.imagehub.cc/images/2026/08/26/6bd5b3296e942ce9670f14840dce217a.png',
-  album:    'https://s1.imagehub.cc/images/2026/08/26/935d48601c04b7263b27f1ec5099422c.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/08/26/54ebf52799ca74609638901648db5adb.png',
-  music:    'https://s1.imagehub.cc/images/2026/08/26/e3653ba4733718068d7a3f7f8cbf8ca7.png',
-  preset:   'https://s1.imagehub.cc/images/2026/08/26/faceaa10272509e2ff060d1b9e59d33a.png',
-  floating: 'https://s1.imagehub.cc/images/2026/08/26/3d4eca47696611d62803c75e810923d3.png',
-  shop:     'https://s1.imagehub.cc/images/2026/08/26/f6c3abae913b884d1fde54b72b40aa0a.png',
-  world:    'https://s1.imagehub.cc/images/2026/08/26/cbe44ba935c63f427e5e5782737cb911.png',
-  game:     'https://s1.imagehub.cc/images/2026/08/26/26e3d752b563898bd244d071907aec55.png',
-  // 底栏图标
-  tabChats:    'https://s1.imagehub.cc/images/2026/08/27/7e1e7d90ae31118d758437a9c767c1e4.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/08/26/93c08ca7e13d17cc5ef15835f095a98f.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/27/c5a2af392047ef7cdf3440b98f4e0472.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/08/26/e65b4ebb4dc8d305953ce56eaedaca54.png',
-  // 发现页 - 朋友圈入口
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/26/907f0bf5df8c8ccac8d350921a797902.png'
-},
-goose: {
-  // 桌面应用图标
-  wechat:   'https://s1.imagehub.cc/images/2026/08/31/eadec62c0758ee052bd3dbb12fb94aed.png',
-  notes:    'https://s1.imagehub.cc/images/2026/08/31/dd477e4b544ae1fc86a746d87ba62fe0.png',
-  focus:    'https://s1.imagehub.cc/images/2026/08/31/3622b81e4cacedc7d76abd4b3fb3cda5.png',
-  settings: 'https://s1.imagehub.cc/images/2026/08/31/aa0cb6baea3c68a9604a9727826c132f.png',
-  album:    'https://s1.imagehub.cc/images/2026/08/31/b56b3478d3aa76e4f80824a467619263.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/08/31/ffe01b5b930cf9141130fd524557e08f.png',
-  music:    'https://s1.imagehub.cc/images/2026/08/31/31640296db24e00c76d7ee35ff6bc424.png',
-  preset:   'https://s1.imagehub.cc/images/2026/08/31/832e3cd0a2de7e28ef6e27ef66553d3d.png',
-  floating: 'https://s1.imagehub.cc/images/2026/08/31/e5f960ccf93e9635b842bad7341ad2cd.png',
-  shop:     'https://s1.imagehub.cc/images/2026/08/31/f65dc8465490f3187be202f767e81c1d.png',
-  world:    'https://s1.imagehub.cc/images/2026/08/31/8acaa56a25bf725c9ab4acf7adbcf3cb.png',
-  game:     'https://s1.imagehub.cc/images/2026/08/31/1765a94b9ce7e086b858e44652943d82.png',
-  // 底栏图标
-  tabChats:    'https://s1.imagehub.cc/images/2026/08/31/d18bc187a057235b64a0240c9f93f1ae.png',
-  tabContacts: 'https://s1.imagehub.cc/images/2026/08/31/b585598b44a99cc8b5358cfd58932830.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/08/31/03c04f4fbf503cc0314f7ebe56ca43cc.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/08/31/cd87cf349e8ed3f89d0adc699066c580.png',
-  // 发现页 - 朋友圈入口
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/08/31/f9a76eca144f167251c6d9965fcbf9d8.png'
-},
-
-sea_salt: {
-  // 桌面应用
-  wechat:   'https://s1.imagehub.cc/images/2026/09/02/f66f7b927342de5c3e46251447ed639a.png',
-  notes:    'https://s1.imagehub.cc/images/2026/09/02/93080aca39aa117358c30b318d7ecd3e.png',
-  focus:    'https://s1.imagehub.cc/images/2026/09/02/855ab716403700900ed756d0f2a400f0.png',
-  settings: 'https://s1.imagehub.cc/images/2026/09/02/c8fec7057ea2680e6326b77c073df5fb.png',
-  album:    'https://s1.imagehub.cc/images/2026/09/02/025abf19215b90b225e6b635a412888d.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/09/02/fa56af9d3ee1cbac417baf3636c7b251.png',
-  music:    'https://s1.imagehub.cc/images/2026/09/02/b29305e2d702702a51aac0dc1061521b.png',
-  preset:   'https://s1.imagehub.cc/images/2026/09/02/b8a76d6405329deade1ebefc485b262d.png',
-  floating: 'https://s1.imagehub.cc/images/2026/09/02/1b2e1cf9153d60daf8b7c59a32850a45.png',
-  shop:     'https://s1.imagehub.cc/images/2026/09/02/4f35c60297a6c5f40125e9de38c7e5b9.png',
-  world:    'https://s1.imagehub.cc/images/2026/09/02/40ec36185633c94e1dd6dd1726d680f0.png',
-  game:     'https://s1.imagehub.cc/images/2026/09/02/d9809b0ec2fa23e939237a4f3f398a88.png',
-  // 底栏
-  tabChats:    'https://s1.imagehub.cc/images/2026/09/02/45463f9387873999873f0e1d876d1e76.png',
-  // ★ 已替换为新的通讯录图标链接
-  tabContacts: 'https://s1.imagehub.cc/images/2026/09/02/c3ad2212abd7ca6043f48b4b01298628.png',
-  tabDiscover: 'https://s1.imagehub.cc/images/2026/09/02/7626b4d36c7309fbbfa855b368480ae7.png',
-  tabMe:       'https://s1.imagehub.cc/images/2026/09/02/36b57a9b74c9c080109eab104553eab4.png',
-  // 发现页 - 朋友圈入口
-  discoverMoments: 'https://s1.imagehub.cc/images/2026/09/02/acc1a76ecf981bc17754f8b4a6567b00.png'
-},
-angel_sheep: {
-  // === 桌面应用图标（来自你的图床，保持原样）===
-  wechat:   'https://s1.imagehub.cc/images/2026/10/03/54c46d029a72cd44db3eef7f0c712dee.png',
-  notes:    'https://s1.imagehub.cc/images/2026/10/03/824fe2cb0d5e02af6ba670c0b8b6f934.png',
-  focus:    'https://s1.imagehub.cc/images/2026/10/03/297b6513b27348b3c936f8fe48d6a34e.png',
-  settings: 'https://s1.imagehub.cc/images/2026/10/03/65a0928d40873e2b65e591b2797b2867.png',
-  album:    'https://s1.imagehub.cc/images/2026/10/03/e95e675fe645041c6e93fcafc7974c34.png',
-  hearts:   'https://s1.imagehub.cc/images/2026/10/03/0ba802a3064b4a75b19b830f3940f6c9.png',
-  music:    'https://s1.imagehub.cc/images/2026/10/03/6e2aaaf723d4813fa240996c9847a17e.png',
-  preset:   'https://s1.imagehub.cc/images/2026/10/03/020212319b53ad608d195c11a783ac35.png',
-  floating: 'https://s1.imagehub.cc/images/2026/10/03/4f8dc9a14aec58432959c0390fdafa38.png',
-  shop:     'https://s1.imagehub.cc/images/2026/10/03/6f3dd2ac934008dad21f331dcbe046c7.png',
-  world:    'https://s1.imagehub.cc/images/2026/10/03/32a34102c5197dd02ec52f77f227e786.png',
-  game:     'https://s1.imagehub.cc/images/2026/10/03/019158f0798ed1ad307752b4de4c7010.png',
-
-  // === 底栏图标（纤细线稿风，22x22，stroke-width 1.5）===
-  tabChats: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H7l-4 3.5v-12A8.5 8.5 0 0 1 11.5 3h1A8.5 8.5 0 0 1 21 11.5z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="14" y2="14"/></svg>'),
-
-  tabContacts: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7.5" r="3.5"/><path d="M3.5 20v-1.2a6.5 6.5 0 0 1 6.5-6.5h0a6.5 6.5 0 0 1 6.5 6.5V20"/><path d="M18 7.5a2.5 2.5 0 0 1 0 5"/><path d="M21 20v-1a3.5 3.5 0 0 0-2-3.2"/></svg>'),
-
-  tabDiscover: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5"/></svg>'),
-
-  tabMe: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3.2"/><path d="M6.5 19.5a6 6 0 0 1 11 0"/></svg>'),
-
-  // === 发现页 · 朋友圈入口（22x22，纤细线稿）===
-  discoverMoments: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M5.2 18.8l2.1-2.1M16.7 7.3l2.1-2.1"/></svg>')
-  
-  }
-};
 // =====================================
 function applySkin(id) {
   // 1. 查找主题配置
@@ -4422,7 +3389,8 @@ if (phone) phone.dataset.theme = id;
 
   // ===== 主题适配（浅色/深色） =====
 
-var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose' || id === 'sea_salt' || id === 'angel_sheep');
+var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose' || id === 'sea_salt' || id === 'angel_sheep' || id === 'demon_sheep');
+
 
   // ★ 气泡文字颜色：根据主题深浅自动适配
   if (isLight) {
@@ -8352,6 +7320,7 @@ if (id === 'album') {
   render();
 }
 function goHome(){view={type:'home'};render();}
+
 function goWechat(p){
   const ph = document.getElementById('phone');
   if (ph) ph.style.backgroundImage = '';
@@ -8359,6 +7328,7 @@ function goWechat(p){
   wechatPage=p;
   render();
 }
+
 function renderHearts(){showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='心动值';tbLeft.textContent='‹';tbLeft.onclick=goHome;tbRight.textContent='';tbRight.onclick=null;
   const locked=[['💭','TA的心声','窥探此刻TA想说又没说的话'],['📅','TA的行程','查看TA今天的安排'],['📡','监控','查看TA所在地的画面']];
   content.innerHTML=`<div style="text-align:center;padding:30px 0 20px;background:linear-gradient(160deg,#ff9a9e,#fecfef)"><div style="font-size:14px;color:#fff;opacity:.9">我的心动值</div><div style="font-size:48px;font-weight:200;color:#fff;margin-top:6px">💗 ${DB.hearts||0}</div><div style="font-size:12px;color:#fff;opacity:.8;margin-top:6px">累计获得 ${DB.heartsTotal||0}</div></div>
@@ -9143,7 +8113,7 @@ function buildFloatingCard(p) {
     '<div class="floating-comments-wrap ' + commentShow + '" id="fc_wrap_' + p.id + '">' +
       commentsHtml +
       '<div class="floating-comment-input">' +
-        '<input id="fc_input_' + p.id + '" placeholder="说点什么…" maxlength="60">' +
+        '<input id="fc_input_' + p.id + '" placeholder="( •̀ ω •́ )✧ 放马过来" maxlength="60">' +
         '<button onclick="floatingComment(\'' + p.id + '\')">发送</button>' +
       '</div>' +
     '</div>' +
@@ -11036,7 +10006,7 @@ bar.innerHTML =
     '<div class="plus-btn" onclick="togglePanel()">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
     '</div>' +
-    '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onGroupInput(this)" onkeydown="onGroupKey(event)"></textarea>' +
+    '<textarea id="chatInput" rows="1" placeholder="( •̀ ω •́ )✧ 放马过来" oninput="onGroupInput(this)" onkeydown="onGroupKey(event)"></textarea>' +
     '<div class="voice-btn" id="voiceMsgBtn">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 19v3M8 22h8"/></svg>' +
     '</div>' +
@@ -12288,27 +11258,32 @@ content.innerHTML = `
   <div class="m-row">
     <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
     <div class="m-label"><div class="t">主聊天</div><div class="d">对话 · 推理</div></div>
-    <select class="m-select" id="chatModel"><option>${s.chatModel||'请先拉取'}</option></select>
+    <select class="m-select" id="chatModel"><option value="">不使用</option>${s.chatModel?`<option value="${s.chatModel}" selected>${s.chatModel}</option>`:''}</select>
+
   </div>
   <div class="m-row">
     <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg></div>
     <div class="m-label"><div class="t">辅助</div><div class="d">润色 · 生成</div></div>
-    <select class="m-select" id="auxModel"><option>${s.auxModel||'请先拉取'}</option></select>
+    <select class="m-select" id="auxModel"><option value="">不使用</option>${s.auxModel?`<option value="${s.auxModel}" selected>${s.auxModel}</option>`:''}</select>
+
   </div>
   <div class="m-row">
     <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
     <div class="m-label"><div class="t">轻量</div><div class="d">高频 · 快速</div></div>
-    <select class="m-select" id="lightModel"><option>${s.lightModel||'请先拉取'}</option></select>
+    <select class="m-select" id="lightModel"><option value="">不使用</option>${s.lightModel?`<option value="${s.lightModel}" selected>${s.lightModel}</option>`:''}</select>
+
   </div>
   <div class="m-row">
     <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5L9 20"/></svg></div>
     <div class="m-label"><div class="t">生图</div><div class="d">配图 · 随手拍</div></div>
-    <select class="m-select" id="imageModel"><option>${s.imageModel||'请先拉取'}</option></select>
+    <select class="m-select" id="imageModel"><option value="">不使用</option>${s.imageModel?`<option value="${s.imageModel}" selected>${s.imageModel}</option>`:''}</select>
+
   </div>
   <div class="m-row">
     <div class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2-7 4 16 3-11 2 5h6"/></svg></div>
     <div class="m-label"><div class="t">语音</div><div class="d">转文字 · 听写</div></div>
-    <select class="m-select" id="voiceModel"><option>${s.voiceModel||'请先拉取'}</option></select>
+    <select class="m-select" id="voiceModel"><option value="">不使用</option>${s.voiceModel?`<option value="${s.voiceModel}" selected>${s.voiceModel}</option>`:''}</select>
+
   </div>
 </div>
 
@@ -13989,8 +12964,10 @@ if (!share && DB.settings.imageModel && canSendImage(cid) && Math.random() < IMA
 
 // ✅ 正确写法（加上 c.id）
 var picId = await generateImage(imgPrompt, DB.settings.imageModel, c.id);
-        imgIds.push(picId);
-        recordImageSent(cid);   // ← 新增：计入今日额度
+        if (picId) {
+          imgIds.push(picId);
+          recordImageSent(cid);   // ← 新增：计入今日额度
+        }
 
       } catch (e) {
         console.log('朋友圈配图失败，发纯文字：', e.message);
@@ -16842,7 +15819,7 @@ content.style.background = 'transparent';
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>' +
       '</div>' +
       '<div class="input-wrap">' +
-        '<textarea id="chatInput" rows="1" placeholder="说点什么…" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
+        '<textarea id="chatInput" rows="1" placeholder="( •̀ ω •́ )✧ 放马过来" oninput="onChatInput(this)" onkeydown="onChatKey(event)"></textarea>' +
         '<div class="idea-btn' + (c.ideaOn ? ' on' : '') + '" id="ideaBtn" onclick="openIdeaPop()" title="接话灵感">' +
           '<svg viewBox="0 0 1024 1024" fill="currentColor"><path d="M866.4064 179.9168c75.1616 74.0864 1.1776 250.9312-154.112 423.5264l141.1072 139.1104a75.776 75.776 0 0 1 0 108.288 78.4384 78.4384 0 0 1-109.824 0l-140.8512-139.0592c-176.0256 155.2384-357.2736 229.5808-432.896 155.0336-54.3744-53.6064-32.1536-157.3376 44.1344-279.0912l9.0624-14.1312 17.7664-27.1872 55.1936 35.0208-17.7152 27.1872c-68.0448 104.0896-87.808 187.0336-61.952 212.48 39.8848 39.3216 189.3888-24.2176 339.7632-155.2384l-86.8864-85.6576a75.776 75.776 0 0 1 1.4336-106.8032 78.4384 78.4384 0 0 1 108.288-1.4336l86.784 85.4528c22.8352-25.8048 43.6736-51.456 62.208-76.4928l18.5856-26.0608c74.0864-107.3664 103.7824-199.3216 73.5232-229.1712-26.4192-25.9584-112.64-5.0176-219.2896 63.5904l-13.9776 9.216-27.136 18.2272-36.864-53.5552 27.136-18.176c137.3696-92.2112 257.3312-123.4432 316.5184-65.0752z"></path><path d="M392.5504 141.056a32.1024 32.1024 0 0 1 6.5024 19.8144l-1.024 82.8928 68.608 47.9232a32.2048 32.2048 0 0 1-9.216 57.344l-80.2816 24.6272-24.9856 79.2064a33.024 33.024 0 0 1-58.2144 9.0624L245.4016 394.24l-84.0704 1.024a32.9216 32.9216 0 0 1-29.696-17.664 32 32 0 0 1 2.9696-34.0992l50.3296-66.4576-27.0848-78.5408a32.0512 32.0512 0 0 1 7.8848-33.28 33.1776 33.1776 0 0 1 33.792-7.7824l79.6672 26.624 67.4304-49.664a33.1776 33.1776 0 0 1 45.9776 6.656z"></path></svg>' +
         '</div>' +
@@ -20668,7 +19645,16 @@ fillSelect('voiceModel', voiceList, DB.settings.voiceModel);
     alert('拉取失败：'+e.message+'\n\n地址：'+url+'\n\n【手机常见原因】\n1.地址开头是否 https（手机对http/混合内容更严格）\n2.UC浏览器可能拦截跨域，换Chrome/系统浏览器试试\n3.本地文件(file://)在部分手机浏览器无法发起请求');
   }
 }
-function fillSelect(id,list,sel){document.getElementById(id).innerHTML=list.map(m=>`<option ${m===sel?'selected':''}>${m}</option>`).join('');}
+function fillSelect(id,list,sel){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var html = '<option value=""' + (sel ? '' : ' selected') + '>不使用</option>';
+  html += list.map(function(m){
+    return '<option value="' + m + '"' + (m === sel ? ' selected' : '') + '>' + m + '</option>';
+  }).join('');
+  el.innerHTML = html;
+}
+
 function saveApi(){
   DB.settings.apiUrl = document.getElementById('apiUrl').value.trim().replace(/\/$/, '');
   DB.settings.apiKey = document.getElementById('apiKey').value.trim();
@@ -20677,12 +19663,16 @@ function saveApi(){
   var lm = document.getElementById('lightModel').value;
   var im = document.getElementById('imageModel').value;
     var vm = document.getElementById('voiceModel').value;
-  if (vm && !vm.includes('请先')) DB.settings.voiceModel = vm;
-
-  if (cm && !cm.includes('请先')) DB.settings.chatModel = cm;
-  if (am && !am.includes('请先')) DB.settings.auxModel = am;
-  if (lm && !lm.includes('请先')) DB.settings.lightModel = lm;
-  if (im && !im.includes('请先')) DB.settings.imageModel = im;
+  // ★ 统一处理：选了"不使用"（空值）就存成空字符串，表示停用该模型
+  function _setModel(key, val){
+    if (val === '' || val === '不使用') { DB.settings[key] = ''; return; }
+    if (val && val.indexOf('请先') === -1) { DB.settings[key] = val; }
+  }
+  _setModel('voiceModel', vm);
+  _setModel('chatModel',  cm);
+  _setModel('auxModel',   am);
+  _setModel('lightModel', lm);
+  _setModel('imageModel', im);
 DB.settings.sfApiKey = (document.getElementById('sfApiKey')||{value:''}).value.trim();
   save();
   alert('已保存！');
@@ -21702,12 +20692,23 @@ function fillChatImages(){
 // 生成图片：传入提示词、模型、所属角色ID（可选）
 async function generateImage(prompt, model, roleId){
   const s = DB.settings;
+
+  // ★★★ 总闸门：没配置生图模型 = 不生图，直接返回，绝不发请求、绝不花钱 ★★★
+  var useModel = model || s.imageModel;
+  if (!useModel
+      || String(useModel).trim() === ''
+      || String(useModel) === '不使用'
+      || String(useModel).indexOf('请先') > -1) {
+    console.log('[生图] 未配置生图模型，已跳过');
+    return null;
+  }
+
   if(!s.apiUrl || !s.apiKey) throw new Error('请先在设置里填写API');
 
   // 复用聊天接口，让它画图
   const reply = await callAI(
     [{ role:'user', content: prompt }],
-    model || s.auxModel
+    useModel
   );
 
   const b64 = extractImage(reply);
@@ -21717,6 +20718,7 @@ async function generateImage(prompt, model, roleId){
   const id = await saveImage(b64, roleId);
   return id;
 }
+
 async function doGenerate(){
   const prompt = document.getElementById('imgPrompt').value;
   const model  = document.getElementById('imgModel').value;
@@ -21728,10 +20730,22 @@ async function doGenerate(){
     roleId = view.id;
   }
 
+  // ★ 新增：没配置生图模型就直接提示，连转圈都不转、请求都不发
+  if (!DB.settings.imageModel) {
+    popTip('未配置生图模型，已跳过生图', {icon:'🚫'});
+    return;
+  }
+
   popLoading('正在生成…');
   try{
     // ★ 修改：传入第三个参数 roleId
     const id = await generateImage(prompt, model, roleId);
+    // ★ 新增：generateImage 返回 null 表示被跳过了，这里要接住，否则下一行会报错
+    if (!id) {
+      popClose();
+      popTip('未配置生图模型，已跳过', {icon:'🚫'});
+      return;
+    }
     const b64 = await getImage(id);
     popClose();
     showGeneratedResult(id, b64);
@@ -23356,21 +22370,35 @@ body.wx-theme-letter .mbody {
 }
 /* AI 气泡 */
 body.wx-theme-letter .msg:not(.me) .mbody {
-  background: color-mix(in srgb, var(--card) 55%, transparent) !important;
-  color: var(--text) !important;
-  border: 1px solid color-mix(in srgb, #fff 55%, transparent) !important;
+  border: 1px solid color-mix(in srgb, #fff 38%, transparent) !important;
+  background:radial-gradient(142% 178% at 42% 32%,
+    color-mix(in srgb,var(--card) var(--bub-core),transparent) 0%,
+    color-mix(in srgb,var(--card) var(--bub-mid),transparent) 52%,
+    color-mix(in srgb,var(--card) var(--bub-edge),transparent) 100%) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 2px 7px -3px rgba(255,255,255,.66),
     0 0 14px var(--letter-glow-other) !important;
+  color: var(--text) !important;
+  backdrop-filter: blur(15px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(1.6) !important;
 }
-/* 用户气泡：去掉 linear-gradient 渐变，改用纯底色 + 纯发光阴影 */
+
 body.wx-theme-letter .msg.me .mbody {
-  background: color-mix(in srgb, var(--theme) 42%, transparent) !important;
-  color: var(--bubble-text-me, var(--text)) !important;
-  border: 1px solid color-mix(in srgb, #fff 45%, transparent) !important;
+  border: 1px solid color-mix(in srgb, #fff 32%, transparent) !important;
+  background:radial-gradient(142% 178% at 42% 32%,
+    color-mix(in srgb,var(--theme) var(--bub-me-core),transparent) 0%,
+    color-mix(in srgb,var(--theme) var(--bub-me-mid),transparent) 52%,
+    color-mix(in srgb,var(--theme) var(--bub-me-edge),transparent) 100%) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.35),
+    inset 0 2px 7px -3px rgba(255,255,255,.5),
     0 0 16px var(--letter-glow-self) !important;
+  color: var(--bubble-text-me, var(--text)) !important;
+  backdrop-filter: blur(15px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(15px) saturate(1.6) !important;
+}
+
+body.wx-theme-letter .msg .mbody {
+  flex-shrink: 0 !important;
 }
 
 /* 图片/表情等媒体消息：不要被 flex 压扁 */
