@@ -3661,7 +3661,7 @@ window.onerror=function(m,s,l){alert('⚠️代码出错（可能粘贴不完整
   </div>
 </div>
 <script>
-const APP_VER = 'v20261008_2';
+const APP_VER = 'v20261008_3';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -4495,18 +4495,17 @@ angel_sheep: {
   world:    'https://s1.imagehub.cc/images/2026/10/03/32a34102c5197dd02ec52f77f227e786.png',
   game:     'https://s1.imagehub.cc/images/2026/10/03/019158f0798ed1ad307752b4de4c7010.png',
 
-  // === 底栏图标（纤细线稿风，22x22，stroke-width 1.5）===
-  tabChats: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H7l-4 3.5v-12A8.5 8.5 0 0 1 11.5 3h1A8.5 8.5 0 0 1 21 11.5z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="14" y2="14"/></svg>'),
+  // === 底栏图标（方案B · 简约线性 · 线条56 · 天使主题色 #7E9FBF）===
+  tabChats: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M512 240c-180 0-324 108-324 244 0 76 42 144 108 188l-24 96c-3 12 9 22 20 17l122-62c30 6 64 9 98 9 180 0 324-108 324-244S692 240 512 240z" fill="none" stroke="#7E9FBF" stroke-width="56" stroke-linejoin="round"/><circle cx="410" cy="484" r="26" fill="#7E9FBF"/><circle cx="512" cy="484" r="26" fill="#7E9FBF"/><circle cx="614" cy="484" r="26" fill="#7E9FBF"/></svg>'),
 
-  tabContacts: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7.5" r="3.5"/><path d="M3.5 20v-1.2a6.5 6.5 0 0 1 6.5-6.5h0a6.5 6.5 0 0 1 6.5 6.5V20"/><path d="M18 7.5a2.5 2.5 0 0 1 0 5"/><path d="M21 20v-1a3.5 3.5 0 0 0-2-3.2"/></svg>'),
+  tabContacts: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><rect x="300" y="200" width="420" height="624" rx="36" fill="none" stroke="#7E9FBF" stroke-width="56"/><line x1="200" y1="330" x2="300" y2="330" stroke="#7E9FBF" stroke-width="56" stroke-linecap="round"/><line x1="200" y1="512" x2="300" y2="512" stroke="#7E9FBF" stroke-width="56" stroke-linecap="round"/><line x1="200" y1="694" x2="300" y2="694" stroke="#7E9FBF" stroke-width="56" stroke-linecap="round"/></svg>'),
 
-  tabDiscover: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5"/></svg>'),
+  tabDiscover: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><circle cx="512" cy="512" r="230" fill="none" stroke="#7E9FBF" stroke-width="56"/><ellipse cx="512" cy="512" rx="350" ry="100" fill="none" stroke="#7E9FBF" stroke-width="56" transform="rotate(-22 512 512)"/><circle cx="420" cy="465" r="24" fill="#7E9FBF"/><circle cx="600" cy="550" r="18" fill="#7E9FBF"/></svg>'),
 
-  tabMe: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3.2"/><path d="M6.5 19.5a6 6 0 0 1 11 0"/></svg>'),
+  tabMe: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M512 720c-140-100-220-180-220-280 0-70 50-120 120-120 40 0 80 20 100 60 20-40 60-60 100-60 70 0 120 50 120 120 0 100-80 180-220 280z" fill="none" stroke="#7E9FBF" stroke-width="56" stroke-linejoin="round"/></svg>'),
 
-  // === 发现页 · 朋友圈入口（22x22，纤细线稿）===
-  discoverMoments: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9EB0C4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M5.2 18.8l2.1-2.1M16.7 7.3l2.1-2.1"/></svg>')
-  
+  // === 发现页 · 朋友圈入口（方案B · 线条56 · 天使主题色 #7E9FBF）===
+  discoverMoments: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M523.49952 641.42336c-161.97632-2.2528-291.85536-65.78688-356.41344-174.29504-63.616-107.16672-52.9152-253.57824 28.61568-391.66464 5.79584-9.71776 17.14688-15.98976 28.92288-15.98976 115.05664 1.59744 214.35904 38.46656 287.23712 106.61376 6.31808 5.89824 9.856 13.7984 9.97376 22.2464 0.11776 8.44288-3.20512 16.4352-9.36448 22.49728a33.41312 33.41312 0 0 1-23.62368 9.58464 33.25952 33.25952 0 0 1-22.89152-8.97536C411.07968 160.11776 336.41472 129.81248 250.04032 123.79136l-6.79936-0.47616-3.08224 5.85728C180.992 241.73568 175.10912 353.43872 224.01024 435.6352c52.75136 88.65792 162.25792 140.57984 300.4416 142.45888a33.17248 33.17248 0 0 1 23.08608 9.55392c6.12352 6.06208 9.43104 14.0544 9.3184 22.51264-0.14848 17.2288-14.80192 31.2576-32.66048 31.2576h-0.69632z" fill="#7E9FBF"/><path d="M508.20096 998.4c-18.11968 0-32.86016-14.18752-32.86016-31.62112v-267.97056c0-17.4336 14.74048-31.616 32.86016-31.616s32.86016 14.1824 32.86016 31.616v267.97056c0 17.4336-14.74048 31.62112-32.86016 31.62112z m-171.8016-147.8912a32.83456 32.83456 0 0 1-15.7952-3.9424 386.05824 386.05824 0 0 1-92.8-68.93056c-6.04672-6.09792-9.2672-14.1056-9.06752-22.5536 0.19968-8.44288 3.79904-16.29696 10.13248-22.10304a33.36704 33.36704 0 0 1 22.71744-8.81152c9.06752 0 17.52576 3.49184 23.808 9.82528a322.4832 322.4832 0 0 0 77.04576 57.2416c7.69024 4.096 13.2608 10.83392 15.68256 18.97984a30.2592 30.2592 0 0 1-2.86208 23.99232c-5.81632 10.05568-16.87552 16.30208-28.86144 16.30208z m349.19936-3.07712c-11.74016 0-22.67648-6.04672-28.53888-15.77472a30.43328 30.43328 0 0 1-3.3024-23.99232c2.25792-8.17664 7.68-14.99648 15.26272-19.21024 26.74688-14.91968 50.96448-33.24416 71.9872-54.46144 6.26688-6.28736 14.68416-9.74336 23.71072-9.74336 8.47872 0 16.5376 3.12832 22.69184 8.8064a31.01696 31.01696 0 0 1 1.05984 44.80512c-25.33888 25.59488-54.47168 47.59552-86.58432 65.39776a33.36704 33.36704 0 0 1-16.28672 4.1728z m-153.69728-207.44704c-10.36288 0-19.89632-4.54656-26.14272-12.4672-96.70144-122.46016-121.76896-255.5904-70.58944-374.87104C485.9392 134.4512 607.1808 54.46656 767.7952 33.20832c1.70496-0.256 3.3024-0.37888 4.93568-0.37888 9.91232 0 19.52256 4.68992 25.70752 12.544 98.11456 124.21632 125.27104 263.19872 74.496 381.31712-48.78848 113.43872-171.48928 191.07328-336.63488 212.99712-1.44384 0.1536-2.9184 0.29696-4.39808 0.29696z m219.0848-540.09856c-123.4688 22.59456-216.42752 87.07072-255.04768 176.896-39.00416 90.69568-22.34368 194.43712 46.90432 292.10112l3.75296 5.2992 6.5536-1.16224c91.73504-16.22528 211.13856-58.96704 259.01568-170.46016 38.58944-89.75872 20.0704-198.57408-50.80576-298.55232l-3.78368-5.33504-6.58944 1.21344z" fill="#7E9FBF"/></svg>')
   },
 // 😈 恶魔羊羊（浅色主题）
 demon_sheep: {
@@ -4524,15 +4523,19 @@ demon_sheep: {
   world:    'https://s1.imagehub.cc/images/2026/10/08/fd396555e3a0f5ce4b19cb1d5c5363f9.png',
   game:     'https://s1.imagehub.cc/images/2026/10/08/0f52518b9d8b96221c225db9d0ce628f.png',
 
-  // === 微信底栏 SVG 图标 ===
-  tabChats: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9B7EB5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H7l-4 3.5v-12A8.5 8.5 0 0 1 11.5 3h1A8.5 8.5 0 0 1 21 11.5z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="14" y2="14"/></svg>'),
-  tabContacts: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9B7EB5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7.5" r="3.5"/><path d="M3.5 20v-1.2a6.5 6.5 0 0 1 6.5-6.5h0a6.5 6.5 0 0 1 6.5 6.5V20"/><path d="M18 7.5a2.5 2.5 0 0 1 0 5"/><path d="M21 20v-1a3.5 3.5 0 0 0-2-3.2"/></svg>'),
-  tabDiscover: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9B7EB5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5 15.5 8.5"/></svg>'),
-  tabMe: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9B7EB5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3.2"/><path d="M6.5 19.5a6 6 0 0 1 11 0"/></svg>'),
+  // === 微信底栏 SVG 图标（方案B · 简约线性 · 线条56 · 恶魔主题色 #9B7EB5）===
+  tabChats: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M512 240c-180 0-324 108-324 244 0 76 42 144 108 188l-24 96c-3 12 9 22 20 17l122-62c30 6 64 9 98 9 180 0 324-108 324-244S692 240 512 240z" fill="none" stroke="#9B7EB5" stroke-width="56" stroke-linejoin="round"/><circle cx="410" cy="484" r="26" fill="#9B7EB5"/><circle cx="512" cy="484" r="26" fill="#9B7EB5"/><circle cx="614" cy="484" r="26" fill="#9B7EB5"/></svg>'),
 
-  // === 朋友圈入口 SVG 图标 ===
-  discoverMoments: 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9B7EB5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M5.2 18.8l2.1-2.1M16.7 7.3l2.1-2.1"/></svg>')
-}
+  tabContacts: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><rect x="300" y="200" width="420" height="624" rx="36" fill="none" stroke="#9B7EB5" stroke-width="56"/><line x1="200" y1="330" x2="300" y2="330" stroke="#9B7EB5" stroke-width="56" stroke-linecap="round"/><line x1="200" y1="512" x2="300" y2="512" stroke="#9B7EB5" stroke-width="56" stroke-linecap="round"/><line x1="200" y1="694" x2="300" y2="694" stroke="#9B7EB5" stroke-width="56" stroke-linecap="round"/></svg>'),
+
+  tabDiscover: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><circle cx="512" cy="512" r="230" fill="none" stroke="#9B7EB5" stroke-width="56"/><ellipse cx="512" cy="512" rx="350" ry="100" fill="none" stroke="#9B7EB5" stroke-width="56" transform="rotate(-22 512 512)"/><circle cx="420" cy="465" r="24" fill="#9B7EB5"/><circle cx="600" cy="550" r="18" fill="#9B7EB5"/></svg>'),
+
+  tabMe: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M512 720c-140-100-220-180-220-280 0-70 50-120 120-120 40 0 80 20 100 60 20-40 60-60 100-60 70 0 120 50 120 120 0 100-80 180-220 280z" fill="none" stroke="#9B7EB5" stroke-width="56" stroke-linejoin="round"/></svg>'),
+
+  // === 朋友圈入口 SVG 图标（方案B · 线条56 · 恶魔主题色 #9B7EB5）===
+  discoverMoments: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M523.49952 641.42336c-161.97632-2.2528-291.85536-65.78688-356.41344-174.29504-63.616-107.16672-52.9152-253.57824 28.61568-391.66464 5.79584-9.71776 17.14688-15.98976 28.92288-15.98976 115.05664 1.59744 214.35904 38.46656 287.23712 106.61376 6.31808 5.89824 9.856 13.7984 9.97376 22.2464 0.11776 8.44288-3.20512 16.4352-9.36448 22.49728a33.41312 33.41312 0 0 1-23.62368 9.58464 33.25952 33.25952 0 0 1-22.89152-8.97536C411.07968 160.11776 336.41472 129.81248 250.04032 123.79136l-6.79936-0.47616-3.08224 5.85728C180.992 241.73568 175.10912 353.43872 224.01024 435.6352c52.75136 88.65792 162.25792 140.57984 300.4416 142.45888a33.17248 33.17248 0 0 1 23.08608 9.55392c6.12352 6.06208 9.43104 14.0544 9.3184 22.51264-0.14848 17.2288-14.80192 31.2576-32.66048 31.2576h-0.69632z" fill="#9B7EB5"/><path d="M508.20096 998.4c-18.11968 0-32.86016-14.18752-32.86016-31.62112v-267.97056c0-17.4336 14.74048-31.616 32.86016-31.616s32.86016 14.1824 32.86016 31.616v267.97056c0 17.4336-14.74048 31.62112-32.86016 31.62112z m-171.8016-147.8912a32.83456 32.83456 0 0 1-15.7952-3.9424 386.05824 386.05824 0 0 1-92.8-68.93056c-6.04672-6.09792-9.2672-14.1056-9.06752-22.5536 0.19968-8.44288 3.79904-16.29696 10.13248-22.10304a33.36704 33.36704 0 0 1 22.71744-8.81152c9.06752 0 17.52576 3.49184 23.808 9.82528a322.4832 322.4832 0 0 0 77.04576 57.2416c7.69024 4.096 13.2608 10.83392 15.68256 18.97984a30.2592 30.2592 0 0 1-2.86208 23.99232c-5.81632 10.05568-16.87552 16.30208-28.86144 16.30208z m349.19936-3.07712c-11.74016 0-22.67648-6.04672-28.53888-15.77472a30.43328 30.43328 0 0 1-3.3024-23.99232c2.25792-8.17664 7.68-14.99648 15.26272-19.21024 26.74688-14.91968 50.96448-33.24416 71.9872-54.46144 6.26688-6.28736 14.68416-9.74336 23.71072-9.74336 8.47872 0 16.5376 3.12832 22.69184 8.8064a31.01696 31.01696 0 0 1 1.05984 44.80512c-25.33888 25.59488-54.47168 47.59552-86.58432 65.39776a33.36704 33.36704 0 0 1-16.28672 4.1728z m-153.69728-207.44704c-10.36288 0-19.89632-4.54656-26.14272-12.4672-96.70144-122.46016-121.76896-255.5904-70.58944-374.87104C485.9392 134.4512 607.1808 54.46656 767.7952 33.20832c1.70496-0.256 3.3024-0.37888 4.93568-0.37888 9.91232 0 19.52256 4.68992 25.70752 12.544 98.11456 124.21632 125.27104 263.19872 74.496 381.31712-48.78848 113.43872-171.48928 191.07328-336.63488 212.99712-1.44384 0.1536-2.9184 0.29696-4.39808 0.29696z m219.0848-540.09856c-123.4688 22.59456-216.42752 87.07072-255.04768 176.896-39.00416 90.69568-22.34368 194.43712 46.90432 292.10112l3.75296 5.2992 6.5536-1.16224c91.73504-16.22528 211.13856-58.96704 259.01568-170.46016 38.58944-89.75872 20.0704-198.57408-50.80576-298.55232l-3.78368-5.33504-6.58944 1.21344z" fill="#9B7EB5"/></svg>')
+  
+  }
 };
 // =====================================
 function applySkin(id) {
@@ -4651,17 +4654,30 @@ function applyBubbleStyle(id){
 function updateAllIcons() {
   var icons = ICON_SETS[currentThemeId] || ICON_SETS.fusion;
 
-  // 更新底栏
-  var tabChats = document.getElementById('tabIconChats');
+  // ★ 只有这两个主题的图标是 SVG，需要单独缩小，其他主题一律 40px
+  var isSvgIcon = (currentThemeId === 'angel_sheep' || currentThemeId === 'demon_sheep');
+  var iconSize = isSvgIcon ? '26px' : '40px';   // 26 可换成你喜欢的数值
+
+  var tabChats    = document.getElementById('tabIconChats');
   var tabContacts = document.getElementById('tabIconContacts');
   var tabDiscover = document.getElementById('tabIconDiscover');
-  var tabMe = document.getElementById('tabIconMe');
+  var tabMe       = document.getElementById('tabIconMe');
 
-  if (tabChats) tabChats.src = icons.tabChats;
+  // 先统一改尺寸
+  [tabChats, tabContacts, tabDiscover, tabMe].forEach(function(el){
+    if (el) {
+      el.style.width  = iconSize;
+      el.style.height = iconSize;
+    }
+  });
+
+  // 再换图
+  if (tabChats)    tabChats.src    = icons.tabChats;
   if (tabContacts) tabContacts.src = icons.tabContacts;
   if (tabDiscover) tabDiscover.src = icons.tabDiscover;
-  if (tabMe) tabMe.src = icons.tabMe;
+  if (tabMe)       tabMe.src       = icons.tabMe;
 }
+
 let DB=load();
 let _dbReady = false;
 setTimeout(function bootDB(){
@@ -11000,7 +11016,8 @@ function renderDiscover() {
   } else {
         content.innerHTML = '<div class="section" style="margin-top:12px">' +
           '<div class="cell" onclick="openMoments()">' +
-            '<div class="avatar" style="background:transparent; background-image: url(' + icons.discoverMoments + '); background-size: cover; background-position: center;"></div>' +
+            '<div class="avatar" style="background:transparent; background-image: url(' + icons.discoverMoments + '); background-size: ' + ((currentThemeId === 'angel_sheep' || currentThemeId === 'demon_sheep') ? '26px 26px' : 'cover') + '; background-position: center; background-repeat: no-repeat;"></div>'
+ +
             '<div class="cell-body"><div class="cell-title">朋友圈</div></div>' +
             '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' + rightHtml + '</div>' +
           '</div>' +
