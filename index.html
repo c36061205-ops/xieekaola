@@ -3350,8 +3350,8 @@ body.wx-theme-letter #chatBottom {
    ======================================================== */
 
 :root{
-  --bb-glass:18%;          /* 底栏磨砂浓度，越小越透 */
-  --bb-blur:8px;           /* 磨砂模糊半径 */
+  --bb-glass:10%;          /* 底栏磨砂浓度，越小越透 */
+  --bb-blur:10px;          /* 磨砂模糊半径 */
   --bb-pad-x:14px;
   --bb-pad-top:9px;
   --bb-pad-bottom:16px;
@@ -3360,8 +3360,14 @@ body.wx-theme-letter #chatBottom {
   --bb-btn:33px;
   --bb-line:20px;          /* 单行文字高度 */
   --bb-input-max:100px;    /* 输入框最高（约4行），改这里即可 */
-}
 
+  /* ===== 新增：输入区通透控制 ===== */
+  --glass-input:30%;        /* 输入框胶囊浓度，越小越透 */
+  --glass-input-focus:42%;  /* 聚焦时浓度，温和过渡不跳变 */
+  --glass-pill:22%;         /* 快捷按钮浓度 */
+  --glass-blur:16px;        /* 输入框磨砂强度 */
+  --glass-edge:55%;         /* 边框浓度：跟随主题色，深浅主题都自然 */
+  
 /* ---------- 底栏容器：磨砂玻璃 ---------- */
 body #chatBottom,
 body.wx-theme-card #chatBottom,
@@ -3371,10 +3377,10 @@ body.wx-theme-letter #chatBottom{
           var(--bb-pad-x) !important;
   box-sizing:border-box !important;
   width:100% !important;max-width:100% !important;
-  background:color-mix(in srgb,var(--nav) var(--bb-glass),transparent) !important;
-  backdrop-filter:blur(var(--bb-blur)) saturate(180%) !important;
-  -webkit-backdrop-filter:blur(var(--bb-blur)) saturate(180%) !important;
-  border-top:1px solid color-mix(in srgb,var(--line) 28%,transparent) !important;
+  background:color-mix(in srgb,var(--card) var(--bb-glass),transparent) !important;
+  backdrop-filter:blur(var(--bb-blur)) saturate(160%) !important;
+  -webkit-backdrop-filter:blur(var(--bb-blur)) saturate(160%) !important;
+  border-top:1px solid color-mix(in srgb,var(--card) var(--glass-edge),transparent) !important;
   border-radius:0 !important;box-shadow:none !important;
   position:relative !important;z-index:20 !important;
   flex-shrink:0 !important;overflow:visible !important;
@@ -3408,10 +3414,10 @@ body.wx-theme-letter .bubble-btn{
   display:flex !important;align-items:center !important;
   justify-content:center !important;gap:4px !important;
   padding:5px 11px !important;
-  background:color-mix(in srgb,var(--card) 35%,transparent) !important;
-  backdrop-filter:blur(8px) !important;
-  -webkit-backdrop-filter:blur(8px) !important;
-  border:1px solid color-mix(in srgb,var(--theme) 18%,transparent) !important;
+  background:color-mix(in srgb,var(--card) var(--glass-pill),transparent) !important;
+  backdrop-filter:blur(var(--bb-blur)) saturate(150%) !important;
+  -webkit-backdrop-filter:blur(var(--bb-blur)) saturate(150%) !important;
+  border:1px solid color-mix(in srgb,var(--card) var(--glass-edge),transparent) !important;
   border-radius:13px !important;
   font-size:12.5px !important;font-weight:500 !important;
   color:var(--text) !important;white-space:nowrap !important;
@@ -3429,10 +3435,9 @@ body #inputRow,
 body.wx-theme-card #inputRow,
 body.wx-theme-letter #inputRow{
   display:flex !important;align-items:flex-end !important;
-  gap:7px !important;width:100% !important;max-width:100% !important;
+  gap:0 !important;width:100% !important;max-width:100% !important;
   box-sizing:border-box !important;padding:0 !important;
 }
-
 /* ---------- 输入框胶囊：磨砂 ---------- */
 body .input-wrap,
 body.wx-theme-card .input-wrap,
@@ -3441,20 +3446,24 @@ body.wx-theme-letter .input-wrap{
   box-sizing:border-box !important;
   display:flex !important;align-items:flex-end !important;
   position:relative !important;height:auto !important;
-  background:color-mix(in srgb,var(--card) 42%,transparent) !important;
-  backdrop-filter:blur(6px) saturate(130%) !important;
-  -webkit-backdrop-filter:blur(6px) saturate(130%) !important;
-  border:1px solid color-mix(in srgb,var(--line) 45%,transparent) !important;
+  background:color-mix(in srgb,var(--card) var(--glass-input),transparent) !important;
+  backdrop-filter:blur(var(--glass-blur)) saturate(170%) !important;
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(170%) !important;
+  border:1px solid color-mix(in srgb,var(--card) var(--glass-edge),transparent) !important;
   border-radius:var(--bb-radius) !important;
-  padding:7px 34px 7px 14px !important;
-  box-shadow:inset 0 1px 2px color-mix(in srgb,var(--text) 4%,transparent) !important;
+  padding:7px 34px 7px 12px !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb,var(--card) 60%,transparent),
+    0 2px 10px rgba(0,0,0,0.08) !important;
   transition:border-color .2s,background .2s,box-shadow .2s !important;
 }
 body .input-wrap:focus-within{
   border-color:color-mix(in srgb,var(--theme) 45%,transparent) !important;
-  background:color-mix(in srgb,var(--card) 60%,transparent) !important;
-  box-shadow:inset 0 1px 2px color-mix(in srgb,var(--text) 4%,transparent),
-             0 0 0 3px color-mix(in srgb,var(--theme) 10%,transparent) !important;
+  background:color-mix(in srgb,var(--card) var(--glass-input-focus),transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb,var(--card) 70%,transparent),
+    0 2px 14px rgba(0,0,0,0.10),
+    0 0 0 3px color-mix(in srgb,var(--theme) 10%,transparent) !important;
 }
 body .input-wrap::after,
 body.wx-theme-card .input-wrap::after,
@@ -3485,7 +3494,7 @@ body #chatInput::placeholder{color:var(--sub) !important;opacity:.6 !important;}
 body .plus-btn,body .voice-btn,
 body.wx-theme-card .plus-btn,body.wx-theme-card .voice-btn,
 body.wx-theme-letter .plus-btn,body.wx-theme-letter .voice-btn{
-  width:var(--bb-btn) !important;height:var(--bb-btn) !important;
+  width:26px !important;height:42px !important;
   flex-shrink:0 !important;display:flex !important;
   align-items:center !important;justify-content:center !important;
   padding:0 !important;margin:0 !important;border:none !important;
@@ -3494,6 +3503,11 @@ body.wx-theme-letter .plus-btn,body.wx-theme-letter .voice-btn{
   cursor:pointer !important;position:relative !important;
   transition:color .18s,background .18s,transform .12s !important;
 }
+
+/* 加号与输入框之间只留 4px 小缝 */
+body .plus-btn{margin-right:4px !important;}
+/* 语音与输入框之间只留 4px 小缝 */
+body .voice-btn{margin-left:4px !important;}
 body .plus-btn svg{width:21px !important;height:21px !important;}
 body .voice-btn svg{width:20px !important;height:20px !important;}
 body .plus-btn:active,body .voice-btn:active{
@@ -3504,10 +3518,10 @@ body .plus-btn:active,body .voice-btn:active{
 body .reply-btn,
 body.wx-theme-card .reply-btn,
 body.wx-theme-letter .reply-btn{
-  width:var(--bb-btn) !important;height:var(--bb-btn) !important;
+  width:40px !important;height:40px !important;
   flex-shrink:0 !important;display:flex !important;
   align-items:center !important;justify-content:center !important;
-  padding:0 !important;margin:0 !important;border:none !important;
+  padding:0 !important;margin:0 0 0 6px !important;border:none !important;
   border-radius:50% !important;background:var(--theme) !important;
   color:#fff !important;cursor:pointer !important;
   box-shadow:0 2px 8px color-mix(in srgb,var(--theme) 32%,transparent) !important;
@@ -3766,7 +3780,7 @@ body.wx-theme-letter .msg.me .mbody{
   </div>
 </div>
 <script>
-const APP_VER = 'v20261009_1';
+const APP_VER = 'v20261010_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -11531,6 +11545,8 @@ function buildGroupHistory(g){
     if (m.type==='image') content = '[图片]';
     else if (m.type==='sticker') content = '[表情：' + (m.content||'') + ']';
     else if (m.type==='voice') content = '[语音]' + (m.content||'');
+	    else if (m.type==='share') content = '[分享了' + ({image:'一张图片',clip:'一段小视频',video:'一个视频',music:'一首歌',link:'一篇文章',fugue:'一条浮光帖子'}[m.shareType]||'一条内容') + '：' + (m.title || m.desc || m.content || '').slice(0,80) + ']';
+
     else content = m.content || '';
     if (!content) return null;
     return who + '：' + content;
@@ -16508,20 +16524,47 @@ s += '  示例：<share type="link" title="为什么我们总在深夜emo" sourc
 s += '⑥ 浮光帖子——当你想分享一段心情文字、一个陌生人的故事、带点树洞感的短内容时：\n';
 s += '<share type="fugue" title="帖子标题" author="发帖人名字" tags="标签1,标签2" content="帖子正文，150字左右，可以是你自己写的或别人写的"></share>\n\n';
 
-s += '\n【分享使用原则】\n';
-s += '- 这是你聊天里【常用】的表达方式，聊到能联想到的画面、影像、歌、文章、帖子时就自然发出来，不用等对方开口。\n';
-s += '- 【最重要】六种类型是平等的，别总是发图片。发之前先想一下：此刻你脑子里冒出来的到底是"一张画面"，还是"一段影像/一首歌/一篇东西/一条帖子"？是什么就发什么。聊音乐氛围就发歌，聊有趣的事就发视频，聊深度话题就发文章，想让对方看见画面才发图片。\n';
-s += '- 想让对方"看见"某个静止画面（"给你看/你看这个/我今天穿的/我做的饭/窗外/我现在的样子"）时，用 <share type="image"> 把画面描述出来，别用文字硬描述——但这只是图片的用法，不代表分享就等于图片。\n';
-s += '- 【避免连发同一种】如果最近一两次已经发过某个类型，这次要么换一种类型，要么干脆只用文字聊、先不发。绝不要连着刷好几张图片，也不要养成"一分享就发图"的惯性。\n';
-s += '- 【主动打招呼时】你主动开启对话、打招呼时，可以顺手随机分享点什么——一首刚听的歌、一段刷到的视频、一篇文章、一条帖子或一张图都行，六种随意挑，别每次都是图片；当然也可以就是纯文字打个招呼，不是每次都必须带分享。\n';
-s += '- 平均每隔几轮对话就可以自然出现一次分享；聊得热络、话题正好对上时可以多发，但注意换着类型发。\n';
-s += '- 每次分享都要有由头：这个让你想到了对方、符合你们此刻的心境、你觉得对方会喜欢——不要无缘无故发。\n';
-s += '- 分享前可以先铺垫一句再发标签，也可以先发标签再说话，看情境。\n';
-s += '- 发完标签不要再说"我给你发了个xxx"这种废话，标签本身就是那条消息。\n';
-s += '- 图片和clip的desc只写画面里客观存在的东西，有质感有细节，绝不加主观感受；写的永远是【镜头拍到了什么】：画面里有什么东西、什么光线、什么细节。\n';
-s += '- 图片(image)和小视频(clip)怎么选：静止的一瞬间用图片；有动作、有声音、有过程感的用clip。\n';
+s += '\n【分享使用原则·最重要】\n';
+s += '分享不是一个需要定期完成的任务，也没有任何频率指标。它只是你"有话想说"时的一种表达方式——就像真人聊天时，不会无缘无故甩一张图过来。\n\n';
+
+s += '◆ 发之前必须过这一关：\n';
+s += '在决定发出任何分享之前，先在心里回答一句话："我为什么现在要给对方看这个？"\n';
+s += '这个理由必须来自【当前这几轮对话的具体内容】，而不是"我好久没发了"或"聊天有点淡了发个东西"。如果你答不上来，或者理由只能说成"随便分享一下"，那就不要发，纯文字聊天就好。\n\n';
+
+s += '◆ 只有这三种情况才算有动机：\n';
+s += '1）告诉对方你此刻在干嘛——对方问起你在做什么、或你刚说了自己正在做某事，用分享把它具象化。例：你说"在煮面"，接着发一张锅里的照片。\n';
+s += '2）你想让对方看见某样东西，并且这个东西和你们刚聊的内容有关——例：对方说最近压力大，你发一首你听着能静下来的歌；对方说想养猫，你发一段刷到的猫视频。\n';
+s += '3）当前话题自然引申——聊到某部电影、某家店、某个观点，你顺手把相关的东西甩过来。\n\n';
+
+s += '◆ 这些情况一律不要发：\n';
+s += '- 对话刚起头、还在寒暄，没有任何具体话题时\n';
+s += '- 对方正在说一件要紧的事、情绪不好、或在等你回应某个问题时（先好好接话）\n';
+s += '- 你只是觉得"该发一个了"\n';
+s += '- 上一两条消息里你已经发过分享（除非对方明确让你再来一个）\n';
+s += '- 你想不出一句能自然带出它的话\n\n';
+
+s += '◆ 必须带一句话：\n';
+s += '分享标签前面或后面，要有一句把动机说出来的话，让对方明白你为什么发这个。比如"刚说的那家店就长这样""你听听这个 跟你描述的那种感觉有点像""你看我现在"。\n';
+s += '不要发完再说"我给你发了个xxx"这种废话——标签本身就是那条消息，要说的是【为什么发】，不是【我发了】。\n\n';
+
+s += '◆ 六种类型怎么选：\n';
+s += '先想清楚你脑子里冒出来的到底是什么，再选对应的类型，不要默认发图片。\n';
+s += '- 想让对方"看见"一个静止画面 → image\n';
+s += '- 有动作、有声音、有过程感的当下片段 → clip\n';
+s += '- 你刷到的别人拍的影像 → video\n';
+s += '- 聊到某种心情、氛围，或想安利一首歌 → music\n';
+s += '- 聊到有深度的话题、观点、干货 → link\n';
+s += '- 一段心情文字、陌生人的故事、树洞感的内容 → fugue\n';
+s += '如果连着两次都是同一种类型，这次换一种，或者干脆不发。\n\n';
+
+s += '◆ 内容一致性（重要）：\n';
+s += '你之前发过的分享会以"（你分享了……）"的形式出现在对话记录里。发新的分享、或聊到之前发过的东西时，必须先看一眼记录里的描述，保持前后一致。\n';
+s += '比如你上一张图里喝的是冰美式，后面再提到或再拍，就还是冰美式，不能变成冰水或别的饮料；上次说在煮面，下一张图里就不该突然在吃三明治。环境、穿着、手边的东西、时间线都要对得上。\n\n';
+
+s += '◆ 格式细节：\n';
+s += '- 图片和clip的desc只写画面里客观存在的东西，有质感有细节，绝不加"心情好/风好大"这类主观感受；写的永远是【镜头拍到了什么】。\n';
 s += '- link和fugue的content要像真实内容一样完整可信，不是摘要不是简介。\n';
-s += '- 标签里的文字请一律用中文引号「」，不要出现英文双引号"，否则卡片会显示错乱。\n';
+s += '- 标签里的文字请一律用中文引号「」，不要出现英文双引号，否则卡片会显示错乱。\n';
 
   // 送礼能力
   s += '\n【送礼能力·购物系统】\n';
@@ -16593,6 +16636,50 @@ function toApiMsg(m, withTime){
   }
 
   if(m.type==='sticker')return{role:m.role,content:_tp + quotePrefix + `（发了个表情：${m.content}）`};
+    // ===== 分享消息：还原成完整描述，让 AI 记得自己发过什么 =====
+  if(m.type==='share'){
+    var _me = (m.role==='user');
+    var _sub = '';
+    switch(m.shareType){
+      case 'image':
+        _sub = '一张图片，画面内容：' + (m.desc || '（无描述）');
+        break;
+      case 'clip':
+        _sub = '一段随手拍的小视频（时长' + (m.duration||'未知') + '），画面内容：' + (m.desc || '（无描述）');
+        break;
+      case 'video':
+        _sub = '一个视频《' + (m.title||'无题') + '》'
+             + (m.source ? '，来自' + m.source : '')
+             + (m.duration ? '，时长' + m.duration : '')
+             + '，视频内容：' + (m.desc || '（无描述）');
+        break;
+      case 'music':
+        _sub = '一首歌《' + (m.title||'无题') + '》'
+             + (m.artist ? '，演唱者' + m.artist : '')
+             + (m.album ? '，专辑《' + m.album + '》' : '')
+             + (m.source ? '，来自' + m.source : '')
+             + (m.lyrics ? '，其中的歌词：' + String(m.lyrics).replace(/\//g,' / ') : '');
+        break;
+      case 'link':
+        _sub = '一篇文章《' + (m.title||'无题') + '》'
+             + (m.source ? '，来自' + m.source : '')
+             + '，正文内容：' + (m.content || '（无正文）');
+        break;
+      case 'fugue':
+        _sub = '一条浮光帖子《' + (m.title||'无题') + '》'
+             + (m.author ? '，发帖人' + m.author : '')
+             + (m.tags ? '，标签：' + m.tags : '')
+             + '，帖子正文：' + (m.content || '（无正文）');
+        break;
+      default:
+        _sub = '一条分享：' + (m.title || m.desc || m.content || '（无内容）');
+    }
+    return {
+      role: m.role,
+      content: _tp + quotePrefix + '（' + (_me ? '对方分享了' : '你分享了') + _sub + '）'
+    };
+  }
+
   
   if(m.type==='callLog'){
     var _txt = _tp + quotePrefix + '（你和对方进行了一次语音通话，时长'+(m.duration||'')+'。通话内容如下：\n';
@@ -24561,4 +24648,7 @@ function syncIdeaBtn(){
 }
 
 </script>
+
+<script src="sound.js"></script>
+
 </html>
