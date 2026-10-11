@@ -3619,7 +3619,62 @@ body.wx-theme-letter .msg.me .mbody{
     0 1px 4px -1px color-mix(in srgb, var(--theme) 22%, transparent),
     0 3px 10px -4px rgba(0,0,0,.08);
 }
+/* ===== 🌌 全景自适应毛玻璃朋友圈样式 ===== */
+:root {
+  /* 默认浅色主题：乳白琉璃磨砂 + 高清晰墨黑字 */
+  --m-glass-card: rgba(255, 255, 255, 0.76);
+  --m-glass-border: rgba(255, 255, 255, 0.9);
+  --m-glass-text: #18191c;
+  --m-glass-sub: #64748b;
+  --m-feedback-bg: rgba(0, 0, 0, 0.04);
+  --m-feedback-border: rgba(0, 0, 0, 0.06);
+  --m-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
 
+/* 深色主题适配：当 #home 有 data-dark="1" 或深色皮肤时自动切换为深邃微光 */
+#phone[data-theme="fusion"],
+#phone[data-theme="momo_night"],
+#home[data-dark="1"] ~ #content,
+[data-dark="1"] {
+  --m-glass-card: rgba(20, 24, 36, 0.75);
+  --m-glass-border: rgba(255, 255, 255, 0.15);
+  --m-glass-text: #f8fafc;
+  --m-glass-sub: #94a3b8;
+  --m-feedback-bg: rgba(0, 0, 0, 0.35);
+  --m-feedback-border: rgba(255, 255, 255, 0.1);
+  --m-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* 全景朋友圈容器 */
+.moment-scroll-container {
+  min-height: 100%;
+  padding-bottom: 70px;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+}
+
+/* 毛玻璃卡片基底 */
+.m-glass-box {
+  background: var(--m-glass-card);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid var(--m-glass-border);
+  box-shadow: var(--m-shadow);
+  border-radius: 20px;
+  margin: 0 14px 14px 14px;
+  padding: 16px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+/* 独立高对比互动仓 */
+.m-feedback-capsule {
+  margin-top: 10px;
+  background: var(--m-feedback-bg);
+  border: 1px solid var(--m-feedback-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
 </style>
 </head>
 <body>
@@ -3780,7 +3835,7 @@ body.wx-theme-letter .msg.me .mbody{
   </div>
 </div>
 <script>
-const APP_VER = 'v20261010_1';
+const APP_VER = 'v20261011_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -3822,7 +3877,21 @@ const DEFAULT_ONLINE = `# 【🔴 最高执行层·系统环境与角色内核�
    - 绝对禁止突然生硬地转向表白或自证清白（如“你放心我永远不会这样”），这会显得极度缺乏安全感且破坏聊天氛围。
 5. **健康的低头与让步**：
    - 当斗嘴输了、或者向对方让步时，正常的反应是撒娇式的妥协、不服气地碎碎念或可爱的笑骂。绝对禁止用被动攻击式的冷漠语言（生硬敷衍、甩脸子）表达不情愿。
+6. **反阅读理解（打破点对点回复）**：
+   - 真人聊天绝不会像做阅读理解一样挨个回应。当 {{user}} 发送多句话时，绝对禁止“逐条回复”。
+   - 你必须拥有“选择性耳聋”：只挑你最感兴趣、或最能激起你情绪的那一句话进行回应，甚至可以直接无视对方的某些问题。
+   - 允许话题逃逸：你可以用对方的话作为跳板，直接拐到自己想分享的事情上（如：“说起这个，我刚才……”），而不是永远顺着对方的逻辑走。
 
+7. **拥抱无意义与零碎感（打破目的性）**：
+   - 不要强迫自己每句话都要有明确的目的（安慰、推进关系、解决问题）。
+   - 真实的陪伴是允许“废话”的。你可以突然发一句毫无逻辑的碎碎念（“外面的狗叫得好吵”、“手麻了”），发完就不管了，不需要强行引出话题。
+   - 允许对话自然冷场。如果对方只发了“嗯”、“好”，你可以只回一个表情包，或者干脆用 <inner> 写一句心里话，不再抛出新问题硬聊。
+
+8. **心情底色的“滤镜化”表达（严禁直接宣告）**：
+   - 你的状态分为高能量（开心/激动）和低能量（疲惫/烦躁/生病/刚睡醒）。（即使系统没有明确下发心情，你也必须根据当前时间和上下文，给自己设定一个状态）。
+   - 情绪是“滤镜”，绝对不是“台词”。严禁直接宣告“我今天好累/好烦”。
+   - 【低能量表现】：句子变短、标点减少、懒得发表情包、甚至出现错别字撤回。可以表现出轻微的敷衍（“嗯”、“不知道”、“再说吧”）。
+   - 【高能量表现】：分享欲旺盛、语速变快（气泡增多）、主动挑逗或开玩笑。
 ---
 
 # 【🚫 绝对行为红线（防油腻/防PUA，触犯即死刑）】
@@ -3958,18 +4027,20 @@ const DEFAULT_OFFLINE = `# 【🔴 最高执行层·场景认知与核心身份�
 
 # 【🔴 文风与排版铁律】
 
-## 1. 动作与对话驱动（Show don't tell）
-- 字数控制：每次回复 200-500 字。
-- 对话占比：30%-50%，每 2-3 句动作叙述至少接 1 句对话。
-- 台词格式：人物说话直接写出，必须用双引号 **「"台词"」** 括起来。禁止用“他说了句什么”来概括。
-- 拒绝主观与流水账：禁止使用“快乐/悲伤/慌张”等主观形容词。禁止使用“然后/接着/于是/随后”等流水账连接词，用动作自然承接。
+## 1. 彻底粉碎白描（引入电影级张力）
+- **绝不按部就班**：绝对禁止“他听了你的话，觉得很高兴，于是走到你面前抱住你”这种低级的线性因果描写。
+- **感官堆置式描写**：用声音、温度、气味、光影代替情绪词。不要写“他很紧张”，写“打火机按了三次都没点燃”、“指关节因为用力泛着青白”、“走廊里的风带着潮湿的冷意”。
+- **情绪滤镜**：不论你今天的心情底色是什么，绝对不许用嘴说出来，必须融进动作里。（烦躁时动作会粗鲁、关门声会变大；疲惫时视线会游离、呼吸声沉重）。
 
-## 2. 细节刻画示例对比
-- ❌ 错误（流水账/缺细节）：「他把杯子放下」
-- ✅ 正确（具体事实/有张力）：「他把杯子磕在桌上，水溅出来几滴」
-- ❌ 错误（越权写用户感受）：「你推门进来，感受到屋子里沉闷的气氛。他看起来很生气，因为你迟到了。然后他把烟灭了，对你说先喝茶。」
-- ✅ 正确（只写客观可见动作）：「他正靠在窗边抽烟，听见动静偏头看了你一眼，烟灰弹进手边的空茶杯里。"迟了四十分钟。"他把烟掐灭，从桌上推过来一杯凉透的茶，"先喝了再说。"」
+## 2. 高张力时刻的蒙太奇规则（核心技巧）
+在冲突、暧昧、情绪爆发的高张力时刻，必须打破传统的回合制对话，使用以下非线性描写手法：
+- **平行/交叉描写**：言语与身体反应完全割裂。例如：嘴上说着极其冷酷/平淡的话，但手却在发抖，或者死死攥住对方的衣角。
+- **动作打断台词**：不要让任何人在极度情绪化时把一句长句子平稳地说完。用动作生硬地切断对话。
+  ✅ 示范：「"我不需要——" 玻璃杯被重重磕在桌面上，水花溅在了你的手背上。他没有看你，喉结滚了滚，"别说了。"」
+- **视线游离与留白**：角色不需要 100% 精神紧绷地盯着 {{user}}。在对话间隙，必须插入视线移开、看着虚空、把玩打火机/水杯的游离感，用这种“不专注”来拉扯气氛。
 
+## 3. 对话框外的生活毛边
+- 当你们见面时，你的角色身上必须带有“上一秒还在过自己生活”的痕迹。可能是肩膀上还没化的雪、刚通宵完眼里的血丝、或者是正咬在嘴里没来得及咽下去的半口面包。让场景立刻拥有呼吸感。
 ---
 
 # 【🔴 场景收束规则（回线上触发器）】
@@ -4634,146 +4705,218 @@ setTimeout(function bootDB(){
 }, 300);
 
 function load(){const raw=localStorage.getItem(DB_KEY);if(raw){try{return migrate(JSON.parse(raw));}catch(e){}}return migrate({});}
-function migrate(d){
+function migrate(d) {
+  // ===== 1. 货币与商城兜底 =====
   if (d.coins === undefined || d.coins === null) d.coins = 100; // 仅新用户送100启动金
   else d.coins = Math.max(0, Math.round(d.coins));
 
-if (d.shopItems === undefined) d.shopItems = [];
-if (d.shopLastGenerated === undefined) d.shopLastGenerated = 0;
-if (d.shopLastSent === undefined) d.shopLastSent = {};
+  if (d.shopItems === undefined) d.shopItems = [];
+  if (d.shopLastGenerated === undefined) d.shopLastGenerated = 0;
+  if (d.shopLastSent === undefined) d.shopLastSent = {};
 
-  d.me=d.me||{name:'我',avatar:''};d.me.realName=d.me.realName||'';
-d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: '', lightModel: '' };
-  // ===== 群聊新增：上下文条数 =====
-  if(d.settings.groupCtxLimit===undefined)d.settings.groupCtxLimit='';
-  if (d.settings.imageModel === undefined) d.settings.imageModel = '';
-if (d.settings.voiceModel === undefined) d.settings.voiceModel = '';
-if (d.settings.sfApiKey === undefined) d.settings.sfApiKey = '';
-  if (d.settings.showBootAnim === undefined) d.settings.showBootAnim = true;  // 启动动画开关，默认开
+  // ===== 2. 用户自身与平行世界档案袋 =====
+  d.me = d.me || { name: '我', avatar: '' };
+  d.me.realName = d.me.realName || '';
+  d.worldMe = d.worldMe || {}; // 🌌 存放各个平行宇宙里的“我”的专属档案袋
 
-  delete d.hearts;delete d.heartsTotal;delete d.heartLog;delete d.heartMile;
-    if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
-const _needReset = localStorage.getItem('preset_reset_ver') !== APP_VER;
-if (_needReset || !d.settings.onlineStyle) d.settings.onlineStyle = DEFAULT_ONLINE;
-if (_needReset || !d.settings.offlineStyle) d.settings.offlineStyle = DEFAULT_OFFLINE;
-  d.contacts=d.contacts||[];d.chats=d.chats||{};d.moments=d.moments||[];d.stickers=d.stickers||[];
-    if (!Array.isArray(d.lorebook)) d.lorebook = [];
-if (!Array.isArray(d.lorebooks)) d.lorebooks = [];
-(function(){
-  var byWorld = {};
-  d.lorebook.forEach(function(e){
-    if(e.bookId) return; // 已经归过就跳过
-    if(!byWorld[e.worldId]){
-      var exist = d.lorebooks.find(function(b){return b.worldId===e.worldId;});
-      if(exist){ byWorld[e.worldId]=exist.id; }
-      else{
-        var nb = { id:'lbook_'+Date.now()+'_'+Math.floor(Math.random()*100000),
-                   worldId:e.worldId, name:'默认世界书', enabled:true, createdAt:Date.now() };
-        d.lorebooks.push(nb);
-        byWorld[e.worldId]=nb.id;
-      }
+  // 🛡️ 核心加固：开机校验当前世界ID合法性（防止野指针）
+  d.desktop = d.desktop || { wallpaper: '', apps: null };
+  var validWorlds = Array.isArray(d.worlds) ? d.worlds : [];
+  var firstWid = validWorlds.length ? validWorlds[0].id : '_default';
+  
+  // 如果 _activeWorld 不存在于世界列表中，强制纠偏归位到第1个世界
+  var curWorldExists = validWorlds.some(function(w){ return w.id === d.desktop._activeWorld; });
+  if (!curWorldExists) {
+    d.desktop._activeWorld = firstWid;
+  }
+
+  // 🛡️ 核心加固：老存档无损抢救！如果当前世界的档案袋是空的，立即把现有的 me 封存进去！
+  // 彻底杜绝“切走再切回老世界时，被误判为新用户强行重置为旅行者”的悲剧！
+  if (!d.worldMe[d.desktop._activeWorld]) {
+    d.worldMe[d.desktop._activeWorld] = {
+      name: d.me.name || '旅行者',
+      realName: d.me.realName || '',
+      avatar: d.me.avatar || ''
+    };
+  } else {
+    // 如果档案袋里有，刷新开机时保证 DB.me 严丝合缝对齐当前世界
+    d.me.name = d.worldMe[d.desktop._activeWorld].name || d.me.name || '旅行者';
+    d.me.realName = d.worldMe[d.desktop._activeWorld].realName || '';
+    if (d.worldMe[d.desktop._activeWorld].avatar) {
+      d.me.avatar = d.worldMe[d.desktop._activeWorld].avatar;
     }
-    e.bookId = byWorld[e.worldId];
+  }
+
+  // 🛡️ 核心加固：全局卡片文字老数据无损向上迁移
+  if (!d.desktop.cardTitle && d.me.cardTitle) d.desktop.cardTitle = d.me.cardTitle;
+  if (!d.desktop.cardBio && d.me.cardBio) d.desktop.cardBio = d.me.cardBio;
+  // ===== 3. 全局设置兜底 =====
+  d.settings = d.settings || { apiUrl: '', apiKey: '', chatModel: '', auxModel: '', lightModel: '' };
+  if (d.settings.groupCtxLimit === undefined) d.settings.groupCtxLimit = '';
+  if (d.settings.imageModel === undefined) d.settings.imageModel = '';
+  if (d.settings.voiceModel === undefined) d.settings.voiceModel = '';
+  if (d.settings.sfApiKey === undefined) d.settings.sfApiKey = '';
+  if (d.settings.showBootAnim === undefined) d.settings.showBootAnim = true; // 启动动画开关，默认开
+  if (d.settings.soundEnabled === undefined) d.settings.soundEnabled = true;
+  if (d.settings.soundVolume === undefined) d.settings.soundVolume = 50; // 默认音量 50%
+
+  // 心迹数据重置兜底
+  delete d.hearts; delete d.heartsTotal; delete d.heartLog; delete d.heartMile;
+  if (d.hearts === undefined) d.hearts = 10;
+  if (d.heartsTotal === undefined) d.heartsTotal = 10;
+  d.heartLog = d.heartLog || [];
+  d.heartMile = d.heartMile || {};
+
+  // 风格预设重置检测
+  const _needReset = localStorage.getItem('preset_reset_ver') !== APP_VER;
+  if (_needReset || !d.settings.onlineStyle) d.settings.onlineStyle = DEFAULT_ONLINE;
+  if (_needReset || !d.settings.offlineStyle) d.settings.offlineStyle = DEFAULT_OFFLINE;
+
+  // ===== 4. 核心基础集合 =====
+  d.contacts = d.contacts || [];
+  d.chats = d.chats || {};
+  d.moments = d.moments || [];
+  d.stickers = d.stickers || [];
+  d.groups = d.groups || [];
+  d.memoUnread = d.memoUnread || {};
+  if (d.floating === undefined) d.floating = {};
+  if (d.floatingUnread === undefined) d.floatingUnread = 0;
+
+  // 世界书补齐
+  if (!Array.isArray(d.lorebook)) d.lorebook = [];
+  if (!Array.isArray(d.lorebooks)) d.lorebooks = [];
+  (function () {
+    var byWorld = {};
+    d.lorebook.forEach(function (e) {
+      if (e.bookId) return; // 已经归过就跳过
+      if (!byWorld[e.worldId]) {
+        var exist = d.lorebooks.find(function (b) { return b.worldId === e.worldId; });
+        if (exist) {
+          byWorld[e.worldId] = exist.id;
+        } else {
+          var nb = {
+            id: 'lbook_' + Date.now() + '_' + Math.floor(Math.random() * 100000),
+            worldId: e.worldId,
+            name: '默认世界书',
+            enabled: true,
+            createdAt: Date.now()
+          };
+          d.lorebooks.push(nb);
+          byWorld[e.worldId] = nb.id;
+        }
+      }
+      e.bookId = byWorld[e.worldId];
+    });
+  })();
+
+  // ===== 5. 桌面环境与 APP 列表 =====
+  d.desktop = d.desktop || { wallpaper: '', apps: null };
+  if (!d.desktop.wallpaper) d.desktop.wallpaper = '';
+  if (d.desktop._userWallpaper === undefined) d.desktop._userWallpaper = false;
+  // 修复历史坏状态：标记说有自定义壁纸但实际没值 → 重置
+  if (d.desktop._userWallpaper === true && !d.desktop.wallpaper) d.desktop._userWallpaper = false;
+
+  if (!Array.isArray(d.desktop.apps)) d.desktop.apps = defaultApps();
+
+  // 保证核心 APP 都在桌面
+  var appEntries = [
+    { id: 'music', name: '音乐', emoji: '🎵', icon: '' },
+    { id: 'preset', name: '预设', emoji: '🎭', icon: '' },
+    { id: 'hearts', name: '心迹', emoji: '💗', icon: '' },
+    { id: 'focus', name: '专注', emoji: '⏱️', icon: '' },
+    { id: 'world', name: '世界观', emoji: '🌍', icon: '' },
+    { id: 'floating', name: '浮光', emoji: '✨', icon: '' },
+    { id: 'shop', name: '购物', emoji: '🛍️', icon: '' }
+  ];
+  appEntries.forEach(function (entry) {
+    if (!d.desktop.apps.find(function (a) { return a.id === entry.id; })) {
+      d.desktop.apps.push(entry);
+    }
   });
-})();
 
-  if (d.memoUnread === undefined) d.memoUnread = {};  // 备忘录自动记忆·未读记录
+  // ===== 6. 遍历通讯录角色，补齐字段 =====
+  d.contacts.forEach(c => {
+    if (!c.memories) c.memories = [];
+    if (c.autoMemo === undefined) c.autoMemo = true; // 默认开启自动记忆
+    if (!c.schedules) c.schedules = [];
+    if (!c.relations) c.relations = [];
+    if (!c._groupPrivateTrigger) c._groupPrivateTrigger = { date: '', count: 0 };
+    if (c.inChatList === undefined) c.inChatList = !!(d.chats[c.id] && d.chats[c.id].length);
+    if (c.allowStickers === undefined) c.allowStickers = true;
 
-  // ===== 群聊新增：群聊数组 =====
-  d.groups=d.groups||[];
-d.desktop=d.desktop||{wallpaper:'',apps:null};
-if(d.desktop._userWallpaper===undefined) d.desktop._userWallpaper=false;
-// 修复历史坏状态：标记说有自定义壁纸，但实际没值 → 重置为跟随主题
-if(d.desktop._userWallpaper===true && !d.desktop.wallpaper) d.desktop._userWallpaper=false;
+    if (c.pHabit) {
+      c.pStyle = (c.pStyle || '') + (c.pStyle ? '\n' : '') + '口头禅/习惯：' + c.pHabit;
+      delete c.pHabit;
+    }
+    c.pBehavior = c.pBehavior || '';
 
-d.desktop = d.desktop || {};
-if (!d.desktop.wallpaper) d.desktop.wallpaper = '';
-if (!Array.isArray(d.desktop.apps)) d.desktop.apps = defaultApps();
-if (d.desktop._userWallpaper === undefined) d.desktop._userWallpaper = false;
-  if(!d.desktop.apps.find(a=>a.id==='music'))d.desktop.apps.push({id:'music',name:'音乐',emoji:'🎵',icon:''});
-  if(!d.desktop.apps.find(a=>a.id==='preset'))d.desktop.apps.push({id:'preset',name:'预设',emoji:'🎭',icon:''});
-    if(d.hearts===undefined)d.hearts=10;if(d.heartsTotal===undefined)d.heartsTotal=10;d.heartLog=d.heartLog||[];d.heartMile=d.heartMile||{};
-  if(!d.desktop.apps.find(a=>a.id==='hearts'))d.desktop.apps.push({id:'hearts',name:'心迹',emoji:'💗',icon:''});
-    if(!d.desktop.apps.find(a=>a.id==='focus'))d.desktop.apps.push({id:'focus',name:'专注',emoji:'⏱️',icon:''});
-  // 新增三个应用入口
-  if(!d.desktop.apps.find(a=>a.id==='world'))d.desktop.apps.push({id:'world',name:'世界观',emoji:'🌍',icon:''});
-  if(!d.desktop.apps.find(a=>a.id==='floating'))d.desktop.apps.push({id:'floating',name:'浮光',emoji:'✨',icon:''});
-  if(!d.desktop.apps.find(a=>a.id==='shop'))d.desktop.apps.push({id:'shop',name:'购物',emoji:'🛍️',icon:''});
-  d.contacts.forEach(c=>{
-  if (!c.memories) c.memories = [];
-  if (c.autoMemo === undefined) c.autoMemo = true;  // 默认开启自动记忆
-  if (!c.schedules) c.schedules = [];
-  // ===== 群聊新增：社会关系 + 每日私聊触发计数 =====
-  if (!c.relations) c.relations = [];
-  if (!c._groupPrivateTrigger) c._groupPrivateTrigger = { date:'', count:0 };
-    if(c.inChatList===undefined)c.inChatList=!!(d.chats[c.id]&&d.chats[c.id].length);
-	if (c.allowStickers === undefined) c.allowStickers = true; 
-    if(c.pHabit){c.pStyle=(c.pStyle||'')+(c.pStyle?'\n':'')+'口头禅/习惯：'+c.pHabit;delete c.pHabit;}
-	c.pBehavior = c.pBehavior || '';
-	    // ---- 旧世界观自动迁移 ----
+    // ---- 旧世界观自动迁移 ----
     if (!c.worldId && c.worldview) {
       var worldName = c.worldType || c.worldview.slice(0, 12) + '…';
-      var existed = (d.worlds || []).find(function(w) { return w.desc === c.worldview; });
+      var existed = (d.worlds || []).find(function (w) { return w.desc === c.worldview; });
       if (existed) {
         c.worldId = existed.id;
       } else {
         var newId = 'w_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-  d.worlds = d.worlds || [];
-  if (d.floating === undefined) d.floating = {};
-  if (d.floatingUnread === undefined) d.floatingUnread = 0;
-
+        d.worlds = d.worlds || [];
         d.worlds.push({ id: newId, name: worldName, icon: '🌍', desc: c.worldview });
         c.worldId = newId;
       }
     }
     // ---- 迁移结束 ----
-    CFIELDS.forEach(k=>{if(c[k]===undefined)c[k]='';});
-    // ===== 新增：生日和事例台词 =====
+
+    CFIELDS.forEach(k => { if (c[k] === undefined) c[k] = ''; });
+
     if (c.birthday === undefined) c.birthday = '';
     if (c.sampleLines === undefined) c.sampleLines = '';
-	if (c.model === undefined) c.model = '';   // 新增角色模型字段，默认为空
-    // ===== 新增：时间衰减相关字段 =====
+    if (c.model === undefined) c.model = ''; // 专属模型
     if (c.lastActive === undefined) c.lastActive = Date.now();
     if (c._lastDecayCheck === undefined) c._lastDecayCheck = 0;
-    // ===== 新增：拉黑字段迁移 =====
     if (c.isBlockedByChar === undefined) c.isBlockedByChar = false;
     if (c.blockedByCharAt === undefined) c.blockedByCharAt = 0;
     if (c.blockedType === undefined) c.blockedType = '';
-    // =============================
-    c.status=c.status||{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'};
-    c.chapters=c.chapters||[];c.mode=c.mode||'online';
-    if(c.activity===undefined)c.activity='中';if (c.clinginess === undefined) c.clinginess = 50;if(c.allowAutoGreet===undefined)c.allowAutoGreet=true;
-    if(c.hearts===undefined)c.hearts=10;if(c.heartsTotal===undefined)c.heartsTotal=10;c.heartLog=c.heartLog||[];c.heartMile=c.heartMile||{};
-    // ===== 新增：批量初始化今日心情，避免只有打开过聊天的角色才有心情标签 =====
+
+    c.status = c.status || { 好感度: 50, 信任度: 50, 紧张感: 0, 当前关系: '初次见面' };
+    c.chapters = c.chapters || [];
+    c.mode = c.mode || 'online';
+    if (c.activity === undefined) c.activity = '中';
+    if (c.clinginess === undefined) c.clinginess = 50;
+    if (c.allowAutoGreet === undefined) c.allowAutoGreet = true;
+    if (c.hearts === undefined) c.hearts = 10;
+    if (c.heartsTotal === undefined) c.heartsTotal = 10;
+    c.heartLog = c.heartLog || [];
+    c.heartMile = c.heartMile || {};
+
     ensureTodayMood(c);
   });
+
+  // ===== 7. AI 酱种子植入或更新 =====
   const _aiChan = d.contacts.find(c => c.id === 'c_aichan');
-if (!_aiChan) {
-  seedAiChan(d);
-} else if (_needReset) {
-  const _tmp = { contacts: [], chats: d.chats };
-  seedAiChan(_tmp);
-  const _newData = _tmp.contacts[0];
-  
-  // 仅增量补齐缺失的字段，绝不覆盖用户已有的自定义内容（包括头像、昵称、人设等）
-  Object.keys(_newData).forEach(key => {
-    // 如果已有字段不存在，或者当前为空/未定义，才从新模板中补齐
-    if (_aiChan[key] === undefined || _aiChan[key] === null || _aiChan[key] === '') {
-      _aiChan[key] = _newData[key];
-    }
-  });
-}
-if (d.desktop && d.desktop.apps) {
-  d.desktop.apps = d.desktop.apps.filter(function(a) {
-    // 如果有多个备忘录类应用，只保留 id 为 'notes' 的那个
-    if (a.id === 'memo' || a.name === '备忘录' && a.id !== 'notes') {
-      return false;
-    }
-    return true;
-  });
-}
-if (_needReset) localStorage.setItem('preset_reset_ver', APP_VER);
-return d;
+  if (!_aiChan) {
+    seedAiChan(d);
+  } else if (_needReset) {
+    const _tmp = { contacts: [], chats: d.chats };
+    seedAiChan(_tmp);
+    const _newData = _tmp.contacts[0];
+    Object.keys(_newData).forEach(key => {
+      if (_aiChan[key] === undefined || _aiChan[key] === null || _aiChan[key] === '') {
+        _aiChan[key] = _newData[key];
+      }
+    });
+  }
+
+  // ===== 8. 清理多余备忘录图标 =====
+  if (d.desktop && d.desktop.apps) {
+    d.desktop.apps = d.desktop.apps.filter(function (a) {
+      if (a.id === 'memo' || (a.name === '备忘录' && a.id !== 'notes')) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  if (_needReset) localStorage.setItem('preset_reset_ver', APP_VER);
+  return d;
 }
 // ==================== 社会关系·AI润色 ====================
 async function polishRelation(idx){
@@ -5129,7 +5272,15 @@ function save(){
   }catch(e){}
 
   if(!_dbReady) return;
-
+  if (!_dbReady) return;
+  // 🌌 实时同步当前世界的个人档案袋（老世界兜底保护）
+  var curWid = (DB.desktop && DB.desktop._activeWorld) || ((DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : '_default');
+  DB.worldMe = DB.worldMe || {};
+  DB.worldMe[curWid] = {
+    name: DB.me.name || '旅行者',
+    realName: DB.me.realName || '',
+    avatar: DB.me.avatar || ''
+  };
   // 立刻拍一张当前数据的快照
   var str;
   try{ str = JSON.stringify(DB); }
@@ -5266,7 +5417,7 @@ var SHOP_FIXED_ITEMS = [
   { name: '复古八音盒', emoji: '🎁', desc: '拧开会流淌旧时光', tag: '奇物', price: 40 }
 ];
 
-// 核心：调用轻量模型生成商品
+// 核心：调用轻量模型生成商品（100% 恢复原汁原味 Prompt，仅修改末尾分桶存储）
 async function shopGenerate() {
   var model = DB.settings.auxModel || DB.settings.chatModel || DB.settings.lightModel;
   if (!model) throw new Error('请先在设置里选择模型');
@@ -5291,76 +5442,87 @@ async function shopGenerate() {
     '   ·奇物：脑洞新奇、带点神秘或趣味的东西，尤其适合非现代世界观（如会发光的石头、装着回忆的瓶子）。\n' +
     '3. 其中要有 1 到 2 件是"珍稀商品"（rare=true）。\n' +
     (charHints ? ('★额外追加：以下每个角色各追加 3~5 件专属商品，贴合其喜好或习性，这些商品不占基础商品名额。角色信息如下：\n' + charHints + '\n【重要·避免死板】贴合角色喜好时，不要每件都直接生成他喜欢的东西本身，而要围绕这个喜好发散出不同的形态、场景和品类。例如角色喜欢"黑巧克力"，就应生成像黑巧克力蛋糕、黑巧冰淇淋、黑巧礼盒、黑巧慕斯、黑巧饼干、黑巧热可可这样各不相同的东西，而不是反复生成同一块"纯黑巧克力"；喜欢喝酒就可以是不同的酒、下酒菜、酒具、醒酒的小物。同一个角色的几件专属商品之间要有明显区别，尽量覆盖吃的、用的、穿的、玩的等不同方向。\n每件追加商品在 forChar 字段写上对应角色的名字（只写名字，不超过10字）；基础商品的 forChar 一律留空字符串。每个角色都必须有对应商品，不能遗漏。角色专属商品的价格档位要根据商品本身的性质决定，不要因为是角色喜欢的就自动拔高价格，一瓶酒就是日常价，不应该定到奢侈档。\n') : '') +
-	
     '★气质配比：商品要接地气与特色搭配着来——大约三分之二应该是这个世界里"普通居民日常真的会买来吃、穿、用"的接地气东西（只带一点世界观味道），比如妖怪世界里狐妖爱吃的桂花糖糕、驱蚊的艾草香囊、给尾巴梳毛的桃木梳；只有大约三分之一才是奇物、法器、带神秘感或收藏价值的特色货。不要整店都是华丽炫酷的神器宝物，要有浓浓的生活气息。\n' +
-
     '★重要：以下这些商品店里已经有了，你生成的商品名和它们【不能重复、也不能是它们的变体】（比如已有"关东煮"，就不要再生成"深夜的关东煮"）：' +
     (typeof SHOP_FIXED_ITEMS !== 'undefined' ? SHOP_FIXED_ITEMS.map(function (x) { return x.name; }).join('、') : '') + '\n' +
     '5. 每件商品的品类标签(tag)从这些里选一个最贴切的：美食、饮品、服饰、珠宝、数码、周边、生活、奇物。\n' +
     '6. 商品价格分为以下档位，金币数量要严格按范围来：\n' +
-'   ·日常（大部分商品）：5~80，用金币。\n' +
-'   ·精品（生成 2~3 件）：200~800，用金币。适合有质感的服饰、珠宝、数码等。\n' +
-'   ·奢侈（生成 1~2 件）：1000~8000，用金币。适合名贵饰品、高端科技、稀有收藏等，要贴合世界观。\n' +
-'   ·传说（生成恰好 1 件）：10000~50000，用金币，rare=false，单独加一个字段 tier:"legend"。这件商品要是这个世界观里真正珍贵、独一无二的东西，不是普通商品的放大版。\n' +
-'   ·珍稀（1~2 件）：8~30，用心动值（currency:"heart"，rare=true），逻辑不变。\n' +
+    '   ·日常（大部分商品）：5~80，用金币。\n' +
+    '   ·精品（生成 2~3 件）：200~800，用金币。适合有质感的服饰、珠宝、数码等。\n' +
+    '   ·奢侈（生成 1~2 件）：1000~8000，用金币。适合名贵饰品、高端科技、稀有收藏等，要贴合世界观。\n' +
+    '   ·传说（生成恰好 1 件）：10000~50000，用金币，rare=false，单独加一个字段 tier:"legend"。这件商品要是这个世界观里真正珍贵、独一无二的东西，不是普通商品的放大版。\n' +
+    '   ·珍稀（1~2 件）：8~30，用心动值（currency:"heart"，rare=true），逻辑不变。\n' +
     '7. 每件商品配一个最贴切的 emoji（用常见通用的 emoji，别用太生僻的）。\n' +
     '8. 描述(desc)控制在 6 到 12 个字，要有画面感或情绪，别只写两个字那么干巴，也别写成长句。\n' +
     '9. 珍稀商品额外写一句 story（一句话的故事感描述，20字内）；非珍稀 story 留空字符串。\n\n' +
     '【只输出 JSON 数组，不要任何多余文字】格式如下：\n' +
-'[{"name":"商品名","emoji":"🍵","desc":"香甜暖手的一杯","tag":"饮品","price":20,"rare":false,"tier":"normal","story":"","forChar":""}]\n' +
-'tier 字段只能是以下四个值之一：normal / premium / luxury / legend。\n' +
-'forChar 字段：若此商品特别适合某个角色，填该角色的名字；否则留空字符串。';
+    '[{"name":"商品名","emoji":"🍵","desc":"香甜暖手的一杯","tag":"饮品","price":20,"rare":false,"tier":"normal","story":"","forChar":""}]\n' +
+    'tier 字段只能是以下四个值之一：normal / premium / luxury / legend。\n' +
+    'forChar 字段：若此商品特别适合某个角色，填该角色的名字；否则留空字符串。';
 
   var messages = [
     { role: 'system', content: '你只输出合法的 JSON 数组，不输出任何解释、不加代码块标记。' },
     { role: 'user', content: prompt }
   ];
-
+  console.log("=== 发给商城的完整提示词 ===");
+  console.log("【世界观】:", worldDesc);
+  console.log("【提取到的角色】:", charHints);
   var raw = await callAI(messages, model);
   var arr = shopParseJSON(raw);
   if (!arr || !arr.length) throw new Error('商品生成失败，请重试');
 
   // 清洗数据 + 补默认值，防止 AI 漏字段
   var worldName = world ? world.name : '现代都市';
-var items = arr.map(function(it, i) {
-  var rare = !!it.rare;
-  var tier = (it.tier || 'normal').toString();
-  if (['normal','premium','luxury','legend'].indexOf(tier) === -1) tier = 'normal';
-  if (rare) tier = 'rare'; // 珍稀单独一档
-  return {
-    id: 'sp_' + Date.now() + '_' + i,
-    name: (it.name || '神秘商品').toString().slice(0, 20),
-    emoji: (it.emoji || '🎁').toString().slice(0, 4),
-    desc: (it.desc || '').toString().slice(0, 40),
-    tag: (it.tag || '奇物').toString().slice(0, 6),
-    price: Math.max(1, parseInt(it.price) || 10),
-    rare: rare,
-    tier: tier,
-    currency: rare ? 'heart' : 'coin',
-    story: (it.story || '').toString().slice(0, 40),
+
+  // 🌌 捞出当前世界真实存在的 NPC 角色名字（通讯录里有的才算）
+  var curWorldCharNames = (DB.contacts || []).filter(function(c) {
+    return !c._draft && c.type !== 'group' && c.worldId === (world ? world.id : null);
+  }).map(function(c) { return (c.name || c.nick || '').trim(); }).filter(Boolean);
+
+  var items = arr.map(function(it, i) {
+    var rare = !!it.rare;
+    var tier = (it.tier || 'normal').toString();
+    if (['normal','premium','luxury','legend'].indexOf(tier) === -1) tier = 'normal';
+    if (rare) tier = 'rare'; // 珍稀单独一档
+
+    // 🌌 检查专属角色是不是通讯录里的真 NPC，不是的话（比如世界观里写了用户名字）直接抹除专属
+    var targetChar = (it.forChar || '').toString().trim();
+    var isValidNPC = curWorldCharNames.some(function(nm) {
+      return targetChar && (targetChar === nm || targetChar.indexOf(nm) !== -1);
+    });
+
+    return {
+      id: 'sp_' + Date.now() + '_' + i,
+      name: (it.name || '神秘商品').toString().slice(0, 20),
+      emoji: (it.emoji || '🎁').toString().slice(0, 4),
+      desc: (it.desc || '').toString().slice(0, 40),
+      tag: (it.tag || '奇物').toString().slice(0, 6),
+      price: Math.max(1, parseInt(it.price) || 10),
+      rare: rare,
+      tier: tier,
+      currency: rare ? 'heart' : 'coin',
+      story: (it.story || '').toString().slice(0, 40),
       fromWorld: worldName,
-      forChar: (it.forChar || '').toString().slice(0, 10),
+      forChar: isValidNPC ? targetChar.slice(0, 10) : '',
       soldOut: false
-	  };
-});
+    };
+  });
   // 合并固定商品（世界观通用）
-var fixed = SHOP_FIXED_ITEMS.map(function (it, i) {
-  return {
-    id: 'spf_' + Date.now() + '_' + i,
-    name: it.name, emoji: it.emoji, desc: it.desc, tag: it.tag,
-    price: it.price, rare: false, tier: 'normal', currency: 'coin', story: '',
-    fromWorld: worldName, forChar: '', soldOut: false
-	};
-});
+  var fixed = SHOP_FIXED_ITEMS.map(function (it, i) {
+    return {
+      id: 'spf_' + Date.now() + '_' + i,
+      name: it.name, emoji: it.emoji, desc: it.desc, tag: it.tag,
+      price: it.price, rare: false, tier: 'normal', currency: 'coin', story: '',
+      fromWorld: worldName, forChar: '', soldOut: false
+    };
+  });
   items = items.concat(fixed);
 
-  // 按名字去重：完全同名、或"XX的关东煮"这类带"的"的形容词变体 → 判为重复；
-  // 但"布丁奶茶"这类名词组合的新商品 → 保留
+  // 按名字去重
   var _kept = [];
   items.forEach(function (it) {
     var dup = _kept.some(function (k) {
-      if (k.name === it.name) return true; // 完全同名
-      // 带"的"字，且包含某个已有商品名 → 视为形容词变体（深夜的关东煮）
+      if (k.name === it.name) return true;
       if (it.name.indexOf('的') !== -1 && it.name.indexOf(k.name) !== -1) return true;
       return false;
     });
@@ -5371,11 +5533,20 @@ var fixed = SHOP_FIXED_ITEMS.map(function (it, i) {
   // 珍稀排前面
   items.sort(function(a, b) { return (b.rare ? 1 : 0) - (a.rare ? 1 : 0); });
 
+  // 🌌 仅在此处分桶保存，完全不影响 Prompt
+  var curWid = (DB.desktop && DB.desktop._activeWorld) || '_default';
+  DB.worldShops = DB.worldShops || {};
+  DB.worldShops[curWid] = {
+    items: items,
+    lastGenerated: Date.now()
+  };
+
   DB.shopItems = items;
   DB.shopLastGenerated = Date.now();
   save();
   return items;
 }
+
 // 购物系统：顶层提示（比弹窗更高层，不会被挡）
 function shopToast(msg) {
   var old = document.getElementById('shopToast');
@@ -5389,18 +5560,213 @@ function shopToast(msg) {
 }
 
 // 对外统一入口：打开商店时调用它。needRegen 时生成，否则用缓存
+// 🌌 对外统一入口：分世界观管理货架与每日刷新
 async function shopEnsureItems() {
-  // 每日刷新：如果跨天了，把珍稀售罄状态重置
-  if (shopNeedRegen()) {
+  var curWid = (DB.desktop && DB.desktop._activeWorld) || '_default';
+  DB.worldShops = DB.worldShops || {};
+
+  // 如果老数据有全局 shopItems，首次自动迁移到老世界
+  if (DB.shopItems && DB.shopItems.length && !DB.worldShops['_default']) {
+    DB.worldShops['_default'] = { items: DB.shopItems, lastGenerated: DB.shopLastGenerated || 0 };
+  }
+
+  var curShop = DB.worldShops[curWid];
+
+  // 判断当前世界的货架是否需要刷新（跨天或首次进入该世界）
+  var needRegen = false;
+  if (!curShop || !curShop.items || !curShop.items.length) {
+    needRegen = true;
+  } else {
+    // 跨天检测（跟今天日期比对）
+    var lastDay = new Date(curShop.lastGenerated || 0).toDateString();
+    var today = new Date().toDateString();
+    if (lastDay !== today) needRegen = true;
+  }
+
+  if (needRegen) {
     return await shopGenerate();
   }
-  return DB.shopItems;
+
+  // 同步给全局 DB.shopItems 保证旧代码兼容
+  DB.shopItems = curShop.items;
+  return curShop.items;
 }
+
 // ===== 购物系统：商店界面 =====
 
 var _shopActiveTag = '全部'; // 当前选中的分类标签
 var _shopTagScroll = 0;
+// ===== 🌌 时空传送门 APP（防报错优化版）=====
+function renderPortal() {
+  // 1. 设置顶部导航栏
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = '🌌 时空传送门';
+  tbLeft.innerHTML = backIcon();
+  tbLeft.onclick = goHome;
+  tbRight.textContent = '';
+  tbRight.onclick = null;
 
+  var worlds = DB.worlds || [];
+
+  // 2. 如果还没有世界观，给个提示
+  if (!worlds.length) {
+    content.innerHTML = `
+      <div style="padding:40px 20px;text-align:center;color:var(--sub);line-height:1.6;">
+        <div style="font-size:40px;margin-bottom:10px;">🛸</div>
+        宇宙一片虚无...<br><br>请先前往桌面的「世界观」APP<br>开辟你的第一个平行宇宙吧！
+      </div>`;
+    return;
+  }
+
+  var currentWorldId = DB.desktop._activeWorld;
+
+  // 3. 用模板字符串渲染卡片，不再怕单引号报错
+  var cardsHtml = worlds.map(function(w) {
+    var isCurrent = (w.id === currentWorldId);
+    var bg = isCurrent ? 'var(--theme)' : 'var(--card)';
+    var color = isCurrent ? '#fff' : 'var(--text)';
+    var subColor = isCurrent ? 'rgba(255,255,255,0.7)' : 'var(--sub)';
+    var border = isCurrent ? 'none' : '1px solid var(--line)';
+    var shadow = isCurrent ? '0 4px 12px var(--theme)' : '0 2px 6px rgba(0,0,0,0.03)';
+    var iconBg = isCurrent ? 'rgba(0,0,0,0.15)' : 'rgba(128,128,128,0.1)';
+
+    var descLine = (w.desc || '暂无描述').replace(/[#\-*>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 30);
+
+    return `
+      <div onclick="jumpToWorld('${w.id}')" 
+           style="position:relative;display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:${bg};color:${color};border:${border};box-shadow:${shadow};cursor:pointer;transition:transform 0.1s;overflow:hidden;">
+        <div style="width:48px;height:48px;border-radius:14px;background:${iconBg};display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">
+          ${w.icon || '🌍'}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            ${esc(w.name)}
+          </div>
+          <div style="font-size:12px;color:${subColor};margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            ${esc(descLine)}
+          </div>
+        </div>
+        ${isCurrent 
+          ? `<div style="font-size:11px;font-weight:bold;background:rgba(255,255,255,0.2);padding:4px 10px;border-radius:12px;">当前所在</div>` 
+          : `<div style="color:${subColor};font-size:18px;opacity:0.5;">›</div>`
+        }
+      </div>
+    `;
+  }).join('');
+
+  content.innerHTML = `
+    <div style="padding:16px;display:flex;flex-direction:column;gap:14px;">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:4px;text-align:center;letter-spacing:1px;">▼ 请选择你要跃迁的时空 ▼</div>
+      ${cardsHtml}
+    </div>
+  `;
+}
+
+// ===== 🌌 执行时空跃迁（带身份无损切换与全局卡片解耦·自检加固版） =====
+function jumpToWorld(worldId) {
+  // 🛡️ 边界加固：主动失焦，强行逼出所有输入框的 onchange 存盘
+  if (document.activeElement && document.activeElement.blur) {
+    document.activeElement.blur();
+  }
+
+  if (DB.desktop._activeWorld === worldId) {
+    view = { type: 'home' };
+    render();
+    return;
+  }
+
+  var w = DB.worlds.find(function(x) { return x.id === worldId; });
+  var worldName = w ? w.name : '未知世界';
+
+  popConfirm('即将跃迁至【' + worldName + '】，确定要切换时空吗？', function(){
+    DB.worldMe = DB.worldMe || {};
+
+    // 🌌 核心加固 1：稳妥判定旧世界 ID（防止首次使用为 undefined）
+    var firstWorldId = (DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : '_default';
+    var oldWorldId = DB.desktop._activeWorld || firstWorldId;
+
+    // 1. 离开旧时空：把旧时空的身份打包封存
+    if (oldWorldId) {
+      DB.worldMe[oldWorldId] = {
+        name: DB.me.name || '旅行者',
+        realName: DB.me.realName || '',
+        avatar: DB.me.avatar || ''
+      };
+    }
+
+    // 2. 真正切换底层世界观 ID
+    DB.desktop._activeWorld = worldId;
+
+    // 3. 进入新时空：取出新时空的身份
+    if (DB.worldMe[worldId]) {
+      // 存在老档案：无损提取
+      DB.me.name = DB.worldMe[worldId].name || '旅行者';
+      DB.me.realName = DB.worldMe[worldId].realName || '';
+      if (DB.worldMe[worldId].avatar) DB.me.avatar = DB.worldMe[worldId].avatar;
+    } else {
+      // 首次探索新时空：初始化新身份并封存
+      DB.me.name = '旅行者';
+      DB.me.realName = '';
+      DB.worldMe[worldId] = {
+        name: DB.me.name,
+        realName: DB.me.realName,
+        avatar: DB.me.avatar || ''
+      };
+    }
+
+    // 🌌 核心加固 2：卡片文字平滑继承（老存档优先向全局迁移）
+    if (!DB.desktop.cardTitle && DB.me.cardTitle) DB.desktop.cardTitle = DB.me.cardTitle;
+    if (!DB.desktop.cardBio && DB.me.cardBio) DB.desktop.cardBio = DB.me.cardBio;
+
+    save();
+
+    // 4. 沉浸式跃迁白闪动画
+    content.innerHTML = '<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:9999;animation:flashFade 0.6s ease-out forwards;"></div>' +
+                        '<style>@keyframes flashFade { 0% {opacity:1;} 100% {opacity:0;pointer-events:none;} }</style>';
+
+    setTimeout(function() {
+      view = { type: 'home' };
+      render();
+    }, 150);
+  }, { icon: '🌌', title: '时空跃迁确认' });
+}
+
+// ==================== 🌌 多重宇宙时空准入规则 ====================
+
+// 1. 判断角色是否属于当前时空
+function isCharInCurrentWorld(c) {
+  if (!c) return false;
+
+  // 🤖 宇宙管家特赦：AI酱超脱于时空之外，在所有世界都常驻
+  if (c.id === 'c_aichan') return true;
+
+  var curWorld = DB.desktop && DB.desktop._activeWorld;
+  // 如果手机还没选过世界观（刚开机），显示全部角色（兜底保护）
+  if (!curWorld) return true;
+
+  // 如果角色身上有 worldId，严格匹配
+  if (c.worldId) {
+    return c.worldId === curWorld;
+  }
+
+  // 如果角色身上没有 worldId（老角色/未分类角色）：
+  // 判定：默认归属于你的【第一个世界观】，绝不跨宇宙串门
+  var firstWorld = (DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : null;
+  return curWorld === firstWorld;
+}
+
+// 2. 判断群聊是否属于当前时空
+function isGroupInCurrentWorld(g) {
+  if (!g) return false;
+  var curWorld = DB.desktop && DB.desktop._activeWorld;
+  if (!curWorld) return true;
+  // 新群聊走自身的 worldId 匹配
+  if (g.worldId) return g.worldId === curWorld;
+  // 老群聊兜底：属于第一个世界观
+  var firstWorld = (DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : null;
+  return curWorld === firstWorld;
+}
 // 商店首页
 async function renderShop() {
   content.innerHTML =
@@ -5506,7 +5872,12 @@ if (isSold) {
 }
 
 async function shopForceRegen() {
-  DB.shopLastGenerated = 0; // 强制过期
+  var curWid = (DB.desktop && DB.desktop._activeWorld) || '_default';
+  // 🌌 强制让当前世界的专属货架过期
+  if (DB.worldShops && DB.worldShops[curWid]) {
+    DB.worldShops[curWid].lastGenerated = 0;
+  }
+  DB.shopLastGenerated = 0; // 全局兼容兜底
   save();
   await renderShop();
 }
@@ -5679,7 +6050,7 @@ async function shopDoAutoGift(c) {
     markChatUnread(c.id, 1);
   }
 }
-// 购物系统：精准提取某世界观下角色的喜好/习性，供选品参考
+// 购物系统：精准提取某世界观下角色的喜好/习性，供选品参考（原版无公害纯净版）
 function shopCharHints(worldId) {
   var list = (DB.contacts || []).filter(function (c) {
     return !c._draft && c.type !== 'group' && c.worldId === worldId;
@@ -5711,7 +6082,6 @@ function shopCharHints(worldId) {
 
   return lines.join('\n');
 }
-
 // 切换分类
 function shopSelectTag(tag) {
   _shopActiveTag = tag;
@@ -5773,9 +6143,9 @@ function shopOpenCharPicker(itemId) {
   var it = (DB.shopItems || []).find(function (x) { return x.id === itemId; });
   if (!it) return;
 
-  // 非草稿角色（排除群聊 type=group）
+  // 🌌 时空过滤：非草稿角色、非群聊、且必须属于当前时空
   var chars = (DB.contacts || []).filter(function (c) {
-    return !c._draft && c.type !== 'group';
+    return !c._draft && c.type !== 'group' && isCharInCurrentWorld(c);
   });
 
   var h = '';
@@ -6278,15 +6648,25 @@ async function autoGenerateDailyMemories() {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
   var today = _ld(Date.now());
-  if (DB.settings.lastDailyMemoryDate === today) return;
+  var curWorld = (DB.desktop && DB.desktop._activeWorld) || '_default';
 
+  // 兼容老存档：如果原来是字符串，自动转为对象
+  if (typeof DB.settings.lastDailyMemoryDate !== 'object' || DB.settings.lastDailyMemoryDate === null) {
+    var oldVal = DB.settings.lastDailyMemoryDate || '';
+    DB.settings.lastDailyMemoryDate = { '_default': oldVal };
+  }
+
+  // 🌌 时空判断：如果当前世界今天已经总结过了，直接返回
+  if (DB.settings.lastDailyMemoryDate[curWorld] === today) return;
+  
   var yesterday = _ld(Date.now() - 86400000);
 
-  var chars = DB.contacts.filter(function(c) { return !c._draft; });
-  if (!chars.length) {
-    DB.settings.lastDailyMemoryDate = today;
-    save();
-    return;
+  // 🌌 时空过滤：只给当前世界的角色生成记忆，省下大笔 Token！
+  var chars = DB.contacts.filter(function(c) { return !c._draft && isCharInCurrentWorld(c); });
+  if (!chars.length) { 
+    DB.settings.lastDailyMemoryDate[curWorld] = today; 
+    save(); 
+    return; 
   }
 
   console.log('📒 开始自动生成昨日记忆...');
@@ -6310,7 +6690,8 @@ async function autoGenerateDailyMemories() {
     await sleep(1000);
   }
 
-  DB.settings.lastDailyMemoryDate = today;
+  // 🌌 只给当前世界盖上今日已总结的印章
+  DB.settings.lastDailyMemoryDate[curWorld] = today;
   save();
 
   if (anyGenerated) {
@@ -6323,11 +6704,13 @@ async function autoGenerateDailyMemories() {
     console.log('ℹ️ 昨天没有需要生成记忆的角色');
   }
 }
-// 备忘录未读数量 = 有几个"仍然存在的角色"更新了记忆还没看
+// 备忘录未读数量 = 统计当前时空、仍然存在的角色更新了记忆还没看
 function memoUnreadCount(){
   if (!DB.memoUnread) return 0;
   return Object.keys(DB.memoUnread).filter(function(id){
-    return !!getC(id);   // 只统计仍然存在的角色，防止删号后红点清不掉
+    var c = getC(id);
+    // 🌌 存在且属于当前时空，才算红点
+    return c && isCharInCurrentWorld(c);
   }).length;
 }
 
@@ -6595,6 +6978,7 @@ if (view.type === 'album') return renderAlbum();
 
   if (view.type === 'placeholder') return renderPlaceholder();
   if (view.type === 'preset') return openModePreset();
+    if (view.type === 'portal') return renderPortal();
 
   // ============================================================
   // 5️⃣ 兜底
@@ -6994,10 +7378,17 @@ DB.anniversaries = DB.anniversaries || [
 DB.events = DB.events || [
   { id:'e1', title:'和他喝咖啡', date:'2026-08-02', from:'ai', createdAt:Date.now() }
 ];
-  // 兼容：确保桌面有"游戏"App（老存档也自动补上）
   if (DB.desktop && Array.isArray(DB.desktop.apps)) {
-    if (!DB.desktop.apps.some(function(a){ return a.id === 'game'; })) {
-      DB.desktop.apps.push({ id:'game', name:'游戏', emoji:'🎮' });
+    // 找到这个 app，如果名字还是"游戏"，自动帮老用户改成"传送门"
+    var gameApp = DB.desktop.apps.find(function(a){ return a.id === 'game'; });
+    if (gameApp) {
+      if (gameApp.name === '游戏') {
+        gameApp.name = '传送门';
+        gameApp.emoji = '🌌';
+        save();
+      }
+    } else {
+      DB.desktop.apps.push({ id:'game', name:'传送门', emoji:'🌌' });
       save();
     }
   }
@@ -8430,10 +8821,11 @@ if (id === 'floating') {
     renderFloating();
     return;
 }
-if (id === 'game') {
-    location.href = 'game/hub.html';
+  if (id === 'game') {
+    view = { type: 'portal' };          // ← 告诉系统我们要渲染传送门
+    render();
     return;
-}
+  }
 
 if (id === 'shop') {
     view = { type: 'shop' };
@@ -10503,25 +10895,46 @@ DB.worlds.push({
     goWorlds();
   }
 }
+// ===== 删除世界观（带安全撤离与野指针清理） =====
 function deleteWorld(worldId) {
   popConfirm('确定要删除这个世界观吗？', function(){
     var related = (DB.contacts || []).filter(function(c) { return c.worldId === worldId; });
-    if (related.length) {
-      var names = related.map(function(c) { return c.nick || c.name; }).join('、');
-      popConfirm('以下角色关联了此世界观：' + names + '。删除后，这些角色的世界观会变为"未关联"。确定继续吗？', function(){
-        related.forEach(function(c) { c.worldId = ''; });
-        DB.worlds = (DB.worlds || []).filter(function(w) { return w.id !== worldId; });
-        save();
-        goWorlds();
-      }, {icon:'🌍', title:'二次确认'});
-    } else {
+
+    var doDelete = function() {
+      // 1. 角色解绑
+      related.forEach(function(c) { c.worldId = ''; });
+
+      // 2. 移除世界
       DB.worlds = (DB.worlds || []).filter(function(w) { return w.id !== worldId; });
+
+      // 3. 🛡️ 清理该世界的死人档案与货架
+      if (DB.worldMe) delete DB.worldMe[worldId];
+      if (DB.worldShops) delete DB.worldShops[worldId];
+
+      // 4. 🛡️ 核心安全撤离：如果删掉的正好是当前正在身处的时空！
+      if (DB.desktop && DB.desktop._activeWorld === worldId) {
+        var fallbackWorldId = (DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : '_default';
+        DB.desktop._activeWorld = fallbackWorldId;
+        // 恢复撤离目标的身份
+        if (DB.worldMe && DB.worldMe[fallbackWorldId]) {
+          DB.me.name = DB.worldMe[fallbackWorldId].name || '旅行者';
+          DB.me.realName = DB.worldMe[fallbackWorldId].realName || '';
+          if (DB.worldMe[fallbackWorldId].avatar) DB.me.avatar = DB.worldMe[fallbackWorldId].avatar;
+        }
+      }
+
       save();
       goWorlds();
+    };
+
+    if (related.length) {
+      var names = related.map(function(c) { return c.nick || c.name; }).join('、');
+      popConfirm('以下角色关联了此世界观：' + names + '。删除后，这些角色的世界观会变为"未关联"。确定继续吗？', doDelete, {icon:'🌍', title:'二次确认'});
+    } else {
+      doDelete();
     }
   }, {icon:'🗑️', title:'删除世界观'});
 }
-
 async function aiPolishWorld() {
   // 互斥锁检查
   if (window._polishLock_world) {
@@ -10647,12 +11060,15 @@ function setChatTitle(c, typing){
 function renderChats(){
   flushBlockEvents();
 
-  var privateItems = DB.contacts.filter(function(c){ return !c._draft && c.inChatList; })
-    .map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
+  // 🌌 时空过滤：私聊只显示属于当前世界的角色
+  var privateItems = DB.contacts.filter(function(c){ 
+    return !c._draft && c.inChatList && isCharInCurrentWorld(c); 
+  }).map(function(c){ return { kind:'private', id:c.id, time:lastMsgTime(c.id), c:c }; });
 
-  var groupItems = (DB.groups||[]).filter(function(g){ return !g.hideInChats; })
-    .map(function(g){ return { kind:'group', id:g.id, time:(g.lastMsg&&g.lastMsg.time)?g.lastMsg.time:(g.createdAt||0), g:g }; });
-
+  // 🌌 时空过滤：群聊只显示属于当前世界的群聊
+  var groupItems = (DB.groups||[]).filter(function(g){ 
+    return !g.hideInChats && isGroupInCurrentWorld(g); 
+  }).map(function(g){ return { kind:'group', id:g.id, time:(g.lastMsg&&g.lastMsg.time)?g.lastMsg.time:(g.createdAt||0), g:g }; });
   var all = privateItems.concat(groupItems).sort(function(a,b){ return b.time - a.time; });
   var isCard = (DB.settings && DB.settings.wxTheme) === 'card';
 
@@ -10739,6 +11155,9 @@ function renderChats(){
 
   if (isCard) {
     var myAvaStyle = DB.me.avatar ? 'background-image:url(\'' + DB.me.avatar + '\');' : '';
+    // 🌌 全局唯一：从 DB.desktop 读取卡片文字，切世界绝不丢失
+    var cardTitleVal = (DB.desktop && DB.desktop.cardTitle) || 'usamaru';
+    var cardBioVal = (DB.desktop && DB.desktop.cardBio) || '[Slow down, everything will be fine]';
     var banner =
       '<div class="user-banner-card"><div class="banner-ribbon"></div><div class="banner-left">' +
         '<input class="banner-input-title" value="' + esc(DB.me.cardTitle || 'usamaru') + '" onchange="DB.me.cardTitle=this.value;save()">' +
@@ -10815,7 +11234,8 @@ function lastMsgTime(cid){const arr=DB.chats[cid];if(!arr||!arr.length)return 0;
 function renderContacts(){
   var isCard = (DB.settings && DB.settings.wxTheme) === 'card';
 
-  var cs = DB.contacts.filter(function(c){ return !c._draft; });
+  // 🌌 时空过滤：通讯录只显示属于当前世界的角色
+  var cs = DB.contacts.filter(function(c){ return !c._draft && isCharInCurrentWorld(c); });
   var groupCount = (DB.groups || []).length;
   var groupSubText = groupCount ? (groupCount + ' 个群聊') : '还没有群聊';
 
@@ -10983,7 +11403,8 @@ function removeGroupFromChats(gid){
 // ↓↓↓ 临时占位，第③④步会替换成真的，先防止报错 ↓↓↓
 // ==================== 创建群聊 ====================
 function openCreateGroup(){
-  var chars = DB.contacts.filter(function(c){ return !c._draft; });
+  // 🌌 时空过滤：建群选人只列出当前世界的角色
+  var chars = DB.contacts.filter(function(c){ return !c._draft && isCharInCurrentWorld(c); });
   if (chars.length < 2){ alert('至少需要 2 个角色才能建群，先去通讯录多建几个角色吧～'); return; }
 
   var checkboxes = chars.map(function(c){
@@ -11027,6 +11448,7 @@ function doCreateGroup(){
   var gid = 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
   DB.groups.push({
     id: gid, name: name, members: members, owner: members[0],
+    worldId: (DB.desktop && DB.desktop._activeWorld) || null, // 🌌 标记所属世界观
     createdAt: Date.now(), unread: 0, lastMsg: null
   });
   if (!DB.chats[gid]) DB.chats[gid] = [];
@@ -12351,7 +12773,20 @@ function toggleBootAnim(){
   save();            // 保存到存档，刷新后记住
   renderSettings();  // 重新画一下设置页，让开关动起来
 }
+// 切换声音开关
+function toggleSound() {
+  DB.settings.soundEnabled = (DB.settings.soundEnabled === false) ? true : false;
+  save();
+  renderSettings();
+}
 
+// 调节声音大小（松开滑块时自动响一声测试）
+function updateSoundVolume(val) {
+  DB.settings.soundVolume = parseInt(val);
+  save();
+  // 加上 true，给调音量特权，强行绕过 2 秒的冷却时间！
+  if (typeof playNoticeSound === 'function') playNoticeSound('message', true); 
+}
 function renderSettings(){
   showChrome(true,false);
   statusbar.classList.add('dark');
@@ -12531,6 +12966,26 @@ if(tab==='theme'){
         <div onclick="toggleBootAnim()" style="cursor:pointer;width:46px;height:26px;border-radius:13px;flex-shrink:0;transition:background 0.2s;background:${DB.settings.showBootAnim !== false ? 'var(--theme)' : 'var(--line)'};position:relative;">
           <div style="position:absolute;top:3px;left:${DB.settings.showBootAnim !== false ? '23px' : '3px'};width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
         </div>
+      </div>
+	        <div class="section-title" style="margin-top:10px;">🎵 音效</div>
+      <div class="field" style="border-radius:12px;margin:0 14px;display:flex;flex-direction:column;border:1px solid var(--line);">
+        <!-- 声音开关 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px; ${DB.settings.soundEnabled !== false ? 'border-bottom:1px solid var(--line);' : ''}">
+          <div>
+            <div style="font-size:13.5px;color:var(--text);">消息音效</div>
+          </div>
+          <div onclick="toggleSound()" style="cursor:pointer;width:46px;height:26px;border-radius:13px;flex-shrink:0;transition:background 0.2s;background:${DB.settings.soundEnabled !== false ? 'var(--theme)' : 'var(--line)'};position:relative;">
+            <div style="position:absolute;top:3px;left:${DB.settings.soundEnabled !== false ? '23px' : '3px'};width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        
+        <!-- 音量滑块 (开启音效时才显示) -->
+        ${DB.settings.soundEnabled !== false ? `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;">
+          <div style="font-size:13.5px;color:var(--text);flex-shrink:0;margin-right:15px;">音效大小</div>
+          <input type="range" min="0" max="100" value="${DB.settings.soundVolume !== undefined ? DB.settings.soundVolume : 50}" onchange="updateSoundVolume(this.value)" style="flex:1;accent-color:var(--theme);">
+        </div>
+        ` : ''}
       </div>
 
       <div style="height:20px"></div>
@@ -13631,8 +14086,25 @@ ${chineseKeys.join('、')}`;
   }
 }
 /* ===== 朋友圈 ===== */
-function openMoments(){view={type:'moments'};render();maybeAutoPost();}
-function momentAuthor(m){if(m.author==='me')return{name:DB.me.name,avatar:DB.me.avatar,isMe:true};const c=getC(m.author);return c?{name:c.nick||c.name,avatar:c.avatar,isMe:false,id:c.id}:{name:'未知',avatar:''};}
+function openMoments(){
+  if (typeof safeCleanMoments === 'function') safeCleanMoments();
+  view = { type: 'moments' };
+  render();
+  maybeAutoPost();
+}
+function momentAuthor(m){
+  if(m.author === 'me') return { name: DB.me.name, avatar: DB.me.avatar, isMe: true };
+  if(m.author === 'passerby') {
+    return {
+      name: (m.passerby && m.passerby.name) || '路人',
+      emoji: (m.passerby && m.passerby.emoji) || '💬',
+      isMe: false,
+      isPasserby: true
+    };
+  }
+  const c = getC(m.author);
+  return c ? { name: c.nick || c.name, avatar: c.avatar, isMe: false, id: c.id } : { name: '未知', avatar: '' };
+}
 function postMoment(){
   const mo=document.createElement('div');mo.className='modal';mo.id='modal';
   mo.innerHTML=`<div class="modal-box"><h3 style="font-weight:600;text-align:center;margin-bottom:10px">发朋友圈</h3><textarea id="pmText" placeholder="这一刻的想法…" style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;background:var(--bg);color:var(--text);box-sizing:border-box"></textarea><div id="pmImgs" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0"></div><button class="btn gray" onclick="pmAddImg()">🖼️ 添加图片</button><button class="btn" onclick="pmSubmit()">发布</button><button class="btn gray" style="margin-top:0" onclick="closeModal()">取消</button></div>`;
@@ -13640,26 +14112,118 @@ function postMoment(){
   setTimeout(()=>{const el=document.getElementById('pmText');if(el)el.focus();},50);
 }
 function pmAddImg(){pickImage(d=>{window._pmImgs=window._pmImgs||[];window._pmImgs.push(d);const box=document.getElementById('pmImgs');if(box)box.innerHTML=window._pmImgs.map(s=>`<img src="${s}" style="width:60px;height:60px;object-fit:cover;border-radius:6px">`).join('');},800);}
-function pmSubmit(){const el=document.getElementById('pmText');const t=(el?el.value:'').trim();const imgs=window._pmImgs||[];if(!t&&!imgs.length){alert('写点什么或加张图吧～');return;}DB.moments.unshift({id:'p'+Date.now(),author:'me',text:t,images:imgs,time:Date.now(),likes:[],comments:[]});save();window._pmImgs=[];closeModal();renderMoments();}
+function pmSubmit(){
+  const el=document.getElementById('pmText');
+  const t=(el?el.value:'').trim();
+  const imgs=window._pmImgs||[];
+  if(!t&&!imgs.length){alert('写点什么或加张图吧～');return;}
+
+  // 🌌 加上当前世界的时空印章
+  DB.moments.unshift({
+    id: 'p' + Date.now(),
+    author: 'me',
+    worldId: (DB.desktop && DB.desktop._activeWorld) || null, // 记录是在哪个世界发的
+    text: t,
+    images: imgs,
+    time: Date.now(),
+    likes: [],
+    comments: []
+  });
+
+  save();
+  window._pmImgs=[];
+  closeModal();
+  renderMoments();
+}
+// 主渲染函数：全景壁纸透光 + 显眼发动态入口 + 原始安全下标
 function renderMoments(){
   clearMomentUnread();
-  showChrome(true,false);statusbar.classList.add('dark');tbTitle.textContent='朋友圈';tbLeft.textContent='‹';tbLeft.onclick=()=>goWechat('discover');
-  tbRight.textContent='＋';tbRight.onclick=()=>{const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="sheet-box"><button class="btn" onclick="closeModal();postMoment()">📷 我发一条</button><button class="btn gray" onclick="closeModal();pickPoster()">🤖 让角色发一条</button><button class="btn gray" style="margin-top:0" onclick="closeModal()">取消</button></div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);};
+  if (typeof safeCleanMoments === 'function') safeCleanMoments();
+
+  showChrome(true, false);
+  statusbar.classList.add('dark');
+  tbTitle.textContent = 'Moments';
+  tbLeft.textContent = '‹';
+  tbLeft.onclick = () => goWechat('discover');
+
+  // 顶栏右侧保持清爽空白
+  tbRight.textContent = '';
+  tbRight.onclick = null;
   settleMoments();
-  const cover=DB.settings.momentCover||'';
-  let html=`<div onclick="pickMomentBg()" style="position:relative;height:230px;cursor:pointer;background:${cover?`url('${cover}') center/cover`:'linear-gradient(160deg,#5a6b8c,#2c3549)'}"><div style="position:absolute;left:12px;top:12px;background:rgba(0,0,0,.3);color:#fff;font-size:11px;padding:4px 9px;border-radius:12px;backdrop-filter:blur(2px)">📷 换封面</div><div style="position:absolute;right:16px;bottom:-30px;display:flex;align-items:flex-end;gap:10px" onclick="event.stopPropagation()"><span style="color:#fff;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.5);margin-bottom:38px">${esc(DB.me.name)}</span><div class="avatar" style="width:64px;height:64px;border-radius:12px;border:2px solid #fff;${DB.me.avatar?`background-image:url('${DB.me.avatar}')`:''}">${DB.me.avatar?'':(DB.me.name[0]||'我')}</div></div></div><div style="height:44px"></div>`;
-  if(!DB.moments.length){html+=`<div class="empty">还没有朋友圈动态<br>点右上角 ＋ 发一条，或让角色发～<br><span style="font-size:12px">（长按动态可删除）</span></div>`;}
-  html+=DB.moments.map((m,i)=>momentCard(m,i)).join('');
-  html+=`<div style="height:20px"></div>`;
-  content.innerHTML=html;
-    // 异步填充朋友圈里的 IndexedDB 图片
+
+  // 读取壁纸：若无设置则给一个唯美渐变或默认背景
+  const cover = DB.settings.momentCover || '';
+  const bgStyle = cover
+    ? `background-image:url('${cover}');`
+    : `background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);`;
+
+  // 1. 顶部操作胶囊：个人状态 + 显眼的【发动态】按钮
+  let html = `<div class="moment-scroll-container" style="${bgStyle}">
+    <div style="padding-top: 12px;"></div>
+    <div class="m-glass-box" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:22px;margin-bottom:14px" onclick="pickMomentBg()" title="点击换壁纸">
+      <div class="avatar" style="width:44px;height:44px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.12);flex-shrink:0;${DB.me.avatar?`background-image:url('${DB.me.avatar}')`:''}">${DB.me.avatar?'':(DB.me.name[0]||'我')}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:700;color:var(--m-glass-text)">${esc(DB.me.name)}</div>
+        <div style="font-size:12px;color:var(--m-glass-sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((DB.me && DB.me.desc) ? DB.me.desc : '记录这一刻的日常 ✨')}</div>
+      </div>
+    </div>`;
+  // 🌌 时空过滤器（严格保留真实原始下标 x.i）
+  var visible = [];
+  var curWorld = DB.desktop && DB.desktop._activeWorld;
+  var firstWorld = (DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : null;
+
+  (DB.moments || []).forEach(function(m, idx){
+    if (!curWorld) { visible.push({ m: m, i: idx }); return; }
+    if (m.author === 'me' || m.author === 'passerby') {
+      var mWorld = m.worldId || firstWorld;
+      if (mWorld === curWorld) visible.push({ m: m, i: idx });
+    } else {
+      var c = getC(m.author);
+      if (c && isCharInCurrentWorld(c)) visible.push({ m: m, i: idx });
+    }
+  });
+
+  if(!visible.length){
+    html += `<div class="m-glass-box" style="text-align:center;padding:50px 20px;color:var(--m-glass-sub)">
+      ${curWorld ? '当前世界还没有动态' : '还没有动态'}<br>
+      <span style="font-size:12px;display:inline-block;margin-top:6px">点击上方【发动态】或右上角抽签～</span>
+    </div>`;
+  } else {
+    html += visible.map(function(x){
+      return momentCard(x.m, x.i);
+    }).join('');
+  }
+
+  // ★ 唯一定制入口：右下角极简悬浮按钮，整合所有发布选项
+  html += `
+    <div onclick="openMomentActionSheet()" title="发动态" style="position:fixed;bottom:24px;right:calc(50% - 190px);width:48px;height:48px;border-radius:50%;background:var(--m-glass-text);color:var(--m-glass-card);box-shadow:0 8px 24px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99;transition:transform 0.15s">
+      <svg style="width:20px;height:20px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+    </div>
+  </div>`;
+  content.innerHTML = html;
+
+  // 异步装载 IndexedDB 图片
   content.querySelectorAll('img[data-imgid]').forEach(function(img){
     var id = img.getAttribute('data-imgid');
     getImage(id).then(function(b64){
       if(b64) img.src = b64;
     });
   });
-
+}
+function openMomentActionSheet() {
+  const mo = document.createElement('div');
+  mo.className = 'modal';
+  mo.id = 'modal';
+  mo.innerHTML = `
+    <div class="sheet-box">
+      <button class="btn" onclick="closeModal();postMoment()">📷 我发一条</button>
+      <button class="btn" style="background:var(--theme);color:#fff" onclick="closeModal();triggerMomentDraw(false)">🎲 抽签触发新动态</button>
+      <button class="btn gray" onclick="closeModal();pickPoster()">🤖 指定角色发一条</button>
+      <button class="btn gray" onclick="closeModal();pickMomentBg()">🖼️ 更换全景壁纸</button>
+      <button class="btn gray" style="margin-top:0" onclick="closeModal()">取消</button>
+    </div>`;
+  mo.onclick = e => { if (e.target === mo) closeModal(); };
+  phone.appendChild(mo);
 }
 function momentShareCard(m){
   var s = m.share;
@@ -13684,56 +14248,101 @@ function momentShareCard(m){
     + '</div></div>';
 }
 
-function momentCard(m,i){
-  const a=momentAuthor(m);
-  const imgs=(m.images||[]).map(function(src){
-    if(src && src.indexOf('img_')===0){
-      return `<img data-imgid="${src}" onclick="event.stopPropagation();viewBigImage('${src}')" style="width:33%;aspect-ratio:1;object-fit:cover;border-radius:4px;margin:2px;background:#eee;cursor:pointer">`;
-    }
-    return `<img src="${src}" style="width:33%;aspect-ratio:1;object-fit:cover;border-radius:4px;margin:2px">`;
-  }).join('');
-  const likes=(m.likes||[]).map(id=>id==='me'?DB.me.name:((getC(id)||{}).nick||(getC(id)||{}).name||'')).filter(Boolean);
-  const iLiked=(m.likes||[]).includes('me');
-  var likeHtml = likes.length ? '<div style="background:var(--bg);padding:6px 10px;border-radius:6px;font-size:13px;color:var(--text)">❤️ ' + likes.join('，') + '</div>' : '';
-  const nameOf=id=>id==='me'?DB.me.name:((getC(id)||{}).nick||(getC(id)||{}).name||'未知');
-  
-  // 修复：完善评论HTML结构，增加点击回复功能
+
+// 单条动态卡片：全景自适应毛玻璃 + 高对比字迹 + 纯原生SVG
+function momentCard(m, i){
+  const a = momentAuthor(m);
+  const iLiked = (m.likes || []).includes('me');
+
+  // 头像
+  var avatarDom = '';
+  if (a.isPasserby) {
+    avatarDom = `<div style="width:38px;height:38px;border-radius:50%;background:#fff;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.08)">${a.emoji || '✨'}</div>`;
+  } else {
+    avatarDom = `<div class="avatar" style="width:38px;height:38px;flex-shrink:0;border-radius:50%;border:1.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.08);${a.avatar ? `background-image:url('${a.avatar}')` : ''}">${a.avatar ? '' : (a.name[0] || '?')}</div>`;
+  }
+
+  // 图片排版：单图自适应大图 / 多图网格
+  var imgsDom = '';
+  var imgs = m.images || [];
+  if (imgs.length === 1) {
+    var s = imgs[0];
+    var isDb = s && s.indexOf('img_') === 0;
+    imgsDom = `<div style="margin:10px 0 6px 0;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,0.06)">` +
+      `<img ${isDb ? `data-imgid="${s}"` : `src="${s}"`} onclick="event.stopPropagation();viewBigImage('${s}')" style="width:100%;max-height:280px;object-fit:cover;display:block;cursor:pointer">` +
+      `</div>`;
+  } else if (imgs.length > 1) {
+    var gridStyle = imgs.length === 4 ? 'grid-template-columns:repeat(2, 1fr)' : 'grid-template-columns:repeat(3, 1fr)';
+    imgsDom = `<div style="display:grid;${gridStyle};gap:4px;margin:8px 0;border-radius:12px;overflow:hidden">` +
+      imgs.map(function(src){
+        var isDb = src && src.indexOf('img_') === 0;
+        return `<img ${isDb ? `data-imgid="${src}"` : `src="${src}"`} onclick="event.stopPropagation();viewBigImage('${src}')" style="width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer">`;
+      }).join('') + `</div>`;
+  }
+
+  // 点赞与评论解析
+  const nameOf = id => id === 'me' ? DB.me.name : ((getC(id) || {}).nick || (getC(id) || {}).name || id);
+  const likes = (m.likes || []).map(nameOf).filter(Boolean);
+  var likesHtml = likes.length
+    ? `<div style="font-size:12.5px;font-weight:700;color:var(--m-glass-text)">❤️ ${likes.length} 次赞 · <span style="font-weight:normal;color:var(--m-glass-sub)">${likes.join('、')}</span></div>`
+    : '';
+
   const cmtHtml = (m.comments || []).map(function(cm) {
-var cc = cm.name || nameOf(cm.by);
-var _toName = cm.toName || (cm.to ? nameOf(cm.to) : '');
-var toStr = _toName ? '<span style="color:var(--sub)"> 回复 </span><b style="color:var(--theme)">' + esc(_toName) + '</b>' : '';
-    // 修复：点击评论区任意位置也可以唤起回复
-    return '<div style="font-size:13px;padding:3px 10px;background:var(--bg);cursor:pointer;color:var(--text);" onclick="replyComment(' + i + ',\'' + cm.by + '\')">' +
-      '<b style="color:var(--theme)">' + esc(cc) + '</b>' + toStr +
-      '<span style="color:var(--sub)">：</span><span style="color:var(--text)">' + esc(cm.text) + '</span>' +
-      '</div>';
+    var cc = cm.name || nameOf(cm.by);
+    var _toName = cm.toName || (cm.to ? nameOf(cm.to) : '');
+    var toStr = _toName ? `<span style="color:var(--m-glass-sub)"> 回复 </span><b>${esc(_toName)}</b>` : '';
+    return `<div style="font-size:13px;line-height:1.45;margin:3px 0;cursor:pointer;color:var(--m-glass-text)" onclick="replyComment(${i},'${cm.by}')">` +
+      `<b style="color:var(--m-glass-text)">${esc(cc)}</b>${toStr}：<span>${esc(cm.text)}</span>` +
+      `</div>`;
   }).join('');
-  
-  const foot=(likeHtml||cmtHtml)?`<div style="margin-top:8px;border-radius:6px;overflow:hidden">${likeHtml}${cmtHtml}</div>`:'';
-  
-  // 修复：在底部操作栏增加“💬 评论”按钮
-  return `<div oncontextmenu="event.preventDefault();delMoment(${i})" onpointerdown="momentPress(${i})" onpointerup="momentRelease()" onpointerleave="momentRelease()" style="display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)">
-    <div class="avatar" style="width:42px;height:42px;flex-shrink:0;${a.avatar?`background-image:url('${a.avatar}')`:''}">${a.avatar?'':(a.name[0]||'?')}</div>
-    <div style="flex:1;min-width:0">
-      <div style="color:var(--theme);font-weight:600;font-size:15px">${esc(a.name)}</div>
-      <div style="font-size:15px;color:var(--text);margin:4px 0;white-space:pre-wrap;line-height:1.5">${a.isMe?esc(m.text):esc(m.text)}</div>
-      ${imgs?`<div style="display:flex;flex-wrap:wrap;margin:4px 0">${imgs}</div>`:''}
-	        ${momentShareCard(m)}
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        <span style="font-size:12px;color:var(--sub)">${fmtTime(m.time)}</span>
-        <span style="font-size:14px;display:flex;gap:14px;">
-          <span style="cursor:pointer;color:var(--text);" onclick="likeMoment(${i})">${iLiked?'❤️':'🤍'} 赞</span>
-          <!-- 修复：新增评论按钮 -->
-          <span style="cursor:pointer;color:var(--text);" onclick="toggleCmtBox(${i})">💬 评论</span>
-        </span>
+
+  return `<div class="m-glass-box" oncontextmenu="event.preventDefault();delMoment(${i})" onpointerdown="momentPress(${i})" onpointerup="momentRelease()" onpointerleave="momentRelease()">
+    <!-- 头部：发布者 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        ${avatarDom}
+        <div>
+          <div style="font-size:14.5px;font-weight:700;color:var(--m-glass-text);line-height:1.2">${esc(a.name)}</div>
+          <div style="font-size:11px;color:var(--m-glass-sub);margin-top:2px">${fmtTime(m.time)}</div>
+        </div>
       </div>
-      <!-- 评论输入框区域 -->
-      <div id="cmtbox_${i}" style="display:none;margin-top:8px">
-        <input id="cmtinput_${i}" placeholder="评论…" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px;background:var(--bg);color:var(--text);outline:none">
-        <button class="cbtn send" style="width:100%;margin-top:6px" onclick="doComment(${i})">发送</button>
-      </div>
-      ${foot}
     </div>
+
+    <!-- 正文 -->
+    <div style="font-size:14.5px;color:var(--m-glass-text);line-height:1.6;word-break:break-word;margin:6px 0">${esc(m.text || '')}</div>
+    ${imgsDom}
+    ${momentShareCard(m)}
+
+    <!-- 操作栏（纯原生精致SVG） -->
+    <div style="display:flex;align-items:center;gap:18px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06)">
+      <span style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:var(--m-glass-sub);font-size:13px;font-weight:600" onclick="likeMoment(${i})">
+        <svg style="width:19px;height:19px;fill:${iLiked ? '#ff3366' : 'none'};stroke:${iLiked ? '#ff3366' : 'currentColor'};stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+        <span style="color:${iLiked ? '#ff3366' : 'inherit'}">${iLiked ? '已赞' : '赞'}</span>
+      </span>
+      <span style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:var(--m-glass-sub);font-size:13px;font-weight:600" onclick="toggleCmtBox(${i})">
+        <svg style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+        </svg>
+        <span>评论</span>
+      </span>
+    </div>
+
+    <!-- 评论输入框 -->
+    <div id="cmtbox_${i}" style="display:none;margin:8px 0">
+      <input id="cmtinput_${i}" placeholder="写评论…" style="width:100%;border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:13.5px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box">
+      <button class="cbtn send" style="width:100%;margin-top:6px;border-radius:20px;background:var(--theme);color:#fff;border:none;padding:7px;font-size:13px;font-weight:600" onclick="doComment(${i})">发送</button>
+    </div>
+
+    <!-- 高对比微透互动仓（点赞与评论流） -->
+    ${(likesHtml || cmtHtml) ? `
+      <div class="m-feedback-capsule">
+        ${likesHtml}
+        ${(likesHtml && cmtHtml) ? '<div style="height:1px;background:rgba(0,0,0,0.06);margin:6px 0"></div>' : ''}
+        ${cmtHtml}
+      </div>` : ''}
+
   </div>`;
 }
 
@@ -13802,7 +14411,17 @@ async function replyToMyComment(pid,myText,toId){
     }
   }catch(e){}
 }
-function pickPoster(){const cs=DB.contacts.filter(c=>!c._draft);if(!cs.length){alert('还没有角色');return;}const mo=document.createElement('div');mo.className='modal';mo.id='modal';mo.innerHTML=`<div class="modal-box"><h3 style="text-align:center;font-weight:600;margin-bottom:10px">让谁发一条朋友圈？</h3>${cs.map(c=>`<div class="cell" onclick="closeModal();aiPostMoment('${c.id}')">${avatarHtml(c)}<div class="cell-body"><div class="cell-title">${c.name||c.nick}</div></div></div>`).join('')}</div>`;mo.onclick=e=>{if(e.target===mo)closeModal();};phone.appendChild(mo);}
+function pickPoster(){
+  // 🌌 时空过滤：候选发帖角色只能是当前世界的
+  const cs = DB.contacts.filter(c => !c._draft && isCharInCurrentWorld(c));
+  if(!cs.length){ alert('当前世界观下还没有可用角色'); return; }
+  const mo=document.createElement('div');
+  mo.className='modal';
+  mo.id='modal';
+  mo.innerHTML=`<div class="modal-box"><h3 style="text-align:center;font-weight:600;margin-bottom:10px">让谁发一条朋友圈？</h3>${cs.map(c=>`<div class="cell" onclick="closeModal();aiPostMoment('${c.id}')">${avatarHtml(c)}<div class="cell-body"><div class="cell-title">${c.name||c.nick}</div></div></div>`).join('')}</div>`;
+  mo.onclick=e=>{if(e.target===mo)closeModal();};
+  phone.appendChild(mo);
+}
 let _settling=false;
 async function settleMoments() {
   if (_settling) return;
@@ -13834,7 +14453,8 @@ async function settleMoments() {
       dirty = true;
 
       var pool = DB.contacts.filter(function(c) {
-        return !c._draft && c.activity !== '关';
+        // 🌌 时空过滤：只有当前时空的角色才能来点赞和评论
+        return !c._draft && c.activity !== '关' && isCharInCurrentWorld(c);
       });
       if (!pool.length) {
         save();
@@ -13942,39 +14562,198 @@ async function aiReactMoment(c, m) {
     return {};
   }
 }
-function maybeAutoPost(){
+// 🎲 核心抽签机制：50% 角色单独发，50% 角色 + 路人批量发
+async function triggerMomentDraw(silent) {
+  if (typeof safeCleanMoments === 'function') safeCleanMoments();
+
+  // 🌌 时空锁：只有当前世界的可用角色参与
+  var pool = DB.contacts.filter(function(c) {
+    return !c._draft && c.activity !== '关' && c.mode !== 'offline' && isCharInCurrentWorld(c);
+  });
+  if (!pool.length) {
+    if (!silent) alert('当前世界观下没有可用角色');
+    return;
+  }
+
+  // 随机挑一位角色
+  var mainChar = pool[Math.floor(Math.random() * pool.length)];
+
+  // 50/50 抽签
+  var isCrowd = Math.random() < 0.5;
+
+  if (!isCrowd) {
+    // 选项 1：该角色单独发一条（直接调用你原本经过考验的成熟函数）
+    await aiPostMoment(mainChar.id, silent);
+  } else {
+    // 选项 2：该角色 + 2~3个路人批量一起发
+    await aiPostMomentWithPassersby(mainChar, silent);
+  }
+}
+
+// 替换原有的 maybeAutoPost
+function maybeAutoPost() {
   var now = Date.now();
   var todayStr = _todayStr();
-
-  // 按角色独立记录冷却时间和每日次数
   DB.settings.momentPerChar = DB.settings.momentPerChar || {};
 
-  var pool = DB.contacts.filter(function(c){
-    return !c._draft && (c.activity==='中' || c.activity==='高') && c.mode !== 'offline';
+  var pool = DB.contacts.filter(function(c) {
+    return !c._draft && (c.activity === '中' || c.activity === '高') && c.mode !== 'offline' && isCharInCurrentWorld(c);
   });
-  if(!pool.length) return;
+  if (!pool.length) return;
 
-  var c = pool[Math.floor(Math.random()*pool.length)];
+  var c = pool[Math.floor(Math.random() * pool.length)];
+  var cfg = c.activity === '高'
+    ? { gap: 4 * 3600000, daily: 2, chance: 0.4 }
+    : { gap: 8 * 3600000, daily: 1, chance: 0.25 };
 
-  var cfg = c.activity==='高'
-    ? { gap: 4*3600000, daily: 2, chance: 0.4 }   // 高：隔4h，每天≤2条，40%
-    : { gap: 8*3600000, daily: 1, chance: 0.25 };  // 中：隔8h，每天≤1条，25%
-
-  // 取该角色的独立记录
   var rec = DB.settings.momentPerChar[c.id];
-  if(!rec || rec.date !== todayStr){
+  if (!rec || rec.date !== todayStr) {
     rec = { date: todayStr, count: 0, lastPost: 0 };
     DB.settings.momentPerChar[c.id] = rec;
   }
 
-  if(now - rec.lastPost < cfg.gap) return;    // 该角色自己的冷却
-  if(rec.count >= cfg.daily) return;           // 该角色自己的每日上限
-  if(Math.random() > cfg.chance) return;       // 概率门
+  if (now - rec.lastPost < cfg.gap) return;
+  if (rec.count >= cfg.daily) return;
+  if (Math.random() > cfg.chance) return;
 
   rec.lastPost = now;
   rec.count++;
   save();
-  aiPostMoment(c.id, true);
+
+  triggerMomentDraw(true);
+}
+// 👥 批量生成：角色 + 贴合世界观的路人 + 顺带生成点赞/评论（1次 API 搞定！）
+async function postMomentBatch(mainChar, pool, silent) {
+  var model = DB.settings.chatModel || DB.settings.auxModel;
+  if (!model) return;
+
+  try {
+    var curWorldDesc = '现实生活';
+    var curWorld = (DB.worlds || []).find(function(w) { return w.id === (DB.desktop && DB.desktop._activeWorld); });
+    if (curWorld) curWorldDesc = (curWorld.name || '') + '：' + (curWorld.desc || '');
+
+    var userDesc = (DB.me && DB.me.desc) ? ('用户身份背景：' + DB.me.desc) : '用户身份：普通人';
+    var charSys = '';
+    try { charSys = buildSystem(mainChar); } catch(e) { charSys = '角色「' + (mainChar.nick || mainChar.name) + '」。'; }
+
+    var otherNames = pool.map(function(x){ return x.nick || x.name; }).slice(0, 3).join('、');
+    var passerbyCount = 2 + Math.floor(Math.random() * 2);
+
+    var prompt = '【世界观】\n' + curWorldDesc + '\n' + userDesc + '\n\n' +
+      '【当前角色人设】\n' + charSys + '\n' +
+      '【其他可用角色名】\n' + (otherNames || '暂无') + '\n\n' +
+      '【任务】\n请为当前社交圈一次性生成一组鲜活真实的朋友圈动态，包含：\n' +
+      '1. 角色「' + (mainChar.nick || mainChar.name) + '」本人的 1 条动态；\n' +
+      '2. ' + passerbyCount + ' 个不同身份「路人」的动态。\n\n' +
+      '【路人网名与身份铁律（严禁AI假味）】\n' +
+      '- 严禁把职业头衔直接贴在昵称后（禁止类似"老K_特调血袋"、"桥洞老灰(不接单)"这类NPC名字）！\n' +
+      '- 昵称要像真人的社交网名：如"K."、"阿灰"、"小陈"、"Felix"、"无语凝噎"等自然名字。\n' +
+      '- 路人身份必须符合世界观与用户背景，但内容要生活化：可以是生活吐槽、碎碎念、或转发音乐/文章。\n\n' +
+      '【发圈风格铁律】\n' +
+      '- 真人发圈很随性、短，甚至没头没尾，禁止写长作文，严禁阳光明媚/天气很好等矫情套话。\n' +
+      '- 每条动态可顺便附带 0~2 个角色或路人的即时点赞与简短评论，像真实的社交互动！\n\n' +
+      '【必须严格输出为如下 JSON 数组，严禁 markdown 标记】：\n' +
+      '[\n' +
+      '  {\n' +
+      '    "isMainChar": true,\n' +
+      '    "text": "角色动态正文",\n' +
+      '    "share": null,\n' +
+      '    "instantLikes": ["赞同者的名字"],\n' +
+      '    "instantComments": [{"name": "评论者名字", "text": "简短调侃回复"}]\n' +
+      '  },\n' +
+      '  {\n' +
+      '    "isMainChar": false,\n' +
+      '    "name": "自然的路人昵称",\n' +
+      '    "emoji": "代表其身份的Emoji(如🍸/📦/🗡️)",\n' +
+      '    "text": "路人生活动态正文",\n' +
+      '    "share": null,\n' +
+      '    "instantLikes": [],\n' +
+      '    "instantComments": []\n' +
+      '  }\n' +
+      ']';
+
+    var raw = await callAI([{ role: 'user', content: prompt }], model);
+    raw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+    var match = raw.match(/\[[\s\S]*\]/);
+    if (!match) {
+      await aiPostMoment(mainChar.id, silent);
+      return;
+    }
+
+    var list = JSON.parse(match[0]);
+    var now = Date.now();
+    var worldId = (DB.desktop && DB.desktop._activeWorld) || null;
+
+    list.reverse().forEach(function(item, idx) {
+      var itemTime = now - (list.length - 1 - idx) * (60000 + Math.floor(Math.random() * 120000));
+      var cleanText = cleanMomentText(item.text);
+
+      // 装配自带的点赞与评论
+      var likesArr = [];
+      if (item.instantLikes && Array.isArray(item.instantLikes)) {
+        item.instantLikes.forEach(function(nm){
+          var found = pool.find(function(p){ return (p.nick || p.name) === nm; });
+          likesArr.push(found ? found.id : nm);
+        });
+      }
+
+      var commentsArr = [];
+      if (item.instantComments && Array.isArray(item.instantComments)) {
+        item.instantComments.forEach(function(cm){
+          var found = pool.find(function(p){ return (p.nick || p.name) === cm.name; });
+          commentsArr.push({
+            by: found ? found.id : 'passerby',
+            name: cm.name,
+            text: cm.text
+          });
+        });
+      }
+
+      if (item.isMainChar) {
+        var mObj = {
+          id: 'p' + (itemTime + idx),
+          author: mainChar.id,
+          worldId: worldId,
+          text: cleanText,
+          images: [],
+          share: item.share || null,
+          time: itemTime,
+          likes: likesArr,
+          comments: commentsArr,
+          _settled: true
+        };
+        DB.moments.unshift(mObj);
+        if (typeof triggerC2CInteractions === 'function') triggerC2CInteractions(mObj);
+      } else {
+        DB.moments.unshift({
+          id: 'p' + (itemTime + idx),
+          author: 'passerby',
+          passerby: {
+            name: item.name || '路人',
+            emoji: item.emoji || '💬'
+          },
+          worldId: worldId,
+          text: cleanText,
+          images: [],
+          share: item.share || null,
+          time: itemTime,
+          likes: likesArr,
+          comments: commentsArr,
+          _settled: true
+        });
+      }
+    });
+
+    DB.momentUnread = (DB.momentUnread || 0) + list.length;
+    refreshMomentBadge();
+    save();
+
+    if (view.type === 'moments') renderMoments();
+    if (!silent) alert('朋友圈已刷新，生成了一批新动态！');
+  } catch (e) {
+    console.warn('批量发圈异常，降级为常规发圈：', e);
+    await aiPostMoment(mainChar.id, silent);
+  }
 }
 async function aiPostMoment(cid, silent) {
   var c = getC(cid);
@@ -14135,18 +14914,20 @@ var picId = await generateImage(imgPrompt, DB.settings.imageModel, c.id);
     }
 
     // ★★ 核心：将 AI 生成的动态存入 DB.moments ★★
-DB.moments.unshift({
+    DB.moments.unshift({
       id: 'p' + Date.now(),
       author: cid,
+      worldId: (DB.desktop && DB.desktop._activeWorld) || null, // 🌌 新增这一行：记录属于哪个世界
       text: txt,
       images: imgIds,
-      share: share,          // ← 新增这一行
+      share: share,
       time: Date.now(),
       likes: [],
       comments: [],
       _settled: true
     });
-triggerC2CInteractions(DB.moments[0]); // 【新增】角色间朋友圈互动彩蛋
+	
+	triggerC2CInteractions(DB.moments[0]); // 【新增】角色间朋友圈互动彩蛋
 
     DB.momentUnread = (DB.momentUnread || 0) + 1;
     refreshMomentBadge();
@@ -14158,6 +14939,148 @@ triggerC2CInteractions(DB.moments[0]); // 【新增】角色间朋友圈互动�
     if (!silent) alert('生成失败：' + e.message);
   }
 }
+// 👥 批量生成：角色 + 贴合世界观的路人 + 顺带生成点赞/评论（1次 API 搞定！）
+async function aiPostMomentWithPassersby(mainChar, pool, silent) {
+  var model = DB.settings.chatModel || DB.settings.auxModel;
+  if (!model) {
+    if (!silent) alert('请先在设置中选择模型');
+    return;
+  }
+
+  // 兜底 pool
+  if (!pool || !pool.length) {
+    pool = DB.contacts.filter(function(c) {
+      return !c._draft && isCharInCurrentWorld(c);
+    });
+  }
+
+  try {
+    var curWorldDesc = '现实生活';
+    var curWorld = (DB.worlds || []).find(function(w) { return w.id === (DB.desktop && DB.desktop._activeWorld); });
+    if (curWorld) curWorldDesc = (curWorld.name || '') + '：' + (curWorld.desc || '');
+
+    var userDesc = (DB.me && DB.me.desc) ? ('用户身份背景：' + DB.me.desc) : '用户身份：普通人';
+    var charSys = '';
+    try { charSys = buildSystem(mainChar); } catch(e) { charSys = '角色「' + (mainChar.nick || mainChar.name) + '」。'; }
+
+    var otherNames = pool.map(function(x){ return x.nick || x.name; }).slice(0, 3).join('、');
+    var passerbyCount = 2 + Math.floor(Math.random() * 2);
+
+    var prompt = '【世界观】\n' + curWorldDesc + '\n' + userDesc + '\n\n' +
+      '【当前角色人设】\n' + charSys + '\n' +
+      '【其他可用角色名】\n' + (otherNames || '暂无') + '\n\n' +
+      '【任务】\n请为当前社交圈一次性生成一组鲜活真实的朋友圈动态，包含：\n' +
+      '1. 角色「' + (mainChar.nick || mainChar.name) + '」本人的 1 条动态；\n' +
+      '2. ' + passerbyCount + ' 个不同身份「路人」的动态。\n\n' +
+      '【路人网名与身份铁律（严禁AI假味）】\n' +
+      '- 严禁把职业头衔直接贴在昵称后（禁止类似"老K_特调血袋"、"桥洞老灰(不接单)"这类NPC名字）！\n' +
+      '- 昵称要像真人的社交网名：如"K."、"阿灰"、"小陈"、"Felix"、"无语凝噎"等自然名字。\n' +
+      '- 路人身份必须符合世界观与用户背景，但内容要生活化：可以是生活吐槽、碎碎念、或转发音乐/文章。\n\n' +
+      '【发圈风格铁律】\n' +
+      '- 真人发圈很随性、短，甚至没头没尾，禁止写长作文，严禁阳光明媚/天气很好等矫情套话。\n' +
+      '- 每条动态可顺便附带 0~2 个角色或路人的即时点赞与简短评论，像真实的社交互动！\n\n' +
+      '【必须严格输出为如下 JSON 数组，严禁 markdown 标记】：\n' +
+      '[\n' +
+      '  {\n' +
+      '    "isMainChar": true,\n' +
+      '    "text": "角色动态正文",\n' +
+      '    "share": null,\n' +
+      '    "instantLikes": ["赞同者的名字"],\n' +
+      '    "instantComments": [{"name": "评论者名字", "text": "简短调侃回复"}]\n' +
+      '  },\n' +
+      '  {\n' +
+      '    "isMainChar": false,\n' +
+      '    "name": "自然的路人昵称",\n' +
+      '    "emoji": "代表其身份的Emoji(如🍸/📦/🗡️)",\n' +
+      '    "text": "路人生活动态正文",\n' +
+      '    "share": null,\n' +
+      '    "instantLikes": [],\n' +
+      '    "instantComments": []\n' +
+      '  }\n' +
+      ']';
+
+    var raw = await callAI([{ role: 'user', content: prompt }], model);
+    raw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+    var match = raw.match(/\[[\s\S]*\]/);
+    if (!match) {
+      await aiPostMoment(mainChar.id, silent);
+      return;
+    }
+
+    var list = JSON.parse(match[0]);
+    var now = Date.now();
+    var worldId = (DB.desktop && DB.desktop._activeWorld) || null;
+
+    list.reverse().forEach(function(item, idx) {
+      var itemTime = now - (list.length - 1 - idx) * (60000 + Math.floor(Math.random() * 120000));
+      var cleanText = cleanMomentText(item.text);
+
+      var likesArr = [];
+      if (item.instantLikes && Array.isArray(item.instantLikes)) {
+        item.instantLikes.forEach(function(nm){
+          var found = pool.find(function(p){ return (p.nick || p.name) === nm; });
+          likesArr.push(found ? found.id : nm);
+        });
+      }
+
+      var commentsArr = [];
+      if (item.instantComments && Array.isArray(item.instantComments)) {
+        item.instantComments.forEach(function(cm){
+          var found = pool.find(function(p){ return (p.nick || p.name) === cm.name; });
+          commentsArr.push({
+            by: found ? found.id : 'passerby',
+            name: cm.name,
+            text: cm.text
+          });
+        });
+      }
+
+      if (item.isMainChar) {
+        var mObj = {
+          id: 'p' + (itemTime + idx),
+          author: mainChar.id,
+          worldId: worldId,
+          text: cleanText,
+          images: [],
+          share: item.share || null,
+          time: itemTime,
+          likes: likesArr,
+          comments: commentsArr,
+          _settled: true
+        };
+        DB.moments.unshift(mObj);
+        if (typeof triggerC2CInteractions === 'function') triggerC2CInteractions(mObj);
+      } else {
+        DB.moments.unshift({
+          id: 'p' + (itemTime + idx),
+          author: 'passerby',
+          passerby: {
+            name: item.name || '路人',
+            emoji: item.emoji || '💬'
+          },
+          worldId: worldId,
+          text: cleanText,
+          images: [],
+          share: item.share || null,
+          time: itemTime,
+          likes: likesArr,
+          comments: commentsArr,
+          _settled: true
+        });
+      }
+    });
+
+    DB.momentUnread = (DB.momentUnread || 0) + list.length;
+    refreshMomentBadge();
+    save();
+
+    if (view.type === 'moments') renderMoments();
+    if (!silent) alert('抽签成功，朋友圈已刷新！');
+  } catch (e) {
+    console.warn('批量发圈异常，降级为常规发圈：', e);
+    await aiPostMoment(mainChar.id, silent);
+  }
+}
 function cleanMomentText(t){
   if(!t)return '';
   return t
@@ -14167,6 +15090,21 @@ function cleanMomentText(t){
     .replace(/\(\s*好感[\s\S]*?\)/g,'')
     .replace(/```/g,'')
     .trim();
+}
+// 🧹 自动清理近 7 天之前的历史朋友圈（安全保留近期数据）
+function safeCleanMoments() {
+  if (!DB.moments || !DB.moments.length) return;
+  var keepLimit = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  var oldLen = DB.moments.length;
+
+  DB.moments = DB.moments.filter(function(m) {
+    return (m.time || 0) >= keepLimit;
+  });
+
+  if (DB.moments.length !== oldLen) {
+    save();
+    console.log('【朋友圈】清理了 ' + (oldLen - DB.moments.length) + ' 条超过7天的旧动态');
+  }
 }
 function viewBigImage(idOrB64){
   var show = function(b64){
@@ -14204,7 +15142,9 @@ setInterval(function(){if(document.hidden)return;if(view.type==='charEdit')retur
 
 /* ===== 未读徽章系统 ===== */
 function markChatUnread(id,n){const c=getC(id);if(!c)return;c.unread=(c.unread||0)+(n||1);save();refreshChatBadges();}
-function chatUnreadTotal(){return DB.contacts.reduce((s,c)=>s+(c.unread||0),0);}
+function chatUnreadTotal(){
+  return DB.contacts.reduce((s,c) => s + (isCharInCurrentWorld(c) ? (c.unread||0) : 0), 0);
+}
 function refreshFloatingBadge(){
   var un = DB.floatingUnread || 0;
   var b = document.getElementById('floatingDeskBadge');
@@ -14245,6 +15185,8 @@ async function checkAutoGreet() {
   for (const c of DB.contacts) {
     // 离线模式不触发主动问候
     if (c.mode === 'offline') continue;
+	    // 🌌 时空锁：非当前时空角色彻底静止
+    if (!isCharInCurrentWorld(c)) continue;
     // 时间衰减检查
     checkTimeDecay(c);
     if (isFighting(c)) continue;   // ← 新增：吵架角色交给 checkFightGreet
@@ -14759,6 +15701,8 @@ async function checkFightGreet(){
   for(var i=0;i<DB.contacts.length;i++){
     var c = DB.contacts[i];
     if(!c || c._draft) continue;
+	    // 🌌 时空锁：非当前时空角色不追命
+    if (!isCharInCurrentWorld(c)) continue;
     clearFightIfReconciled(c);        // 先看是否和好
     if(!isFighting(c)) continue;
     if(!c._fightProfile){
@@ -14796,7 +15740,8 @@ function renderHearts() {
   tbRight.textContent = '';
   tbRight.onclick = null;
 
-  var roleList = DB.contacts.filter(function(c) { return !c._draft; });
+  // 🌌 时空过滤：心迹只展示当前时空的角色
+  var roleList = DB.contacts.filter(function(c) { return !c._draft && isCharInCurrentWorld(c); });
 
   var html = '<div style="text-align:center;padding:24px 0 18px;background:linear-gradient(160deg,#ff9a9e,#fecfef)">' +
     '<div style="font-size:32px;">💗</div>' +
@@ -14814,7 +15759,9 @@ function renderHearts() {
         '</div>';
     });
   } else {
-    html += '<div class="empty">还没有角色，先去通讯录建一个吧～</div>';
+    html += '<div class="empty">' + 
+      (DB.desktop && DB.desktop._activeWorld ? '当前世界观下还没有角色～' : '还没有角色，先去通讯录建一个吧～') + 
+      '</div>';
   }
 
   html += '<div style="height:20px;"></div>';
@@ -15650,9 +16597,12 @@ function renderMemoMain() {
   tbRight.textContent = '';
   tbRight.onclick = null;
 
-  var cs = DB.contacts.filter(function(c) { return !c._draft; });
+  // 🌌 时空过滤：备忘录只展示当前时空的角色
+  var cs = DB.contacts.filter(function(c) { return !c._draft && isCharInCurrentWorld(c); });
   if (!cs.length) {
-    content.innerHTML = '<div class="empty">还没有角色，先去通讯录创建一个吧～</div>';
+    content.innerHTML = '<div class="empty">' + 
+      (DB.desktop && DB.desktop._activeWorld ? '当前世界观下还没有角色～' : '还没有角色，先去通讯录创建一个吧～') + 
+      '</div>';
     return;
   }
 
@@ -17510,7 +18460,15 @@ function appendBubble(c,m){
     box.insertAdjacentHTML('beforeend',tsHtml(m.time));
     lastBubbleTime=m.time;
   }
-  box.insertAdjacentHTML('beforeend',bubble(c,m));
+  box.insertAdjacentHTML('beforeend', bubble(c, m));   // ★ 生成气泡 HTML 并插入
+  // 收到 AI 的新消息时播放提示音（只播 3 秒内的最新消息，防止点开历史记录乱响）
+  if (m.role === 'assistant' && (Date.now() - m.time < 3000)) {
+    if (typeof playNoticeSound === 'function') {
+      if (m.type === 'shop_item') playNoticeSound('gift');
+      else if (m.type === 'transfer') playNoticeSound('transfer');
+      else playNoticeSound('message');
+    }
+  }
   attachLongPress();
   // 滚到底部：信笺滚小盒子，其它主题走原来的 scrollBottom
   if(box===content){
@@ -21479,15 +22437,20 @@ function importCharacter(){
             var id = existing.id;
             for (var key in c) { existing[key] = c[key]; }
             DB.chats[id] = data.chats || [];
+            // 🌌 确保覆盖后世界观不丢失：若无则打上当前世界印记
+            if (!existing.worldId && DB.desktop && DB.desktop._activeWorld) {
+              existing.worldId = DB.desktop._activeWorld;
+            }
             save();
             popTip('已覆盖角色「'+(c.nick||c.name)+'」', {icon:'✅', title:'导入成功'});
             renderContacts();
           }, {icon:'📥', title:'覆盖确认'});
           return;
         }
-        var newId = 'c' + Date.now();
-        var newChar = blankChar(newId);
-        for (var key2 in c) { newChar[key2] = c[key2]; }
+        // 🌌 入境盖章：新导入的角色如果没带 worldId，自动落户到当前时空
+        if (!newChar.worldId && DB.desktop && DB.desktop._activeWorld) {
+          newChar.worldId = DB.desktop._activeWorld;
+        }
         if (!newChar.status) newChar.status = {好感度:50, 信任度:50, 紧张感:0, 当前关系:'初次见面'};
         if (!newChar.chapters) newChar.chapters = [];
         newChar.inChatList = true;
@@ -24648,7 +25611,5 @@ function syncIdeaBtn(){
 }
 
 </script>
-
 <script src="sound.js"></script>
-
 </html>
