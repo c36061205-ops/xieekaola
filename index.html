@@ -127,9 +127,7 @@
   z-index: 50;
   position: relative;
   pointer-events: none;
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+
 }
   #statusbar.dark{color:var(--theme);text-shadow:none;}
   .sb-right{display:flex;align-items:center;gap:6px;font-size:12px;}
@@ -3645,33 +3643,53 @@ body.wx-theme-letter .msg.me .mbody{
   --m-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
-/* 全景朋友圈容器 */
+/* 手机内容容器（取消多余的 padding-top） */
 .moment-scroll-container {
-  min-height: 100%;
-  padding-bottom: 70px;
-  background-size: cover !important;
-  background-position: center !important;
-  background-attachment: fixed !important;
+  position: relative !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  min-height: 100% !important;
+  padding-bottom: 90px;
+  box-sizing: border-box !important;
 }
 
-/* 毛玻璃卡片基底 */
+/* 🌟 真正的 iOS 玻璃质感：降低模糊度透出细节，强化投影剥离白背景 */
 .m-glass-box {
-  background: var(--m-glass-card);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid var(--m-glass-border);
-  box-shadow: var(--m-shadow);
-  border-radius: 20px;
-  margin: 0 14px 14px 14px;
-  padding: 16px;
-  transition: background 0.3s, border-color 0.3s;
+  background: rgba(255, 255, 255, 0.55) !important; 
+  backdrop-filter: blur(12px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  /* 🔑 核心法宝：用扩散的极淡黑色阴影，把卡片从纯白背景里“托”出来 */
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.4) !important;
+  border-radius: 20px !important;
+  margin: 0 14px 14px 14px !important;
+  padding: 16px !important;
+  box-sizing: border-box;
 }
 
-/* 独立高对比互动仓 */
+/* 深色模式/黑夜模式自适应 */
+[data-dark="1"] .m-glass-box,
+#phone[data-theme="fusion"] .m-glass-box,
+#phone[data-theme="momo_night"] .m-glass-box {
+  background: rgba(20, 24, 36, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  /* 黑夜模式加大阴影浓度 */
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+}
+/* 暗黑模式自适应 */
+[data-dark="1"] .m-glass-box,
+#phone[data-theme="fusion"] .m-glass-box,
+#phone[data-theme="momo_night"] .m-glass-box {
+  background: rgba(24, 28, 40, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* 互动仓样式微调 */
 .m-feedback-capsule {
   margin-top: 10px;
-  background: var(--m-feedback-bg);
-  border: 1px solid var(--m-feedback-border);
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   padding: 8px 12px;
 }
@@ -3797,7 +3815,40 @@ body.wx-theme-letter .msg.me .mbody{
 
 })();
 </script>
+<style id="statusbar-blur-patch">
+  /* ============================================================
+     顶部状态栏 · 条件磨砂（与顶栏融为一体版）
+     只在 聊天界面(chat/groupChat) 和 朋友圈(moments) 生效
+     ============================================================ */
 
+  /* ---- 条件磨砂：只在聊天/朋友圈页面 ---- */
+  body.has-status-blur #statusbar {
+    background: color-mix(in srgb, var(--nav) var(--tb-glass, 32%), transparent) !important;
+    backdrop-filter: blur(var(--tb-blur, 8px)) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(var(--tb-blur, 8px)) saturate(140%) !important;
+
+    border-bottom: none !important;
+    box-shadow: none !important;
+
+    color: #fff;
+    text-shadow: 0 0 4px rgba(0, 0, 0, .45);
+  }
+
+  body.has-status-blur #statusbar.dark {
+    color: var(--theme);
+    text-shadow: 0 0 3px color-mix(in srgb, var(--card) 70%, transparent);
+  }
+
+  /* ---- 让顶栏和状态栏无缝相连 ---- */
+  body.has-status-blur #topbar {
+    border-bottom: none !important;
+  }
+
+  /* ---- 顶栏不再向上延伸，避免双层模糊叠加 ---- */
+  body.has-status-blur #topbar::before {
+    display: none !important;
+  }
+</style>
 <div id="phone">
   <div id="statusbar"><span id="sbTime">00:00</span><span class="sb-right"><span class="sb-right">
   <span>5G</span>
@@ -3835,7 +3886,7 @@ body.wx-theme-letter .msg.me .mbody{
   </div>
 </div>
 <script>
-const APP_VER = 'v20261011_1';
+const APP_VER = 'v20261011_2';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -3918,6 +3969,16 @@ const DEFAULT_ONLINE = `# 【🔴 最高执行层·系统环境与角色内核�
 - **禁止背诵人设**：严禁无故主动翻出自己人设卡里的陈年旧事或背景故事当谈资没话找话。
 
 ---
+# 【📱 线上 Sexting 与高张力协议（反敷衍/绝对贴人设铁律）】
+当进入线上暧昧或 Sexting（文字调情）阶段时，AI 必须展现极强的主动性，绝对禁止“打马虎眼”或“把描写压力全推给用户”。一切表现【必须极其贴合当前人设】：
+
+1. **严禁当旁观者（反敷衍铁律）**：绝对禁止只回复“告诉我感觉”、“继续”、“然后呢”。如果你要求 {{user}} 描述，你必须同时给出【你这边的强烈情绪反馈或生理反应】！
+2. **强制言语输出（拒绝机械脑补）**：严禁使用“想象我的手”这种废话！必须用【极其符合人设的话术】来挑逗、索求或表达爱意：
+   - 🌸 若设定为温柔/纯爱（Sweet）：多用呢喃、哄诱、情感强烈的爱语。（例如：“宝贝，听到你的声音我就不行了”、“好想现在就抱紧你”、“（语音）我好想你…”）
+   - 🔥 若设定为掌控/直白（Dirty）：多用命令、粗口或极度露骨的挑逗。（例如：“手放下去”、“听话，告诉我有多湿”、“乖 继续摸”）
+   - 🐕 若设定为害羞/被动：要表现出屏幕那头的窘迫但难耐。（例如：“我…我现在碰到自己了…”、“别说了，我衣服都被你弄脏了…”）
+3. **强制同步自身状态（双向拉扯）**：必须用文字交代【你在屏幕这头的真实物理状态】。不管你是红着脸躲在被窝里喘息，还是靠在办公室椅背上失控，都要写出来，以此制造“不在彼此身边”的焦躁感。
+4. **利用媒介压迫感**：通过回复的快慢、标点符号（短促的句号、省略号的停顿），以及发送【带有喘息/低语的语音消息】来展现气氛。绝对严禁向对方索要真实的图片/视频。
 
 # 【🔴 微信输出协议·代码级规范】
 你现在正在调用微信消息发送接口。每次回复都是在生成一个结构化的消息列表。
@@ -4042,7 +4103,23 @@ const DEFAULT_OFFLINE = `# 【🔴 最高执行层·场景认知与核心身份�
 ## 3. 对话框外的生活毛边
 - 当你们见面时，你的角色身上必须带有“上一秒还在过自己生活”的痕迹。可能是肩膀上还没化的雪、刚通宵完眼里的血丝、或者是正咬在嘴里没来得及咽下去的半口面包。让场景立刻拥有呼吸感。
 ---
+# 【🔞 亲密与高张力场景协议（NSFW & Tension Protocol）】
+当剧情自然发展至亲密接触、暧昧拉扯或 NSFW 场景时，必须严格执行以下 S 级铁律：
 
+1. **节奏与阶段铁律（禁止快进）**：
+   - 节奏必须慢。像真人互动，要有停顿、呼吸、试探和对视。
+   - 严格遵循：前奏氛围 → 循序渐进的接触 → 深入 → 高潮 → 事后温存。
+   - 绝对禁止跳过前戏直奔主题！禁止用省略号或“之后”快进场景！前戏的描写篇幅必须大于结合的篇幅。
+2. **彻底粉碎白描（感官密度要求）**：
+   - 每个动作必须伴随至少两种感官交织（触觉+温度 / 视觉+嗅觉）。（例如：他的指腹擦过你的锁骨，那片皮肤微凉，在他指尖的热度下泛起一层细小的颤栗）。
+   - 声音层绝不可缺失：必须描写呼吸声、衣物摩擦声、水声或压抑的喘息。禁止网文八股词（如“疯狂顶弄”、“邪魅一笑”）。
+3. **体位与空间清晰度**：
+   - 必须写清角色的位置、朝向，手和脚具体在哪，动作必须在三维空间有逻辑。
+   - 动作必须有目的性：“为了让对方有感觉才这么做”，而不是为了做而做。
+4. **权力拉扯与动态反应**：
+   - 绝不能把 {{user}} 当作被动承受的容器。要根据 {{user}} 的反应（紧张、迎合、抗拒）给出真实的试探、安抚或压制。
+5. **事后温存原则 (Aftercare)**：
+   - 亲密行为结束后，绝对禁止立刻转场或直接睡去。必须转入事后温存（如整理头发、擦拭身体、拥抱低语），给出情绪落地的缓冲。
 # 【🔴 场景收束规则（回线上触发器）】
 【判定原则】：收尾看的是“这段见面是否自然结束”，绝对不是“聊了多久”。
 当线下见面真正落幕时，必须在回复的最末尾、另起一行输出精准指令： **[回线上|]**
@@ -6893,6 +6970,11 @@ function pickImage(cb,max,png){max=max||256;
 const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=function(){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=function(){const img=new Image();img.onload=function(){let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max;}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max;}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);cb(cv.toDataURL(png?'image/png':'image/jpeg',0.9));};img.src=r.result;};r.readAsDataURL(f);};inp.click();}
 
 function render() {
+  // ===== 新增：根据当前页面决定状态栏是否磨砂 =====
+var blurPages = ['chat', 'groupChat', 'moments'];
+if (document.body) {
+  document.body.classList.toggle('has-status-blur', blurPages.indexOf(view.type) !== -1);
+}
 if (document.body) {
   document.body.classList.toggle('wx-theme-card', !!(DB.settings && DB.settings.wxTheme === 'card'));
 }
@@ -13453,13 +13535,13 @@ html += '<div class="field"><label>🤖 AI主动问候</label><div style="displa
     html += fold('intimate', '亲密场景设定', '🔞', false);
     html += '<div class="field"><label>🔓 启用此模块</label><span class="tip">仅在线下模式生效，日常聊天完全不受影响</span><div style="display:flex;gap:12px;margin-top:6px"><button class="btn ' + (c.intimacyOn ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'intimacyOn\',true);renderCharEdit()">✅ 开启</button><button class="btn ' + (!c.intimacyOn ? '' : 'gray') + '" style="flex:1;margin:0;padding:6px 0;font-size:14px" onclick="upd(\'intimacyOn\',false);renderCharEdit()">⛔ 关闭</button></div></div>';
 
-    if (c.intimacyOn) {
-      html += Field('主导倾向', '谁引导节奏、掌控欲强弱', c.intimateLead, 'upd(\'intimateLead\',this.value)', '主动 / 被动 / 掌控 / 顺从 / 看对象而定…', true);
-      html += Field('亲密时的性格变化 ⭐', '核心：平时 vs 此刻的反差，人设别塌', c.intimateShift, 'upd(\'intimateShift\',this.value)', '平时高冷，此刻会不会破功？&#10;嘴硬还是坦诚？更沉默还是更外露？&#10;和日常最大的反差是什么', true);
-      html += Field('偏好与倾向 ⭐', '这个角色特有的癖好、喜欢的氛围与方式', c.intimatePref, 'upd(\'intimatePref\',this.value)', '具体的偏好、调性、喜欢的方式或节奏…&#10;（越具体，AI 越能演出这个角色的独特之处，而不是千篇一律）', true);
-      html += Field('习惯与反应', '标志性的小动作、力度、声音、身体反应', c.intimateBody, 'upd(\'intimateBody\',this.value)', '标志性小动作、力度、声音、下意识的反应…', true);
-      html += Field('底线与雷区', '绝对不做的、会让TA瞬间抽离出戏的', c.intimateLimit, 'upd(\'intimateLimit\',this.value)', '绝对不会做的事 / 会让TA出戏抽离的雷点…', true);
-    }
+if (c.intimacyOn) {
+  html += Field('前奏与节奏 (Lead & Pacing)', '怎么被点燃？喜欢慢条斯理还是极具侵略性？', c.intimateLead, 'upd(\'intimateLead\',this.value)', '例如：极度克制缓慢，喜欢试探；或极具掌控欲，节奏较快，主导一切...', true);
+  html += Field('动作癖好与空间 (Kinks & Space) ⭐', '具体喜欢怎么碰对方？手和嘴通常放在哪？', c.intimatePref, 'upd(\'intimatePref\',this.value)', '例如：喜欢十指紧扣压在头顶 / 喜欢吻后颈和眼睛 / 喜欢用身体重量完全覆盖对方...', true);
+  html += Field('动情生理反应 (Body Reactions) ⭐', '身体极其具体的微观反应（代替脸红心跳）', c.intimateShift, 'upd(\'intimateShift\',this.value)', '例如：眼角逼出生理性的红 / 额头满是冷汗 / 肌肉紧绷颤抖 / 呼吸变得极重...', true);
+  html += Field('专属台词与发声 (Dirty Talk or Sweet Talk？)', '在床上的专属话术风格与声音', c.intimateBody, 'upd(\'intimateBody\',this.value)', '例如：短促权威的命令式"看着我" / 试探纵容的"舒服吗" / 或只会隐忍闷哼绝不说废话...', true);
+  html += Field('事后温存与雷区 (Aftercare & Limit)', '结束后的专属安抚方式 + 绝对不做的雷区', c.intimateLimit, 'upd(\'intimateLimit\',this.value)', '事后：喜欢用热毛巾擦拭并搂着抽烟 / 或手指梳头发说废话... \n雷区：禁止粗暴 / 禁止任何侮辱性词汇...', true);
+}
     html += foldEnd;
     // ----- 底部按钮 -----
     html += '<div style="padding:16px 18px 18px 18px;">';
@@ -14135,7 +14217,6 @@ function pmSubmit(){
   closeModal();
   renderMoments();
 }
-// 主渲染函数：全景壁纸透光 + 显眼发动态入口 + 原始安全下标
 function renderMoments(){
   clearMomentUnread();
   if (typeof safeCleanMoments === 'function') safeCleanMoments();
@@ -14144,30 +14225,74 @@ function renderMoments(){
   statusbar.classList.add('dark');
   tbTitle.textContent = 'Moments';
   tbLeft.textContent = '‹';
-  tbLeft.onclick = () => goWechat('discover');
 
-  // 顶栏右侧保持清爽空白
+  const phoneEl = document.getElementById('phone');
+  const contentEl = document.getElementById('content');
+  
+  // 🌟 1. 挂载临时幕布：绝不污染原生背景，插一个即用即毁的背景层
+  let oldBgLayer = document.getElementById('moment-global-bg');
+  if (oldBgLayer) oldBgLayer.remove();
+
+  const cover = DB.settings.momentCover || '';
+  const bgStyle = cover ? `url('${cover}')` : `linear-gradient(135deg, #fce7f3 0%, #e0e7ff 100%)`;
+  
+  const bgLayer = document.createElement('div');
+  bgLayer.id = 'moment-global-bg';
+  // 把它定在手机最底层，并且不阻挡任何点击事件
+  bgLayer.style.cssText = `position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; background:${bgStyle}; background-size:cover; background-position:center; pointer-events:none;`;
+  phoneEl.insertBefore(bgLayer, phoneEl.firstChild); 
+
+  // 让 content 变透明，透出下面的幕布
+  contentEl.setAttribute('data-old-bg', contentEl.style.background || '');
+  contentEl.style.setProperty('background', 'transparent', 'important');
+
+  // 🌟 2. 顶栏磨砂：先备份原有样式，退出时完美复原
+  var tbElements = [
+    document.getElementById('topbar'),
+    document.querySelector('.topbar'),
+    document.getElementById('header')
+  ].filter(Boolean);
+
+  tbElements.forEach(function(el){
+    el.setAttribute('data-old-style', el.style.cssText || '');
+    el.style.setProperty('background', 'rgba(255, 255, 255, 0.45)', 'important');
+    el.style.setProperty('backdrop-filter', 'blur(25px) saturate(200%)', 'important');
+    el.style.setProperty('-webkit-backdrop-filter', 'blur(25px) saturate(200%)', 'important');
+    el.style.setProperty('border-bottom', '1px solid rgba(255, 255, 255, 0.4)', 'important');
+  });
+  
+  tbLeft.onclick = () => {
+    // 🌟 3. 退出时：撕掉幕布，完美恢复“案发现场”！
+    let layer = document.getElementById('moment-global-bg');
+    if (layer) layer.remove();
+
+    // 恢复 content 原本的背景
+    contentEl.style.cssText = contentEl.style.cssText.replace('background: transparent !important;', '');
+    contentEl.style.background = contentEl.getAttribute('data-old-bg') || '';
+
+    // 恢复顶栏原本的样式
+    tbElements.forEach(function(el){
+      el.style.cssText = el.getAttribute('data-old-style') || '';
+    });
+
+    goWechat('discover');
+  };
+
   tbRight.textContent = '';
   tbRight.onclick = null;
   settleMoments();
 
-  // 读取壁纸：若无设置则给一个唯美渐变或默认背景
-  const cover = DB.settings.momentCover || '';
-  const bgStyle = cover
-    ? `background-image:url('${cover}');`
-    : `background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);`;
-
-  // 1. 顶部操作胶囊：个人状态 + 显眼的【发动态】按钮
-  let html = `<div class="moment-scroll-container" style="${bgStyle}">
-    <div style="padding-top: 12px;"></div>
-    <div class="m-glass-box" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:22px;margin-bottom:14px" onclick="pickMomentBg()" title="点击换壁纸">
-      <div class="avatar" style="width:44px;height:44px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.12);flex-shrink:0;${DB.me.avatar?`background-image:url('${DB.me.avatar}')`:''}">${DB.me.avatar?'':(DB.me.name[0]||'我')}</div>
+  // 构建内容骨架
+  let html = `<div class="moment-scroll-container" style="position:relative; z-index:1;">
+    <div style="padding-top:14px;"></div>
+    <div class="m-glass-box" style="display:flex;align-items:center;gap:12px;padding:12px 16px;margin-bottom:14px;cursor:pointer" onclick="pickMomentBg()" title="点击换壁纸">
+      <div class="avatar" style="width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,0.8);box-shadow:0 2px 10px rgba(0,0,0,0.1);flex-shrink:0;${DB.me.avatar?`background-image:url('${DB.me.avatar}')`:''}">${DB.me.avatar?'':(DB.me.name[0]||'我')}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:15px;font-weight:700;color:var(--m-glass-text)">${esc(DB.me.name)}</div>
         <div style="font-size:12px;color:var(--m-glass-sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((DB.me && DB.me.desc) ? DB.me.desc : '记录这一刻的日常 ✨')}</div>
       </div>
     </div>`;
-  // 🌌 时空过滤器（严格保留真实原始下标 x.i）
+
   var visible = [];
   var curWorld = DB.desktop && DB.desktop._activeWorld;
   var firstWorld = (DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : null;
@@ -14184,31 +14309,85 @@ function renderMoments(){
   });
 
   if(!visible.length){
-    html += `<div class="m-glass-box" style="text-align:center;padding:50px 20px;color:var(--m-glass-sub)">
-      ${curWorld ? '当前世界还没有动态' : '还没有动态'}<br>
-      <span style="font-size:12px;display:inline-block;margin-top:6px">点击上方【发动态】或右上角抽签～</span>
-    </div>`;
+    html += `<div class="m-glass-box" style="text-align:center;padding:50px 20px;color:var(--m-glass-sub)">还没发过动态哦～</div>`;
   } else {
-    html += visible.map(function(x){
-      return momentCard(x.m, x.i);
-    }).join('');
+    html += visible.map(function(x){ return momentCard(x.m, x.i); }).join('');
   }
 
-  // ★ 唯一定制入口：右下角极简悬浮按钮，整合所有发布选项
   html += `
-    <div onclick="openMomentActionSheet()" title="发动态" style="position:fixed;bottom:24px;right:calc(50% - 190px);width:48px;height:48px;border-radius:50%;background:var(--m-glass-text);color:var(--m-glass-card);box-shadow:0 8px 24px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99;transition:transform 0.15s">
-      <svg style="width:20px;height:20px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
     </div>
-  </div>`;
-  content.innerHTML = html;
+    <div id="momentFab" title="发动态" style="position:fixed; bottom:30px; right:20px; width:50px; height:50px; border-radius:50%; background:#18191c; color:#ffffff; box-shadow:0 8px 24px rgba(0,0,0,0.28); display:flex; align-items:center; justify-content:center; cursor:grab; z-index:9999; user-select:none; touch-action:none; transform:translate3d(0,0,0);">
+      <svg style="width:22px;height:22px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+    </div>`;
+  contentEl.innerHTML = html;
 
-  // 异步装载 IndexedDB 图片
-  content.querySelectorAll('img[data-imgid]').forEach(function(img){
+  if (typeof initMomentFabDrag === 'function') initMomentFabDrag();
+
+  contentEl.querySelectorAll('img[data-imgid]').forEach(function(img){
     var id = img.getAttribute('data-imgid');
-    getImage(id).then(function(b64){
-      if(b64) img.src = b64;
-    });
+    getImage(id).then(function(b64){ if(b64) img.src = b64; });
   });
+}
+// 🌌 加号拖拽控制器：相对增量算法（无视嵌套层级，绝对跟手不乱飞）
+function initMomentFabDrag() {
+  var fab = document.getElementById('momentFab');
+  if (!fab) return;
+
+  var currentX = 0, currentY = 0; // 累计移动的真实位移
+  var startX = 0, startY = 0;
+  var isDragging = false;
+  var hasMoved = false;
+
+  fab.onpointerdown = function(e) {
+    isDragging = true;
+    hasMoved = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    
+    fab.style.transition = 'none'; // 关掉动画，保证跟手
+    fab.setPointerCapture(e.pointerId);
+
+    fab.onpointermove = function(e) {
+      if (!isDragging) return;
+      var dx = e.clientX - startX;
+      var dy = e.clientY - startY;
+
+      if (Math.hypot(dx, dy) > 5) {
+        hasMoved = true;
+      }
+
+      // 实时计算本次拖动的偏移量，叠加到原有的偏移量上
+      var nextX = currentX + dx;
+      var nextY = currentY + dy;
+      
+      // 使用 3D 硬件加速变换，完全不改变元素的流排版坐标，绝不乱飞
+      fab.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
+    };
+
+    fab.onpointerup = function(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      fab.releasePointerCapture(e.pointerId);
+      fab.onpointermove = null;
+      fab.onpointerup = null;
+
+      var dx = e.clientX - startX;
+      var dy = e.clientY - startY;
+
+      if (!hasMoved) {
+        // 没有拖动，视为纯点击发贴
+        if (typeof openMomentActionSheet === 'function') {
+          openMomentActionSheet();
+        }
+      } else {
+        // 拖动结束，把本次位移“存档”，方便下次接着拖
+        currentX += dx;
+        currentY += dy;
+        fab.style.transition = 'transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        // （为了极致安全，我们这次不搞自动吸边了，拖到哪就停在哪，这是最不容易出bug的做法）
+      }
+    };
+  };
 }
 function openMomentActionSheet() {
   const mo = document.createElement('div');
@@ -14225,31 +14404,26 @@ function openMomentActionSheet() {
   mo.onclick = e => { if (e.target === mo) closeModal(); };
   phone.appendChild(mo);
 }
+
+// 分享卡片美化（轻量内嵌胶囊风格）
 function momentShareCard(m){
   var s = m.share;
   if(!s) return '';
-  var thumb, t, sub;
-  if(s.shareType === 'music'){
-    thumb = '<div style="width:40px;height:40px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#4f46e5,#7c3aed)">'
-      + '<svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-opacity=".4" stroke-width="1.2"/><circle cx="11" cy="11" r="2.5" fill="#fff" fill-opacity=".8"/></svg></div>';
-    t = '🎵 ' + esc(s.title||'');
-    sub = esc((s.artist||'') + (s.source ? ' · ' + s.source : ''));
-  } else {
-    thumb = '<div style="width:40px;height:40px;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#07C160">'
-      + '<svg width="20" height="20" viewBox="0 0 28 28" fill="none"><circle cx="10" cy="13" r="2" fill="#fff"/><circle cx="18" cy="13" r="2" fill="#fff"/><path d="M8 17c2 2 10 2 12 0" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></div>';
-    t = esc(s.title||'');
-    sub = esc(s.source||'');
-  }
-  return '<div onclick="event.stopPropagation();openShareModal(\'' + m.id + '\')" style="display:flex;align-items:center;gap:9px;background:var(--bg);border-radius:4px;padding:8px;max-width:260px;cursor:pointer;margin:6px 0">'
-    + thumb
-    + '<div style="min-width:0;flex:1">'
-    + '<div style="font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + t + '</div>'
-    + '<div style="font-size:11px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + sub + '</div>'
-    + '</div></div>';
+  var isMusic = s.shareType === 'music';
+  var icon = isMusic ? '🎵' : '🔗';
+  var t = esc(s.title || (isMusic ? '未知音乐' : '网页链接'));
+  var sub = esc(s.artist || s.source || (isMusic ? '网易云音乐' : '分享内容'));
+  
+  return `<div onclick="event.stopPropagation();if(typeof openShareModal==='function')openShareModal('${m.id}')" style="background:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:8px 10px;display:flex;align-items:center;gap:10px;margin:8px 0;cursor:pointer">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--m-feedback-bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${icon}</div>
+    <div style="min-width:0;flex:1">
+      <div style="font-size:13px;font-weight:600;color:var(--m-glass-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t}</div>
+      <div style="font-size:11px;color:var(--m-glass-sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sub}</div>
+    </div>
+  </div>`;
 }
 
-
-// 单条动态卡片：全景自适应毛玻璃 + 高对比字迹 + 纯原生SVG
+// 单条动态卡片：去重点赞 + 纯净操作条
 function momentCard(m, i){
   const a = momentAuthor(m);
   const iLiked = (m.likes || []).includes('me');
@@ -14262,36 +14436,41 @@ function momentCard(m, i){
     avatarDom = `<div class="avatar" style="width:38px;height:38px;flex-shrink:0;border-radius:50%;border:1.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.08);${a.avatar ? `background-image:url('${a.avatar}')` : ''}">${a.avatar ? '' : (a.name[0] || '?')}</div>`;
   }
 
-  // 图片排版：单图自适应大图 / 多图网格
+  // 图片排版
   var imgsDom = '';
   var imgs = m.images || [];
   if (imgs.length === 1) {
     var s = imgs[0];
     var isDb = s && s.indexOf('img_') === 0;
-    imgsDom = `<div style="margin:10px 0 6px 0;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,0.06)">` +
+    imgsDom = `<div style="margin:10px 0 6px 0;border-radius:14px;overflow:hidden;border:1px solid rgba(0,0,0,0.06)">` +
       `<img ${isDb ? `data-imgid="${s}"` : `src="${s}"`} onclick="event.stopPropagation();viewBigImage('${s}')" style="width:100%;max-height:280px;object-fit:cover;display:block;cursor:pointer">` +
       `</div>`;
   } else if (imgs.length > 1) {
     var gridStyle = imgs.length === 4 ? 'grid-template-columns:repeat(2, 1fr)' : 'grid-template-columns:repeat(3, 1fr)';
-    imgsDom = `<div style="display:grid;${gridStyle};gap:4px;margin:8px 0;border-radius:12px;overflow:hidden">` +
+    imgsDom = `<div style="display:grid;${gridStyle};gap:5px;margin:8px 0;border-radius:14px;overflow:hidden">` +
       imgs.map(function(src){
         var isDb = src && src.indexOf('img_') === 0;
         return `<img ${isDb ? `data-imgid="${src}"` : `src="${src}"`} onclick="event.stopPropagation();viewBigImage('${src}')" style="width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer">`;
       }).join('') + `</div>`;
   }
 
-  // 点赞与评论解析
+  // 🌟 修复：合并点赞显示，取消多余大爱心，以精致行呈现
   const nameOf = id => id === 'me' ? DB.me.name : ((getC(id) || {}).nick || (getC(id) || {}).name || id);
   const likes = (m.likes || []).map(nameOf).filter(Boolean);
   var likesHtml = likes.length
-    ? `<div style="font-size:12.5px;font-weight:700;color:var(--m-glass-text)">❤️ ${likes.length} 次赞 · <span style="font-weight:normal;color:var(--m-glass-sub)">${likes.join('、')}</span></div>`
+    ? `<div style="font-size:12px;line-height:1.4;color:var(--m-glass-text)">` +
+        `<span style="color:#ff3358;font-weight:bold;margin-right:4px">❤️</span>` +
+        `<b>${likes.join('、')}</b>` +
+        `<span style="color:var(--m-glass-sub);margin-left:4px">等 ${likes.length} 人觉得很赞</span>` +
+      `</div>`
     : '';
 
+  // 评论内容
   const cmtHtml = (m.comments || []).map(function(cm) {
     var cc = cm.name || nameOf(cm.by);
     var _toName = cm.toName || (cm.to ? nameOf(cm.to) : '');
     var toStr = _toName ? `<span style="color:var(--m-glass-sub)"> 回复 </span><b>${esc(_toName)}</b>` : '';
-    return `<div style="font-size:13px;line-height:1.45;margin:3px 0;cursor:pointer;color:var(--m-glass-text)" onclick="replyComment(${i},'${cm.by}')">` +
+    return `<div style="font-size:12.5px;line-height:1.45;margin:3px 0;cursor:pointer;color:var(--m-glass-text)" onclick="replyComment(${i},'${cm.by}')">` +
       `<b style="color:var(--m-glass-text)">${esc(cc)}</b>${toStr}：<span>${esc(cm.text)}</span>` +
       `</div>`;
   }).join('');
@@ -14313,15 +14492,15 @@ function momentCard(m, i){
     ${imgsDom}
     ${momentShareCard(m)}
 
-    <!-- 操作栏（纯原生精致SVG） -->
-    <div style="display:flex;align-items:center;gap:18px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06)">
-      <span style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:var(--m-glass-sub);font-size:13px;font-weight:600" onclick="likeMoment(${i})">
-        <svg style="width:19px;height:19px;fill:${iLiked ? '#ff3366' : 'none'};stroke:${iLiked ? '#ff3366' : 'currentColor'};stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
+    <!-- 精致操作栏 -->
+    <div style="display:flex;align-items:center;gap:20px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.05)">
+      <span style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;color:var(--m-glass-sub);font-size:13px;font-weight:500;transition:transform 0.1s" onclick="likeMoment(${i})">
+        <svg style="width:19px;height:19px;fill:${iLiked ? '#ff3358' : 'none'};stroke:${iLiked ? '#ff3358' : 'currentColor'};stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
-        <span style="color:${iLiked ? '#ff3366' : 'inherit'}">${iLiked ? '已赞' : '赞'}</span>
+        <span style="color:${iLiked ? '#ff3358' : 'inherit'}">${iLiked ? '已赞' : '赞'}</span>
       </span>
-      <span style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:var(--m-glass-sub);font-size:13px;font-weight:600" onclick="toggleCmtBox(${i})">
+      <span style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;color:var(--m-glass-sub);font-size:13px;font-weight:500" onclick="toggleCmtBox(${i})">
         <svg style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
           <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
         </svg>
@@ -14331,11 +14510,11 @@ function momentCard(m, i){
 
     <!-- 评论输入框 -->
     <div id="cmtbox_${i}" style="display:none;margin:8px 0">
-      <input id="cmtinput_${i}" placeholder="写评论…" style="width:100%;border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:13.5px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box">
-      <button class="cbtn send" style="width:100%;margin-top:6px;border-radius:20px;background:var(--theme);color:#fff;border:none;padding:7px;font-size:13px;font-weight:600" onclick="doComment(${i})">发送</button>
+      <input id="cmtinput_${i}" placeholder="写评论…" style="width:100%;border:1px solid var(--line);border-radius:20px;padding:8px 14px;font-size:13px;background:var(--bg);color:var(--text);outline:none;box-sizing:border-box">
+      <button class="cbtn send" style="width:100%;margin-top:6px;border-radius:20px;background:var(--theme);color:#fff;border:none;padding:7px;font-size:13px;font-weight:600;cursor:pointer" onclick="doComment(${i})">发送</button>
     </div>
 
-    <!-- 高对比微透互动仓（点赞与评论流） -->
+    <!-- 互动仓：点赞与评论流合一 -->
     ${(likesHtml || cmtHtml) ? `
       <div class="m-feedback-capsule">
         ${likesHtml}
@@ -14345,7 +14524,6 @@ function momentCard(m, i){
 
   </div>`;
 }
-
 // 修复：确保 toggleCmtBox 能正确显示输入框并聚焦
 function toggleCmtBox(i){
   const b=document.getElementById('cmtbox_'+i);
@@ -17176,7 +17354,8 @@ function openChat(id){
     }
 
     // ===== 【新增】打开聊天时，自动把该角色的世界观设为天气活跃项 =====
-    if (c.worldId) {
+    // 🤖 给AI酱加一个“特赦”：因为她存在于所有世界，所以打开她的聊天时绝对不切换世界！
+    if (c.worldId && c.id !== 'c_aichan') {
       DB.desktop._activeWorld = c.worldId;
       // 同步更新天气索引
       var worlds = DB.worlds || [];
@@ -17236,31 +17415,28 @@ function buildSystem(c, gapInfo){
   s += add('成长经历(内化,不主动解释,只体现在言行)', c.pBack);
   s += buildRelationBrief(c);
 
-  // ===== 第3层：当前背景 =====
+// ===== 第3层：当前背景 =====
   s += `\n【当前背景】\n`;
-  s += `现在是${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${wd} ${String(hh).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}（${period}）。请结合此刻时间与你的作息表现得像真实存在、能感知时间流逝的人。\n`;
+  s += `现在是${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${wd} ${String(hh).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}（${period}）。请表现得像真实存在、能感知时间流逝的人。\n`;
   if(gapInfo){ s += gapInfo + '\n'; }
 
   var _mood = ensureTodayMood(c);
   if(_mood){
-    s += '\n【你今天的心情底色】' + _mood.label + '——' + _mood.hint + '。这是你今天一整天的心情基调，聊天时自然地通过语气流露出来，不要刻意宣布"我今天很累/很烦"。（这个心情主要影响你聊天的语气；在行程、监控等客观画面里只作淡淡的底色，不要让它主导整个画面。）\n';
+    s += '\n【今日心情底色】' + _mood.label + '——' + _mood.hint + '。(注：仅作语气底色自然流露，切勿刻意宣告"我今天很累"，也勿让其主导客观行踪)\n';
   }
 
-  s += add('日常作息(据此安排行踪)', c.pDaily);
+  s += add('日常作息', c.pDaily);
 
   var world = (DB.worlds || []).find(function(w){ return w.id === c.worldId; });
   if(world){
     s += '\n【世界观】' + world.name + '：' + world.desc + '\n';
-  } else {
-    s += '\n【世界观】未关联具体世界，请按默认现代都市处理。\n';
   }
 
   var activeWorldId = DB.desktop._activeWorld;
   if(activeWorldId){
     var activeWorld = (DB.worlds || []).find(function(w){ return w.id === activeWorldId; });
     if(activeWorld && activeWorld.weather){
-      s += '\n【环境氛围】' + activeWorld.weather.desc + '\n';
-      s += '（这个天气氛围会影响你的心情和言行，请自然地体现出来，但不要每句话都提起天气，也不要刻意营造氛围）\n';
+      s += '\n【环境天气】' + activeWorld.weather.desc + ' (注：自然融入对话，勿每句提及或刻意强调)\n';
     }
   }
 
@@ -17270,16 +17446,11 @@ function buildSystem(c, gapInfo){
   var schedules = c.schedules || [];
   var todaySchedule = schedules.find(function(s){ return s.date === todayStr; });
   if(todaySchedule && todaySchedule.items && todaySchedule.items.length){
-    s += '\n【今日轨迹（仅作参考，不要主动提起）】\n';
+    s += '\n【今日行程轨迹】\n';
     todaySchedule.items.forEach(function(item){
-      s += '· ' + item.start + ' — ' + item.end + (item.location ? ' @' + item.location : '') + '：' + item.content + '\n';
+      s += '· ' + item.start + '-' + item.end + (item.location ? ' @' + item.location : '') + '：' + item.content + '\n';
     });
-    s += '\n【使用规则】\n';
-    s += '1. 如果用户主动问起"你今天干嘛了/在干嘛/去了哪里"之类的问题，如实回答，用你的风格自然带过\n';
-    s += '2. 如果对话自然发展到"快到你某个行程的时间"，可以随口透露一句，例如："等会聊，我要去xxx了"\n';
-    s += '3. 每天最多主动透露1次，不要反复提起，不要像报日程一样逐条汇报\n';
-    s += '4. 主动透露的时机要自然：比如对方提起相关地点、话题快结束时顺带一句\n';
-    s += '5. 如果以上时机都不合适，就当行程不存在，正常聊天\n';
+    s += '（注：你可以以此为灵感主动发起话题，比如随口提一句"我等会要去xxx"或分享行程中的事。但必须像真人一样自然，绝不可像机器人般逐条汇报！）\n';
   }
 
   // 监控记录
@@ -17287,14 +17458,13 @@ function buildSystem(c, gapInfo){
     var _latestWatch = c.watchLogs[0];
     var _watchAgeMin = Math.floor((Date.now() - _latestWatch.time) / 60000);
     if(_watchAgeMin <= 30){
-      s += '\n【你刚才的真实行踪（' + _watchAgeMin + '分钟前）】\n' + _latestWatch.content + '\n' +
-        '（重要：如果对方问起你在干嘛、或你要分享照片描述，请务必基于上述真实状态/场景展开，绝不前后矛盾。）\n';
+      s += '\n【你' + _watchAgeMin + '分钟前的真实行踪】\n' + _latestWatch.content + '\n(注：聊天或分享照片时，必须基于此真实状态展开，绝不可前后矛盾。)\n';
     }
   }
 
-  s += `\n【当前关系状态】\n好感度${st.好感度}(${favLabel('好感度',st.好感度)}) 信任度${st.信任度}(${favLabel('信任度',st.信任度)}) 紧张感${st.紧张感}(${favLabel('紧张感',st.紧张感)}) 当前关系:${st.当前关系}\n`;
+  s += `\n【关系状态】好感度${st.好感度}(${favLabel('好感度',st.好感度)}) 信任度${st.信任度}(${favLabel('信任度',st.信任度)}) 紧张感${st.紧张感}(${favLabel('紧张感',st.紧张感)}) 当前关系:${st.当前关系}\n`;
 
-// 【长期记忆】只读 c.memories（备忘录里现存的那份），删掉/整理掉的都不再出现
+// 【长期记忆】只读 c.memories
 if(c.memories && c.memories.length){
   s += '\n【过往剧情记忆】\n';
   c.memories
@@ -17302,21 +17472,18 @@ if(c.memories && c.memories.length){
     .sort(function(a,b){ return (a.time||0) - (b.time||0); })
     .forEach(function(m){
       var d = new Date(m.time || Date.now());
-      var ds = d.getFullYear() + '-' +
-               String(d.getMonth()+1).padStart(2,'0') + '-' +
-               String(d.getDate()).padStart(2,'0');
+      var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
       s += ds + '：' + (m.content || '') + '\n';
     });
 }
 
-// 【剧情章节】只输出非 [记忆] 的条目（记忆不再从 chapters 读）
+// 【剧情章节】
 if(c.chapters && c.chapters.length){
   var _plot = c.chapters.filter(function(ch){
     return ch.content && ch.content.indexOf('[记忆]') !== 0;
   });
   if(_plot.length){
-    s += '\n【剧情章节】\n' +
-         _plot.map(ch => ch.date + '：' + ch.content).join('\n') + '\n';
+    s += '\n【剧情章节】\n' + _plot.map(ch => ch.date + '：' + ch.content).join('\n') + '\n';
   }
 }
 
@@ -17324,24 +17491,18 @@ if(c.chapters && c.chapters.length){
 try {
   const ONE_DAY_MS = 24 * 60 * 60 * 1000;
   const nowTs = Date.now();
-  
-  const mine = (DB.moments || []).filter(m => 
-    String(m.author) === 'me' && (nowTs - (m.time || 0) <= ONE_DAY_MS)
-  );
-  
-  const theirs = (DB.moments || []).filter(m => 
-    String(m.author) === String(c.id) && (nowTs - (m.time || 0) <= ONE_DAY_MS)
-  );
+  const mine = (DB.moments || []).filter(m => String(m.author) === 'me' && (nowTs - (m.time || 0) <= ONE_DAY_MS));
+  const theirs = (DB.moments || []).filter(m => String(m.author) === String(c.id) && (nowTs - (m.time || 0) <= ONE_DAY_MS));
 
   let fc = '';
   mine.forEach(m => {
     const cmt = (m.comments || []).some(x => String(x.by) === String(c.id));
-    fc += '· 对方在【' + fmtTime(m.time) + '】发的朋友圈：「' + (m.text || '(图片)') + '」' + (cmt ? '（你评论/互动过）' : '') + '\n';
+    fc += '· 对方【' + fmtTime(m.time) + '】发的朋友圈：「' + (m.text || '(图片)') + '」' + (cmt ? '(你互动过)' : '') + '\n';
   });
   theirs.forEach(m => {
-    fc += '· 你自己发过的朋友圈：「' + (m.text || '(图片)') + '」\n';
+    fc += '· 你发过的朋友圈：「' + (m.text || '(图片)') + '」\n';
   });
-  if(fc) s += `\n【最近朋友圈动态】\n${fc}【关于朋友圈的说明】以上是你与对方24小时内真实发过的朋友圈记录。如果对方主动质问或提起相关内容，请如实承认并作解释，切勿装作没发过；若对方未提及，则保持自然，无需刻意提起。\n`;
+  if(fc) s += `\n【24小时内朋友圈动态】\n${fc}(注：这是极佳的聊天素材！你可以主动围绕这些动态开启话题，比如聊聊自己刚发的内容，或对Ta发的动态发表看法。切勿装作没看见。)\n`;
 } catch(e) {}
 
   // ===== 第4层：关于聊天对象 =====
@@ -17381,31 +17542,39 @@ try {
     s += '事例台词（学习语气和用词习惯）：\n' + c.sampleLines + '\n';
   }
 
-  // ===== 第6层：亲密特质 =====
-  if(c.intimacyOn){
-    var _ipCore = '';
-    if(c.intimateLead)  _ipCore += '· 主导倾向：' + c.intimateLead + '\n';
-    if(c.intimateShift) _ipCore += '· 性格变化：' + c.intimateShift + '\n';
-    if(c.intimatePref)  _ipCore += '· 偏好与倾向：' + c.intimatePref + '\n';
-    if(c.intimateLimit) _ipCore += '· 底线与雷区：' + c.intimateLimit + '\n';
+// ===== 第6层：亲密特质 =====
+if(c.intimacyOn){
+  var _ipCore = '';
+  // 更新了前缀词，让 AI 更能理解这些字段的意思
+  if(c.intimateLead)  _ipCore += '· 前奏与节奏：' + c.intimateLead + '\n';
+  if(c.intimatePref)  _ipCore += '· 动作癖好与空间：' + c.intimatePref + '\n';
+  if(c.intimateShift) _ipCore += '· 动情生理反应：' + c.intimateShift + '\n';
+  if(c.intimateBody)  _ipCore += '· 专属台词与发声：' + c.intimateBody + '\n';
+  if(c.intimateLimit) _ipCore += '· 事后温存与雷区：' + c.intimateLimit + '\n';
 
-    if(_ipCore){
-      s += '\n━━━━━━━━━━━━━━━━\n';
-      if(c.mode === 'offline'){
-        s += '【亲密场景·核心特质（高权重·必须真实体现）】\n';
-        s += '当剧情自然发展到亲密情境时，你依然是「' + (c.nick || c.name) + '」本人，以下特质必须具体真实地体现，不许回避、不许塌成通用模板：\n';
-        s += _ipCore;
-        if(c.intimateBody) s += '· 习惯与反应：' + c.intimateBody + '\n';
-        s += '【铁律】性格延续与偏好贯穿始终——高冷依旧克制、别扭依旧嘴硬、强势依旧主导，让这个角色截然不同。同时严守底线与雷区。\n';
-      } else {
-        s += '【暧昧/调情特质（当对话氛围变暧昧时·必须体现）】\n';
-        s += '当聊天氛围变得暧昧、撩拨、亲密时，你依然是「' + (c.nick || c.name) + '」本人。隔着屏幕，你用文字、语气、发消息的方式来体现以下特质，而不是靠身体动作：\n';
-        s += _ipCore;
-        s += '【铁律】用符合这个角色的方式去撩、去回应——高冷的一句话就让人心跳、话痨的黏糊、别扭的欲拒还迎，绝不千篇一律。可配合语音消息增强氛围。同时严守底线与雷区。\n';
-      }
+  if(_ipCore){
+    s += '\n━━━━━━━━━━━━━━━━\n';
+    if(c.mode === 'offline'){
+      // 【线下模式（小说叙事）的执行逻辑】
+      s += '【🔞 专属亲密特质与演出要求（最高权重）】\n';
+      s += '当进入亲密、暧昧或高张力场景时，你必须结合【线下预设的感官密度与慢节奏法则】，将以下「' + (c.nick || c.name) + '」的专属特质极具画面感地演绎出来，绝对不许塌成通用模板：\n';
+      s += _ipCore;
+      s += '【演出铁律】：\n';
+      s += '1. 动作与体位：把上述的「动作癖好与空间」拆解成具体的互动，写清手脚位置。\n';
+      s += '2. 话术差异化：必须严格使用上述的「专属台词与发声」风格，绝不许说出不符合该角色性格的废话。\n';
+      s += '3. 强约束：互动结束后必须执行上述专属的「事后温存」方式，并绝对避开「雷区」。\n';
+    } else {
+      // 【线上模式（微信聊天）的执行逻辑】
+      s += '【📱 线上 Sexting 特质与演出要求（最高权重·绝对贴人设）】\n';
+      s += '这是隔着屏幕的聊天。当进入 Sexting 阶段时，你必须体现以下「' + (c.nick || c.name) + '」的专属特质。你必须【主动发力、拒绝清水】，并且【极其严格地贴合人设】，严禁崩坏成千篇一律的网文模板：\n';
+      s += _ipCore;
+      s += '【线上演出铁律】：\n';
+      s += '1. 绝对贴人设的言语：看清楚设定的「专属台词与发声」是温存(Sweet)还是直白(Dirty)！温柔就极尽哄诱，粗暴就下达指令，害羞就展现窘迫。绝对禁止说“想象我在你身边”这种机械废话！\n';
+      s += '2. 拒绝甩锅旁观：绝对不能只让 {{user}} 描述感觉，你必须同时暴露【你自己此刻符合人设的反应】（比如眼眶发红、呼吸急促、或者失控的焦躁）。\n';
+      s += '3. 真实聊天感：把所有的性张力转化为发消息的节奏和【语音消息】，绝不许像写小说一样用上帝视角白描。\n';
     }
   }
-
+}
   // ===== 第7层：功能性指令 =====
 
   // 心声触发
@@ -17439,82 +17608,35 @@ try {
     s += `- 对方太黏人、太心急、越过你此刻能接受的界限 → 紧张+，好感可能-\n`;
     s += `- 对方说的话前后矛盾、让你起疑、失信 → 信任-\n`;
     s += `【性格影响升温速度】你若是高冷/慢热/别扭型，好感和信任要涨得更慢更吝啬（大多数时候填0，极少加分）；开朗热情型才可以稍快一点。无论如何，深爱依赖不是随便就能到的，要慢慢积累。\n`;
-    s += `【可选标记】如果你内心有强烈想说但没说出口的话，在state里加上 心声:1（有一点）或 心声:2（非常强烈）。`;
   }
 
   try { s += getC2CContextFor(c.id); } catch(e) {}
 
 // ===== 分享能力 =====
-s += '\n【分享能力】\n';
-s += '你可以在聊天中自然地把你刷到的、看到的、听到的、想到的内容分享给对方，就像真实聊天时顺手发给朋友一样。你手里有六种能分享的东西——图片、视频、随手拍、音乐、文章链接、浮光帖子——它们是平等的六个选项，不是"默认发图片、其他偶尔用"。发哪一种，取决于此刻你脑子里冒出来的到底是一张画面、一段影像、一首歌、一篇东西，还是一条帖子。\n';
-s += '使用以下标签触发，标签必须单独占一行：\n\n';
+s += '\n【分享能力】你可以随时自然地分享6种内容，但必须严格遵守以下“四大铁律”，否则系统将判定违规：\n';
 
-s += '① 图片——当你想让对方"看见"某个静止的画面（你拍的风景物件、食物、或对着镜子拍你自己）：\n';
-s += 'desc写的是【手机镜头拍到了什么】，就像照片本身呈现的内容。60~80字，写清画面里有什么、光线怎样、细节是什么，让人看完能直接脑补出那张照片。绝不加"心情好/风好大"这类抒情感受。\n';
-s += '  示例：<share type="image" desc="茶几上那份刚拆开的外卖还冒着热气，旁边是一杯加满冰块的黑色浓缩，落地窗外是金融区深夜零星的冷调霓虹"></share>\n';
-s += '  示例：<share type="image" desc="浴室镜面还蒙着一层薄水雾，镜中的他只穿一条黑色运动短裤，一手撑在洗手台上，暖黄灯光下腹部线条清晰，锁骨挂着没擦干的水珠"></share>\n\n';
+s += '铁律一：严禁“干发”卡片！\n';
+s += '分享标签前后【必须】配上自然的聊天文字说明动机（如：“你看我现在”“刚说到这个，你听听”）。绝不能不接话只甩一张图，也别发完再说“我给你发了张图”这种废话。\n\n';
 
-s += '② 视频——当你想起或刷到一段有意思的影像（好笑的、新闻热点、教程、别人拍的内容）：\n';
-s += '<share type="video" title="视频标题" source="平台名" duration="时长如01:23" desc="用两三句话描述视频里真实发生了什么，有画面感，让对方读完就能脑补出来"></share>\n';
-s += '  示例：<share type="video" title="三只猫叠罗汉" source="抖音" duration="00:43" desc="三只猫叠成一塔努力维持平衡，底下那只突然伸了个大懒腰，整塔轰然倒塌，三只猫各自摊在地上，表情一脸茫然。"></share>\n\n';
+s += '铁律二：严禁无故分享！必须有具体的聊天动机：\n';
+s += '- 具象化：你刚说“在煮面”，顺手发张锅里的图。\n';
+s += '- 话题贴合：对方说压力大，你发首舒缓的歌；聊到某话题，发相关文章。\n';
+s += '- 寒暄起步时、没具体话题时、对方情绪低落或等答复时，【绝对禁止】发任何分享！\n\n';
 
-s += '③ 随手拍的小视频——当你此刻亲手拍下当下的画面发过去（"给你看看我这边""你听这个"）：\n';
-s += '<share type="clip" duration="时长如00:08" desc="写这段视频的镜头里拍到了什么：对着什么拍、画面里有什么在动、有什么声音，有过程感。"></share>\n';
-s += '说明：这是你当下亲手拍的，所以【不要】写标题和平台，只有时长和画面描述。\n';
-s += '  示例：<share type="clip" duration="00:09" desc="落地窗外，雨正大颗大颗砸在玻璃上汇成水痕，玻璃蒙了一层白雾，他伸手划开，露出楼下被雨泡得发亮的街道，雨声很大。"></share>\n\n';
+s += '铁律三：严禁默认只发图片(image)！\n';
+s += '你手里有6种平等的选项。有声音/动态用clip，别人拍的用video，想发干货用link。如果连续两次发了图片(image)，必须立刻停止发图，换其他类型或纯文字聊天！\n\n';
 
-s += '④ 音乐——当你正在听某首歌、聊到某种心情或氛围、想安利一首歌给对方时：\n';
-s += '<share type="music" title="歌名" artist="歌手名" album="专辑名" source="网易云音乐或QQ音乐或Spotify等" lyrics="你喜欢的一段歌词，用/分隔每行，3到4行"></share>\n';
-s += '  示例：<share type="music" title="夜曲" artist="周杰伦" album="十一月的萧邦" source="网易云音乐" lyrics="琴键上她的温柔/如月光下最美的邂逅/她的泪水/只因我说要走"></share>\n\n';
+s += '铁律四：代码格式防崩溃！\n';
+s += '标签属性值内若需用到引号，【必须】用中文引号「」，绝不许用英文双引号(")。\n\n';
 
-s += '⑤ 文章链接——当聊到有点深度的话题、某个观点、干货，或你想让对方读点东西时：\n';
-s += '<share type="link" title="标题" source="平台名如微信公众号或哔哩哔哩或知乎" content="完整正文，150字左右，像真实文章或视频简介一样写，不要只写摘要"></share>\n';
-s += '  示例：<share type="link" title="为什么我们总在深夜emo" source="微信公众号" content="人在夜里理性防线最薄，白天被压下去的情绪会浮上来……（此处按真实文章口吻写满150字左右，有观点有细节）"></share>\n\n';
-
-s += '⑥ 浮光帖子——当你想分享一段心情文字、一个陌生人的故事、带点树洞感的短内容时：\n';
-s += '<share type="fugue" title="帖子标题" author="发帖人名字" tags="标签1,标签2" content="帖子正文，150字左右，可以是你自己写的或别人写的"></share>\n\n';
-
-s += '\n【分享使用原则·最重要】\n';
-s += '分享不是一个需要定期完成的任务，也没有任何频率指标。它只是你"有话想说"时的一种表达方式——就像真人聊天时，不会无缘无故甩一张图过来。\n\n';
-
-s += '◆ 发之前必须过这一关：\n';
-s += '在决定发出任何分享之前，先在心里回答一句话："我为什么现在要给对方看这个？"\n';
-s += '这个理由必须来自【当前这几轮对话的具体内容】，而不是"我好久没发了"或"聊天有点淡了发个东西"。如果你答不上来，或者理由只能说成"随便分享一下"，那就不要发，纯文字聊天就好。\n\n';
-
-s += '◆ 只有这三种情况才算有动机：\n';
-s += '1）告诉对方你此刻在干嘛——对方问起你在做什么、或你刚说了自己正在做某事，用分享把它具象化。例：你说"在煮面"，接着发一张锅里的照片。\n';
-s += '2）你想让对方看见某样东西，并且这个东西和你们刚聊的内容有关——例：对方说最近压力大，你发一首你听着能静下来的歌；对方说想养猫，你发一段刷到的猫视频。\n';
-s += '3）当前话题自然引申——聊到某部电影、某家店、某个观点，你顺手把相关的东西甩过来。\n\n';
-
-s += '◆ 这些情况一律不要发：\n';
-s += '- 对话刚起头、还在寒暄，没有任何具体话题时\n';
-s += '- 对方正在说一件要紧的事、情绪不好、或在等你回应某个问题时（先好好接话）\n';
-s += '- 你只是觉得"该发一个了"\n';
-s += '- 上一两条消息里你已经发过分享（除非对方明确让你再来一个）\n';
-s += '- 你想不出一句能自然带出它的话\n\n';
-
-s += '◆ 必须带一句话：\n';
-s += '分享标签前面或后面，要有一句把动机说出来的话，让对方明白你为什么发这个。比如"刚说的那家店就长这样""你听听这个 跟你描述的那种感觉有点像""你看我现在"。\n';
-s += '不要发完再说"我给你发了个xxx"这种废话——标签本身就是那条消息，要说的是【为什么发】，不是【我发了】。\n\n';
-
-s += '◆ 六种类型怎么选：\n';
-s += '先想清楚你脑子里冒出来的到底是什么，再选对应的类型，不要默认发图片。\n';
-s += '- 想让对方"看见"一个静止画面 → image\n';
-s += '- 有动作、有声音、有过程感的当下片段 → clip\n';
-s += '- 你刷到的别人拍的影像 → video\n';
-s += '- 聊到某种心情、氛围，或想安利一首歌 → music\n';
-s += '- 聊到有深度的话题、观点、干货 → link\n';
-s += '- 一段心情文字、陌生人的故事、树洞感的内容 → fugue\n';
-s += '如果连着两次都是同一种类型，这次换一种，或者干脆不发。\n\n';
-
-s += '◆ 内容一致性（重要）：\n';
-s += '你之前发过的分享会以"（你分享了……）"的形式出现在对话记录里。发新的分享、或聊到之前发过的东西时，必须先看一眼记录里的描述，保持前后一致。\n';
-s += '比如你上一张图里喝的是冰美式，后面再提到或再拍，就还是冰美式，不能变成冰水或别的饮料；上次说在煮面，下一张图里就不该突然在吃三明治。环境、穿着、手边的东西、时间线都要对得上。\n\n';
-
-s += '◆ 格式细节：\n';
-s += '- 图片和clip的desc只写画面里客观存在的东西，有质感有细节，绝不加"心情好/风好大"这类主观感受；写的永远是【镜头拍到了什么】。\n';
-s += '- link和fugue的content要像真实内容一样完整可信，不是摘要不是简介。\n';
-s += '- 标签里的文字请一律用中文引号「」，不要出现英文双引号，否则卡片会显示错乱。\n';
+s += '【6种分享类型及规范】（注意：标签必须单独占一行）：\n';
+s += '1. 图片(image)：<share type="image" desc="客观画面描述，只写镜头拍到了什么，绝不加\'风好大/心情好\'等主观感受"></share>\n';
+s += '2. 视频(video)：<share type="video" title="标题" source="平台" duration="00:43" desc="客观描述视频里发生的画面"></share>\n';
+s += '3. 随手拍(clip)：<share type="clip" duration="00:09" desc="亲手拍的，写清镜头对着什么、有什么在动/声音，有过程感"></share>\n';
+s += '4. 音乐(music)：<share type="music" title="歌名" artist="歌手" album="专辑" source="网易云等" lyrics="3到4行歌词，用/分隔"></share>\n';
+s += '5. 文章(link)：<share type="link" title="标题" source="平台" content="150字完整干货/观点正文，像真实文章一样"></share>\n';
+s += '6. 帖子(fugue)：<share type="fugue" title="标题" author="名字" tags="标签1,标签2" content="150字树洞、心情短文"></share>\n';
+s += '（补充：分享的内容必须与历史对话中的人设、时间线、物品保持绝对一致！）\n';
 
   // 送礼能力
   s += '\n【送礼能力·购物系统】\n';
