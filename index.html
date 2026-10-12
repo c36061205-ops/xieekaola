@@ -3693,6 +3693,17 @@ body.wx-theme-letter .msg.me .mbody{
   border-radius: 12px;
   padding: 8px 12px;
 }
+/* 朋友圈专属顶栏磨砂：body 上有 in-moments 类时才生效 */
+body.in-moments #topbar {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(25px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+body.in-moments #content {
+  background: transparent !important;
+}
+
 </style>
 </head>
 <body>
@@ -3886,7 +3897,7 @@ body.wx-theme-letter .msg.me .mbody{
   </div>
 </div>
 <script>
-const APP_VER = 'v20261011_2';
+const APP_VER = 'v20261012_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -6975,6 +6986,10 @@ var blurPages = ['chat', 'groupChat', 'moments'];
 if (document.body) {
   document.body.classList.toggle('has-status-blur', blurPages.indexOf(view.type) !== -1);
 }
+// 新增朋友圈专属 class
+if (document.body) {
+  document.body.classList.toggle('in-moments', view.type === 'moments');
+}
 if (document.body) {
   document.body.classList.toggle('wx-theme-card', !!(DB.settings && DB.settings.wxTheme === 'card'));
 }
@@ -7005,6 +7020,23 @@ if (topbar) {
         if (banner) banner.remove();
   closeModal();
   content.style.backgroundImage = '';
+    // 离开朋友圈时，摘掉朋友圈的全局背景幕布和内联 style 兜底
+  if (view.type !== 'moments') {
+    var oldMomentBg = document.getElementById('moment-global-bg');
+    if (oldMomentBg) oldMomentBg.remove();
+
+    var tb = document.getElementById('topbar');
+    if (tb && tb.hasAttribute('data-old-style')) {
+      tb.style.cssText = tb.getAttribute('data-old-style');
+      tb.removeAttribute('data-old-style');
+    }
+    var ct = document.getElementById('content');
+    if (ct && ct.hasAttribute('data-old-bg')) {
+      ct.style.removeProperty('background');
+      ct.removeAttribute('data-old-bg');
+    }
+  }
+
 
   // ============================================================
   // 3️⃣ 触发每日记忆生成
@@ -14247,36 +14279,9 @@ function renderMoments(){
   contentEl.style.setProperty('background', 'transparent', 'important');
 
   // 🌟 2. 顶栏磨砂：先备份原有样式，退出时完美复原
-  var tbElements = [
-    document.getElementById('topbar'),
-    document.querySelector('.topbar'),
-    document.getElementById('header')
-  ].filter(Boolean);
-
-  tbElements.forEach(function(el){
-    el.setAttribute('data-old-style', el.style.cssText || '');
-    el.style.setProperty('background', 'rgba(255, 255, 255, 0.45)', 'important');
-    el.style.setProperty('backdrop-filter', 'blur(25px) saturate(200%)', 'important');
-    el.style.setProperty('-webkit-backdrop-filter', 'blur(25px) saturate(200%)', 'important');
-    el.style.setProperty('border-bottom', '1px solid rgba(255, 255, 255, 0.4)', 'important');
-  });
-  
-  tbLeft.onclick = () => {
-    // 🌟 3. 退出时：撕掉幕布，完美恢复“案发现场”！
-    let layer = document.getElementById('moment-global-bg');
-    if (layer) layer.remove();
-
-    // 恢复 content 原本的背景
-    contentEl.style.cssText = contentEl.style.cssText.replace('background: transparent !important;', '');
-    contentEl.style.background = contentEl.getAttribute('data-old-bg') || '';
-
-    // 恢复顶栏原本的样式
-    tbElements.forEach(function(el){
-      el.style.cssText = el.getAttribute('data-old-style') || '';
-    });
-
-    goWechat('discover');
-  };
+tbLeft.onclick = () => {
+  goWechat('discover');
+};
 
   tbRight.textContent = '';
   tbRight.onclick = null;
