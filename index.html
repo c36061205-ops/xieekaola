@@ -3897,7 +3897,7 @@ body.in-moments #content {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261012_1';
+const APP_VER = 'v20261013_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -4958,6 +4958,8 @@ function migrate(d) {
     if (c.birthday === undefined) c.birthday = '';
     if (c.sampleLines === undefined) c.sampleLines = '';
     if (c.model === undefined) c.model = ''; // 专属模型
+	if (!d.settings) d.settings = {};
+if (!Array.isArray(d.settings.availableModels)) d.settings.availableModels = [];
     if (c.lastActive === undefined) c.lastActive = Date.now();
     if (c._lastDecayCheck === undefined) c._lastDecayCheck = 0;
     if (c.isBlockedByChar === undefined) c.isBlockedByChar = false;
@@ -5081,11 +5083,14 @@ function rollMood(){
 }
 function getMood(key){ return MOODS.find(function(m){return m.key===key;}) || MOODS[0]; }
 function ensureTodayMood(c){
-  var t=new Date();
-  var ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-  if(!c.todayMood || c.todayMood.date!==ds){
-    c.todayMood={ date:ds, key:rollMood(), note:'', whisper:'' }; // note/whisper 当天付费查看时才填
-    save();
+  if (!c) return MOODS[0];
+  var t = new Date();
+  var ds = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+  if(!c.todayMood || c.todayMood.date !== ds || !c.todayMood.status){
+    var mk = rollMood();
+    c.todayMood = { date: ds, key: mk, status: '', note: '', whisper: '' };
+    c.todayMood.status = pickStatus(c); // 当天摇出来直接存下，绝不再变
+    if (typeof save === 'function') save();
   }
   return getMood(c.todayMood.key);
 }
@@ -5191,44 +5196,48 @@ function buildYesterdaySummary(c){
 }
 
 function pickStatus(c){
-  if(!c.todayMood) return '';
-  var mk = c.todayMood.key || 'calm';
-  var hh = new Date().getHours();
+  if(!c) return '';
+  // 如果已经存过今天的心情文本，直接拿来用，绝不重算（解决一天反复变的问题）
+  if (c.todayMood && c.todayMood.status) {
+    return c.todayMood.status;
+  }
+
+  // 兜底自愈：如果没有心情，先补齐
+  if(!c.todayMood) {
+    ensureTodayMood(c);
+    if(c.todayMood && c.todayMood.status) return c.todayMood.status;
+  }
+
+  var mk = (c.todayMood && c.todayMood.key) ? c.todayMood.key : 'calm';
+  var ds = (c.todayMood && c.todayMood.date) ? c.todayMood.date : '';
   var extras = ['crush','miss','expect','meh','hide','soft'];
 
-  // ★ 种子加入：角色ID + 日期 + 心情key + 时段（半天一变，既稳定又有变化）
-  var halfDay = hh < 12 ? 'AM' : 'PM';
-  var seed = String(c.id || '') + '|' + (c.todayMood.date || '') + '|' + mk + '|' + halfDay;
+  // ★ 种子只绑定角色和日期，去掉了上下午和半夜的时间变动，全天完全固定
+  var seed = String(c.id || '') + '|' + ds + '|' + mk;
 
-  // ★ 用更好的打散算法（FNV-1a 变体），避免余数集中
   var h = 2166136261;
   for (var i = 0; i < seed.length; i++) {
     h ^= seed.charCodeAt(i);
-    h = (h * 16777619) >>> 0;   // >>>0 保证是正整数
+    h = (h * 16777619) >>> 0;
   }
-  // 再搅一次，让低位也充分随机
   h ^= h >>> 15; h = (h * 2246822507) >>> 0;
   h ^= h >>> 13; h = (h * 3266489909) >>> 0;
   h ^= h >>> 16;
 
-  // ★ 不同用途用不同的数，避免"选池子"和"选下标"互相绑定
-  var rPool = h % 1000;                    // 决定走哪个池
-  var rIdx  = Math.floor(h / 1000) % 100000; // 决定池内下标
+  var rPool = h % 1000;
+  var rIdx  = Math.floor(h / 1000) % 100000;
 
   var poolKey;
-  if ((hh >= 23 || hh < 5) && rPool < 700) {
-    poolKey = 'night';                        // 深夜70%走夜间池
-  } else if (rPool < 300) {
-    poolKey = extras[rIdx % extras.length];   // 30%抽一个"新维度"
+  if (rPool < 300) {
+    poolKey = extras[rIdx % extras.length];
   } else {
     poolKey = mk;
   }
 
-  var pool = STATUS_POOL[poolKey] || STATUS_POOL.calm;
+  var pool = (typeof STATUS_POOL !== 'undefined' && STATUS_POOL[poolKey]) ? STATUS_POOL[poolKey] : (STATUS_POOL && STATUS_POOL.calm ? STATUS_POOL.calm : ['平常心']);
   var idx = rIdx % pool.length;
-  return pool[idx];
+  return pool[idx] || '';
 }
-
 function blankChar(id){
 const c={id,name:'新角色',nick:'',avatar:'',activity:'中',clinginess: 50,hearts:10,heartsTotal:10,heartLog:[],heartMile:{},status:{好感度:50,信任度:50,紧张感:0,当前关系:'初次见面'},chapters:[],mode:'online',inChatList:false,type:'single',members:[],isBlockedByChar:false,blockedByCharAt:0,blockedType:'',pBehavior:'', model:'', allowStickers:true, myExtra:'', autoMemo:true, giftLog:[]};
   CFIELDS.forEach(k=>c[k]='');c.birthday='';c.sampleLines='';c.lastActive=Date.now();c._lastDecayCheck=0;return c;
@@ -6099,10 +6108,14 @@ async function shopDoAutoGift(c) {
     var gModel = DB.settings.lightModel || DB.settings.auxModel || DB.settings.chatModel;
     var gName = c.name || c.nick || '对方';
     var uName = DB.me.realName || DB.me.name || '对方';
-    var gNudge = '（你突然想给' + uName + '送一件小东西：' + picked.emoji + '「' + picked.name + '」' +
-      (picked.desc ? '，' + picked.desc : '') + '。请你按自己的人设，用微信聊天的口语短句，自然地说一句"为什么突然送TA东西"的开场白，' +
-      '比如路过看到想起对方、单纯想对TA好、找个小借口等。只输出1到2句话，不要提任何价格数字系统内容，不要写动作旁白。）';
-    var gHist = (DB.chats[c.id] || []).slice(-6).map(toApiMsg);
+var gNudge = '（你要把 ' + picked.emoji + '「' + picked.name + '」' + 
+  (picked.desc ? '（' + picked.desc + '）' : '') + ' 给' + uName + '。\n' +
+  '【要求】\n' +
+  '1. 像真人发微信一样自然地把东西递出去。不要像在交差，更不要像做汇报一样特意去解释“我为什么送你这个”。\n' +
+  '2. 说话要有你的性格和生活气息，根据你当下的状态或最近聊的事随口说一两句就行。\n' +
+  '3. 严禁使用任何套路模板（绝对不要说“路过看到适合你”、“顺手买的”这类假话）。\n' +
+  '只回1到2句纯聊天短句，不带动作括号。）';
+  var gHist = (DB.chats[c.id] || []).slice(-6).map(toApiMsg);
     var gMessages = [
       { role: 'system', content: buildSystem(c) },
       { role: 'system', content: '【立即生效】微信线上打字聊天：只输出口语短句，最多2句，禁止括号动作/心理描写，禁止旁白。' }
@@ -13499,9 +13512,13 @@ if (edModule === 'role') {
 
     html += '<div class="field"><label>头像（点击选择）</label><div class="avapick" style="--ava:' + (c.avatar ? 'url(\'' + c.avatar + '\')' : 'none') + '" onclick="pickAvatar()">' + (c.avatar ? '' : '点击上传') + '</div></div>';
 
-    // ========== 新增：聊天模型下拉选择 ==========
-    var modelList = DB.settings.availableModels || [];
-    var currentModel = c.model || '';
+// ========== 新增：聊天模型下拉选择 ==========
+var modelList = (DB.settings.availableModels || []).slice();
+var currentModel = c.model || '';
+// 🛡️ 核心修复：如果当前角色已经绑定了模型，但临时不在可用列表里，强行把它塞到第一位，防止被重置为全局
+if (currentModel && modelList.indexOf(currentModel) === -1) {
+    modelList.unshift(currentModel);
+}
     var modelOpts = '';
     if (modelList.length === 0) {
         modelOpts = '<option value="">⚠️ 请先去设置页拉取模型</option>';
@@ -22477,6 +22494,7 @@ function exportCharacter(id) {
       signature: c.signature || '',           // 个性签名
       lineColor: c.lineColor || '',           // 台词颜色
       sampleLines: c.sampleLines || '',       // 事例台词
+	  model: c.model || '', // 导出时保留角色独立模型
 
       // 世界观与背景
       worldType: c.worldType || '',
@@ -22574,10 +22592,10 @@ function importCharacter(){
           }, {icon:'📥', title:'覆盖确认'});
           return;
         }
-        // 🌌 入境盖章：新导入的角色如果没带 worldId，自动落户到当前时空
-        if (!newChar.worldId && DB.desktop && DB.desktop._activeWorld) {
-          newChar.worldId = DB.desktop._activeWorld;
-        }
+// 🌌 入境盖章：新导入的角色如果没带 worldId，自动落户到当前时空
+if (!c.worldId && DB.desktop && DB.desktop._activeWorld) {
+    c.worldId = DB.desktop._activeWorld;
+}
         if (!newChar.status) newChar.status = {好感度:50, 信任度:50, 紧张感:0, 当前关系:'初次见面'};
         if (!newChar.chapters) newChar.chapters = [];
         newChar.inChatList = true;
@@ -22955,15 +22973,29 @@ function idbLoadDB(){
   });
 }
 
-// 存图：传入 b64 和可选的 roleId（图片属于哪个角色），返回图片 id
 async function saveImage(b64, roleId){
   const db = await _openImgDB();
   const id = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+
+  // 稳妥计算这张图应该属于哪个世界：
+  // 优先看角色属于哪个世界 -> 其次看当前手机处于哪个世界 -> 保底第一个世界
+  var curWorld = DB.desktop && DB.desktop._activeWorld;
+  var firstWorld = (DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : '_default';
+  var targetWorld = curWorld || firstWorld;
+  
+  if (roleId) {
+    var c = getC(roleId);
+    if (c && c.worldId) {
+      targetWorld = c.worldId;
+    }
+  }
+
   const record = { 
     b64: b64, 
     createdAt: Date.now(), 
     fav: false,
-    roleId: roleId || null   // 新增字段：关联角色ID
+    roleId: roleId || null,
+    worldId: targetWorld // 准确盖戳
   };
   return new Promise(function(resolve, reject){
     const tx = db.transaction('imgs','readwrite');
@@ -23427,6 +23459,26 @@ function delPhoto(id) {
       });
   }, {icon:'🗑️', title:'删除图片'});
 }
+// 判定照片是否属于当前世界观
+function isImageInCurrentWorld(it, curWorld, firstWorld) {
+  // 1. 如果照片自己盖了世界戳（未来新存的照片）
+  if (it.worldId) {
+    return it.worldId === curWorld;
+  }
+
+  // 2. 如果照片只记了角色（历史老照片）
+  if (it.roleId) {
+    var c = getC(it.roleId);
+    if (c) {
+      // 哪怕是AI酱，老照片也看她当时被赋予的真实所属，没有所属就归属第一世界
+      var charWorld = c.worldId || firstWorld;
+      return charWorld === curWorld;
+    }
+  }
+
+  // 3. 既无世界又无角色的孤儿照片，保底给第一世界，防止在主世界看不到
+  return curWorld === firstWorld;
+}
 function renderAlbum() {
   showChrome(true, false);
   statusbar.classList.add('dark');
@@ -23701,6 +23753,15 @@ function renderAlbum() {
 
   // ---- 渲染内容 ----
   listImages({favOnly: favOnly}).then(function(items) {
+
+    // 🌌 过滤：严格只看当前世界观下的相册照片
+    var curWorld = DB.desktop && DB.desktop._activeWorld;
+    var firstWorld = (DB.worlds && DB.worlds[0]) ? DB.worlds[0].id : null;
+
+    items = items.filter(function(it) {
+      return isImageInCurrentWorld(it, curWorld, firstWorld);
+    });
+  
     var total = items.length;
     var favCount = items.filter(function(it) { return it.fav; }).length;
 
@@ -25642,6 +25703,11 @@ window.setChatTitle = function(c, typing) {
     var nameEl = document.getElementById('letterChatName');
     if (nameEl) {
       nameEl.innerHTML = esc(c.nick || c.name) + (typing ? ' <span style="font-size:12px;font-weight:normal;color:var(--theme);">正在输入…</span>' : '');
+    }
+    // 补上心情状态文字更新
+    var statusEl = document.getElementById('letterChatStatus');
+    if (statusEl) {
+      statusEl.textContent = pickStatus(c);
     }
   }
 };
