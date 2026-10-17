@@ -3380,7 +3380,7 @@ body.wx-theme-letter #chatBottom{
   -webkit-backdrop-filter:blur(var(--bb-blur)) saturate(160%) !important;
   border-top:1px solid color-mix(in srgb,var(--card) var(--glass-edge),transparent) !important;
   border-radius:0 !important;box-shadow:none !important;
-  position:relative !important;z-index:20 !important;
+  position:absolute !important;left:0 !important;right:0 !important;bottom:0 !important;z-index:20 !important;
   flex-shrink:0 !important;overflow:visible !important;
 }
 body #chatBottom::before{
@@ -3703,6 +3703,100 @@ body.in-moments #topbar {
 body.in-moments #content {
   background: transparent !important;
 }
+/* ===== 【新增】聊天页毛玻璃透气泡 ===== */
+
+/* 1. 消息区底部垫空白，让气泡能滚到底栏后面 */
+body.in-chat #content{
+  padding-bottom: var(--chat-bottom-h, 120px) !important;
+}
+
+/* 2. 顶栏：半透明 + 毛玻璃（提高权重，覆盖所有主题） */
+body.in-chat #topbar,
+body.in-chat #topbar.wx-topbar,
+body.in-chat.wx-theme-card #topbar,
+body.in-chat.wx-theme-card #topbar.wx-topbar,
+html body.in-chat.wx-theme-card #topbar.wx-topbar{
+  background: color-mix(in srgb, var(--nav) 40%, transparent) !important;
+backdrop-filter: blur(10px) saturate(150%) !important;
+-webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 20%, transparent) !important;
+}
+
+/* 顶栏向上延伸那块伪元素，别盖住效果 */
+body.in-chat #topbar::before{
+  background: inherit !important;
+  backdrop-filter: inherit !important;
+  -webkit-backdrop-filter: inherit !important;
+}
+
+/* 3-A. 底栏本体：半透明毛玻璃 */
+body.in-chat #chatBottom,
+html body.in-chat #chatBottom,
+html body.in-chat.wx-theme-card #chatBottom{
+  background: color-mix(in srgb, var(--card) 30%, transparent) !important;
+  backdrop-filter: blur(10px) saturate(150%) !important;
+
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border-top: 1px solid color-mix(in srgb, var(--line) 15%, transparent) !important;
+}
+
+/* 3-B. 输入框：压掉那块白板 + 去掉内阴影 */
+html body.in-chat #chatBottom .input-wrap,
+html body.in-chat.wx-theme-card #chatBottom .input-wrap{
+  background: color-mix(in srgb, var(--card) 32%, transparent) !important;
+  backdrop-filter: blur(10px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+  border: 1px solid color-mix(in srgb, var(--card) 40%, transparent) !important;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06) !important;
+}
+
+/* 3-C. 输入框聚焦时也别变实 */
+html body.in-chat #chatBottom .input-wrap:focus-within{
+  background: color-mix(in srgb, var(--card) 42%, transparent) !important;
+  box-shadow:
+    0 1px 8px rgba(0,0,0,0.08),
+    0 0 0 3px color-mix(in srgb, var(--theme) 12%, transparent) !important;
+}
+
+/* 3-D. 底栏上的小按钮也透一点 */
+html body.in-chat #chatBottom .bubble-btn{
+  background: color-mix(in srgb, var(--card) 35%, transparent) !important;
+}
+
+
+/* 4. 信笺主题不参与（它有自己一套，后面单独处理） */
+body.wx-theme-letter.in-chat #content{
+  padding-bottom: 0 !important;
+}
+body.wx-theme-letter.in-chat #chatBottom{
+  position: relative !important;
+  left: auto !important; right: auto !important; bottom: auto !important;
+}
+/* 5. 顶栏浮空（最高权重兜底版） */
+html body.in-chat #topbar,
+html body.in-chat #topbar.wx-topbar,
+html body.in-chat.wx-theme-card #topbar,
+html body.in-chat.wx-theme-card #topbar.wx-topbar,
+html body.in-chat.wx-theme-card #topbar.wx-topbar:not(#x):not(#y){
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: var(--topbar-top, 44px) !important;
+  bottom: auto !important;
+  z-index: 20 !important;
+  background: color-mix(in srgb, var(--nav) 40%, transparent) !important;
+backdrop-filter: blur(10px) saturate(150%) !important;
+-webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 18%, transparent) !important;
+}
+
+/* 6. 消息区顶部垫空白 */
+html body.in-chat #content{
+  padding-top: var(--topbar-h, 100px) !important;
+}
+
+
+/* ===== 【新增】结束 ===== */
 
 </style>
 </head>
@@ -3897,7 +3991,7 @@ body.in-moments #content {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261013_1';
+const APP_VER = 'v20261017_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -11183,6 +11277,21 @@ function setChatTitle(c, typing){
     '<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + line1 + '</div>' +
     (stat ? '<div style="font-size:11px;font-weight:400;color:var(--sub);margin-top:3px;">' + stat + '</div>' : '');
 }
+/* 【新增】离开聊天页时清掉标记 */
+function leaveChatPage(){
+  document.body.classList.remove('in-chat');
+  document.documentElement.style.removeProperty('--chat-bottom-h');
+  document.documentElement.style.removeProperty('--topbar-h');
+
+  // 清掉顶栏的内联样式，还原成普通布局
+  var tb = document.getElementById('topbar');
+  if (tb) {
+    ['position','left','right','top','bottom','z-index'].forEach(function(p){
+      tb.style.removeProperty(p);
+    });
+  }
+}
+
 
 function renderChats(){
   flushBlockEvents();
@@ -18217,6 +18326,41 @@ content.style.background = 'transparent';
   }
   
   phone.appendChild(bar);
+
+  /* ===== 【新增】聊天页毛玻璃：打标记 + 测底栏高度 ===== */
+  document.body.classList.add('in-chat');
+
+  function syncChatBottomH(){
+    var h = bar.offsetHeight || 120;
+    document.documentElement.style.setProperty('--chat-bottom-h', h + 'px');
+
+    // 顺带测顶栏：高度 + 它应该待的位置（状态栏下面）
+    var tb = document.getElementById('topbar');
+    var sb = document.getElementById('statusbar');
+    if (tb) {
+      var sbH = sb ? sb.offsetHeight : 44;
+      var tbH = tb.offsetHeight || 56;
+
+      // 直接写内联样式，权重最高，谁也压不住
+      tb.style.setProperty('position', 'absolute', 'important');
+      tb.style.setProperty('left', '0', 'important');
+      tb.style.setProperty('right', '0', 'important');
+      tb.style.setProperty('top', sbH + 'px', 'important');
+      tb.style.setProperty('bottom', 'auto', 'important');
+      tb.style.setProperty('z-index', '20', 'important');
+
+      document.documentElement.style.setProperty('--topbar-h', (sbH + tbH) + 'px');
+    }
+
+  }
+  requestAnimationFrame(syncChatBottomH);
+
+
+  if (window.ResizeObserver) {
+    new ResizeObserver(syncChatBottomH).observe(bar);
+  }
+  /* ===== 【新增】结束 ===== */
+
 
   // ===== 11. 滑动辅助 =====
   attachSwipe();
