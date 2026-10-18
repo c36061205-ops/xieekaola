@@ -1055,17 +1055,109 @@ textarea {
 }
 
 /* ===== 设置页 · 表情卡片网格 ===== */
-.stgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start;}
-.st-card{position:relative;box-sizing:border-box;background:var(--card);border:2px solid transparent;border-radius:14px;padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.stgrid{
+  display:grid;
+  /* minmax(0,1fr) 是关键：允许列被压缩，长名字不会顶宽整列 */
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  /* 行高固定为内容自动，但配合下面 st-card 的固定高度，实际每行一样高 */
+  grid-auto-rows:auto;
+  gap:12px;
+  /* 去掉 align-items:start，改成 stretch（默认值），让同行卡片等高 */
+  align-items:stretch;
+}
+
+.st-card,
+.stgrid .st-add{
+  position:relative;
+  box-sizing:border-box;
+  border:2px solid transparent;
+  border-radius:14px;
+  padding:10px 8px 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  /* 内容区不允许被内部元素撑开 */
+  min-width:0;
+  overflow:hidden;
+}
+
+.st-card{
+  background:var(--card);
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
+}
+
 .st-card:active{transform:scale(.96);}
-.st-card img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:8px;background:var(--bg);}
-.st-card .nm{font-size:11px;color:var(--sub);margin-top:6px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.st-card .del{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
+
+/* 图片区：严格正方形，固定比例，不受原图尺寸影响 */
+.st-card img,
+.stgrid .st-add .add-inner{
+  width:100%;
+  aspect-ratio:1 / 1;
+  /* flex 容器里 aspect-ratio 有时会被压扁，加这行兜底 */
+  flex:0 0 auto;
+  border-radius:8px;
+}
+
+.st-card img{
+  object-fit:contain;
+  background:var(--bg);
+  display:block;
+}
+
+/* 名字区：固定一行高度，超出省略号 */
+.st-card .nm,
+.stgrid .st-add .t{
+  font-size:11px;
+  color:var(--sub);
+  margin-top:6px;
+  width:100%;
+  min-width:0;
+  /* 固定高度 = 行高，保证永远只占一行的位置 */
+  height:16px;
+  line-height:16px;
+  flex:0 0 auto;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.st-card .del{
+  position:absolute;
+  top:6px;right:6px;
+  width:20px;height:20px;
+  border-radius:50%;
+  background:rgba(0,0,0,.35);
+  color:#fff;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  z-index:2;
+}
 
 /* ===== 添加占位卡片（设置页 + 聊天页 共用）===== */
-/* 外层跟表情卡片同结构，边框透明用来对齐；虚线只加在里面的正方形上 */
-.st-add{box-sizing:border-box;background:transparent;border:2px solid transparent;border-radius:14px;padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;color:var(--sub);cursor:pointer;}
-.st-add .add-inner{width:100%;aspect-ratio:1;box-sizing:border-box;border:2px dashed #c9ccd1;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.st-add{
+  box-sizing:border-box;
+  background:transparent;
+  border:2px solid transparent;
+  border-radius:14px;
+  padding:10px 8px 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  color:var(--sub);
+  cursor:pointer;
+  min-width:0;
+}
+.st-add .add-inner{
+  width:100%;
+  aspect-ratio:1 / 1;
+  box-sizing:border-box;
+  border:2px dashed #c9ccd1;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+}
 .st-add:active{color:#07c160;}
 .st-add:active .add-inner{border-color:#07c160;}
 .st-add .plus{font-size:30px;line-height:1;font-weight:300;}
@@ -1073,14 +1165,73 @@ textarea {
 
 /* ===== 聊天页 · 表情选择窗口 ===== */
 .picker-head{padding:2px 2px 10px;font-weight:600;font-size:15px;color:var(--text);}
-.picker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;height:220px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;align-items:start;}
-.picker-grid .p-st{box-sizing:border-box;border:2px solid transparent;display:flex;flex-direction:column;align-items:center;cursor:pointer;}
-.picker-grid .p-st img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:8px;background:var(--bg);}
-.picker-grid .p-st .nm{font-size:10px;color:var(--sub);margin-top:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.picker-grid .st-add{padding:0;}
-.picker-grid .st-add .add-inner{border-radius:8px;}
+
+.picker-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  /* 关键：行高不再自动，由内容自己决定，且不参与拉伸分配 */
+  grid-auto-rows:min-content;
+  gap:12px;
+  height:220px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  /* 去掉 align-items:stretch 和 align-content:start，用默认值 */
+}
+
+.picker-grid .p-st{
+  box-sizing:border-box;
+  border:2px solid transparent;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  cursor:pointer;
+  min-width:0;
+}
+
+.picker-grid .p-st img{
+  width:100%;
+  /* 用 padding-top 撑高度的老办法更稳，但这里直接给 aspect-ratio + height:auto */
+  aspect-ratio:1 / 1;
+  height:auto;
+  object-fit:contain;
+  border-radius:8px;
+  background:var(--bg);
+  display:block;
+}
+
+.picker-grid .p-st .nm{
+  font-size:10px;
+  color:var(--sub);
+  margin-top:4px;
+  width:100%;
+  min-width:0;
+  line-height:14px;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.picker-grid .st-add{padding:0;min-width:0;}
+.picker-grid .st-add .add-inner{
+  width:100%;
+  aspect-ratio:1 / 1;
+  height:auto;
+  border-radius:8px;
+}
 .picker-grid .st-add .plus{font-size:26px;}
-.picker-grid .st-add .t{font-size:10px;margin-top:4px;}
+.picker-grid .st-add .t{
+  font-size:10px;
+  margin-top:4px;
+  line-height:14px;
+  width:100%;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
 /* 聊天表情弹窗：让窗口撑高、网格填满剩余空间 */
 .sticker-modal .modal-box{
   height:80%;
@@ -1088,9 +1239,9 @@ textarea {
   flex-direction:column;
 }
 .sticker-modal .picker-grid{
-  height:auto;      /* 覆盖原来的固定 220px */
-  flex:1;           /* 吃掉标题和取消按钮之外的全部空间 */
-  min-height:0;     /* 保证 flex 内部滚动正常 */
+  height:auto;
+  flex:1;
+  min-height:0;
 }
 
 :root {
@@ -3898,7 +4049,7 @@ body.in-moments #content {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261017_2';
+const APP_VER = 'v20261018_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -13126,7 +13277,7 @@ if(tab==='sticker'){
     tbTitle.textContent = '表情包仓库';
     content.innerHTML = `
       <div class="hint" style="padding:12px 16px 4px;">AI 靠"名字"识别并使用表情</div>
-      <div style="padding:10px 14px 20px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;">
+      <div style="padding:10px 14px 24px;">
         <div class="stgrid">
 <div class="st-add" onclick="addSticker()">
   <div class="add-inner"><span class="plus">＋</span></div>
@@ -14432,10 +14583,12 @@ function openMomentActionSheet() {
 function momentShareCard(m){
   var s = m.share;
   if(!s) return '';
-  var isMusic = s.shareType === 'music';
-  var icon = isMusic ? '🎵' : '🔗';
-  var t = esc(s.title || (isMusic ? '未知音乐' : '网页链接'));
-  var sub = esc(s.artist || s.source || (isMusic ? '网易云音乐' : '分享内容'));
+  var ICONS = { music:'🎵', link:'📄', fugue:'💭', video:'▶️', clip:'🎬', image:'🖼️' };
+  var NAMES = { music:'未知音乐', link:'网页链接', fugue:'一条帖子', video:'一个视频', clip:'随手拍', image:'一张图片' };
+  var st = s.shareType || 'link';
+  var icon = ICONS[st] || '🔗';
+  var t = esc(s.title || s.desc || NAMES[st] || '分享内容');
+  var sub = esc(s.artist || s.source || s.author || s.desc || '分享内容');
   
   return `<div onclick="event.stopPropagation();if(typeof openShareModal==='function')openShareModal('${m.id}')" style="background:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.7);border-radius:12px;padding:8px 10px;display:flex;align-items:center;gap:10px;margin:8px 0;cursor:pointer">
     <div style="width:36px;height:36px;border-radius:8px;background:var(--m-feedback-bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${icon}</div>
@@ -14823,139 +14976,6 @@ function maybeAutoPost() {
 
   triggerMomentDraw(true);
 }
-// 👥 批量生成：角色 + 贴合世界观的路人 + 顺带生成点赞/评论（1次 API 搞定！）
-async function postMomentBatch(mainChar, pool, silent) {
-  var model = DB.settings.chatModel || DB.settings.auxModel;
-  if (!model) return;
-
-  try {
-    var curWorldDesc = '现实生活';
-    var curWorld = (DB.worlds || []).find(function(w) { return w.id === (DB.desktop && DB.desktop._activeWorld); });
-    if (curWorld) curWorldDesc = (curWorld.name || '') + '：' + (curWorld.desc || '');
-
-    var userDesc = (DB.me && DB.me.desc) ? ('用户身份背景：' + DB.me.desc) : '用户身份：普通人';
-    var charSys = '';
-    try { charSys = buildSystem(mainChar); } catch(e) { charSys = '角色「' + (mainChar.nick || mainChar.name) + '」。'; }
-
-    var otherNames = pool.map(function(x){ return x.nick || x.name; }).slice(0, 3).join('、');
-    var passerbyCount = 2 + Math.floor(Math.random() * 2);
-
-    var prompt = '【世界观】\n' + curWorldDesc + '\n' + userDesc + '\n\n' +
-      '【当前角色人设】\n' + charSys + '\n' +
-      '【其他可用角色名】\n' + (otherNames || '暂无') + '\n\n' +
-      '【任务】\n请为当前社交圈一次性生成一组鲜活真实的朋友圈动态，包含：\n' +
-      '1. 角色「' + (mainChar.nick || mainChar.name) + '」本人的 1 条动态；\n' +
-      '2. ' + passerbyCount + ' 个不同身份「路人」的动态。\n\n' +
-      '【路人网名与身份铁律（严禁AI假味）】\n' +
-      '- 严禁把职业头衔直接贴在昵称后（禁止类似"老K_特调血袋"、"桥洞老灰(不接单)"这类NPC名字）！\n' +
-      '- 昵称要像真人的社交网名：如"K."、"阿灰"、"小陈"、"Felix"、"无语凝噎"等自然名字。\n' +
-      '- 路人身份必须符合世界观与用户背景，但内容要生活化：可以是生活吐槽、碎碎念、或转发音乐/文章。\n\n' +
-      '【发圈风格铁律】\n' +
-      '- 真人发圈很随性、短，甚至没头没尾，禁止写长作文，严禁阳光明媚/天气很好等矫情套话。\n' +
-      '- 每条动态可顺便附带 0~2 个角色或路人的即时点赞与简短评论，像真实的社交互动！\n\n' +
-      '【必须严格输出为如下 JSON 数组，严禁 markdown 标记】：\n' +
-      '[\n' +
-      '  {\n' +
-      '    "isMainChar": true,\n' +
-      '    "text": "角色动态正文",\n' +
-      '    "share": null,\n' +
-      '    "instantLikes": ["赞同者的名字"],\n' +
-      '    "instantComments": [{"name": "评论者名字", "text": "简短调侃回复"}]\n' +
-      '  },\n' +
-      '  {\n' +
-      '    "isMainChar": false,\n' +
-      '    "name": "自然的路人昵称",\n' +
-      '    "emoji": "代表其身份的Emoji(如🍸/📦/🗡️)",\n' +
-      '    "text": "路人生活动态正文",\n' +
-      '    "share": null,\n' +
-      '    "instantLikes": [],\n' +
-      '    "instantComments": []\n' +
-      '  }\n' +
-      ']';
-
-    var raw = await callAI([{ role: 'user', content: prompt }], model);
-    raw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
-    var match = raw.match(/\[[\s\S]*\]/);
-    if (!match) {
-      await aiPostMoment(mainChar.id, silent);
-      return;
-    }
-
-    var list = JSON.parse(match[0]);
-    var now = Date.now();
-    var worldId = (DB.desktop && DB.desktop._activeWorld) || null;
-
-    list.reverse().forEach(function(item, idx) {
-      var itemTime = now - (list.length - 1 - idx) * (60000 + Math.floor(Math.random() * 120000));
-      var cleanText = cleanMomentText(item.text);
-
-      // 装配自带的点赞与评论
-      var likesArr = [];
-      if (item.instantLikes && Array.isArray(item.instantLikes)) {
-        item.instantLikes.forEach(function(nm){
-          var found = pool.find(function(p){ return (p.nick || p.name) === nm; });
-          likesArr.push(found ? found.id : nm);
-        });
-      }
-
-      var commentsArr = [];
-      if (item.instantComments && Array.isArray(item.instantComments)) {
-        item.instantComments.forEach(function(cm){
-          var found = pool.find(function(p){ return (p.nick || p.name) === cm.name; });
-          commentsArr.push({
-            by: found ? found.id : 'passerby',
-            name: cm.name,
-            text: cm.text
-          });
-        });
-      }
-
-      if (item.isMainChar) {
-        var mObj = {
-          id: 'p' + (itemTime + idx),
-          author: mainChar.id,
-          worldId: worldId,
-          text: cleanText,
-          images: [],
-          share: item.share || null,
-          time: itemTime,
-          likes: likesArr,
-          comments: commentsArr,
-          _settled: true
-        };
-        DB.moments.unshift(mObj);
-        if (typeof triggerC2CInteractions === 'function') triggerC2CInteractions(mObj);
-      } else {
-        DB.moments.unshift({
-          id: 'p' + (itemTime + idx),
-          author: 'passerby',
-          passerby: {
-            name: item.name || '路人',
-            emoji: item.emoji || '💬'
-          },
-          worldId: worldId,
-          text: cleanText,
-          images: [],
-          share: item.share || null,
-          time: itemTime,
-          likes: likesArr,
-          comments: commentsArr,
-          _settled: true
-        });
-      }
-    });
-
-    DB.momentUnread = (DB.momentUnread || 0) + list.length;
-    refreshMomentBadge();
-    save();
-
-    if (view.type === 'moments') renderMoments();
-    if (!silent) alert('朋友圈已刷新，生成了一批新动态！');
-  } catch (e) {
-    console.warn('批量发圈异常，降级为常规发圈：', e);
-    await aiPostMoment(mainChar.id, silent);
-  }
-}
 async function aiPostMoment(cid, silent) {
   var c = getC(cid);
   if (!c) return;
@@ -14974,19 +14994,36 @@ var model = DB.settings.chatModel || DB.settings.auxModel;
       sys = '你扮演「' + (c.nick || c.name) + '」。';
     }
 
-var allowShare = Math.random() < 0.2; // 20% 概率允许发分享卡片
+var allowShare = Math.random() < 0.2; // 20% 概率「允许」（不是强制）带分享卡片
 
 // 随机抽一种"发圈形式"，让朋友圈有真人的随意感、经常是半条甚至没内容
+// 注意：这里只描述"人处在什么状态下发圈"，不预设要不要带分享
 var forms = [
   '【形式：一句话】只发一句话，短，像随口一说。可以是吐槽、一个念头、一句感慨，别超过25字。',
   '【形式：几个字】只发几个字或一个词，甚至一个标点。比如"困了""无语""……""行吧"。不用解释，越少越好。',
   '【形式：半夜没头没尾】此刻突然想发点什么，一句没头没尾、不解释的话，带点情绪但别点破。',
   '【形式：吐槽一件小事】就今天遇到的一件具体小事发一句，别复述经过、别交代是谁几点在哪，只发这事让你冒出来的那一下反应。',
-  '【形式：发张照片】此刻拍到的一个画面。正文留空或只配一两个字，别解释照片。用上面人设里说明的 <share type="image"> 标签发（标签单独占一行、属性用双引号），别加任何前缀文字。',
-  '【形式：转首歌】你此刻想分享一首歌，别写歌评。正文留空或只一个字/一个标点。用上面人设里说明的 <share type="music"> 标签发（标签单独占一行、属性用双引号），别加"分享歌曲："这类前缀文字。',
-  '【形式：转篇文章】你想转一篇符合你身份或心情的文章，别写读后感。正文留空或只一两个字。用上面人设里说明的 <share type="link"> 标签发（标签单独占一行、属性用双引号），别加"分享文章："这类前缀文字。'
+  '【形式：此刻在做的事】正在做某件具体的事（吃/走/等/收拾/听），发一句跟它有关的话，别写成流水账。',
+  '【形式：一个念头】脑子里突然冒出来一个想法或疑问，发出来，不求回应，也别自问自答。',
+  '【形式：情绪残渣】某件事过去了，留下一点说不清的情绪，用一句不完整的话带过。'
 ];
 var pickForm = forms[Math.floor(Math.random() * forms.length)];
+
+// 只有抽中 allowShare 时，才追加"可选分享"段落；且必须有动机
+var shareRule = '';
+if (allowShare) {
+  shareRule = '\n\n【可选：附带分享卡片】\n'
+    + '你这次【可以】在朋友圈里附带一个分享卡片，但【只在确实有理由时才发】。必须满足下面任意一条：\n'
+    + '  (1) 正文里提到了这个东西——比如正文说"这歌单听了一下午"，就配那首歌；正文说"看到篇说得挺对的"，就配那篇文章。\n'
+    + '  (2) 分享的东西是正文情绪的延伸——比如正文是"累"，配一首丧气的歌；正文在想某件事，配一篇相关的帖子。\n'
+    + '【硬性规定】\n'
+    + '  - 想不出有关联的，就【不要发】，只发纯文字。宁可不发，绝不硬凑。\n'
+    + '  - 发分享时正文【必须有内容】，不能留空、不能只有一个标点——没有正文就没有动机。\n'
+    + '  - 正文里【不要】写"分享一首歌""推荐这篇"这种说明文字，卡片自己会显示。\n'
+    + '  - 最多只发一个分享卡片。\n'
+    + '  - 格式严格用上面人设里教过的 <share ...> 标签，单独占一行，放在正文之后。\n'
+    + '  - 类型从 music / link / fugue / video / clip 里选，不要用 image（照片走配图逻辑，不用标签）。';
+}
 
 var p = sys + '\n\n【任务】以「' + (c.nick || c.name) + '」本人的身份，用你自己的性格，随手发一条微信朋友圈。真人发圈大多很随意、很短、经常什么都不解释——不是写作文。\n\n' +
   pickForm + '\n\n' +
@@ -14995,27 +15032,27 @@ var p = sys + '\n\n【任务】以「' + (c.nick || c.name) + '」本人的身�
   '- 可以提到别人或跟某人有关的事，但别指名道姓、别复述来龙去脉，只发这件事给你的那一下感受（比如收到喜欢的礼物，发"太懂我了吧"，而不是"某人送了我喜欢的东西"）。\n' +
   '- 宁可短、宁可残缺、宁可什么都不多说，也不要凑字数、不要写长、不要抒情。\n' +
   '- 禁止天气/阳光/风/暖洋洋这类文艺矫情句。\n' +
-  '- 若按形式要发分享卡片，就严格用上面人设里教过的 <share ...> 标签格式，标签单独占一行，前面不要加任何说明文字。\n' +
-  '- 只输出朋友圈正文本身，不要引号、不要解释、不要旁白，禁止 <state> 标签，正文不要换行分成好几条。';
+  '- 默认【只发纯文字】，不要带任何分享卡片，除非下面明确允许。\n' +
+  '- 只输出朋友圈正文本身，不要引号、不要解释、不要旁白，禁止 <state> 标签，正文不要换行分成好几条。' +
+  shareRule;
     var txt = await callAI([{ role: 'user', content: p }], model);
-	// 先从原文解析分享卡片（必须在 cleanMomentText 之前，否则标记会被清掉）
-var share = null;
-if (txt) {
-  var mMusic = txt.match(/【分享·音乐\|([^】]*)】/);
-  var mLink  = txt.match(/【分享·文章\|([^】]*)】/);
-  if (mMusic) {
-    var f = mMusic[1].split('|');
-    share = { shareType:'music', title:(f[0]||'').trim(), artist:(f[1]||'').trim(), source:(f[2]||'网易云音乐').trim(), lyrics:(f[3]||'').trim() };
-    txt = txt.replace(mMusic[0], '');
-  } else if (mLink) {
-    var g = mLink[1].split('|');
-    share = { shareType:'link', title:(g[0]||'').trim(), source:(g[1]||'').trim(), content:(g[2]||'').trim() };
-    txt = txt.replace(mLink[0], '');
-  }
-}
+	// 先从原文解析分享卡片（必须在 cleanMomentText 之前，否则标签会被清掉）
+	var share = null;
+	if (txt) {
+	  var _sm = txt.match(/<share\b([^>]*?)\/?>(?:[\s\S]*?<\/share>)?/i);
+	  if (_sm) {
+	    share = parseShareAttrs(_sm[1]);
+	    txt = txt.replace(_sm[0], ' ');
+	  }
+	}
 
     txt = cleanMomentText(txt);
 	if (txt) txt = txt.replace(/\s*\n+\s*/g, ' ').trim();
+
+	// 后置校验：没有正文的分享必然是无动机硬凑的，丢掉
+	if (share && !txt) share = null;
+	// 没抽中 allowShare 却硬塞了分享，也丢掉
+	if (share && !allowShare) share = null;
 
 if (!txt && !share) {
       if (!silent) alert('生成为空，再试一次～');
@@ -15135,11 +15172,13 @@ var picId = await generateImage(imgPrompt, DB.settings.imageModel, c.id);
     save();
 
     if (view.type === 'moments') renderMoments();
-    if (!silent) alert((c.nick || c.name) + ' 发了一条朋友圈～');
+    // 已移除「XX发了一条朋友圈」的 alert，改为静默发布，只靠红点提示
   } catch (e) {
+    console.log('朋友圈生成失败：', e.message);
     if (!silent) alert('生成失败：' + e.message);
   }
 }
+
 // 👥 批量生成：角色 + 贴合世界观的路人 + 顺带生成点赞/评论（1次 API 搞定！）
 async function aiPostMomentWithPassersby(mainChar, pool, silent) {
   var model = DB.settings.chatModel || DB.settings.auxModel;
@@ -15180,6 +15219,13 @@ async function aiPostMomentWithPassersby(mainChar, pool, silent) {
       '【发圈风格铁律】\n' +
       '- 真人发圈很随性、短，甚至没头没尾，禁止写长作文，严禁阳光明媚/天气很好等矫情套话。\n' +
       '- 每条动态可顺便附带 0~2 个角色或路人的即时点赞与简短评论，像真实的社交互动！\n\n' +
+      '【关于 share 字段】绝大多数动态的 share 都应该是 null。\n' +
+      '只有当正文里【明确提到】了某首歌/某篇文章/某个帖子，或者分享的东西是正文情绪的直接延伸时，才填写 share。\n' +
+      '想不出有关联的就填 null。宁可全是 null，也不要硬凑。一批动态里最多 1 条带 share。\n' +
+      'share 不为 null 时，必须是如下结构之一（字段名不许改）：\n' +
+      '  音乐：{"shareType":"music","title":"歌名","artist":"歌手","album":"专辑","source":"网易云音乐","lyrics":"3到4行歌词，用/分隔"}\n' +
+      '  文章：{"shareType":"link","title":"标题","source":"平台","content":"150字完整正文"}\n' +
+      '  帖子：{"shareType":"fugue","title":"标题","author":"昵称","tags":"标签1,标签2","content":"150字心情短文"}\n\n' +
       '【必须严格输出为如下 JSON 数组，严禁 markdown 标记】：\n' +
       '[\n' +
       '  {\n' +
@@ -15215,6 +15261,9 @@ async function aiPostMomentWithPassersby(mainChar, pool, silent) {
     list.reverse().forEach(function(item, idx) {
       var itemTime = now - (list.length - 1 - idx) * (60000 + Math.floor(Math.random() * 120000));
       var cleanText = cleanMomentText(item.text);
+      // 清洗 AI 吐出来的 share：字段纠错 + 白名单过滤 + 空壳丢弃
+      var safeShare = (typeof normalizeShare === 'function') ? normalizeShare(item.share) : null;
+      if (safeShare && !cleanText) safeShare = null;  // 没正文 = 没动机，丢掉
 
       var likesArr = [];
       if (item.instantLikes && Array.isArray(item.instantLikes)) {
@@ -15243,7 +15292,7 @@ async function aiPostMomentWithPassersby(mainChar, pool, silent) {
           worldId: worldId,
           text: cleanText,
           images: [],
-          share: item.share || null,
+          share: safeShare,
           time: itemTime,
           likes: likesArr,
           comments: commentsArr,
@@ -15262,7 +15311,7 @@ async function aiPostMomentWithPassersby(mainChar, pool, silent) {
           worldId: worldId,
           text: cleanText,
           images: [],
-          share: item.share || null,
+          share: safeShare,
           time: itemTime,
           likes: likesArr,
           comments: commentsArr,
@@ -15292,6 +15341,79 @@ function cleanMomentText(t){
     .replace(/```/g,'')
     .trim();
 }
+/* ── 从 <share ...> 的属性串里提取全部字段 ── */
+function parseShareAttrs(attrs){
+  if(!attrs) return null;
+  // 同时兼容英文引号 "" '' 和中文引号 「」
+  function pick(name){
+    var re = new RegExp(name + '\\s*=\\s*(?:"([^"]*)"|\'([^\']*)\'|「([^」]*)」)', 'i');
+    var m = attrs.match(re);
+    if(!m) return '';
+    return (m[1] || m[2] || m[3] || '').trim();
+  }
+  var obj = {
+    shareType: (pick('type') || 'link').toLowerCase(),
+    title:     pick('title'),
+    desc:      pick('desc'),
+    source:    pick('source'),
+    duration:  pick('duration'),
+    artist:    pick('artist'),
+    album:     pick('album'),
+    lyrics:    pick('lyrics'),
+    author:    pick('author'),
+    tags:      pick('tags'),
+    content:   pick('content')
+  };
+  return normalizeShare(obj);
+}
+
+/* ── 规范化 + 校验分享对象，不合格直接返回 null ── */
+function normalizeShare(raw){
+  if(!raw || typeof raw !== 'object') return null;
+  var ALLOW = ['image','video','clip','music','link','fugue'];
+
+  // 字段名纠错：AI 有时会吐 type / name / text 这类别名
+  var t = (raw.shareType || raw.type || '').toString().toLowerCase().trim();
+  if(ALLOW.indexOf(t) < 0) return null;   // 类型不在白名单，整个丢弃
+
+  function s(v){ return (v == null ? '' : String(v)).trim(); }
+
+  var o = {
+    shareType: t,
+    title:    s(raw.title || raw.name),
+    desc:     s(raw.desc  || raw.description),
+    source:   s(raw.source || raw.platform),
+    duration: s(raw.duration),
+    artist:   s(raw.artist || raw.singer),
+    album:    s(raw.album),
+    lyrics:   s(raw.lyrics),
+    author:   s(raw.author),
+    tags:     s(raw.tags),
+    content:  s(raw.content || raw.text || raw.body)
+  };
+
+  // 空壳校验：连一点可显示内容都没有，就不要这个卡片
+  if(!o.title && !o.desc && !o.content && !o.lyrics) return null;
+
+  // 各类型补默认值，避免详情页出现空白区
+  if(t === 'music'){
+    if(!o.title)  o.title  = '未知音乐';
+    if(!o.source) o.source = '网易云音乐';
+  } else if(t === 'link'){
+    if(!o.title)  o.title  = '一篇文章';
+    if(!o.source) o.source = '网页';
+  } else if(t === 'fugue'){
+    if(!o.title)  o.title  = '一条帖子';
+    if(!o.author) o.author = '匿名';
+  } else if(t === 'video'){
+    if(!o.title)  o.title  = '一个视频';
+    if(!o.source) o.source = '视频';
+  } else if(t === 'image' || t === 'clip'){
+    if(!o.desc) o.desc = o.title || o.content;
+  }
+  return o;
+}
+
 // 🧹 自动清理近 7 天之前的历史朋友圈（安全保留近期数据）
 function safeCleanMoments() {
   if (!DB.moments || !DB.moments.length) return;
@@ -24023,17 +24145,33 @@ function buildShareBubble(m) {
 
 /* ── 分享弹窗 ── */
 function openShareModal(msgId) {
-var m = null;
-  var cid = view && view.id;
-  if (cid && DB.chats[cid]) {
-    m = DB.chats[cid].find(function(x){ return x.id === msgId; });
+  var m = null;
+  var inMoments = (typeof view !== 'undefined') && view && view.type === 'moments';
+
+  // 在朋友圈视图时，优先查朋友圈，避免和聊天消息 ID 撞车
+  if (inMoments && DB.moments) {
+    var _mo0 = DB.moments.find(function(x){ return x.id === msgId; });
+    if (_mo0 && _mo0.share) m = _mo0.share;
   }
-  // 新增：聊天里没找到，去朋友圈里找
+  if (!m) {
+    var cid = view && view.id;
+    if (cid && DB.chats[cid]) {
+      m = DB.chats[cid].find(function(x){ return x.id === msgId; });
+    }
+  }
   if (!m && DB.moments) {
     var _mo = DB.moments.find(function(x){ return x.id === msgId; });
     if (_mo && _mo.share) m = _mo.share;
   }
   if (!m) return;
+
+  // 兜底：历史遗留的残缺数据，补全字段；实在没内容就提示而不是弹空白
+  if (typeof normalizeShare === 'function' && m.shareType !== undefined) {
+    var _fix = normalizeShare(m);
+    if (!_fix) { alert('这条分享的内容已失效～'); return; }
+    m = Object.assign({}, m, _fix);
+  }
+
 
   /* 从当前 CSS 变量里读实时值，确保跟随主题 */
   var root = document.documentElement;
