@@ -1427,7 +1427,8 @@ function renderPick(){
       '<span class="sep">│</span>'+
       '<span class="pwr">PWR <span class="cells" id="pwrCells"></span> <b id="pwrPct">--%</b></span>'+
       '<span class="sep">│</span><span><span class="tdot"></span> LINK ONLINE</span></div>'+
-    '<div class="navrow"><span class="back" onclick="location.href=&quot;index.html&quot;">‹ EXIT</span>'+
+    '<div class="navrow"><span class="back" onclick="if(history.length>1){history.back();}else{location.href=&quot;../index.html&quot;;}">‹ EXIT</span>'+
+
       '<span>DEVICE SCANNER v2.6</span></div>'+
     '<div class="thead"><div class="kicker">// REMOTE ACCESS</div>'+
       '<h1>查看 <span>目标设备</span></h1>'+
@@ -2022,6 +2023,10 @@ function parsePrivateApp(raw){
 }
 // ==================== 彻底去类型池，完全根据上下文反差生成 ====================
 function loadPrivateApp(c, win) {
+  /* ★ 防重复生成锁 */
+  if(win._pvLoading) return;
+  win._pvLoading = true;
+
   var box = win._pv;
   
   // 1. 整理出前面所有已经生成过的 APP 信息，形成排他上下文
@@ -2086,6 +2091,8 @@ function loadPrivateApp(c, win) {
         (historyInfo ? 
           '【差异化强制要求】：\n' +
           '- 观察此前已出现的应用，本次生成的 APP 必须在【软件类型】、【核心功能】、【使用场景】、【心理动机】和【情绪氛围】上与它们彻底不同！\n' +
+          '- 特别注意：如果前面已经出过"社区类"，这次就换"养成游戏类"或"玄学占卜类"；' +
+          '如果前面已经是"可爱基调"，这次就换"心酸"或"生活气息"基调。类型和情绪都要轮换。\n' +
           '- 坚决避免模式化重复！挖掘该角色性格中尚未被揭露的另一个隐秘侧面。\n\n' 
           : 
           '【要求】：放开思路，结合该人物的身份特质与心理状态，量身推导一个最符合其特质的隐藏 App。\n\n'
@@ -2093,24 +2100,44 @@ function loadPrivateApp(c, win) {
         '【🧠 角色深度推导逻辑（在构思界面前必须进行的多维思考）】：\n' +
         '1. 【身份与环境推导】：以 TA 的职业（' + roleJob + '）与生活节奏（' + roleDaily + '），TA 平时在社交场上必须维持什么形象？TA 会积压什么压力或产生什么特殊需求？独处时 TA 需要什么软件来释放、调节或自处？\n' +
         '2. 【性格与心理映射】：结合性格（' + roleKeywords + '）与言行特征（' + roleBehavior + '），TA 真实的情感诉求是什么？TA 习惯用克制、放肆、精细、散漫还是执着的方式去记录生活？\n' +
-        '3. 【软件形态的多样性（打破单一思维，完全自由构思）】：\n' +
-        '   根据推导结果选择最合适的软件载体，形态完全自由决定，例如但不限于：\n' +
-        '   - 垂类兴趣/同好社群（特定领域的交流阵地、小圈子交流流、深度同好组）\n' +
-        '   - 私人管理/记录工具（高度个性化的清单、带有自嘲或独特命名的追踪器、专属偏好收藏）\n' +
-        '   - 纯粹的自我消遣/宣泄阵地（不为人知的马甲小号、自娱自乐的内容产出、无声解压角落）\n' +
-        '   - 具有独特功能属性的生活应用（特定用途的小工具、带有强烈个人痕迹的实用软件）\n\n' +
-        '【🚨🚨🚨 极其重要的真实性与内容规范（针对常见硬伤的重点限制） 🚨🚨🚨】\n' +
-        '1. 【软件名称必须像现实中真正能下载的 App】：\n' +
-        '   - 严禁起任何古风修仙、抽象玄幻、假大空的词语（如《慎独》《琢藏》这类毫无现代 App 质感的名字彻底禁止）；\n' +
-        '   - 名字必须符合现代软件的命名感觉，哪怕是一个记录日记或癖好的工具，也要取一个现代、真实、像应用商店里真有的名字（无论是商业软件还是小众独立开发工具）。\n' +
-        '2. 【严禁看不懂的科幻数值堆砌，必须全是大白话生活内容】：\n' +
-        '   - 你生成的是 TA 手机里安装的一个【具体的软件应用】，【绝对不是】科幻终端或监测台！严禁出现“4,812件、一级监测、躯体异常预警、偏角、PSI”等莫名其妙、不知所谓的假数据；\n' +
-        '   - 真实 APP 的灵魂在于【人类一眼就能读懂的具体文字】：真实的帖子正文、吐槽抱怨、求助提问、网友真实回复、备忘录里一段带情绪的日常原话随笔、真实的待办清单、具体商品加购等，要让人一眼看明白 TA 到底在干嘛，充满生活温度与反差窥探感。\n' +
-        '3. 【双轨叙事：个人独立性与羁绊交织】：\n' +
-        '   - TA 是一个有独立精神世界的人：APP 的核心功能与绝大部分内容必须牢牢扎根于 TA 自身的人设、生活嗜好与独立习惯，绝不能变成单一的“查看者（' + myName + '）专属跟踪器”；\n' +
-        '   - 与此同时，TA 并非与“' + myName + '”毫无瓜葛：近期经历与两人的关系状态（完全契合双方的种族与特殊关系），应当以一种符合 TA 性格的方式自然渗入软件的某些角落（例如一条未发出的草稿、某项特别的收藏、某条特定备注或浏览记录等），不刻意、不突兀，流露出真实的情感张力。\n' +
-        '4. 【语言风格深度贴合】：软件内的文字（包括但不限于自定义昵称、个性签名、帖子、笔记正文、按钮标注等），其用词习惯、标点符号、语气助词必须完全符合 TA 的说话风格（' + roleStyle + '），杜绝千人一面的通用 AI 味。\n' +
-        '5. 【内容高度写实，细节拉满】：拒绝空洞概念与口号式文字。每一条内容必须具备真实细节：具体的时间戳、真实感的标题与正文、符合情境的互动反馈或记录数据，使其宛如一张真正的手机屏幕运行截图。\n\n' +
+        '3. 【软件形态：必须是现实中真实存在的那类 App，不要凭空发明】：\n' +
+        '   先从下面这个【真实 App 原型库】里挑一个最贴合 TA 的类型，然后把它改个名字、做成 TA 的私人版本。\n' +
+        '   ★ 社区/内容类：小红书式生活笔记、豆瓣小组式话题讨论区、匿名树洞/深夜情感论坛、' +
+        '贴吧或NGA式老派论坛、微博小号、Lofter/AO3式同人站、B站收藏夹、知乎私密收藏、虎扑步行街式吐槽区。\n' +
+        '   ★ 玄学/占卜类：测测/塔罗占卜、星盘运势、MBTI与各种心理测试、求签解签、' +
+        '每日宜忌黄历、水逆提醒、恋爱配对测算。\n' +
+        '   ★ 养成/小游戏类：拓麻歌子式电子宠物、旅行青蛙式放置游戏、' +
+        '养鱼/养猫/种树类治愈小游戏、动物森友会式日常、换装/捏脸、乙女向恋爱手游、' +
+        '卡牌抽卡游戏（含欧非战绩记录）。\n' +
+        '   ★ 记录/工具类：手帐与日记、情绪打卡、习惯追踪、减肥或健身记录、' +
+        '番茄钟与专注计时、记账本、睡眠监测、生理期记录、酒单咖啡单品鉴笔记、观影观剧标记。\n' +
+        '   ★ 消费/生活类：购物车与收藏夹、咸鱼二手、代购/集卡/谷子交易、' +
+        '外卖常点清单、团购优惠券、宠物用品囤货。\n' +
+        '   ★ 其它：听歌年度报告、ASMR白噪音助眠、冥想课程、' +
+        '匿名聊天/陌生人漂流瓶、学习打卡社群、小众兴趣接龙群。\n' +
+        '   （以上只是原型参考，可以组合、可以变形，但成品必须让人一眼认出"哦这就是那种App"。' +
+        '绝对不要发明现实中不存在的奇怪软件类别。）\n\n' +
+        '【💖 本次创作的灵魂（优先级高于下方所有技术规范）】\n' +
+        '1. 【第一原则：从记忆和聊天记录里长出来】：这个 App 必须是基于' +
+        '【TA 的人设 + 最近的聊天记录 + 你们之间发生过的事】自然推导出来的，' +
+        '让人看了觉得"对，就是这个人会下载的 App"。不要做泛泛而谈的通用软件。\n' +
+        '2. 【情绪基调要有变化，不要每次都一个味】：请从下面随机选一种主基调，' +
+        '不要次次都选同一种——\n' +
+        '   · 可爱沙雕型：中二昵称、幼稚的小游戏、立了就塌的flag、自己跟自己对话；\n' +
+        '   · 反差戳破型：人前强大冷酷，私下在养电子宠物/收集毛绒玩具/认真做心理测试；\n' +
+        '   · 心酸隐秘型：匿名树洞里的深夜发言、不敢发出去的草稿、反复查看的某个页面；\n' +
+        '   · 生活气息型：购物车、记账本、常点外卖、咖啡品鉴笔记，普通但真实得可爱；\n' +
+        '   · 执着上头型：某个小众爱好深度沉迷、抽卡战绩、追星数据、考据笔记。\n' +
+        '3. 【内容要可读，不要数据墙】：严禁整屏只有数字、进度条、统计图。' +
+        '主体必须是【人类写的句子】——帖子正文、网友回复、日记原话、评论、备注、弹幕、' +
+        '测试结果的解读文案。数字只能作为点缀（比如"连续打卡 37 天"），不能当主角。\n' +
+        '4. 【细节要具体而不是宏大】：不要写"人生规划"，要写"第37次尝试早睡（失败）"；' +
+        '不要写"情感分析报告"，要写"今天他多看了我一眼（存疑）"。\n' +
+        '5. 【说明栏是整个App的笑点担当】：放一句毒舌或心疼的神吐槽，' +
+        '要么戳破TA的伪装，要么让人心头一软，绝对不要写成干巴巴的功能介绍。\n' +
+        '（重要提醒：下方的真实性规范是为了防止你写出假大空的科幻数值，' +
+        '不是要你写得严肃无趣。真实的生活本身就充满笑点和心酸，请在"像真的"的前提下尽情发挥。）\n\n' +
+        '【📌 真实性底线（防止假大空，但不影响你写得有趣）】\n' +
         '【关键界面与排版要求】：\n' +
         '1. 【界面布局因物制宜】：界面必须精致、高还原度。根据你设计的软件形态决定版面结构（例如：社区采用卡片流/讨论列表，工具采用功能面板与指标块，记录采用温润的条目清单等），避免机械套用单一格式。\n' +
         '2. 【视觉质感】：使用纯 HTML + 内联 style（合理运用圆角、细腻的卡片阴影、渐变色块、emoji 作为图标）。视觉配色要贴合该软件的功能定位与角色基调（如深色模式、清爽便签、工业极简或柔和色调），拒绝千篇一律的单一配色。\n' +
@@ -2118,13 +2145,16 @@ function loadPrivateApp(c, win) {
         '必须严格按以下格式输出，不要任何多余废话：\n' +
         '【APP】应用名称（像真实手机里存在的现代软件名）\n' +
         '【ICON】一个匹配的emoji图标\n' +
-        '【说明】一句话短标签/神吐槽（25字以内短句，禁止长篇大论剧透）\n' +
+        '【说明】一句毒舌或心疼的神吐槽（15~35字，要有梗、要戳破TA的伪装，' +
+        '可以用"……"或"（）"制造语气，禁止写成干巴巴的功能介绍）\n' +
         '【界面】\n' +
         '<你的HTML界面代码>' 
     }
   ];
 
   callAI(msgs, peekModelName()).then(function(out) {
+      win._pvLoading = false;             /* ★ 解锁 */
+
     var data = parsePrivateApp(out);
     var root = win.querySelector('#pkPrivRoot');
     if (!data) {
@@ -3205,19 +3235,28 @@ function renderMsgList(c,win){
   });
   var npcRe=root.querySelector('#pkNpcRe');
   if(npcRe) npcRe.onclick=function(){
+    if(win._npcLoading) return;                 /* ★ 正在生成就不许重复点 */
     c.peekNpcChats=null; c.peekNpcTime=0; saveDB();
     var list=root.querySelector('.msg-list');
     if(list) list.insertAdjacentHTML('beforeend','<div class="msg-load" id="pkNpcLoad">◉ 正在重新提取联系人…</div>');
     loadPeekNpc(c,win,true);   // 免费重新提取
   };
 
-  if(!c.peekMyNick)loadPeekMyNick(c,win);
-  if(!npcs.length)loadPeekNpc(c,win);
+  /* ★ 自动生成只在"窗口第一次打开"时做一次，之后重渲染不再偷偷发请求 */
+  if(!win._msgInited){
+    win._msgInited = true;
+    if(!c.peekMyNick)loadPeekMyNick(c,win);
+    if(!npcs.length)loadPeekNpc(c,win);
+  }
 
 }
 
 /* AI 现编一个爱称，只取第一个词，缓存并局部刷新 */
 function loadPeekMyNick(c,win){
+  /* ★ 防重复生成锁 */
+  if(win._nickLoading) return;
+  win._nickLoading = true;
+
   var sys='你正在扮演角色："'+(c.name||'TA')+'"。'+
     (c.pStyle?('你的说话风格：'+c.pStyle+'。'):'')+
     (c.myRelation?('你和"我"的关系：'+c.myRelation+'。'):'');
@@ -3227,6 +3266,7 @@ function loadPeekMyNick(c,win){
       '严格要求：只输出这一个爱称本身，禁止输出多个、禁止顿号逗号、禁止引号、禁止解释、禁止任何标点。'}
   ];
   callAI(msgs,peekModelName()).then(function(out){
+    win._nickLoading = false;           /* ★ 解锁 */
     var nick=(out||'').replace(/["""'「」『』\[\]（）()]/g,'').trim();
     nick=(nick.split(/[、,，\s\/\n。.!！?？;；:：]+/)[0]||'').slice(0,8);
     if(!nick)nick='宝贝';
@@ -3234,6 +3274,7 @@ function loadPeekMyNick(c,win){
     var el=win.querySelector('#pkMeNick');
     if(el)el.textContent=nick;
   }).catch(function(){
+    win._nickLoading = false;           /* ★ 解锁 */
     var el=win.querySelector('#pkMeNick');
     if(el)el.textContent='（获取失败）';
   });
@@ -3241,8 +3282,13 @@ function loadPeekMyNick(c,win){
 
 /* AI 生成 3~4 个 NPC 及对话（JSON），缓存并刷新列表 */
 function loadPeekNpc(c,win,free){
+  /* ★ 防重复生成锁：正在生成中就直接退出 */
+  if(win._npcLoading) return;
+  win._npcLoading = true;
+
   if(!free){
     if(!payView(c)){
+      win._npcLoading = false;          /* ★ 解锁 */
       var l0=win.querySelector('#pkNpcLoad');
       if(l0) l0.textContent='（心动值不足 5，无法提取其他联系人）';
       return;
@@ -3262,13 +3308,14 @@ function loadPeekNpc(c,win,free){
       'who=me 表示 TA（机主本人）发的，who=them 表示对方发的。'}
   ];
   callAI(msgs,peekModelName()).then(function(out){
+    win._npcLoading = false;            /* ★ 解锁 */
     var data=parseJsonFromAI(out);
     if(!data||!data.length){
       var ld=win.querySelector('#pkNpcLoad');
       if(ld)ld.textContent='（未能提取到其他联系人）';
       return;
     }
-    c.peekNpcChats=data.slice(0,4).map(function(n){
+    c.peekNpcChats=data.slice(0,7).map(function(n){    /* ★ 4 改成 7 */
       return {
         name:(n.name||'未知').toString().slice(0,12),
         nick:(n.nick||'').toString().slice(0,12),
@@ -3282,6 +3329,7 @@ function loadPeekNpc(c,win,free){
     if(win.querySelector('#pkMsgRoot'))renderMsgList(c,win);
 
   }).catch(function(){
+    win._npcLoading = false;            /* ★ 解锁 */
     var ld=win.querySelector('#pkNpcLoad');
     if(ld)ld.textContent='（连接失败，无法提取联系人）';
   });
