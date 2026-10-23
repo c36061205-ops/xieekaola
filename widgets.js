@@ -331,7 +331,7 @@
     ],
     anniv: [
       { id:'classic', name:'经典款' },
-      { id:'capsule', name:'极简款（仅天数）' }
+      { id:'capsule', name:'欧式复古' }
     ]
   };
   var LABEL = { weather:'天气', clock:'时间', anniv:'纪念日' };
