@@ -8,19 +8,66 @@
     var st = document.createElement('style');
     st.id = 'widgets-style';
     st.textContent = `
-      /* ---- 天气 · 占位款 ---- */
-      .wg-weather-minimal{
-        width:100%;padding:14px 16px;border-radius:18px;box-sizing:border-box;
-        background:color-mix(in srgb, var(--card) 60%, transparent);
-        border:1px solid color-mix(in srgb, var(--theme) 22%, transparent);
-        color:var(--text);
-        backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+      /* ---- 天气 · 极淡主题色底 ---- */
+      .wg-weather-stamp {
+        width: 100%; box-sizing: border-box; 
+        padding: 10px 14px; 
+        border-radius: 14px; 
+        
+        /* 【核心】抛弃白色，直接用主题色兑一点点背景色，做极淡的有色底 */
+        background: color-mix(in srgb, var(--theme) 10%, transparent);
+        /* 边框也用主题色的微弱变体，整体非常和谐 */
+        border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02); /* 去掉重阴影 */
+        color: var(--text); 
+        
+        display: flex; justify-content: space-between; align-items: stretch; gap: 10px;
       }
-      .wg-weather-minimal .wm-loc{font-size:12px;color:var(--sub);margin-bottom:4px;}
-      .wg-weather-minimal .wm-temp{font-size:34px;font-weight:200;line-height:1;color:var(--text);letter-spacing:-1px;}
-      .wg-weather-minimal .wm-unit{font-size:13px;color:var(--theme);margin-left:2px;}
-      .wg-weather-minimal .wm-desc{font-size:11px;color:var(--sub);margin-top:6px;line-height:1.4;}
 
+      .wg-weather-stamp .stamp-left { 
+        flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; 
+      }
+
+      .wg-weather-stamp .stamp-header { display: flex; align-items: center; gap: 6px; font-family: "Georgia", serif; }
+      .wg-weather-stamp .stamp-loc { font-size: 14px; font-weight: 700; letter-spacing: 1px; color: var(--text); }
+      .wg-weather-stamp .stamp-en { font-size: 8px; color: var(--sub); letter-spacing: 1px; text-transform: uppercase; transform: translateY(1px); }
+
+      .wg-weather-stamp .stamp-body { display: flex; align-items: baseline; gap: 6px; font-family: "Georgia", serif; }
+      .wg-weather-stamp .stamp-temp { font-size: 32px; font-weight: 400; font-family: "Helvetica Neue", sans-serif; line-height: 1; letter-spacing: -0.5px; color: var(--text); }
+      .wg-weather-stamp .stamp-state { font-size: 12px; font-style: italic; color: color-mix(in srgb, var(--theme) 80%, var(--text)); }
+
+      .wg-weather-stamp .stamp-desc {
+        font-size: 11px; color: var(--text); opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        font-family: "Georgia", serif; border-top: 1px dashed color-mix(in srgb, var(--text) 20%, transparent); padding-top: 4px;
+      }
+
+      .wg-weather-stamp .stamp-bottom { 
+        display: flex; align-items: center; justify-content: space-between; 
+        font-size: 9px; color: var(--sub); font-family: monospace; 
+      }
+      .wg-weather-stamp .stamp-data { display: flex; gap: 12px; }
+
+      .wg-weather-stamp .stamp-right {
+        flex-shrink: 0; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; 
+      }
+
+      /* 【关键修复】暴打主文件 SVG 尺寸，强制锁死！ */
+      .wg-weather-stamp .stamp-icon { 
+        width: 34px !important; 
+        height: 34px !important; 
+        opacity: 0.9;
+        margin-top: -2px; margin-right: -2px;
+      }
+      .wg-weather-stamp .stamp-icon svg { 
+        width: 100% !important; 
+        height: 100% !important; 
+        display: block !important;
+      }
+
+      .wg-weather-stamp .stamp-actions { display: flex; gap: 8px; font-size: 13px; color: var(--sub); font-family: sans-serif; }
+      .wg-weather-stamp .stamp-actions span { cursor: pointer; opacity: 0.7; transition: 0.2s; }
+      .wg-weather-stamp .stamp-actions span:hover { opacity: 1; color: var(--theme); }
+	  
       /* ---- 时间 · 欧式经典指针钟 ---- */
       .wg-clock-analog{
         grid-column: 1 / span 2 !important;
@@ -127,37 +174,163 @@
         font-weight: 600;
         text-shadow: 0 1px 1px var(--bg, #fff);
         font-variant-numeric: tabular-nums;
-      }      /* ---- 纪念日 · 占位款 ---- */
-      .wg-anniv-capsule{
+      } 
+
+      /* ---- 纪念日 · 模仿天气背景 ---- */
+      .wg-anniv-frame {
         grid-column: 3 / span 2 !important;
         grid-row: 3 / span 2 !important;
-        width: 100% !important; height: 100% !important;
-        box-sizing: border-box !important; border-radius:18px;cursor:pointer;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px;
-        background:color-mix(in srgb, var(--card) 65%, transparent);
-        border:1px solid color-mix(in srgb, var(--theme) 20%, transparent);
-        color:var(--text);
-        backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        box-sizing: border-box !important;
+        
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        cursor: pointer;
       }
-      .wg-anniv-capsule .wa-title{font-size:12px;color:var(--sub);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
-      .wg-anniv-capsule .wa-days{font-size:20px;font-weight:600;color:var(--theme);text-align:center;}
-      .wg-anniv-capsule .wa-days .num{font-size:26px;font-weight:700;margin:0 2px;}
-    `;
+
+      .wg-anniv-frame .type-paper {
+        width: 90% !important; 
+        height: 90% !important;
+        
+        /* ✅ 核心：和天气面板一模一样的底！没有任何毛玻璃，只有 10% 主题色 */
+        background: color-mix(in srgb, var(--theme) 10%, transparent) !important;
+        
+        /* ✅ 边框：和天气面板一模一样的 20% 主题色细边框 */
+        border: 1px solid color-mix(in srgb, var(--theme) 20%, transparent) !important;
+        border-radius: 14px !important; /* 和天气组件统一圆角 */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+        
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 12px 10px !important;
+        box-sizing: border-box !important;
+        
+        /* 打字机字体 */
+        font-family: "Courier New", Courier, monospace !important;
+        color: var(--text) !important;
+        
+        transform: none !important; 
+      }
+
+      .wg-anniv-frame:active .type-paper {
+        transform: scale(0.96) !important;
+      }
+
+      /* 顶部头带 */
+      .type-paper .tp-header {
+        font-size: 8px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        color: var(--sub) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        border-bottom: 1px dashed color-mix(in srgb, var(--text) 20%, transparent) !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 6px !important;
+      }
+
+      .type-paper .tp-body {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+      }
+      
+      .type-paper .tp-title {
+        font-size: 12px !important;
+        font-weight: bold !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin-bottom: 2px !important;
+      }
+
+      .type-paper .tp-num-row {
+        display: flex !important;
+        align-items: baseline !important;
+      }
+      
+      .type-paper .tp-prefix {
+        font-size: 10px !important;
+        color: var(--sub) !important;
+        margin-right: 4px !important;
+      }
+      
+      .type-paper .tp-num {
+        font-size: 36px !important;
+        font-weight: 300 !important; 
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important; 
+        font-style: italic !important;
+        line-height: 0.9 !important;
+        letter-spacing: -1px !important;
+        color: var(--text) !important;
+      }
+      
+      .type-paper .tp-unit {
+        font-size: 10px !important;
+        margin-left: 3px !important;
+        color: var(--sub) !important;
+      }
+
+      .type-paper .tp-footer {
+        margin-top: 6px !important;
+        font-size: 10px !important;
+      }
+      
+      .type-paper .tp-event {
+        font-weight: bold !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        color: var(--text) !important;
+      }
+      
+      .type-paper .tp-date {
+        font-size: 9px !important;
+        color: var(--sub) !important;
+        margin-top: 1px !important;
+      }
+      
+      .type-paper .tp-empty {
+        font-size: 9px !important;
+        color: var(--sub) !important;
+        font-style: italic !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+      }
+      .type-paper .tp-empty::before,
+      .type-paper .tp-empty::after {
+        content: '' !important;
+        width: 10px !important;
+        height: 1px !important;
+        background: var(--theme) !important;
+        opacity: 0.4 !important;
+      }
+	  `;
     document.head.appendChild(st);
   }
 
   /* ---------- 2. 样式清单 ---------- */
   var OPTIONS = {
     weather: [
-      { id:'classic', name:'经典款（现款）' },
-      { id:'minimal', name:'极简款（仅温度）' }
+      { id:'classic', name:'经典' },
+      { id:'minimal', name:'欧式复古' }
     ],
     clock: [
-      { id:'classic', name:'经典款（现款）' },
-      { id:'flip',    name:'指针钟（欧式复古）' }
+      { id:'classic', name:'经典' },
+      { id:'flip',    name:'欧式复古' }
     ],
     anniv: [
-      { id:'classic', name:'经典款（现款）' },
+      { id:'classic', name:'经典款' },
       { id:'capsule', name:'极简款（仅天数）' }
     ]
   };
@@ -188,15 +361,66 @@
   /* ---------- 4. 三个渲染入口 ---------- */
   function renderWeather(data, worldName){
     var styleId = getStyle('weather');
-    if (styleId === 'minimal') {
+    if (styleId !== 'classic') { 
       var loc = worldName || '未关联';
       var temp = (data && data.temp !== undefined && data.temp !== null && data.temp !== '--') ? data.temp : '--';
       var desc = (data && data.desc) ? data.desc : '加载天气…';
-      return '<div class="wg-weather-minimal" id="weatherWidget">' +
-        '<div class="wm-loc">' + esc(loc) + '</div>' +
-        '<div class="wm-temp">' + esc(String(temp)) + '<span class="wm-unit">℃</span></div>' +
-        '<div class="wm-desc">' + esc(desc) + '</div>' +
-        '</div>';
+      
+      var windTxt = '--';
+      var humTxt = '--';
+      var detail = (data && data.detail) ? data.detail : '';
+      var m1 = detail.match(/湿度\s*([\d.]+\s*%?)/);
+      if (m1) humTxt = m1[1].replace(/\s+/g, '');
+      var m2 = detail.match(/(?:风速|风)\s*[:：]?\s*([\d.]+\s*(?:级|km\/h|m\/s)?)/);
+      if (m2) windTxt = m2[1].replace(/\s+/g, '');
+      if (humTxt === '--' && data && data.humidity) humTxt = data.humidity + '%';
+      if (windTxt === '--' && data && data.wind) windTxt = data.wind;
+
+      var state = data && data.state ? data.state : '晴';
+      var WEATHER_EN = {
+        '晴': 'Sunny', '多云': 'Cloudy', '阴': 'Overcast',
+        '雨': 'Rain', '小雨': 'Light Rain', '中雨': 'Moderate Rain', '大雨': 'Heavy Rain', '雷雨': 'Thunderstorm', '阵雨': 'Showers',
+        '雪': 'Snow', '小雪': 'Light Snow', '大雪': 'Heavy Snow',
+        '雾': 'Fog', '霾': 'Haze', '风': 'Windy'
+      };
+      var enState = WEATHER_EN[state] || '';
+      var stateText = enState ? (state + ' / ' + enState) : state;
+
+      var iconKey = (typeof getWeatherSvgKey === 'function') ? getWeatherSvgKey(state) : 'sunny';
+      var iconSvg = (typeof WEATHER_SVGS !== 'undefined' && WEATHER_SVGS[iconKey]) ? WEATHER_SVGS[iconKey] : '';
+
+      return '<div class="wg-weather-stamp" id="weatherWidget">' +
+        
+        '<div class="stamp-left">' +
+          '<div class="stamp-header">' +
+            '<div class="stamp-loc">' + esc(loc) + '</div>' +
+            '<div class="stamp-en">Weather Record</div>' +
+          '</div>' +
+          
+          '<div class="stamp-body">' +
+            '<span class="stamp-temp">' + esc(String(temp)) + '℃</span>' +
+            '<span class="stamp-state">' + esc(stateText) + '</span>' +
+          '</div>' +
+          
+          '<div class="stamp-desc">' + esc(desc) + '</div>' +
+          
+          '<div class="stamp-bottom">' +
+            '<div class="stamp-data">' +
+              '<span>WIND ' + esc(windTxt) + '</span>' +
+              '<span>HUM ' + esc(humTxt) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="stamp-right">' +
+          '<div class="stamp-icon">' + iconSvg + '</div>' +
+          '<div class="stamp-actions">' +
+            '<span onclick="event.stopPropagation();openWeatherEditor()" title="设置">⚙</span>' +
+            '<span onclick="event.stopPropagation();refreshWeather()" title="刷新">↻</span>' +
+          '</div>' +
+        '</div>' +
+        
+      '</div>';
     }
     return '';
   }
@@ -236,24 +460,65 @@
 
   function renderAnniv(){
     var styleId = getStyle('anniv');
-    if (styleId === 'capsule') {
+    if (styleId !== 'classic') {
+      // 1. 获取置顶纪念日
       var list = DB.anniversaries || [];
       var pin = null;
       for (var i=0;i<list.length;i++){ if(list[i].pinned){ pin=list[i]; break; } }
       if (!pin && list.length) pin = list[0];
-      var title = '纪念日', daysHtml = '--';
+      
+      var title = '纪念日';
+      var prefix = '';
+      var num = '--';
+      var unit = '天';
+
       if (pin) {
         title = pin.title || '纪念日';
         if (pin.type === '生日') {
-          daysHtml = '还有<span class="num">' + Math.abs(daysBetween(nextBirthday(pin.date))) + '</span>天';
+          prefix = '还有';
+          num = Math.abs(daysBetween(nextBirthday(pin.date)));
         } else {
-          daysHtml = '已经<span class="num">' + Math.abs(daysBetween(pin.date)) + '</span>天';
+          prefix = '已经';
+          num = Math.abs(daysBetween(pin.date));
         }
       }
-      return '<div class="wg-anniv-capsule" onclick="openAnniversary()">' +
-        '<div class="wa-title">' + esc(title) + '</div>' +
-        '<div class="wa-days">' + daysHtml + '</div>' +
-        '</div>';
+
+      // 2. 获取最近的一条日程
+      var events = (DB.events || []).slice().sort(function(a,b){ return new Date(a.date) - new Date(b.date); }).slice(0,1);
+      var eventHtml = '';
+      
+      if (events.length > 0) {
+        var e = events[0];
+        eventHtml = 
+          '<div class="wg-anniv-event">' + esc(e.title || '未命名日程') + '</div>' +
+          '<div class="wg-anniv-date">' + esc(fmtEventDate(e.date)) + '</div>';
+      } else {
+        // 没日程时的优雅空状态
+        eventHtml = '<div class="wg-anniv-empty">Sans Souci</div>';
+      }
+
+      // 获取当前年份
+      var currentYear = new Date().getFullYear();
+
+      return '<div class="wg-anniv-frame" onclick="openAnniversary()">' +
+        '<div class="type-paper">' +
+          '<div class="tp-header">' +
+            '<span>MEMO.</span>' +
+            '<span>' + currentYear + '</span>' +
+          '</div>' +
+          '<div class="tp-body">' +
+            '<div class="tp-title">' + esc(title) + '</div>' +
+            '<div class="tp-num-row">' +
+              '<span class="tp-prefix">' + prefix + '</span>' +
+              '<span class="tp-num">' + num + '</span>' +
+              '<span class="tp-unit">' + unit + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="tp-footer">' +
+            eventHtml +
+          '</div>' +
+        '</div>' +
+      '</div>';
     }
     return '';
   }
@@ -418,3 +683,83 @@ window._initAnalogClock = function() {
   
   update();
 };
+/* ============================================================
+   🎃 万圣猫猫 · 天气组件复古融合补丁
+   ============================================================ */
+(function(){
+  var style = document.createElement('style');
+  style.textContent = `
+    /* 1. 底座：用暗焦糖色，微微透出壁纸的纹理 */
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp {
+      background: rgba(50, 35, 30, 0.25) !important; /* 半透明深棕色 */
+      border-color: rgba(180, 120, 80, 0.35) !important; /* 暗铜色边框 */
+    }
+
+    /* 2. 主文字：用暖沙色，带一点复古旧纸张的质感 */
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp .stamp-loc,
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp .stamp-temp {
+      color: #E8D5C4 !important; 
+      text-shadow: none !important; /* 去掉突兀的发光 */
+    }
+
+    /* 3. 描述和状态：稍微暗一点，融合进底色 */
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp .stamp-desc,
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp .stamp-state {
+      color: #D4BFAE !important;
+      border-top-color: rgba(180, 120, 80, 0.2) !important;
+    }
+    
+    /* 4. 底部数据微调 */
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp .stamp-bottom,
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp .stamp-data {
+      color: rgba(212, 191, 174, 0.7) !important;
+    }
+    
+    /* 5. 英文小字和按钮降低存在感 */
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp .stamp-en,
+    #phone[data-theme="halloween_cat"] .wg-weather-stamp .stamp-actions {
+      color: rgba(212, 191, 174, 0.5) !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+/* ============================================================
+   🎃 万圣猫猫 · 纪念日组件复古融合补丁
+   ============================================================ */
+(function(){
+  var style = document.createElement('style');
+  style.textContent = `
+    /* 1. 底座：用暗焦糖色，微微透出壁纸的纹理 */
+    #phone[data-theme="halloween_cat"] .wg-anniv-frame .type-paper {
+      background: rgba(50, 35, 30, 0.25) !important; /* 半透明深棕色 */
+      border-color: rgba(180, 120, 80, 0.35) !important; /* 暗铜色边框 */
+    }
+
+    /* 2. 主文字：用暖沙色，带一点复古旧纸张的质感 */
+    #phone[data-theme="halloween_cat"] .type-paper .tp-title,
+    #phone[data-theme="halloween_cat"] .type-paper .tp-num {
+      color: #E8D5C4 !important; 
+      text-shadow: none !important; /* 去掉突兀的发光 */
+    }
+
+    /* 3. 描述、日期和前缀：稍微暗一点，融合进底色 */
+    #phone[data-theme="halloween_cat"] .type-paper .tp-date,
+    #phone[data-theme="halloween_cat"] .type-paper .tp-prefix,
+    #phone[data-theme="halloween_cat"] .type-paper .tp-unit,
+    #phone[data-theme="halloween_cat"] .type-paper .tp-event,
+    #phone[data-theme="halloween_cat"] .type-paper .tp-empty {
+      color: #D4BFAE !important;
+    }
+    
+    /* 4. 分割线和空状态修饰线 */
+    #phone[data-theme="halloween_cat"] .type-paper .tp-header {
+      color: rgba(212, 191, 174, 0.7) !important;
+      border-bottom-color: rgba(180, 120, 80, 0.2) !important;
+    }
+    #phone[data-theme="halloween_cat"] .type-paper .tp-empty::before,
+    #phone[data-theme="halloween_cat"] .type-paper .tp-empty::after {
+      background: rgba(180, 120, 80, 0.5) !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
