@@ -3856,6 +3856,111 @@ body.in-moments #content {
   background: transparent !important;
 }
 
+/* ============================================================
+   🎃 万圣猫猫 · 天气/时钟颜色降噪微调（仅调色，不换结构）
+   ============================================================ */
+
+/* 1. 天气组件：柔和边框，降低对比度，解决“脏”的问题 */
+#phone[data-theme="halloween_cat"] .weather-widget {
+  /* 边框从亮白换成暖灰半透明，不再与灰背景起冲突 */
+  border: 1px solid rgba(210, 195, 180, 0.35) !important;
+  /* 阴影减弱并偏暖，去掉那种生硬的黑边 */
+  box-shadow: 0 4px 12px -2px rgba(80, 60, 40, 0.1) !important;
+  /* 维持完全通透，但带一点点极弱的暖色雾气 */
+  background: rgba(255, 248, 240, 0.04) !important;
+}
+
+/* 2. 天气文字：改用暖米色，加浅色阴影，保证在灰底上看清 */
+#phone[data-theme="halloween_cat"] .weather-widget .w-temp,
+#phone[data-theme="halloween_cat"] .weather-widget .w-desc,
+#phone[data-theme="halloween_cat"] .weather-widget .w-loc span,
+#phone[data-theme="halloween_cat"] .weather-widget .w-info .w-val,
+#phone[data-theme="halloween_cat"] .weather-widget .w-update {
+  color: #FFF3E6 !important; /* 暖米白色，不像纯白那么刺眼 */
+  text-shadow: 0 1px 4px rgba(50, 35, 25, 0.35) !important; /* 轻微的深色投影压住底噪 */
+}
+
+/* 天气组件里的强调色（温度单位、分割线、小图标）统一换成浅杏色 */
+#phone[data-theme="halloween_cat"] .weather-widget .w-temp-unit {
+  color: #FFD5B5 !important;
+}
+#phone[data-theme="halloween_cat"] .weather-widget .w-desc {
+  border-left-color: rgba(255, 210, 180, 0.6) !important;
+}
+#phone[data-theme="halloween_cat"] .weather-widget .w-loc svg,
+#phone[data-theme="halloween_cat"] .weather-widget .w-dots span.active {
+  stroke: #FFD5B5 !important;
+  background-color: #FFD5B5 !important;
+}
+#phone[data-theme="halloween_cat"] .weather-widget .w-act {
+  background: rgba(255, 210, 180, 0.15) !important;
+  color: #FFD5B5 !important;
+}
+
+/* 3. 时钟组件：同样处理，字变米白，淡化刺眼的粉紫小点 */
+#phone[data-theme="halloween_cat"] .clock-starry.widget-2x2 .time,
+#phone[data-theme="halloween_cat"] .clock-starry.widget-2x2 .time .star {
+  color: #FFF3E6 !important; 
+  text-shadow: 0 2px 6px rgba(50, 35, 25, 0.4) !important;
+}
+#phone[data-theme="halloween_cat"] .clock-starry.widget-2x2 .date {
+  color: #F2E5D9 !important;
+  text-shadow: 0 1px 3px rgba(50, 35, 25, 0.4) !important;
+}
+#phone[data-theme="halloween_cat"] .clock-starry.widget-2x2 .greet {
+  color: #FFD5B5 !important;
+  text-shadow: 0 1px 3px rgba(50, 35, 25, 0.4) !important;
+}
+/* 让时钟的发光圈稍微变暖、变淡，不再泛着冷光 */
+#phone[data-theme="halloween_cat"] .clock-starry.widget-2x2::after {
+  box-shadow: 
+    0 0 16px 2px rgba(255, 180, 130, 0.15), 
+    inset 0 0 16px 2px rgba(255, 180, 130, 0.08) !important;
+}
+/* ============================================================
+   🎃 万圣猫猫 · 天气组件细节修复（仅覆盖错误项）
+   ============================================================ */
+
+/* 1. 修复定位图标变成方块的问题：只保留描边（stroke），去掉填充（fill/background） */
+#phone[data-theme="halloween_cat"] .weather-widget .w-loc svg {
+  stroke: #FFD5B5 !important;
+  fill: none !important;
+  background: transparent !important;
+}
+#phone[data-theme="halloween_cat"] .weather-widget .w-loc svg path,
+#phone[data-theme="halloween_cat"] .weather-widget .w-loc svg circle {
+  fill: none !important;
+  stroke: #FFD5B5 !important;
+}
+
+/* 2. 修复风向和湿度小胶囊：底色调暖，边框调暖，文字提亮 */
+#phone[data-theme="halloween_cat"] .weather-widget .w-info {
+  background: rgba(255, 210, 180, 0.12) !important; /* 暖橘色的半透明底 */
+  border: 1px solid rgba(255, 210, 180, 0.25) !important; /* 暖色边框 */
+}
+#phone[data-theme="halloween_cat"] .weather-widget .w-info .w-ico svg {
+  stroke: #FFD5B5 !important;
+  fill: none !important;
+}
+#phone[data-theme="halloween_cat"] .weather-widget .w-info .w-val {
+  color: #FFF3E6 !important;
+  font-weight: 600 !important; /* 稍微加粗一点更清晰 */
+}
+/* ============================================================
+   🌤️ 天气组件 · 全局透明度优化（让背景更清晰，拒绝糊成一团）
+   ============================================================ */
+
+.weather-widget {
+  /* 1. 降低底色浓度：将原本的透明底调成 8% 极淡的主题色迷雾 */
+  background: color-mix(in srgb, var(--theme) 8%, transparent) !important;
+  
+  /* 2. 减弱模糊度：从原本的 12px 降到 4px，让背后的壁纸轮廓能透出来 */
+  backdrop-filter: blur(4px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(4px) saturate(140%) !important;
+  
+  /* 3. 把边框也稍微调淡一点点，增强“清透感” */
+  border: 1px solid color-mix(in srgb, var(--theme) 35%, rgba(255, 255, 255, 0.15)) !important;
+}
 </style>
 </head>
 <body>
@@ -4049,7 +4154,7 @@ body.in-moments #content {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261018_1';
+const APP_VER = 'v20261023_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -4506,6 +4611,20 @@ wallpaper: `
   '--ring-opacity': '0.6',
   // 浅色壁纸：浅紫到纯白的柔和过渡，带一点点紫雾感
   wallpaper: 'radial-gradient(circle at 20% 10%, rgba(200, 182, 216, 0.35) 0%, transparent 45%), radial-gradient(circle at 80% 90%, rgba(200, 182, 216, 0.20) 0%, transparent 45%), linear-gradient(160deg, #F8F4FC 0%, #FDFBFF 100%)'
+},
+{
+  id: 'halloween_cat',
+  name: '🎃 万圣猫猫',
+  color: '#C77B46',            // 图标圆点颜色：复古焦糖南瓜色
+  '--theme': '#C77B46',        // 主强调色：低饱和暖橘棕（不刺眼）
+  '--bg': '#FCFAF6',           
+  '--nav': '#FFFFFF',          
+  '--card': '#FFFFFF',         
+  '--text': '#2E2931',         
+  '--sub': '#5C5250',          
+  '--line': '#F0EBE3',         
+  '--ring-opacity': '0.65',
+  wallpaper: 'radial-gradient(ellipse at 50% 100%, rgba(199, 123, 70, 0.15) 0%, transparent 60%), linear-gradient(180deg, #FCFAF6 0%, #F6F2EA 100%)'
 }
 ];
 // ========== 主题图标集 ==========
@@ -4767,7 +4886,34 @@ demon_sheep: {
   // === 朋友圈入口 SVG 图标（方案B · 线条56 · 恶魔主题色 #9B7EB5）===
   discoverMoments: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M523.49952 641.42336c-161.97632-2.2528-291.85536-65.78688-356.41344-174.29504-63.616-107.16672-52.9152-253.57824 28.61568-391.66464 5.79584-9.71776 17.14688-15.98976 28.92288-15.98976 115.05664 1.59744 214.35904 38.46656 287.23712 106.61376 6.31808 5.89824 9.856 13.7984 9.97376 22.2464 0.11776 8.44288-3.20512 16.4352-9.36448 22.49728a33.41312 33.41312 0 0 1-23.62368 9.58464 33.25952 33.25952 0 0 1-22.89152-8.97536C411.07968 160.11776 336.41472 129.81248 250.04032 123.79136l-6.79936-0.47616-3.08224 5.85728C180.992 241.73568 175.10912 353.43872 224.01024 435.6352c52.75136 88.65792 162.25792 140.57984 300.4416 142.45888a33.17248 33.17248 0 0 1 23.08608 9.55392c6.12352 6.06208 9.43104 14.0544 9.3184 22.51264-0.14848 17.2288-14.80192 31.2576-32.66048 31.2576h-0.69632z" fill="#9B7EB5"/><path d="M508.20096 998.4c-18.11968 0-32.86016-14.18752-32.86016-31.62112v-267.97056c0-17.4336 14.74048-31.616 32.86016-31.616s32.86016 14.1824 32.86016 31.616v267.97056c0 17.4336-14.74048 31.62112-32.86016 31.62112z m-171.8016-147.8912a32.83456 32.83456 0 0 1-15.7952-3.9424 386.05824 386.05824 0 0 1-92.8-68.93056c-6.04672-6.09792-9.2672-14.1056-9.06752-22.5536 0.19968-8.44288 3.79904-16.29696 10.13248-22.10304a33.36704 33.36704 0 0 1 22.71744-8.81152c9.06752 0 17.52576 3.49184 23.808 9.82528a322.4832 322.4832 0 0 0 77.04576 57.2416c7.69024 4.096 13.2608 10.83392 15.68256 18.97984a30.2592 30.2592 0 0 1-2.86208 23.99232c-5.81632 10.05568-16.87552 16.30208-28.86144 16.30208z m349.19936-3.07712c-11.74016 0-22.67648-6.04672-28.53888-15.77472a30.43328 30.43328 0 0 1-3.3024-23.99232c2.25792-8.17664 7.68-14.99648 15.26272-19.21024 26.74688-14.91968 50.96448-33.24416 71.9872-54.46144 6.26688-6.28736 14.68416-9.74336 23.71072-9.74336 8.47872 0 16.5376 3.12832 22.69184 8.8064a31.01696 31.01696 0 0 1 1.05984 44.80512c-25.33888 25.59488-54.47168 47.59552-86.58432 65.39776a33.36704 33.36704 0 0 1-16.28672 4.1728z m-153.69728-207.44704c-10.36288 0-19.89632-4.54656-26.14272-12.4672-96.70144-122.46016-121.76896-255.5904-70.58944-374.87104C485.9392 134.4512 607.1808 54.46656 767.7952 33.20832c1.70496-0.256 3.3024-0.37888 4.93568-0.37888 9.91232 0 19.52256 4.68992 25.70752 12.544 98.11456 124.21632 125.27104 263.19872 74.496 381.31712-48.78848 113.43872-171.48928 191.07328-336.63488 212.99712-1.44384 0.1536-2.9184 0.29696-4.39808 0.29696z m219.0848-540.09856c-123.4688 22.59456-216.42752 87.07072-255.04768 176.896-39.00416 90.69568-22.34368 194.43712 46.90432 292.10112l3.75296 5.2992 6.5536-1.16224c91.73504-16.22528 211.13856-58.96704 259.01568-170.46016 38.58944-89.75872 20.0704-198.57408-50.80576-298.55232l-3.78368-5.33504-6.58944 1.21344z" fill="#9B7EB5"/></svg>')
   
-  }
+  },
+  halloween_cat: {
+  // 桌面应用图标
+  wechat:   'https://s1.imagehub.cc/images/2026/10/23/fd824ba423b7a6703a0e2c09dda05171.png',
+  notes:    'https://s1.imagehub.cc/images/2026/10/23/fad22c6e3ddafa8fb22f847429987f08.png',
+  focus:    'https://s1.imagehub.cc/images/2026/10/23/10d5f510d4faed370159e3e228bb9050.png',
+  settings: 'https://s1.imagehub.cc/images/2026/10/23/a3e345ade324ea45e25b5bb1f4b05616.png',
+  album:    'https://s1.imagehub.cc/images/2026/10/23/02e425cac2f6d112213bec2a5d56f041.png',
+  hearts:   'https://s1.imagehub.cc/images/2026/10/23/e8059418d9c10028ced66c719e3d4f9e.png',
+  music:    'https://s1.imagehub.cc/images/2026/10/23/2eba631e53177551a928d255550f9701.png',
+  preset:   'https://s1.imagehub.cc/images/2026/10/23/5514cfa31e8cc104d26394a7dc955d44.png',
+  floating: 'https://s1.imagehub.cc/images/2026/10/23/94ec5a0652c94ad91da0251b14213bfe.png',
+  shop:     'https://s1.imagehub.cc/images/2026/10/23/a9f095b8ec0a6a2a615461d950e045a5.png',
+  world:    'https://s1.imagehub.cc/images/2026/10/23/3c31ece2fccc3f7514028046248241ef.png',
+  game:     'https://s1.imagehub.cc/images/2026/10/23/fd0e7de24c14d2fdbacb8233015bb75b.png',
+  
+  // 底栏图标（这里用SVG绘制了贴合万圣节配色的线性图标，保证底栏清晰可见）
+  tabChats: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M512 240c-180 0-324 108-324 244 0 76 42 144 108 188l-24 96c-3 12 9 22 20 17l122-62c30 6 64 9 98 9 180 0 324-108 324-244S692 240 512 240z" fill="none" stroke="#C88E61" stroke-width="56" stroke-linejoin="round"/><circle cx="410" cy="484" r="26" fill="#C88E61"/><circle cx="512" cy="484" r="26" fill="#C88E61"/><circle cx="614" cy="484" r="26" fill="#C88E61"/></svg>'),
+  
+  tabContacts: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><rect x="300" y="200" width="420" height="624" rx="36" fill="none" stroke="#C88E61" stroke-width="56"/><line x1="200" y1="330" x2="300" y2="330" stroke="#C88E61" stroke-width="56" stroke-linecap="round"/><line x1="200" y1="512" x2="300" y2="512" stroke="#C88E61" stroke-width="56" stroke-linecap="round"/><line x1="200" y1="694" x2="300" y2="694" stroke="#C88E61" stroke-width="56" stroke-linecap="round"/></svg>'),
+  
+  tabDiscover: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><circle cx="512" cy="512" r="230" fill="none" stroke="#C88E61" stroke-width="56"/><ellipse cx="512" cy="512" rx="350" ry="100" fill="none" stroke="#C88E61" stroke-width="56" transform="rotate(-22 512 512)"/><circle cx="420" cy="465" r="24" fill="#C88E61"/><circle cx="600" cy="550" r="18" fill="#C88E61"/></svg>'),
+  
+  tabMe: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><path d="M512 720c-140-100-220-180-220-280 0-70 50-120 120-120 40 0 80 20 100 60 20-40 60-60 100-60 70 0 120 50 120 120 0 100-80 180-220 280z" fill="none" stroke="#C88E61" stroke-width="56" stroke-linejoin="round"/></svg>'),
+  
+  // 发现页 · 朋友圈入口
+  discoverMoments: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="22" height="22"><circle cx="512" cy="512" r="400" fill="none" stroke="#C88E61" stroke-width="50"/><circle cx="512" cy="512" r="160" fill="none" stroke="#C88E61" stroke-width="50"/><path d="M512 112 L512 352 M512 672 L512 912 M112 512 L352 512 M672 512 L912 512" stroke="#C88E61" stroke-width="50" stroke-linecap="round"/></svg>')
+}
 };
 // =====================================
 function applySkin(id) {
@@ -4823,8 +4969,7 @@ if (phone) phone.dataset.theme = id;
 
   // ===== 主题适配（浅色/深色） =====
 
-var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose' || id === 'sea_salt' || id === 'angel_sheep' || id === 'demon_sheep');
-
+var isLight = (id === 'aqua_girl' || id === 'pink_tea' || id === 'milktea' || id === 'orchard' || id === 'misi' || id === 'sunset_parfait' || id === 'redsun_forest' || id === 'goose' || id === 'sea_salt' || id === 'angel_sheep' || id === 'demon_sheep'); 
 
   // ★ 气泡文字颜色：根据主题深浅自动适配
   if (isLight) {
@@ -7728,7 +7873,12 @@ DB.events = DB.events || [
     _weatherCurrentIndex = 0;
   }
   
-  var clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
+  var _cStyle = (window.Widgets && Widgets.getStyle) ? Widgets.getStyle('clock') : 'classic';
+  var clockHtml = '';
+  if (_cStyle !== 'classic' && window.Widgets) {
+    clockHtml = Widgets.renderClock();
+  } else {
+  clockHtml = `<div class="clock-starry widget-2x2" id="homeClock">
 <svg style="position:absolute;pointer-events:none;z-index:0;width:160px;height:160px;top:-2%;left:50%;transform:translateX(-50%);overflow:visible;" viewBox="0 0 160 160">
   <defs>
     <filter id="ring-glow-1" x="-50%" y="-50%" width="200%" height="200%">
@@ -7769,11 +7919,17 @@ DB.events = DB.events || [
     </div>
     <div class="greet" style="position:relative;z-index:2;color:var(--clock-theme-color, var(--theme));">今夜星辰</div>
   </div>`;
-  
+  }
   var weatherHtml = '';
   if (weatherApp) {
+    var _wStyle = (window.Widgets && Widgets.getStyle) ? Widgets.getStyle('weather') : 'classic';
+    if (_wStyle !== 'classic' && window.Widgets) {
+      // 新样式：直接用 widgets.js 的 HTML
+      var _curW = (DB.worlds || []).find(function(x){ return x.id === DB.desktop._activeWorld; }) || (DB.worlds && DB.worlds[0]) || null;
+      weatherHtml = Widgets.renderWeather(_curW ? _curW.weather : null, _curW ? _curW.name : '未关联');
+    } else {
     weatherHtml = `<div class="weather-widget" id="weatherWidget">
-<!---->
+	<!---->
     <!-- 第1行：地点 | 圆点 | 设置 | 刷新 -->
     <div class="w-row-1">
       <div class="w-loc">
@@ -7823,6 +7979,7 @@ DB.events = DB.events || [
 
   </div>`;
   }  
+  }
   var appsHtml = otherApps.map(function(a) {
     var badge = '';
     if (a.id === 'wechat') {
@@ -7850,7 +8007,8 @@ d.innerHTML = `<div style="padding:40px 0 16px 0;position:relative;z-index:1;">
   </div>
 <div id="appgrid" class="icon-${DB.desktop.iconSize || 'large'}">
   ${clockHtml}
-  ${annivWidgetHtml()}
+  
+  ${((window.Widgets && Widgets.getStyle && Widgets.getStyle('anniv') !== 'classic') ? Widgets.renderAnniv() : annivWidgetHtml())}
   ${appsHtml}
 </div>
 <div id="homebar"></div>
@@ -13221,6 +13379,17 @@ if(tab==='theme'){
           ${DB.desktop._userWallpaper ? '当前:自定义壁纸' : '当前:主题默认壁纸'}
         </div>
         <button class="btn gray" style="width:100%;margin:8px 0 0;padding:7px 0;font-size:12px;" onclick="resetWallpaper()">🔄 恢复主题默认壁纸</button>
+      </div>
+
+      <div class="section-title" style="margin-top:10px;">🎨 桌面小组件样式</div>
+      <div class="field" style="border-radius:12px;margin:0 14px;padding:12px 14px;border:1px solid var(--line);">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13.5px;color:var(--text);">天气 / 时间 / 纪念日</div>
+            <div style="font-size:11px;color:var(--sub);opacity:0.7;margin-top:2px;">点击进入切换面板</div>
+          </div>
+          <button onclick="Widgets.openStylePanel()" style="padding:7px 16px;border:none;border-radius:8px;background:var(--theme);color:#fff;font-size:13px;font-weight:600;cursor:pointer;">切换</button>
+        </div>
       </div>
 
       <div class="section-title" style="margin-top:10px;">📐 桌面图标大小</div>
@@ -25942,6 +26111,7 @@ function syncIdeaBtn(){
   }catch(err){}
 }
 
-</script>
 <script src="sound.js"></script>
+<script src="widgets.js"></script>
+</body>
 </html>
