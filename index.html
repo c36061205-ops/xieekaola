@@ -4066,6 +4066,8 @@ body.has-status-blur #phone[data-theme="halloween_cat"] #statusbar.dark {
 </style>
 </head>
 <body>
+
+<script src="./sound.js"></script>   <!-- 加上这个斜杠和点，防止路径出错 -->
 <!-- ===== 启动加载页 ===== -->
 <div id="bootLoading">
   <div class="boot-blob b1"></div>
@@ -4258,7 +4260,7 @@ body.has-status-blur #phone[data-theme="halloween_cat"] #statusbar.dark {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261023_1';
+const APP_VER = 'v20261024_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
