@@ -4260,7 +4260,7 @@ body.has-status-blur #phone[data-theme="halloween_cat"] #statusbar.dark {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261024_1';
+const APP_VER = 'v20261106_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -11799,7 +11799,7 @@ function renderContacts(){
         '<div class="cell-body" style="flex:1;min-width:0;">' +
           '<div class="cell-title" style="display:flex;align-items:center;justify-content:space-between;">' +
             '<span style="font-weight:600;font-size:15px;color:var(--text);">' + esc(c.nick || c.name) + '</span>' +
-            '<span style="font-size:13px;color:var(--sub);cursor:pointer;padding:0 6px;opacity:0.6;" onclick="event.stopPropagation();exportCharacter(\'' + c.id + '\')">📤</span>' +
+            '<span style="font-size:13px;color:var(--sub);cursor:pointer;padding:0 6px;opacity:0.6;" onclick="event.stopPropagation();popExportChoice(\'' + c.id + '\')">📤</span>' +
           '</div>' +
           '<div class="cell-sub" style="color:var(--sub);font-size:12px;margin-top:3px;font-style:italic;">' + esc(sign).slice(0, 26) + '</div>' +
         '</div>' +
@@ -11832,7 +11832,7 @@ function renderContacts(){
       avatarHtml(c) +
       '<div class="cell-body"><div class="cell-title">' +
       esc(c.nick || c.name) +
-      '<span style="float:right;font-size:14px;color:var(--sub);cursor:pointer;padding:0 6px" onclick="event.stopPropagation();exportCharacter(\'' + c.id + '\')">📤</span>' +
+      '<span style="float:right;font-size:14px;color:var(--sub);cursor:pointer;padding:0 6px" onclick="event.stopPropagation();popExportChoice(\'' + c.id + '\')">📤</span>' +
       '</div><div class="cell-sub" style="color:var(--sub);font-style:italic">' + esc(sign).slice(0, 26) + '</div></div></div></div>';
   }).join('');
 
@@ -14009,6 +14009,7 @@ if (c.intimacyOn) {
     // ----- 底部按钮 -----
     html += '<div style="padding:16px 18px 18px 18px;">';
     html += '<button class="btn" id="polishBtn" onclick="polishChar()">✨ AI 润色 / 补全人设</button>';
+	    html += '<button class="btn gray" style="margin-top:6px;" onclick="exportCharProfile(\'' + c.id + '\')">📤 导出人设卡（纯净）</button>';
     html += '<div class="hint" style="padding:6px 0;font-size:12px;color:var(--sub);">已填字段只做轻微润色，空字段根据人设合理补全，不会凭空捏造。</div>';
     if (c._draft) {
       html += '<button class="btn" onclick="saveDraft()">✅ 保存并开始聊天</button>';
@@ -22853,6 +22854,103 @@ var MAX_MS = 9000;   // 最多显示 9 秒
     hide();
   }, MAX_MS);
 }
+// ===== 导出：纯净人设卡（只含人设文字，不含聊天/记忆/心动值/查手机/头像） =====
+function exportCharProfile(id) {
+  var c = getC(id);
+  if (!c) { alert('角色不存在'); return; }
+
+  // 白名单：只导出"人设字段"，avatar 不导出（纯文字卡）
+  var WHITELIST = [
+    // 基础档案
+    'name','nick','gender','age','birthday','job','family','body',
+    // 外貌与性格
+    'pLook','pKeywords','pBehavior','pBack','pDaily','pLike','pLang',
+    // 说话方式
+    'pStyle','sampleLines','lineColor','pOnlinePersona','opening','pExtra','negative','signature',
+    // 世界观（纯文字，不带 worldId）
+    'worldType','worldview',
+    // 我方设定
+    'myGender','myAge','myJob','myLook','myPersona','myRelation','myExtra',
+    'myNick','myNickIntimate','myNickAngry',
+    // 亲密模块
+    'intimacyOn','intimateLead','intimateShift','intimatePref','intimateBody','intimateLimit',
+    // 开关
+    'allowStickers','allowAutoGreet','activity','model','chatBg','clinginess'
+  ];
+
+  var profile = {};
+  WHITELIST.forEach(function(k){
+    var v = c[k];
+    // 空字符串/undefined/null 一律不导出，避免脏字段占位
+    if (v === undefined || v === null || v === '') return;
+    // 布尔 false 保留（有语义）
+    if (v === false) { profile[k] = false; return; }
+    profile[k] = v;
+  });
+
+  // 社会关系：去掉 targetId（指向别处会脏引用），只保留描述性字段
+  if (Array.isArray(c.relations) && c.relations.length) {
+    profile.relations = c.relations.map(function(r){
+      return {
+        targetId: 'npc',
+        targetName:   r.targetName   || '',
+        targetGender: r.targetGender || '',
+        targetJob:    r.targetJob    || '',
+        relationType: r.relationType || '中性',
+        description:  r.description  || ''
+      };
+    });
+  }
+
+  // 顶层包装，后续如果做导入，用 _type 判断
+  var out = {
+    _type: 'char_profile',
+    _version: 1,
+    _exportTime: new Date().toISOString(),
+    profile: profile
+  };
+
+  var jsonStr = JSON.stringify(out, null, 2);
+  var safeName = (c.nick || c.name || '角色').replace(/[\\/:*?"<>|]/g, '_');
+  var filename = safeName + '_人设_' + new Date().toISOString().slice(0,10) + '.json';
+  downloadJSON(jsonStr, filename);
+  popTip('已导出人设卡「' + (c.nick || c.name) + '」', { icon:'📤', title:'导出成功' });
+}
+
+// ===== 通讯录导出按钮：弹出选择框，让用户选"纯净人设"还是"完整备份" =====
+function popExportChoice(id) {
+  var c = getC(id);
+  if (!c) return;
+  var name = c.nick || c.name || '角色';
+
+  popClose();
+  var p = document.createElement('div');
+  p.className = 'popup';
+  p.id = 'popup';
+  p.innerHTML =
+    '<div class="popup-box">' +
+      '<div class="popup-head">' +
+        '<div class="popup-icon">📤</div>' +
+        '<div class="popup-title">导出 ' + esc(name) + '</div>' +
+        '<div class="popup-msg">选择要导出的内容</div>' +
+      '</div>' +
+      '<div class="popup-btns vertical">' +
+        '<button class="popup-btn main" data-act="profile">📋 只导出人设卡（纯净）</button>' +
+        '<button class="popup-btn sub"  data-act="full">💾 完整备份（人设 + 全部聊天）</button>' +
+        '<button class="popup-btn sub"  data-act="no">取消</button>' +
+      '</div>' +
+    '</div>';
+  phone.appendChild(p);
+
+  p.querySelectorAll('.popup-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var act = btn.getAttribute('data-act');
+      popClose();
+      if (act === 'profile') exportCharProfile(id);
+      else if (act === 'full') exportCharacter(id);
+    });
+  });
+}
 
 function exportCharacter(id) {
   var c = getC(id);
@@ -23076,13 +23174,13 @@ function openExportModal() {
 
   // ---- 提示小字 ----
   var hint = document.createElement('div');
-  hint.textContent = '默认勾选了所有核心数据，按需取消勾选即可';
+  hint.textContent = '默认勾选所有核心数据。只想导出某个角色的人设 → 去通讯录点该角色的 📤';
   hint.style.cssText = 'font-size:12px;color:var(--sub);margin-bottom:12px;text-align:center;';
   box.appendChild(hint);
 
   // ---- 选项列表 ----
   var items = [
-    { id: 'exp_contacts', label: '角色卡（含人设、状态、记忆、行程）', checked: true },
+    { id: 'exp_contacts', label: '全部角色数据（人设 + 状态 + 记忆 + 行程，完整备份）', checked: true },
     { id: 'exp_chats', label: '聊天记录（私聊 + 群聊消息）', checked: true },
     { id: 'exp_worlds', label: '世界观', checked: true },
     { id: 'exp_moments', label: '朋友圈', checked: true },
