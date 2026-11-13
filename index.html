@@ -4260,7 +4260,7 @@ body.has-status-blur #phone[data-theme="halloween_cat"] #statusbar.dark {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261106_1';
+const APP_VER = 'v20261114_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -4361,11 +4361,13 @@ const DEFAULT_ONLINE = `# 【🔴 最高执行层·系统环境与角色内核�
 直接输出聊天内容，严禁把整段回复用【】[]《》或引号包裹。文字中绝不允许出现成对的【】、[]、#、*等符号。你发出的每一样东西都必须用标签包裹，没有"裸着"的文字。每个标签单独占一行，绝对不能合并，严禁解释标签。
 
 ## 二、 发消息格式·铁律（<bubble> 标签）
-格式：<bubble id="序号">一句话</bubble>
+格式：<bubble id="序号">内容</bubble>
 - id 从 1 开始，每条递增（1、2、3...），不能跳号。
-- **单条字数**：每个 <bubble> 最多 15 字。
-- **气泡数量**：一轮回复包含 2 到 5 个 <bubble>。一个 <bubble> 只表达一个小意思，想说第二句必须开新的 <bubble>。绝对禁止把多句话塞进同一个气泡。
+- **单条字数**：每个 <bubble> 最多 25 字。
+- **气泡内部禁止换行**：想接着说就用空格隔开，绝对不要用换行分句。换行只允许出现在气泡外面（标签与标签之间）。
+- **气泡数量**：一轮回复包含 1 到 5 个 <bubble>。可以一句一个气泡，也可以一两句话放同一个气泡里（如 <bubble id="1">今天天气不错 出来玩？</bubble>）。
 - **标点铁律**：禁止句号（。）和逗号（，）。允许：问号（？）、感叹号（！）和空格。禁止一切动作描写（"我笑了"）与心理描写。
+- **标签位置**：所有特殊标签（<inner>、<voice>、<state> 等）必须放在所有 <bubble> 标签之外，不能塞进气泡里面。
 
 **【错误示范·严重违规】**：
 <bubble id="1">我刚到家今天好累你在干嘛</bubble>
@@ -20185,6 +20187,9 @@ function applyState(c, text) {
   // 移除 state 标签本身
   text = text.replace(/<state>[\s\S]*?<\/state>/g, '').trim();
 
+  // 【新增】半截 <state 未闭合 → 从 <state 到末尾全部丢弃，避免污染气泡
+  text = text.replace(/<state[\s\S]*$/g, '').trim();
+
   // 清除残留的旧式心声标记（不管独占一行还是混在文字里，一律清掉）
   text = text.replace(/心声\s*[:：]?\s*[12](?![0-9])/g, '').trim();
 
@@ -20214,17 +20219,32 @@ function splitToBubbles(text) {
   var source = (text || '').replace(/\r\n?/g, '\n').trim();
   if (!source) return [];
 
-  // 模型已经主动换行：完全按模型的分行显示
-  var lines = source.split(/\n+/).map(function(s) {
+  var rawLines = source.split(/\n+/).map(function(s) {
     return s.trim();
   }).filter(Boolean);
+
+  // 【新增】碎渣合并：长度<2 或纯符号的行，拼回上一行
+  var lines = [];
+  rawLines.forEach(function(line) {
+    if (!line) return;
+    // 判断碎渣：长度小于 2 字，或者整行是标点/符号
+    var isJunk = line.length < 2
+      || /^[\[\]<>()（）【】《》，。、；：？！…—\s'"“”‘’·]+$/.test(line);
+    if (isJunk) {
+      if (lines.length) {
+        lines[lines.length - 1] += line;
+      }
+      // 若开头就是碎渣，直接丢弃
+      return;
+    }
+    lines.push(line);
+  });
 
   if (lines.length > 1) return lines;
 
   var line = lines[0] || '';
   if (!line) return [];
 
-  // 有问号、感叹号、省略号等明确收尾时，按收尾标点拆
   var sentenceParts = line.match(
     /[\s\S]*?(?:[。！？!?]+|…+|\.{3,}|[～~]+)(?:["'"'）)】]*)|[\s\S]+$/g
   );
@@ -20235,8 +20255,6 @@ function splitToBubbles(text) {
     }).filter(Boolean);
   }
 
-  // 没标签、没换行、没任何标点时：
-  // 超过 15 字就强制拆，确保不会挤成超长单气泡
   var MAX_BUBBLE_LENGTH = 15;
 
   if (line.length <= MAX_BUBBLE_LENGTH) {
@@ -20251,34 +20269,28 @@ function splitToBubbles(text) {
     var searchEnd = Math.min(MAX_BUBBLE_LENGTH, rest.length - 1);
     var searchStart = Math.max(5, MAX_BUBBLE_LENGTH - 6);
 
-    // 优先在接近第 15 字的位置找自然语气词后面切
     for (var i = searchEnd; i >= searchStart; i--) {
       var before = rest.slice(0, i + 1);
-
       if (/(你呢|我呢|好吗|行吗|对吗|吧|啊|呀|呢|了|的|吗|哦|啦|哎)$/.test(before)) {
         cutAt = i + 1;
         break;
       }
     }
 
-    // 再找常见转折、连接词前面切开
     if (cutAt === -1) {
       var nearby = rest.slice(searchStart, searchEnd + 1);
       var connector = nearby.search(/但是|可是|不过|然后|所以|因为|如果|我刚|你刚|今天|刚才|现在|等会/);
-
       if (connector > 0) {
         cutAt = searchStart + connector;
       }
     }
 
-    // 全部找不到自然位置时，固定在第 15 字后切
     if (cutAt === -1) {
       cutAt = MAX_BUBBLE_LENGTH;
     }
 
     var part = rest.slice(0, cutAt).trim();
     if (part) result.push(part);
-
     rest = rest.slice(cutAt).trim();
   }
 
@@ -20286,6 +20298,7 @@ function splitToBubbles(text) {
 
   return result;
 }
+
 function parseAIMessage(raw) {
     if (!raw) return [{ type: 'text', content: '' }];
 
@@ -20351,7 +20364,8 @@ function parseAIMessage(raw) {
     });
 
     // 3. 提取逻辑：先取出所有标签及其位置 (✨ 这里加上了 quote)
-    const regex = /<(voice|sticker|recall|transfer|block|inner|action|giftback|gift|share|meet|msg|quote)([^>]*)>(?:([\s\S]*?)<\/\1>)?/g;
+    const regex = /<(voice|sticker|recall|transfer|block|inner|action|giftback|gift|share|meet|msg|quote|bubble)([^>]*)>(?:([\s\S]*?)<\/\1>)?/g;
+	
     const parts = [];
     if (_snapWish) { parts._snap = _snapWish; }
 
@@ -20442,17 +20456,27 @@ function parseAIMessage(raw) {
                 parts.push({ type: 'meet_invite', place: mPlace, reason: mReason, meetType: mType, duration: mDuration });
                 break;
             }
-			case 'msg': {
-                var mc = cleanLeftoverTags(t.content || '').trim();
-                if (mc) {
-                    var subLines = splitToBubbles(mc);
-                    subLines.forEach(function(l){
-                        var cc = l.trim();
-                        if (cc) parts.push({ type: 'text', content: cc });
-                    });
-                }
-                break;
-            }
+case 'bubble': {
+    var bc = (t.content || '')
+        .replace(/<inner[\s\S]*?<\/inner>/gi, '')
+        .replace(/<心声[\s\S]*?<\/心声>/gi, '')
+        .replace(/\s*\n+\s*/g, ' ')
+        .replace(/[ \t]+/g, ' ')
+        .trim();
+    if (bc) parts.push({ type: 'text', content: bc });
+    break;
+}
+case 'msg': {
+    var mc = cleanLeftoverTags(t.content || '').trim();
+    if (mc) {
+        var subLines = splitToBubbles(mc);
+        subLines.forEach(function(l){
+            var cc = l.trim();
+            if (cc) parts.push({ type: 'text', content: cc });
+        });
+    }
+    break;
+}
             case 'voice': {
                 if (t.content) parts.push({ type: 'voice', content: t.content });
                 break;
@@ -20895,7 +20919,7 @@ if (pendingGift) {
 let out = await callAI(messages, getEffectiveChatModel(c));
 console.log('【AI原始输出】', JSON.stringify(out));
 out = applyState(c, out);
-	out = out.replace(/\[\d{4}-\d{2}-\d{2}\s+\d{1,2}[:：]\d{2}\]\s*/g, ''); // 擦掉AI误吐的时间戳
+	out = out.replace(/\[\d{4}-\d{2}-\d{2}[\s\S]{0,3}\d{1,2}[:：]\d{2}\]\s*/g, ''); // 擦掉AI误吐的时间戳
 // ★ 接话灵感：只有开关打开时才解析选项；关闭时不解析，避免把 AI 台词误当选项
 var _pendingIdeas = c.ideaOn ? _parseIdeas(out) : [];
 out = out.replace(/\[\[\[OPTIONS\]\]\][\s\S]*$/i, '').trim();
