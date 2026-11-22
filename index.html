@@ -595,6 +595,46 @@ textarea {
   justify-content: center;
   font-size: 15px;
 }
+/* ===== 气泡 v4：分组头部 + 胶囊几何（背景/磨砂/渐变一律不动）===== */
+
+/* 1 · 段内间距 */
+.msg{padding:4px 10px;}              /* 段内上下各 4px → 气泡间隙 8px */
+.msg .cavatar{display:none;}         /* 头像只出现在段首 */
+.msg.cont{margin-top:0;}
+
+/* 2 · 段首头部：头像 + 网名 + 时间 + 状态 */
+.msg-head{display:flex;align-items:flex-start;gap:8px;padding:18px 10px 7px;}
+.msg-head.me{flex-direction:row-reverse;}
+.msg-head .hd-av{position:relative;width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background:var(--theme) center/cover;background-size:cover;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:15px;overflow:hidden;
+  box-shadow:
+    0 0 0 1.2px rgba(255,255,255,.9),
+    0 3px 8px -4px rgba(0,0,0,.2);}
+.msg-head .hd-av::after{content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 205deg,
+    color-mix(in srgb, var(--theme) 25%, #fff) 0deg,
+    color-mix(in srgb, var(--theme) 78%, #fff) 95deg,
+    color-mix(in srgb, var(--theme) 88%, #000) 205deg,
+    color-mix(in srgb, var(--theme) 45%, #fff) 300deg,
+    color-mix(in srgb, var(--theme) 25%, #fff) 360deg);
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 2.8px), #000 calc(100% - 2.3px));
+          mask:radial-gradient(farthest-side, transparent calc(100% - 2.8px), #000 calc(100% - 2.3px));}
+@supports not ((-webkit-mask:radial-gradient(#000,#000)) or (mask:radial-gradient(#000,#000))){
+  .msg-head .hd-av::after{display:none;}
+  .msg-head .hd-av{box-shadow:0 0 0 1.2px rgba(255,255,255,.9),
+    0 0 0 2.6px color-mix(in srgb, var(--theme) 52%, transparent),
+    0 3px 8px -4px rgba(0,0,0,.2);}
+}
+.msg-head .hd-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 8px;
+  flex:1;min-width:0;padding-top:1px;}
+.msg-head.me .hd-meta{flex-direction:row-reverse;}
+.msg-head .hd-name{font-size:13px;font-weight:600;color:var(--text);
+  word-break:break-word;line-height:1.3;}
+.msg-head .hd-time{font-size:10.5px;color:var(--text);white-space:nowrap;}
+.msg-head .hd-st{width:100%;font-size:10px;color:var(--text);line-height:1.4;}
+.msg-head.me .hd-st{text-align:right;}
+
 .msg-slide{display:flex;flex-direction:column;align-items:flex-start;gap:0;transition:transform .2s;position:relative;}
 .msg.me .msg-slide{align-items:flex-end;}
 
@@ -4063,6 +4103,31 @@ body.has-status-blur #phone[data-theme="halloween_cat"] #statusbar.dark {
 #phone[data-theme="halloween_cat"] .cavatar {
   box-shadow: 0 1px 4px rgba(80,60,40,0.18) !important;
 }
+/* ===== 气泡 v6 · 胶囊几何（在主样式表内、所有主题规则之后）===== */
+body:not(.wx-theme-letter) #phone .msg .mbody-txt{
+  border-radius:20px !important;                 /* 单行自动被裁成半圆；想多行也胶囊就改 999px */
+  border-top-left-radius:20px !important;
+  border-top-right-radius:20px !important;
+  border-bottom-left-radius:20px !important;
+  border-bottom-right-radius:20px !important;    /* 四角全重置，清掉卡片主题的 4px 尾巴 */
+  padding:8px 15px !important;
+  line-height:1.45 !important;
+  letter-spacing:.2px !important;
+  text-shadow:0 1px 1px rgba(0,0,0,.05) !important;
+}
+body:not(.wx-theme-letter) #phone .msg.me .mbody-txt{
+  padding:8px 17px !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.16) !important;
+}
+body:not(.wx-theme-letter) #phone .msg:not(.me) .mbody-txt{
+  border:0 !important;
+  box-shadow:0 6px 16px -10px rgba(0,0,0,.16) !important;
+}
+body:not(.wx-theme-letter) #phone .msg.me .mbody-txt{
+  border:0 !important;
+  box-shadow:0 6px 14px -10px color-mix(in srgb, var(--theme) 26%, transparent) !important;
+}
+
 </style>
 </head>
 <body>
@@ -4260,7 +4325,7 @@ body.has-status-blur #phone[data-theme="halloween_cat"] #statusbar.dark {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261122_2';
+const APP_VER = 'v20261122_3';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -18184,6 +18249,23 @@ function toApiMsg(m, withTime){
 
 function colorLines(s,color){const col=color||'var(--theme)';return esc(s).replace(/(「[^」]*」|“[^”]*”|"[^"]*"|＂[^＂]*＂)/g,'<span style="color:'+col+';font-weight:500">$1</span>');}
 function tsHtml(t){return `<div class="ts"><span class="ts-pill">${fmtTime(t)}</span></div>`;}
+// ===== 分组头部：谁 + 什么时候（每段只出现一次）=====
+var _lastRole = null, _lastTime = 0;
+function msgHead(c, m){
+  var me = m.role === 'user';
+  var av = me ? (DB.me.avatar || '') : (c.avatar || '');
+  var nm = me ? (DB.me.name || '我') : (c.nick || c.name || 'TA');   // ← 我方走你设置的网名
+  var ini = av ? '' : String(nm).slice(0, 1);
+  var avaStyle = av ? "background-image:url('" + av + "');" : '';
+  var st = me ? 'Sending… 已送达' : ((c.mode === 'offline') ? '离线' : 'Receiving… 已读');
+  return '<div class="msg-head ' + (me ? 'me' : '') + '">'
+    + '<div class="hd-av" style="' + avaStyle + '">' + esc(ini) + '</div>'
+    + '<div class="hd-meta"><span class="hd-name">' + esc(nm) + '</span>'
+    + '<span class="hd-time">' + fmtTime(m.time || Date.now()) + '</span>'
+    + '<span class="hd-st">' + esc(st) + '</span>'
+    + '</div></div>';
+}
+
 // 根据 AI/用户给的名字，智能查找最匹配的表情
 function findSticker(name) {
   if (!name) return null;
@@ -18220,7 +18302,7 @@ function renderVoiceContent(text) {
     ' <span style="font-style:italic;opacity:0.6;">$1</span> ');
   return out;
 }
-function bubble(c,m){
+function bubble(c,m,noAva){
   if(m.type==='system'){
     return '<div class="ts"><span class="ts-pill" style="color:var(--text);background:rgba(255,255,255,0.06);border:1px solid var(--line);">' + esc(m.content) + '</span></div>';
   }
@@ -18290,7 +18372,7 @@ else if(m.type==='text'){
       '</div>';
   }
   
-  body=`<div class="mbody">${quoteHtml}${me?esc(displayContent):(c.mode==='offline'?colorLines(displayContent,c.lineColor):esc(displayContent))}</div>`;
+  body=`<div class="mbody mbody-txt">${quoteHtml}${me?esc(displayContent):(c.mode==='offline'?colorLines(displayContent,c.lineColor):esc(displayContent))}</div>`;
 }
 else if (m.type === 'share') {
   body = buildShareBubble(m);
@@ -18368,8 +18450,9 @@ else if (m.type === 'shop_item') {
     '</div>';
 }
 
-else{body=`<div class="mbody">${me?esc(m.content):(c.mode==='offline'?colorLines(m.content,c.lineColor):esc(m.content))}</div>`;}
-return `<div class="msg ${me?'me':''}" data-mid="${m.id||''}"><div class="cavatar" style="${av?`background-image:url('${av}')`:''}">${av?'':nm}</div>${body}</div>`;}
+else{body=`<div class="mbody mbody-txt">${me?esc(m.content):(c.mode==='offline'?colorLines(m.content,c.lineColor):esc(m.content))}</div>`;}
+return `<div class="msg ${me?'me':''} ${noAva?'cont':''}" data-mid="${m.id||''}"><div class="cavatar" style="${av?`background-image:url('${av}')`:''}">${av?'':nm}</div>${body}</div>`;
+}
 function renderChat(keepScroll) {
   if (window._chatJustOpened) {
     keepScroll = false;
@@ -18444,14 +18527,22 @@ content.style.background = 'transparent';
   }
   var html = more ? '<div class="ts">（仅显示最近500条，更早' + more + '条已折叠，记忆不受影响）</div>' : '';
   lastBubbleTime = 0;
+  _lastRole = null; _lastTime = 0;
   show.forEach(function(m) {
     if (m.hidden) return; 
     var t = m.time || Date.now();
-    if (!lastBubbleTime || t - lastBubbleTime > 300000) {
-      html += tsHtml(t);
+    var isSys = (m.type === 'system' || m.role === 'system');
+    if (isSys) {                       // 系统提示（撤回/时间条）保持原样，并打断分组
+      html += bubble(c, m, true);
+      _lastRole = null; _lastTime = 0;
       lastBubbleTime = t;
+      return;
     }
-    html += bubble(c, m);
+    if (!_lastRole || m.role !== _lastRole || t - _lastTime > 300000) {
+      html += msgHead(c, m);           // 换人就换段 → 出一次头像+网名+时间
+    }
+    html += bubble(c, m, true);        // 段内气泡：不出头像
+    _lastRole = m.role; _lastTime = t; lastBubbleTime = t;
   });
   
   content.innerHTML = html;
@@ -18988,11 +19079,13 @@ function appendBubble(c,m){
   if(m.hidden)return;
   // 信笺主题：气泡要放进卡片内部的滚动盒子；其它主题维持原样
   var box = document.getElementById('letterChatScroll') || content;
-  if(!lastBubbleTime||m.time-lastBubbleTime>300000){
-    box.insertAdjacentHTML('beforeend',tsHtml(m.time));
-    lastBubbleTime=m.time;
+  var isSys = (m.type === 'system' || m.role === 'system');
+  if (!isSys && (!_lastRole || m.role !== _lastRole || m.time - _lastTime > 300000)) {
+    box.insertAdjacentHTML('beforeend', msgHead(c, m));
   }
-  box.insertAdjacentHTML('beforeend', bubble(c, m));   // ★ 生成气泡 HTML 并插入
+  box.insertAdjacentHTML('beforeend', bubble(c, m, true));   // ★ 生成气泡 HTML 并插入
+  if (isSys) { _lastRole = null; _lastTime = 0; } else { _lastRole = m.role; _lastTime = m.time; }
+  lastBubbleTime = m.time;
   // 收到 AI 的新消息时播放提示音（只播 3 秒内的最新消息，防止点开历史记录乱响）
   if (m.role === 'assistant' && (Date.now() - m.time < 3000)) {
     if (typeof playNoticeSound === 'function') {
@@ -24964,11 +25057,11 @@ function handleOAReturn(cid) {
 // 劫持原来的 bubble 渲染：如果是 oa_invite 类型的消息，绘制工作审批卡片；否则，走原先的老气泡逻辑
 if (typeof window._originalBubble === 'undefined') {
   window._originalBubble = window.bubble;
-  window.bubble = function(c, m) {
+  window.bubble = function(c, m, noAva) {
     if (m.type === 'oa_invite') {
       return renderOACardBubble(c, m);
     }
-    return window._originalBubble(c, m);
+    return window._originalBubble(c, m, noAva);
   };
 }
 
@@ -25513,6 +25606,24 @@ body.wx-theme-letter .msg .mbody {
 body.wx-theme-letter .msg .mbody {
   flex-shrink: 0 !important;
 }
+
+body:not(.wx-theme-letter) #phone .msg:not(.me) .mbody-txt{
+  border:1px solid color-mix(in srgb, #fff 46%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.78),
+    inset 0 2px 8px -4px rgba(255,255,255,.55),
+    0 2px 6px -2px rgba(0,0,0,.06),
+    0 8px 18px -10px rgba(0,0,0,.13) !important;
+}
+body:not(.wx-theme-letter) #phone .msg.me .mbody-txt{
+  border:1px solid color-mix(in srgb, #fff 34%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.62),
+    inset 0 2px 8px -4px rgba(255,255,255,.5),
+    0 2px 8px -3px color-mix(in srgb, var(--theme) 26%, transparent),
+    0 8px 16px -10px color-mix(in srgb, var(--theme) 32%, transparent) !important;
+}
+
     /* ----------------------------------------------------------
        [12] 底部输入区（★ 已合并：原 2 处 #chatBottom）
        ---------------------------------------------------------- */
