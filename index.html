@@ -4127,6 +4127,129 @@ body:not(.wx-theme-letter) #phone .msg.me .mbody-txt{
   border:0 !important;
   box-shadow:0 6px 14px -10px color-mix(in srgb, var(--theme) 26%, transparent) !important;
 }
+/* ==================== 💬 气泡/顶栏/底栏 透明度（新增） ==================== */
+/* ① 两个总开关：--xxx-keep 是倍数，--xxx-t 是补足量。
+      默认 1 和 0% 表示“完全不影响原来画面” */
+:root{
+  --bub-keep: 1;
+  --bub-t: 0%;
+  --bar-keep: 1;
+  --bar-t: 0%;
+  --tb-glass0: 32%;   /* 顶栏原来浓度 */
+  --bb-glass0: 10%;   /* 底栏原来浓度 */
+}
+
+/* ② 把各主题原本的气泡浓度抄一份新名字（原来的代码一个字都不改） */
+.mbody{
+  --bub-ai-core0: 38%; --bub-ai-mid0: 48%; --bub-ai-edge0: 54%;
+  --bub-me-core0: 22%; --bub-me-mid0: 32%; --bub-me-edge0: 38%;
+}
+#phone[data-theme="aqua_girl"] .mbody,
+#phone[data-theme="orchard"] .mbody,
+#phone[data-theme="sunset_parfait"] .mbody,
+#phone[data-theme="redsun_forest"] .mbody,
+#phone[data-theme="goose"] .mbody,
+#phone[data-theme="sea_salt"] .mbody,
+#phone[data-theme="angel_sheep"] .mbody{
+  --bub-ai-core0: 46%; --bub-ai-mid0: 56%; --bub-ai-edge0: 62%;
+  --bub-me-core0: 28%; --bub-me-mid0: 38%; --bub-me-edge0: 44%;
+}
+#phone[data-theme="halloween_cat"] .msg:not(.me) .mbody{
+  --bub-ai-core0: 20%; --bub-ai-mid0: 30%; --bub-ai-edge0: 38%;
+}
+#phone[data-theme="halloween_cat"] .msg.me .mbody{
+  --bub-me-core0: 35%; --bub-me-mid0: 45%; --bub-me-edge0: 52%;
+}
+
+/* ③ 真正的浓度 = 原浓度 × 倍数 + 补足量（!important 保证盖过所有主题） */
+.mbody{
+  --bub-ai-core: calc(var(--bub-ai-core0) * var(--bub-keep) + var(--bub-t)) !important;
+  --bub-ai-mid:  calc(var(--bub-ai-mid0)  * var(--bub-keep) + var(--bub-t)) !important;
+  --bub-ai-edge: calc(var(--bub-ai-edge0) * var(--bub-keep) + var(--bub-t)) !important;
+  --bub-me-core: calc(var(--bub-me-core0) * var(--bub-keep) + var(--bub-t)) !important;
+  --bub-me-mid:  calc(var(--bub-me-mid0)  * var(--bub-keep) + var(--bub-t)) !important;
+  --bub-me-edge: calc(var(--bub-me-edge0) * var(--bub-keep) + var(--bub-t)) !important;
+}
+
+/* ===== 顶栏 / 底栏：浓度由 JS 算好，以 --tb-alpha / --bb-alpha 写在 #phone 上 =====
+   （两个 ID + !important 保证盖过所有主题；预览条和真顶栏读同一个变量） */
+body.has-status-blur #phone #topbar{
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: none !important;
+}
+
+/* statusbar + topbar = ONE sheet of paper: #topbar::before paints 44+56 = 100px in a single pass.
+   The slider only changes the tint layer on top of that paper. */
+body.has-status-blur #phone #topbar::before{
+  display: block !important;
+  content: '' !important;
+  position: absolute !important;
+  top: -44px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 100px !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--nav) var(--tb-alpha, 32%), transparent),
+                    color-mix(in srgb, var(--nav) var(--tb-alpha, 32%), transparent)),
+    var(--sk-wall, none) !important;
+  background-size: 100% 100%, cover !important;
+  background-position: center center, center center !important;
+  background-repeat: no-repeat, no-repeat !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.has-status-blur #phone #chatBottom{
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--card) var(--bb-alpha, 10%), transparent),
+                    color-mix(in srgb, var(--card) var(--bb-alpha, 10%), transparent)),
+    var(--sk-wall, none) !important;
+  background-size: 100% 100%, cover !important;
+  background-position: center center, center bottom !important;
+  background-repeat: no-repeat, no-repeat !important;
+}
+
+/* 最顶上「时间 / 电量」那一条：永远实色，不跟滑块走，避免和下面不协调 */
+body.has-status-blur #phone #statusbar,
+body.has-status-blur #phone #statusbar.dark{
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: var(--theme) !important;
+  text-shadow: none !important;
+}
+
+
+/* ④ 「我」页里的迷你预览条（拖动滑块时它就实时变） */
+.wx-opa-pv{
+  margin:10px 0 0; border-radius:14px; overflow:hidden; border:1px solid var(--line);
+  height:150px; display:flex; flex-direction:column;
+  background:linear-gradient(135deg,#7fb2ff 0%,#ffc2d4 48%,#ffe9a8 100%);
+}
+.wx-opa-pv-top{
+  flex:0 0 30px; display:flex; align-items:center; padding:0 10px;
+  font-size:10px; color:var(--text);
+  background:color-mix(in srgb, var(--nav) var(--tb-alpha, 32%), transparent);
+}
+.wx-opa-pv-mid{
+  flex:1; min-height:0; padding:4px 0;
+  display:flex; flex-direction:column; justify-content:center;
+}
+.wx-opa-pv-bot{
+  flex:0 0 36px; display:flex; align-items:center; gap:6px; padding:0 8px;
+  background:color-mix(in srgb, var(--card) var(--bb-alpha, 10%), transparent);
+}
+.wx-opa-pv-input{
+  flex:1; height:22px; border-radius:11px; display:flex; align-items:center;
+  padding-left:9px; font-size:10px; color:var(--sub);
+  background:color-mix(in srgb, var(--card) var(--glass-input), transparent);
+  border:1px solid color-mix(in srgb, var(--card) var(--glass-edge), transparent);
+}
+.wx-opa-pv .msg{ padding:3px 8px; }
+.wx-opa-pv .mbody{ font-size:11.5px; padding:5px 8px; line-height:1.4; }
 
 </style>
 </head>
@@ -4325,7 +4448,7 @@ body:not(.wx-theme-letter) #phone .msg.me .mbody-txt{
   </div>
 </div>
 <script>
-const APP_VER = 'v20261122_3';
+const APP_VER = 'v20261122_4';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -5100,6 +5223,10 @@ function applySkin(id) {
     root.style.setProperty(key, skin[key]);
   });
 
+  try{
+    root.style.setProperty('--sk-wall', wallpaperToCss(skin.wallpaper || ''));
+  }catch(e){}
+
   // 3. 更新全局状态
   currentThemeId = skin.id;
   DB.settings.skin = skin.id;
@@ -5317,6 +5444,11 @@ function migrate(d) {
   if (d.settings.showBootAnim === undefined) d.settings.showBootAnim = true; // 启动动画开关，默认开
   if (d.settings.soundEnabled === undefined) d.settings.soundEnabled = true;
   if (d.settings.soundVolume === undefined) d.settings.soundVolume = 50; // 默认音量 50%
+    // 聊天界面透明度：0-100，40 = 现在的样子
+  if (d.settings.bubbleOpacity === undefined || isNaN(parseInt(d.settings.bubbleOpacity))) d.settings.bubbleOpacity = 40;
+  if (d.settings.barOpacity   === undefined || isNaN(parseInt(d.settings.barOpacity)))   d.settings.barOpacity = 40;
+  d.settings.bubbleOpacity = Math.max(0, Math.min(100, parseInt(d.settings.bubbleOpacity)));
+  d.settings.barOpacity    = Math.max(0, Math.min(100, parseInt(d.settings.barOpacity)));
 
   // 心迹数据重置兜底
   delete d.hearts; delete d.heartsTotal; delete d.heartLog; delete d.heartMile;
@@ -13170,6 +13302,7 @@ function renderWxMe(){
         '<div class="card-container" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;">' +
           themeButtonsHtml +
         '</div>' +
+        wxAppearanceHtml() +
 
       '</div>';
     return;
@@ -13192,8 +13325,121 @@ function renderWxMe(){
     '<div class="section-title" style="margin-top:14px;">🎨 微信主题</div>' +
     '<div style="padding:6px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
       themeButtonsHtml +
-    '</div>';
+    '</div>' +
+    wxAppearanceHtml();
 }
+
+/* ===================== 💬 聊天界面透明度 ===================== */
+var OPA_BASE = 40;   // 40 = 现在的样子
+
+/* 把 0-100 的滑块值，换算成“倍数 + 补足量” */
+function opaVars(p){
+  p = Math.max(0, Math.min(100, parseFloat(p) || 0));
+  var keep, t;
+  if (p >= OPA_BASE){
+    keep = 1 - (p - OPA_BASE) / (100 - OPA_BASE);       // 40→1，100→0
+    t    = (p - OPA_BASE) / (100 - OPA_BASE) * 100;      // 40→0%，100→100%
+  } else {
+    keep = p / OPA_BASE;                               // 0→0，40→1
+    t    = 0;
+  }
+  return { k: keep.toFixed(3), t: t.toFixed(2) + '%' };
+}
+
+/* 把存档里的值应用到界面上 */
+function applyChatOpacity(){
+  var phone = document.getElementById('phone');
+  if (!phone) return;
+  var sb = (DB.settings.bubbleOpacity === undefined) ? OPA_BASE : DB.settings.bubbleOpacity;
+  var sr = (DB.settings.barOpacity    === undefined) ? OPA_BASE : DB.settings.barOpacity;
+  var kb = opaVars(sb), kr = opaVars(sr);
+  phone.style.setProperty('--bub-keep', kb.k);
+  phone.style.setProperty('--bub-t',    kb.t);
+  applyBarAlpha(sr);
+}
+
+/* 顶栏/底栏：算出「绝对浓度」百分比写在 #phone 上（真顶栏和预览条共用同一份） */
+function applyBarAlpha(p){
+  var phone = document.getElementById('phone');
+  if (!phone) return;
+  var v = opaVars(p);
+  var k = parseFloat(v.k), t = parseFloat(v.t);
+  var tb = 32 * k + t;   // 顶栏原来 32%
+  var bb = 10 * k + t;   // 底栏原来 10%
+  phone.style.setProperty('--tb-alpha', Math.max(0, Math.min(100, tb)).toFixed(2) + '%');
+  phone.style.setProperty('--bb-alpha', Math.max(0, Math.min(100, bb)).toFixed(2) + '%');
+}
+
+/* 一键恢复默认 40% */
+function resetChatOpacity(){
+  DB.settings = DB.settings || {};
+  DB.settings.bubbleOpacity = OPA_BASE;
+  DB.settings.barOpacity    = OPA_BASE;
+  save();
+  applyChatOpacity();
+  var s1 = document.getElementById('opaBubSlider'); if (s1) s1.value = OPA_BASE;
+  var s2 = document.getElementById('opaBarSlider'); if (s2) s2.value = OPA_BASE;
+  var l1 = document.getElementById('opaBubVal');    if (l1) l1.textContent = OPA_BASE + '%';
+  var l2 = document.getElementById('opaBarVal');    if (l2) l2.textContent = OPA_BASE + '%';
+}
+
+/* 拖动中：只改显示，不写存档（所以很流畅） */
+function onOpacityInput(kind, val){
+  var phone = document.getElementById('phone');
+  if (!phone) return;
+  var v = opaVars(val);
+  if (kind === 'bubble'){
+    phone.style.setProperty('--bub-keep', v.k);
+    phone.style.setProperty('--bub-t', v.t);
+  } else {
+    applyBarAlpha(val);
+  }
+  var lab = document.getElementById(kind === 'bubble' ? 'opaBubVal' : 'opaBarVal');
+  if (lab) lab.textContent = Math.round(parseFloat(val) || 0) + '%';
+}
+
+/* 松手：写进 DB.settings 并保存，重启后依然生效 */
+function onOpacityChange(kind, val){
+  DB.settings = DB.settings || {};
+  var n = Math.round(parseFloat(val) || 0);
+  if (kind === 'bubble') DB.settings.bubbleOpacity = n;
+  else                   DB.settings.barOpacity    = n;
+  save();
+  applyChatOpacity();
+  onOpacityInput(kind, n);
+}
+
+/* 「我」页里那一段滑块 + 迷你预览的 HTML */
+function wxAppearanceHtml(){
+  var b = (DB.settings.bubbleOpacity === undefined) ? OPA_BASE : DB.settings.bubbleOpacity;
+  var r = (DB.settings.barOpacity    === undefined) ? OPA_BASE : DB.settings.barOpacity;
+  return ''
+  + '<div class="section-title" style="margin-top:14px;">💬 聊天界面透明度</div>'
+  + '<div class="field" style="border-radius:12px;margin:0 14px;border:1px solid var(--line);">'
+  +   '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;">'
+  +     '<span>聊天气泡</span><span id="opaBubVal" style="color:var(--theme);font-weight:600;">' + b + '%</span>'
+  +   '</div>'
+  +   '<input type="range" min="0" max="100" step="1" value="' + b + '" style="width:100%;accent-color:var(--theme);"'
+  +     ' id="opaBubSlider" oninput="onOpacityInput(\'bubble\',this.value)" onchange="onOpacityChange(\'bubble\',this.value)">'
+  +   '<div style="height:12px;"></div>'
+  +   '<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text);margin-bottom:6px;">'
+  +     '<span>顶栏 / 底栏</span><span id="opaBarVal" style="color:var(--theme);font-weight:600;">' + r + '%</span>'
+  +   '</div>'
+  +   '<input type="range" min="0" max="100" step="1" value="' + r + '" style="width:100%;accent-color:var(--theme);"'
+  +     ' id="opaBarSlider" oninput="onOpacityInput(\'bar\',this.value)" onchange="onOpacityChange(\'bar\',this.value)">'
+  +   '<div style="font-size:10.5px;color:var(--sub);opacity:.8;margin-top:8px;line-height:1.6;">0% = 只留底纸（壁纸）· 40% = 现在的样子 · 100% = 完全实色</div>'
+  +   '<div class="wx-opa-pv">'
+  +     '<div class="wx-opa-pv-top">预览 · 顶栏</div>'
+  +     '<div class="wx-opa-pv-mid">'
+  +       '<div class="msg"><div class="mbody">AI 气泡的样子～</div></div>'
+  +       '<div class="msg me"><div class="mbody">你的气泡的样子～</div></div>'
+  +     '</div>'
+  +     '<div class="wx-opa-pv-bot"><div class="wx-opa-pv-input">输入框</div></div>'
+  +   '</div>'
+  +   '<button class="btn gray" style="width:100%;margin:12px 0 0;padding:9px 0;font-size:13px;" onclick="resetChatOpacity()">恢复默认（40%）</button>'
+  + '</div>';
+}
+
 function pickMeAvatar(){pickImage(d=>{DB.me.avatar=d;save();render();});}
 function attachSwipe() {
   var cells = document.querySelectorAll('.swipe-cell');
@@ -22773,6 +23019,8 @@ function bootStartup(){
   }
   applySkin(DB.settings.skin || 'fusion');
   applyBubbleStyle(DB.settings.bubbleStyle || '');
+    applyChatOpacity();
+
   // 同步微信主题的图标模式（img图片 或 svg线条图标），确保刷新页面后图标不会显示错
   var _initTheme = WX_THEMES.find(function(t){ return t.id === ((DB.settings && DB.settings.wxTheme) || 'default'); });
   document.body.setAttribute('data-tab-icon-mode', (_initTheme && _initTheme.tabIconMode) || 'img');
