@@ -4260,7 +4260,7 @@ body.has-status-blur #phone[data-theme="halloween_cat"] #statusbar.dark {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261114_1';
+const APP_VER = 'v20261122_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -20223,28 +20223,28 @@ function splitToBubbles(text) {
     return s.trim();
   }).filter(Boolean);
 
-  // 【新增】碎渣合并：长度<2 或纯符号的行，拼回上一行
+  // 碎渣合并：长度<2 或纯符号的行，拼回上一行
   var lines = [];
   rawLines.forEach(function(line) {
     if (!line) return;
-    // 判断碎渣：长度小于 2 字，或者整行是标点/符号
     var isJunk = line.length < 2
       || /^[\[\]<>()（）【】《》，。、；：？！…—\s'"“”‘’·]+$/.test(line);
     if (isJunk) {
       if (lines.length) {
         lines[lines.length - 1] += line;
       }
-      // 若开头就是碎渣，直接丢弃
       return;
     }
     lines.push(line);
   });
 
+  // ① 按换行分条（你原来正常分行就靠这）
   if (lines.length > 1) return lines;
 
   var line = lines[0] || '';
   if (!line) return [];
 
+  // ② 按句末标点分句（你原来能正常分句就靠这）
   var sentenceParts = line.match(
     /[\s\S]*?(?:[。！？!?]+|…+|\.{3,}|[～~]+)(?:["'"'）)】]*)|[\s\S]+$/g
   );
@@ -20255,50 +20255,9 @@ function splitToBubbles(text) {
     }).filter(Boolean);
   }
 
-  var MAX_BUBBLE_LENGTH = 15;
-
-  if (line.length <= MAX_BUBBLE_LENGTH) {
-    return [line];
-  }
-
-  var result = [];
-  var rest = line;
-
-  while (rest.length > MAX_BUBBLE_LENGTH) {
-    var cutAt = -1;
-    var searchEnd = Math.min(MAX_BUBBLE_LENGTH, rest.length - 1);
-    var searchStart = Math.max(5, MAX_BUBBLE_LENGTH - 6);
-
-    for (var i = searchEnd; i >= searchStart; i--) {
-      var before = rest.slice(0, i + 1);
-      if (/(你呢|我呢|好吗|行吗|对吗|吧|啊|呀|呢|了|的|吗|哦|啦|哎)$/.test(before)) {
-        cutAt = i + 1;
-        break;
-      }
-    }
-
-    if (cutAt === -1) {
-      var nearby = rest.slice(searchStart, searchEnd + 1);
-      var connector = nearby.search(/但是|可是|不过|然后|所以|因为|如果|我刚|你刚|今天|刚才|现在|等会/);
-      if (connector > 0) {
-        cutAt = searchStart + connector;
-      }
-    }
-
-    if (cutAt === -1) {
-      cutAt = MAX_BUBBLE_LENGTH;
-    }
-
-    var part = rest.slice(0, cutAt).trim();
-    if (part) result.push(part);
-    rest = rest.slice(cutAt).trim();
-  }
-
-  if (rest) result.push(rest);
-
-  return result;
+  // ③ 原 15 字硬切已删除，整句原样返回
+  return [line];
 }
-
 function parseAIMessage(raw) {
     if (!raw) return [{ type: 'text', content: '' }];
 
