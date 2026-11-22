@@ -4260,7 +4260,7 @@ body.has-status-blur #phone[data-theme="halloween_cat"] #statusbar.dark {
   </div>
 </div>
 <script>
-const APP_VER = 'v20261122_1';
+const APP_VER = 'v20261122_2';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -19304,9 +19304,13 @@ function cancelQuote() {
 }
 // ====== 引用功能结束 ======
 
-
+function stopAI(){
+  _aiStopped = true;                        // 打开"别继续了"开关
+  if (_aiAbort) { try { _aiAbort.abort(); } catch(e){} }   // 按下遥控器，网络请求立刻断
+}
 // ---------- 发送按钮点击 (保留这个完整的版本) ----------
 function actBtnClick() {
+    if (replying) { stopAI(); return; } 
     var el = document.getElementById('chatInput');
     var text = el ? el.value.trim() : '';
     if (text) {
@@ -20690,6 +20694,9 @@ function extractMarkers(line) {
   return { markers: markers, cleanText: clean };
 }
 let replying=false,lastActivity=Date.now();
+let _aiAbort = null;
+let _aiStopped = false;
+
 async function aiReply(nudge) {
   console.log('aiReply触发，replying状态=', replying);
   if (replying) return;
@@ -20718,11 +20725,16 @@ if (!getEffectiveChatModel(c)) {
     return;
 }
   replying = true;
+    _aiStopped = false;
+  _aiAbort = new AbortController();
   setChatTitle(c, '正在输入…');
 
   const b = document.getElementById('actBtn');
-  if (b) { b.textContent = '…'; b.disabled = true; }
-
+  if (b) {
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+    b.disabled = false;
+  }
+  
   let meetPlace = null;
   let wantBack = false;
 
@@ -21091,7 +21103,7 @@ if (part.type === 'share') {
           if (part.ideas && part.ideas.length) msgObj.ideas = part.ideas; // ★ 选项只挂在这，不进 content
         }
         }
-
+        if (_aiStopped) break;
         // 发送消息
         if (msgObj) {
             DB.chats[c.id].push(msgObj);
@@ -21102,6 +21114,7 @@ if (part.type === 'share') {
             if (msgObj.type === 'text' || msgObj.type === 'voice') {
                  if (i < parts.length - 1) {
                     await sleep(500 + Math.min((msgObj.content || '').length * 28, 1600));
+                    if (_aiStopped) break;					
                  }
             }
         }
@@ -21158,12 +21171,16 @@ if (c.ideaOn && _pendingIdeas && _pendingIdeas.length) {
     // ★★ 聊天随手拍：文字发完后，后台悄悄配图（不阻塞）★★
     triggerChatSnapshot(c, parts);
   } catch (e) {
-    console.error('aiReply 出错：', e);   // 新增：把错误打到控制台
-    alert('回复失败：' + (e && e.message ? e.message : e));
+    // ★ 用户主动点停止导致的报错，不弹窗、不打红字
+    if (!_aiStopped) {
+      console.error('aiReply 出错：', e);
+      alert('回复失败：' + (e && e.message ? e.message : e));
+    } else {
+      console.log('用户主动停止了AI回复');
+    }
   } finally {
     // ★ 兜底：如果本次是重刷但因异常提前结束，清掉残留标记
     if (c && c._isRegen) c._isRegen = false;
-
     // ===== 兜底：一次回复后，自动收下所有待处理的礼物卡片 =====
     if (c && c._hasPendingGift) {
 	var msgs = DB.chats[c.id] || [];
@@ -21190,8 +21207,13 @@ if (c.ideaOn && _pendingIdeas && _pendingIdeas.length) {
 
     setChatTitle(c);
     replying = false;
+    _aiStopped = false;
+    _aiAbort = null;
+    
+    // 注意：b2 必须先用 const 声明，才能在后面用
     const b2 = document.getElementById('actBtn');
     if (b2) b2.disabled = false;
+    
     updateActBtn();
 }
 }
@@ -22494,10 +22516,11 @@ async function callAI(messages, model, _retry, opts){
           { model: model || s.chatModel, messages },
           opts.temperature != null ? { temperature: opts.temperature } : {}
         )
-      )
+      ),
+      signal: _aiAbort ? _aiAbort.signal : undefined
 
     });
-
+	
     // ★ body 只读这一次，成功/失败都复用 rawText
     var rawText = '';
     try { rawText = await res.text(); } catch(e){}
