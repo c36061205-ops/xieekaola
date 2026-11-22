@@ -4448,7 +4448,7 @@ body.has-status-blur #phone #statusbar.dark{
   </div>
 </div>
 <script>
-const APP_VER = 'v20261122_4';
+const APP_VER = 'v20261122_5';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -13725,11 +13725,38 @@ content.innerHTML = `
   </div>
 </div>
 
+<div class="m-title"><span class="bar"></span>手动添加模型</div>
+<div class="m-card">
+  <div class="m-row" style="gap:8px;">
+    <div style="flex:1;min-width:0;">
+      <input class="m-input" id="manualModel" placeholder="粘贴模型ID，多个用逗号隔开" autocomplete="off" style="width:100%;">
+    </div>
+    <button class="m-btn solid" style="width:auto;flex:0 0 auto;padding:9px 16px;font-size:13px;" onclick="addManualModel()">添加</button>
+  </div>
+</div>
+<div style="font-size:11.5px;color:var(--sub);padding:8px 18px 0;line-height:1.7;">
+  豆包 / 火山方舟这类接口没有「模型列表」，拉取会失败，直接在这里手填就行：地址 <b>https://ark.cn-beijing.volces.com/api/v3</b>，密钥填方舟 API Key，模型ID（也支持接入点 ep- 开头）粘进来点「添加」。
+</div>
+
 <div class="m-btns">
-  <button class="m-btn soft" onclick="fetchModels()">
+  <div class="m-title"><span class="bar"></span>接口自检</div>
+  <div class="m-card">
+    <div class="m-row" style="flex-direction:column;align-items:stretch;gap:10px;">
+      <button class="m-btn soft" style="padding:11px;font-size:13px;" onclick="diagApi()">用当前配置发一次最小测试（同步请求）</button>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);">
+        <input type="checkbox" id="dbgApi" onclick="DB.settings.debugApi=this.checked;save();" ${s.debugApi?'checked':''}>
+        在控制台打印每次请求（model / URL）
+      </label>
+      <pre id="diagOut" style="margin:0;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-all;color:var(--sub);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;min-height:40px;">点上面的按钮：这里会打印最终 URL、model、请求体、状态码和返回原文。</pre>
+    </div>
+  </div>
+
+  ${(/volces\.com|ark\./i.test(s.apiUrl||''))
+    ? '<div style="font-size:11.5px;color:var(--sub);padding:2px 4px 8px;line-height:1.6;">当前是火山方舟接口：没有 /models 列表接口，「拉取模型」已禁用，请用上面的手动添加。</div>'
+    : `<button class="m-btn soft" onclick="fetchModels()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg>
     连接并拉取模型
-  </button>
+  </button>`}
   <button class="m-btn solid" onclick="saveApi()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
     保存接口设置
@@ -13742,6 +13769,13 @@ content.innerHTML = `
 
 <div style="height:20px"></div>
 `;
+    // 让「已保存 / 手动添加」的模型也能在下拉里出现
+    var _ml = (DB.settings.availableModels || []);
+    fillSelect('chatModel',  _ml, DB.settings.chatModel);
+    fillSelect('auxModel',   _ml, DB.settings.auxModel);
+    fillSelect('lightModel', _ml, DB.settings.lightModel);
+    fillSelect('imageModel', _ml, DB.settings.imageModel);
+    fillSelect('voiceModel', _ml, DB.settings.voiceModel);
     return;
   }
 
@@ -22381,7 +22415,7 @@ async function callAIStream(messages, model, onDelta){
   var res = await fetch(s.apiUrl+'/chat/completions',{
     method:'POST',
     headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+s.apiKey },
-    body: JSON.stringify({ model:model, messages:messages, stream:true })
+    body: JSON.stringify({ model:cleanModelId(model), messages:messages, stream:true })
   });
   if(!res.ok){ var t=''; try{t=await res.text();}catch(e){} throw new Error('HTTP '+res.status+(t?'：'+t.slice(0,200):'')); }
   var reader = res.body.getReader(), decoder = new TextDecoder();
@@ -22852,13 +22886,14 @@ async function callAI(messages, model, _retry, opts){
       },
       body: JSON.stringify(
         Object.assign(
-          { model: model || s.chatModel, messages },
+          { model: cleanModelId(model || s.chatModel), messages },
           opts.temperature != null ? { temperature: opts.temperature } : {}
         )
       ),
       signal: _aiAbort ? _aiAbort.signal : undefined
 
     });
+    if (DB.settings.debugApi) { try { console.log('[AI请求] URL=' + s.apiUrl + '/chat/completions  model=' + JSON.stringify(cleanModelId(model || s.chatModel))); } catch (e) {} }
 	
     // ★ body 只读这一次，成功/失败都复用 rawText
     var rawText = '';
@@ -22896,6 +22931,20 @@ async function callAI(messages, model, _retry, opts){
 }
 async function genWorld(){const c=getC(editingId);const btn=document.getElementById('genWorldBtn');const model=DB.settings.auxModel||DB.settings.chatModel;if(!model){alert('请先在设置里选择模型');return;}btn.textContent='生成中…';btn.disabled=true;try{const txt=await callAI([{role:'user',content:`为角色扮演生成简洁世界观。类型：「${c.worldType||'现代都市'}」，角色：${c.pKeywords||c.name}。250字内含地点时代氛围关键设定，直接输出正文。`}],model);c.worldview=txt;save();render();}catch(e){alert('生成失败：'+e.message);btn.textContent='🌍 AI 生成/补全世界观';btn.disabled=false;}}
 function addContact(){const id='c'+Date.now();const c=blankChar(id);c._draft=true;DB.contacts.push(c);DB.chats[id]=[];save();editContact(id,'contacts');}
+/* 清洗模型ID：把复制来的花式连字符 / 全角字符 / 零宽字符 / 引号 全部规整掉，
+   这是「curl 能通、App 报 Model not found」最常见的原因 */
+function cleanModelId(v){
+  if (v == null) return '';
+  var t = String(v);
+  t = t.replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF\u00A0]/g, ' ');
+  t = t.replace(/[\u2010-\u2015\u2043\u2212\uFF0D\uFE63]/g, '-');
+  t = t.replace(/[\uFF01-\uFF5E]/g, function(ch){
+    return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0);
+  });
+  t = t.replace(/[`'"“”‘’《》<>]/g, ' ');
+  return t.trim().replace(/\s+/g, '');
+}
+
 async function fetchModels(){
   const url=document.getElementById('apiUrl').value.trim().replace(/\/$/,'');
   const key=document.getElementById('apiKey').value.trim();
@@ -22924,17 +22973,77 @@ fillSelect('voiceModel', voiceList, DB.settings.voiceModel);
     // ==================================
     alert('成功拉取 '+list.length+' 个模型');
   }catch(e){
-    alert('拉取失败：'+e.message+'\n\n地址：'+url+'\n\n【手机常见原因】\n1.地址开头是否 https（手机对http/混合内容更严格）\n2.UC浏览器可能拦截跨域，换Chrome/系统浏览器试试\n3.本地文件(file://)在部分手机浏览器无法发起请求');
+    alert('拉取失败：'+e.message+'\n\n地址：'+url+'\n\n【手机常见原因】\n1.地址开头是否 https（手机对http/混合内容更严格）\n2.UC浏览器可能拦截跨域，换Chrome/系统浏览器试试\n3.本地文件(file://)在部分手机浏览器无法发起请求\n\n【豆包 / 火山方舟】这类接口没有 /models，拉不到属正常，请用下方「手动添加模型」直接填模型ID');
   }
 }
 function fillSelect(id,list,sel){
   var el = document.getElementById(id);
   if(!el) return;
+  list = (list || []).slice();
+  if (sel && list.indexOf(sel) === -1) list.unshift(sel);
   var html = '<option value=""' + (sel ? '' : ' selected') + '>不使用</option>';
   html += list.map(function(m){
     return '<option value="' + m + '"' + (m === sel ? ' selected' : '') + '>' + m + '</option>';
   }).join('');
   el.innerHTML = html;
+}
+
+/* 用当前配置发一次最小同步请求，把最终 URL / model / 请求体 / 返回原文全部打出来 */
+async function diagApi(){
+  var out = document.getElementById('diagOut');
+  var s = DB.settings;
+  var url = (s.apiUrl || '').replace(/\/$/, '');
+  var key = (s.apiKey || '');
+  var model = cleanModelId(s.chatModel);
+  var lines = [];
+  lines.push('URL    : ' + url + '/chat/completions');
+  lines.push('model  : ' + JSON.stringify(model) + '   (len=' + model.length + ')');
+  var bad = [];
+  for (var i = 0; i < model.length; i++) {
+    var c = model.charCodeAt(i);
+    if (c > 127) bad.push(i + ':' + c);
+  }
+  lines.push('非ASCII: ' + (bad.length ? bad.join(', ') : '无'));
+  lines.push('密钥   : ' + (key ? ('Bearer ' + key.slice(0, 5) + '…' + key.slice(-4) + '  (len=' + key.length + ')') : '空'));
+  if (/[ \t\r\n]/.test(key)) lines.push('⚠️ 密钥里含空白/换行');
+  if (url.indexOf('/chat/completions') !== -1) lines.push('⚠️ API地址里已经带了 /chat/completions，会被重复拼接');
+  var body = { model: model, messages: [{ role: 'user', content: 'hi' }] };
+  lines.push('body   : ' + JSON.stringify(body));
+  if (out) out.textContent = lines.join('\n');
+  try {
+    var t0 = Date.now();
+    var res = await fetch(url + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify(body)
+    });
+    var txt = '';
+    try { txt = await res.text(); } catch (e) {}
+    lines.push('');
+    lines.push('HTTP ' + res.status + '   ' + (Date.now() - t0) + 'ms');
+    lines.push(txt.slice(0, 600));
+    if (out) out.textContent = lines.join('\n');
+    try { console.log('[接口自检]', { url: url, body: body, status: res.status, resp: txt }); } catch (e) {}
+  } catch (e) {
+    lines.push('');
+    lines.push('请求失败：' + e.message);
+    if (out) out.textContent = lines.join('\n');
+  }
+}
+
+function addManualModel(){
+  var el = document.getElementById('manualModel');
+  if (!el) return;
+  var parts = (el.value || '').split(/[,，;；\s]+/).map(cleanModelId).filter(function(x){ return !!x; });
+  if (!parts.length) { alert('先把模型ID粘进来（多个用逗号或空格隔开）'); return; }
+  var list = (DB.settings.availableModels || []).slice();
+  var added = 0;
+  parts.forEach(function(m){ if (list.indexOf(m) === -1) { list.push(m); added++; } });
+  DB.settings.availableModels = list;
+  if (!DB.settings.chatModel) DB.settings.chatModel = parts[0];
+  save();
+  renderSettings();
+  alert('已加入 ' + added + ' 个模型，当前共 ' + list.length + ' 个。\n到上面的「主聊天」等下拉里选中它，再点「保存接口设置」。');
 }
 
 function saveApi(){
@@ -22947,6 +23056,7 @@ function saveApi(){
     var vm = document.getElementById('voiceModel').value;
   // ★ 统一处理：选了"不使用"（空值）就存成空字符串，表示停用该模型
   function _setModel(key, val){
+    val = cleanModelId(val);
     if (val === '' || val === '不使用') { DB.settings[key] = ''; return; }
     if (val && val.indexOf('请先') === -1) { DB.settings[key] = val; }
   }
