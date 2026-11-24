@@ -739,6 +739,62 @@ textarea {
   text-shadow:none !important;
 }
 
+/* ===== 语音条：与文字气泡完全同一套几何（同一个胶囊 / 一样高 / 一样内边距） ===== */
+/* 经典微信 + 软萌卡片：直接抄 .mbody-txt 的胶囊参数（20px 圆角、8px 15px 内边距、同款描边阴影） */
+body:not(.wx-theme-letter) #phone .msg .mbody.voice-bubble{
+  border-radius: 20px !important;
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  border-bottom-left-radius: 20px !important;
+  border-bottom-right-radius: 20px !important;
+  padding: 8px 15px !important;
+  min-width: 0 !important;
+  gap: 4px !important;
+  border: 0 !important;
+  box-shadow: 0 6px 16px -10px rgba(0,0,0,.16) !important;
+}
+body:not(.wx-theme-letter) #phone .msg.me .mbody.voice-bubble{
+  padding: 8px 17px !important;
+  border: 0 !important;
+  box-shadow: 0 6px 14px -10px color-mix(in srgb, var(--theme) 26%, transparent) !important;
+}
+/* 微光信笺：跟随它自己的圆角，但四个角一样圆，去掉左上尖角 */
+body.wx-theme-letter .msg .mbody.voice-bubble{
+  border-radius: var(--bub-radius, 14px) !important;
+  border-top-left-radius: var(--bub-radius, 14px) !important;
+  border-top-right-radius: var(--bub-radius, 14px) !important;
+  padding: 9px 13px !important;
+  min-width: 0 !important;
+  gap: 4px !important;
+}
+/* 内部内容压到和一行文字一样高（20px），整体高度就跟文字气泡一致 */
+.mbody.voice-bubble .voice-top{
+  gap: 8px !important;
+  height: 20px !important;
+}
+.mbody.voice-bubble .play-icon{
+  font-size: 12px !important;
+  line-height: 20px !important;
+  opacity: .55 !important;
+}
+.mbody.voice-bubble .wave-bars{
+  height: 20px !important;
+  gap: 2px !important;
+}
+.mbody.voice-bubble .wave-bars .bar{
+  width: 2.5px !important;
+}
+/* 只用 6 根波形，宽度收窄，别撑成一块大砖 */
+.mbody.voice-bubble .wave-bars .bar:nth-child(n+7){
+  display: none !important;
+}
+.mbody.voice-bubble .duration{
+  font-size: 11px !important;
+  line-height: 20px !important;
+  min-width: 0 !important;
+  opacity: .48 !important;
+}
+
 .bubble-btn {
   display: flex;
   align-items: center;
@@ -4448,7 +4504,7 @@ body.has-status-blur #phone #statusbar.dark{
   </div>
 </div>
 <script>
-const APP_VER = 'v20261122_5';
+const APP_VER = 'v20261124_1';
 const cachedVer = localStorage.getItem('app_cached_ver');
 if (cachedVer !== APP_VER) {
   localStorage.setItem('app_cached_ver', APP_VER);
@@ -4551,10 +4607,10 @@ const DEFAULT_ONLINE = `# 【🔴 最高执行层·系统环境与角色内核�
 ## 二、 发消息格式·铁律（<bubble> 标签）
 格式：<bubble id="序号">内容</bubble>
 - id 从 1 开始，每条递增（1、2、3...），不能跳号。
-- **单条字数**：每个 <bubble> 最多 25 字。
-- **气泡内部禁止换行**：想接着说就用空格隔开，绝对不要用换行分句。换行只允许出现在气泡外面（标签与标签之间）。
-- **气泡数量**：一轮回复包含 1 到 5 个 <bubble>。可以一句一个气泡，也可以一两句话放同一个气泡里（如 <bubble id="1">今天天气不错 出来玩？</bubble>）。
-- **标点铁律**：禁止句号（。）和逗号（，）。允许：问号（？）、感叹号（！）和空格。禁止一切动作描写（"我笑了"）与心理描写。
+- **一条一句话**：每个 <bubble> 只放一句**完整**的话，20 字左右即可；**绝对不能把半句拆到下一个气泡**（例如先发「…把想说的话全喷」再发「出来了」是违规的）；这句话说完整了，才换下一个标签。
+- **一个气泡不许多句**：想接着说就另开一个 <bubble> 标签，不要用空格把两句硬凑在一个气泡里，也不要在气泡内部换行。换行只允许出现在标签与标签之间。
+- **气泡数量**：一轮回复 2 到 5 条，一条一句，写完一句就换下一个标签；绝对不要把两句以上塞进同一个 <bubble>。
+- **标点**：允许逗号（，）、问号（？）、感叹号（！）；仍然禁止句号（。）。禁止一切动作描写（"我笑了"）与心理描写。
 - **标签位置**：所有特殊标签（<inner>、<voice>、<state> 等）必须放在所有 <bubble> 标签之外，不能塞进气泡里面。
 
 **【错误示范·严重违规】**：
@@ -4588,7 +4644,7 @@ const DEFAULT_ONLINE = `# 【🔴 最高执行层·系统环境与角色内核�
 - 触发条件：只在极其害羞、极度克制、不知所措时使用。代表**在输入框打好了字却默默删掉的瞬间真心话**。日常聊天绝对禁止使用！绝对禁止大男子主义或套路化词汇。
 ⑥ **引用回复**：<quote ref="对方原话的片段">针对这句的具体回复</quote>
 - 仅在针对性回复对方某句话时使用。
-- **字数与标点规则与 <bubble> 完全一致**（最多15字，禁止句号逗号）。
+- **字数与标点规则与 <bubble> 完全一致**（最多15字，禁止句号，允许逗号）。
 - 可以和 <bubble> 组合使用，计入一轮回复的气泡总数。
 
 ✅ **【包含引用的正确示范】**：
@@ -20588,6 +20644,9 @@ function cleanLeftoverTags(text) {
     
     // ★★★ 彻底抹除残留的"心声1/心声2"文本 ★★★
     t = t.replace(/(?:^|\n|\s)*[【\[（(]?\s*心声\s*[:：|｜]?\s*[12一二]\s*[】\]）)]?/gi, '');
+    // 兜底：清掉漏了左尖括号的标签残渣（bubble id="1"> / /bubble> 这类）
+    t = t.replace(/(?:^|\n)\s*(?:bubble|msg|voice|sticker|inner|quote|meet|gift|transfer|recall|action|share|block)\s+[^>]{0,80}>\s*/gi, '\n');
+    t = t.replace(/(?:^|\n)\s*\/(?:bubble|msg|voice|sticker|inner|quote|meet|gift|transfer|recall|action|share|block)>\s*/gi, '\n');
     
     return t.trim();
 }
@@ -20604,8 +20663,7 @@ function splitToBubbles(text) {
   var lines = [];
   rawLines.forEach(function(line) {
     if (!line) return;
-    var isJunk = line.length < 2
-      || /^[\[\]<>()（）【】《》，。、；：？！…—\s'"“”‘’·]+$/.test(line);
+    var isJunk = /^[\[\]<>()（）【】《》，。、；：？！…—\s'"“”‘’·.~～]+$/.test(line);
     if (isJunk) {
       if (lines.length) {
         lines[lines.length - 1] += line;
@@ -20648,6 +20706,11 @@ function parseAIMessage(raw) {
         return match.replace(/```(json|xml|text)?\n?/gi, '').replace(/```/g, '');
     }).trim();
     text = text.replace(/[ \u00A0\u3000]{2,}/g, ' ');
+    // 0.4 标签容错：全角尖括号统一成半角
+    text = text.replace(/＜/g, '<').replace(/＞/g, '>');
+    // 0.5 标签容错：模型偶尔漏写左尖括号（如 bubble id="1">啊这）
+    text = text.replace(/(^|[>\s])\s*(bubble|msg|voice|sticker|inner|quote|meet|gift|transfer|recall|action|share|block)(\s+[^\n<>]{0,80})?>/gi,
+      function(m, pre, tag, attrs){ return pre + '<' + tag + (attrs || '') + '>'; });
     // 把 AI 可能乱写的文本标签统一成 <msg>
     text = text.replace(/<(p|text|message|bubble)(\s[^>]*)?>/gi, '<msg>');
     text = text.replace(/<\/(p|text|message|bubble)>/gi, '</msg>');
@@ -20948,6 +21011,30 @@ case 'msg': {
             return [{ type: 'text', content: raw }];
         }
     }
+
+    // ★ 续接合并：模型把一句话拆成两个气泡时（如 "…全喷" + "出来了"），并回上一条
+    try {
+      var _mergedParts = [];
+      var _standalone = /^(嗯+|哦+|好+|行|是|对|可以|知道了|晚安|拜拜|哈哈+|嘿嘿|ok|OK|收到|谢谢|在|早|笑死|离谱|绝了|没问题|没事)$/;
+      for (var _i = 0; _i < parts.length; _i++) {
+        var _p = parts[_i];
+        var _prev = _mergedParts[_mergedParts.length - 1];
+        var _canMerge = _p && _p.type === 'text' && !_p.quote
+          && _prev && _prev.type === 'text' && !_prev.quote
+          && _prev.content.length >= 4
+          && _p.content.length <= 6
+          && !/[。！？!?…，,、；;：:．.~～]$/.test(_prev.content.slice(-1))
+          && !/[。！？!?…]$/.test(_p.content.slice(-1))
+          && !_standalone.test(_p.content.trim());
+        if (_canMerge) {
+          _prev.content = _prev.content + _p.content;
+        } else {
+          _mergedParts.push(_p);
+        }
+      }
+      parts.length = 0;
+      Array.prototype.push.apply(parts, _mergedParts);
+    } catch (e) {}
 
     return parts;
 }
